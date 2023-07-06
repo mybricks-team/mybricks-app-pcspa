@@ -30,21 +30,21 @@ export default class PcPageController {
 		return error ? { code: 0, message: error } : { code: 1, message: '发布完成' };
 	}
 	
-  @Post('/generateHTML')
-  async generateHTML(
-    @Body('userId') userId: string,
-    @Body('fileId') fileId: number,
-    @Body('json') json: any,
-    @Req() req: any
-	) {
-		if (!isDefined(json) || !isDefined(fileId)) {
-			return { code: 0, message: '参数 json、fileId 不能为空' };
-		}
+  // @Post('/generateHTML')
+  // async generateHTML(
+  //   @Body('userId') userId: string,
+  //   @Body('fileId') fileId: number,
+  //   @Body('json') json: any,
+  //   @Req() req: any
+	// ) {
+	// 	if (!isDefined(json) || !isDefined(fileId)) {
+	// 		return { code: 0, message: '参数 json、fileId 不能为空' };
+	// 	}
 		
-		const res = await this.service.generateHTML(req, { json, fileId });
+	// 	const res = await this.service.generateHTML(req, { json, fileId });
 		
-		return res.code !== 1 ? { code: 0, message: res.error } : { code: 1, data: { bundle: res.data, ext_name: 'html' } };
-	}
+	// 	return res.code !== 1 ? { code: 0, message: res.error } : { code: 1, data: { bundle: res.data, ext_name: 'html' } };
+	// }
 }
 
 export function isDefined(v: any) {
