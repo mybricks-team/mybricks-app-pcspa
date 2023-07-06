@@ -5,14 +5,13 @@ import servicePlugin, {
   mock as connectorHttpMock,
 } from '@mybricks/plugin-connector-http'
 import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-connector-domain'
-import { openFilePanel } from "@mybricks/sdk-for-app/ui";
+// import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
 import toolsPlugin from "@mybricks/plugin-tools";
 
 import { render as renderUI } from '@mybricks/render-web';
 import comlibLoaderFunc from './configs/comlibLoader'
 import { comLibAdderFunc } from './configs/comLibAdder'
-import SQLPanel from './plugin/sqlPanel';
 import { uploadApi } from '@/utils';
 
 const getComs = () => {
@@ -46,26 +45,14 @@ export default function (ctx, save) {
       'ctrl+s': [save],
     },
     plugins: [
-      servicePlugin({
-        addActions: [
-          {
-            type: 'http-sql',
-            title: '领域接口',
-            render: (props) => {
-              return (
-                <SQLPanel
-                  {...props}
-                  openFileSelector={() => openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })}
-                />
-              );
-            }
-          },
-        ],
-      }),
+      servicePlugin({}),
       domainServicePlugin({
-        openFileSelector() {
-          return openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })
-        },
+        addActions: [
+          { type: 'aggregation-model', title: '聚合模型' }
+        ]
+        // openFileSelector() {
+        //   return openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })
+        // },
       }),
       versionPlugin({
         user: ctx.user,
@@ -135,22 +122,7 @@ export default function (ctx, save) {
                 ctx.debugQuery = v
               }
             }
-          },
-          // isPublicVersion()
-          //   ? {
-          //     title: '分享到案例库',
-          //     type: 'switch',
-          //     //options: {readOnly: true},
-          //     value: {
-          //       get: (context) => {
-          //         return ctx.fileItem.shareType
-          //       },
-          //       set: (context, v: any) => {
-          //         ctx.share(v)
-          //       },
-          //     },
-          //   }
-          //   : {},
+          }
         ]
       },
     },
@@ -180,20 +152,6 @@ export default function (ctx, save) {
                     { script: connector.script, useProxy: true },
                     params
                   )
-                } else if (connector.type === 'http-sql') {
-                  return callConnectorHttp(
-                    { script: connector.script },
-                    params,
-                    {
-                      // 发送请求前的钩子函数
-                      before(options) {
-                        let newOptions = { ...options }
-                        return {
-                          ...newOptions
-                        }
-                      }
-                    }
-                  )
                 } else {
                   return Promise.reject('错误的连接器类型.')
                 }
@@ -220,20 +178,6 @@ export default function (ctx, save) {
             return callConnectorHttp(
               { script: connector.script, useProxy: true },
               params
-            )
-          } else if (connector.type === 'http-sql') {
-            return callConnectorHttp(
-              { script: connector.script },
-              params,
-              {
-                // 发送请求前的钩子函数
-                before(options) {
-                  let newOptions = { ...options }
-                  return {
-                    ...newOptions
-                  }
-                }
-              }
             )
           } else {
             return Promise.reject('错误的连接器类型.')

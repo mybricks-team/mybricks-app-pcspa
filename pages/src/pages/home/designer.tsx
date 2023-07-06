@@ -13,14 +13,17 @@ import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
+import { ComlibEditUrl, ChartsEditUrl, BasicEditUrl } from '../../constants'
 
 import css from './app.less'
 
 const appName = 'mybricks-app-pcspa-for-manatee'
 
+const defaultComlibs = [BasicEditUrl, ComlibEditUrl, ChartsEditUrl]
+
 export default function MyDesigner({ appData }) {
   const { comlibs = [], designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.82/index.min.js' } = appData.config[appName]?.config ?? {}
-  const configComlibs = comlibs.map(lib => lib.editJs)
+  // const configComlibs = comlibs.map(lib => lib.editJs)
   
   const [ctx] = useState({
     sdk: appData,
@@ -29,7 +32,7 @@ export default function MyDesigner({ appData }) {
     fileItem: appData.fileContent || {},
     setting: appData.config || {},
     hasMaterialApp: appData.hasMaterialApp,
-    comlibs: (appData.fileContent?.content?.comlibs?.filter?.((comlib) => comlib.defined) || []).concat(configComlibs),
+    comlibs: (appData.fileContent?.content?.comlibs?.filter?.((comlib) => comlib.defined) || []).concat(defaultComlibs),
     // comlibs: ['http://localhost:8001/libEdt.js', 'http://localhost:8002/libEdt.js'],
     debugQuery: appData.fileContent?.content?.debugQuery,
     versionApi: null,
@@ -158,7 +161,7 @@ export default function MyDesigner({ appData }) {
   }, [])
 
   const publish= useCallback(
-    (type) => {
+    () => {
       if (publishingRef.current) {
         return
       }
@@ -178,13 +181,13 @@ export default function MyDesigner({ appData }) {
         json.comlibs = ctx.comlibs
         json.debugQuery = ctx.debugQuery
 
-        let folderPath;
+        // let folderPath;
 
-        if (type === 'staging') {
-          folderPath = '/staging/app/pcpage'
-        } else {
-          folderPath = '/app/pcpage'
-        }
+        // if (type === 'staging') {
+        //   folderPath = '/staging/app/pcpage'
+        // } else {
+        //   folderPath = '/app/pcpage'
+        // }
 
 		    json.toJSON = JSON.parse(JSON.stringify({...designerRef?.current?.toJSON(), configuration: {
           // scripts: encodeURIComponent(scripts),
@@ -192,7 +195,7 @@ export default function MyDesigner({ appData }) {
           title: ctx.fileItem.name,
           projectId: ctx.sdk.projectId,
           // 非模块下的页面直接发布到项目空间下
-          folderPath: folderPath,
+          folderPath: '/app/pcpage',
           fileName: `${ctx.fileItem.id}.html`
         }}));
 
@@ -206,7 +209,7 @@ export default function MyDesigner({ appData }) {
           userId: ctx.user?.email,
           fileId: ctx.fileId,
           json: json.toJSON,
-          envType: type
+          envType: 'prod'
         })
 
         message.success({
@@ -261,12 +264,11 @@ export default function MyDesigner({ appData }) {
           dotTip={beforeunload}
         />
         <Toolbar.Button onClick={preview}>预览</Toolbar.Button>
-        <Toolbar.Publish
+        <Toolbar.Button
           disabled={!operable}
           loading={publishLoading}
           onClick={publish}
-          // envList={ ctx.sdk.projectId ? [{label: '测试环境', type: 'staging'}, {label: '线上环境', type: 'prod'}] : [{label: '测试环境', type: 'staging'}]}
-        />
+        >发布</Toolbar.Button>
       </Toolbar>
       <div className={css.designer}>
 	      {SPADesigner && (
