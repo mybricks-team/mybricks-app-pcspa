@@ -86,20 +86,12 @@ export default class PcPageService {
 	}
 
 	async publish(req, {json, userId, fileId, envType}) {
-		let domainServicePath = '/api/system/domain/run';
 		let error = ''
 
 		try {
 			let template = fs.readFileSync(path.resolve(__dirname, './template.html'), 'utf8')
 			const { title, comlibs, projectId, fileName, folderPath } = json.configuration
 			Reflect.deleteProperty(json, 'configuration')
-
-			if(projectId) {
-				// 项目下发布prod环境发布才调用线上接口，否则都是测试接口
-				if(envType === 'prod') {
-					domainServicePath = '/runtime/api/domain/service/run';
-				}
-			}
 
 			/** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
 			const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
@@ -110,7 +102,6 @@ export default class PcPageService {
 				.replace(`--title--`, title)
 				.replace(`'--projectJson--'`, JSON.stringify(json))
 				.replace(`'--slot-project-id--'`, projectId ? projectId : JSON.stringify(null))
-				.replace(`--domain-service-path--`, domainServicePath)
 
 			const res = await API.Upload.staticServer({
 				content: template,
@@ -118,6 +109,7 @@ export default class PcPageService {
 				fileName,
         noHash: true
 			})
+			
 			await API.File.publish({
 				userId,
 				fileId,
@@ -136,36 +128,36 @@ export default class PcPageService {
 	}
 
 	// 专供模块安装时使用
-	async generateHTML(req, {json, fileId}) {
-		const domainServicePath = '/runtime/api/domain/service/run';
-		let error = ''
+	// async generateHTML(req, {json, fileId}) {
+	// 	const domainServicePath = '/runtime/api/domain/service/run';
+	// 	let error = ''
 		
-		try {
-			let template = fs.readFileSync(path.resolve(__dirname, './template.html'), 'utf8')
-			const { title, comlibs, projectId, fileName, folderPath } = json.configuration
-			Reflect.deleteProperty(json, 'configuration')
+	// 	try {
+	// 		let template = fs.readFileSync(path.resolve(__dirname, './template.html'), 'utf8')
+	// 		const { title, comlibs, projectId, fileName, folderPath } = json.configuration
+	// 		Reflect.deleteProperty(json, 'configuration')
 			
-			/** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
-			const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
+	// 		/** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
+	// 		const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
 			
-			return {
-				code: 1,
-				data: template
-					.replace(`--RENDER_WEB--`, 'https://f2.eckwai.com/kos/nlav12333/mybricks/render-web/index.min.1.1.46.js')
-					.replace(`<!-- comlib-rt -->`, await this._generateComLibRT(comlibs, json, {domainName}))
-					.replace(`--title--`, title)
-					.replace(`'--projectJson--'`, JSON.stringify(json))
-					.replace('--domain-service-path--', domainServicePath)
-			};
-		} catch (e) {
-			console.log('pcpage publish error', e)
-			error = e
-		}
+	// 		return {
+	// 			code: 1,
+	// 			data: template
+	// 				.replace(`--RENDER_WEB--`, 'https://f2.eckwai.com/kos/nlav12333/mybricks/render-web/index.min.1.1.46.js')
+	// 				.replace(`<!-- comlib-rt -->`, await this._generateComLibRT(comlibs, json, {domainName}))
+	// 				.replace(`--title--`, title)
+	// 				.replace(`'--projectJson--'`, JSON.stringify(json))
+	// 				.replace('--domain-service-path--', domainServicePath)
+	// 		};
+	// 	} catch (e) {
+	// 		console.log('pcpage publish error', e)
+	// 		error = e
+	// 	}
 		
-		if (error) {
-			return { code: 0, error };
-		}
-	}
+	// 	if (error) {
+	// 		return { code: 0, error };
+	// 	}
+	// }
 	
 }
 

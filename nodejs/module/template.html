@@ -1,300 +1,300 @@
 <!DOCTYPE html>
 <html lang="zh-CN" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <meta name="viewport" content="user-scalable=no,viewport-fit=cover"> -->
+    <meta name="referrer" content="no-referrer" />
+    <meta http-equiv="Access-Control-Allow-Origin" content="*" />
+    <link
+      rel="stylesheet"
+      href="//f2.eckwai.com/kos/nlav12333/mybricks/antd4.21.6.min.css"
+    />
 
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- <meta name="viewport" content="user-scalable=no,viewport-fit=cover"> -->
-  <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Access-Control-Allow-Origin" content="*">
-  <link rel="stylesheet" href="//f2.eckwai.com/kos/nlav12333/mybricks/antd4.21.6.min.css" />
+    <title>--title--</title>
 
-  <title>--title--</title>
+    <style></style>
 
-  <style>
-  </style>
+    <!-- react about -->
+    <script src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/reat-18.0.0/react.production.min.js"></script>
+    <script src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/react-dom-18.0.0/react-dom.production.min.js"></script>
 
-  <!-- react about -->
-  <script src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/reat-18.0.0/react.production.min.js"></script>
-  <script src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/react-dom-18.0.0/react-dom.production.min.js"></script>
+    <!-- antd about -->
+    <script src="//f2.eckwai.com/kos/nlav12333/mybricks/moment2.29.4.min.js"></script>
+    <script src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/moment-2.29.4/zh-cn.min.js"></script>
 
-  <!-- antd about -->
-  <script src="//f2.eckwai.com/kos/nlav12333/mybricks/moment2.29.4.min.js"></script>
-  <script src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/moment-2.29.4/zh-cn.min.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav12333/mybricks/antd4.21.6.min.js"></script>
+    <script src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav12333/mybricks/index4.7.0.umd.min.js"></script>
+    <script src="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/ant-design/charts-1.2.14/charts.min.js"></script>
+    <script
+      crossorigin="anonymous"
+      src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/axios/axios.min.js"
+    ></script>
+    <script src="//f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/plugin-http-connector.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav12333/mybricks/plugin-domain-connector/index.js"></script>
 
-  <script src="//f2.eckwai.com/kos/nlav12333/mybricks/antd4.21.6.min.js"></script>
-  <script src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>
-  <script src="//f2.eckwai.com/kos/nlav12333/mybricks/index4.7.0.umd.min.js"></script>
-  <script src="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/ant-design/charts-1.2.14/charts.min.js"></script>
-  <script crossorigin="anonymous" src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/axios/axios.min.js"></script>
-  <script src="//f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/plugin-http-connector.js"></script>
-  <script src="//f2.eckwai.com/kos/nlav12333/mybricks/plugin-domain-connector/index.js"></script>
+    <!-- mybricks-render-web -->
+    <script src="--RENDER_WEB--"></script>
 
-  <!-- mybricks-render-web -->
-  <script src="--RENDER_WEB--"></script>
+    <!-- comlib-rt 替换成特定的组件库rt地址 -->
+    <!-- <script src="--ComlibRtUrl--"></script> -->
 
-  <!-- comlib-rt 替换成特定的组件库rt地址 -->
-  <!-- <script src="--ComlibRtUrl--"></script> -->
+    <!-- comlib-rt -->
+  </head>
 
-  <!-- comlib-rt -->
-</head>
+  <body>
+    <div id="qiankun-container"></div>
 
-<body>
-  <div id="qiankun-container"></div>
-
-  <script entry>
-    ((global) => {
-
-      function decode(str) {
-        try {
-          return decodeURIComponent(str)
-        } catch (err) {
-          if (process.env.NODE_ENV !== 'production') {
-            console.warn(false, `Error decoding "${str}". Leaving it intact.`)
+    <script entry>
+      ;((global) => {
+        function decode(str) {
+          try {
+            return decodeURIComponent(str)
+          } catch (err) {
+            if (process.env.NODE_ENV !== 'production') {
+              console.warn(false, `Error decoding "${str}". Leaving it intact.`)
+            }
           }
+          return str
         }
-        return str
-      }
 
-      function parseQuery(query) {
-        const res = {}
-        query = query.trim().replace(new RegExp(decodeURIComponent('%5E(%5C%3F%7C%23%7C%26)')), '')
-        if (!query) {
+        function parseQuery(query) {
+          const res = {}
+          query = query
+            .trim()
+            .replace(
+              new RegExp(decodeURIComponent('%5E(%5C%3F%7C%23%7C%26)')),
+              ''
+            )
+          if (!query) {
+            return res
+          }
+          query.split('&').forEach((param) => {
+            const parts = param
+              .replace(new RegExp(decodeURIComponent('%5C%2B'), 'g'), ' ')
+              .split('=')
+            const key = decode(parts.shift())
+            const val = parts.length > 0 ? decode(parts.join('=')) : null
+            if (res[key] === undefined) {
+              res[key] = val
+            } else if (Array.isArray(res[key])) {
+              res[key].push(val)
+            } else {
+              res[key] = [res[key], val]
+            }
+          })
           return res
         }
-        query.split('&').forEach((param) => {
-          const parts = param.replace(new RegExp(decodeURIComponent('%5C%2B'), 'g'), ' ').split('=')
-          const key = decode(parts.shift())
-          const val = parts.length > 0 ? decode(parts.join('=')) : null
-          if (res[key] === undefined) {
-            res[key] = val
-          } else if (Array.isArray(res[key])) {
-            res[key].push(val)
-          } else {
-            res[key] = [res[key], val]
-          }
-        })
-        return res
-      }
 
-      const getComs = () => {
-        const comDefs = {};
-        const regAry = (comAray) => {
-          comAray.forEach((comDef) => {
-            if (comDef.comAray) {
-              regAry(comDef.comAray);
-            } else {
-              comDefs[`${comDef.namespace}-${comDef.version}`] = comDef;
-            }
-          });
-        };
-        // Object.keys(window['CloudComponentDependentComponents']).forEach((key) => {
-        //   const [namespace, version] = key.split('@');
-
-        //   comDefs[`${namespace}-${version}`] =
-        //     window['CloudComponentDependentComponents'][key];
-        // });
-        const comlibs = [
-          ...(window['__comlibs_edit_'] || []),
-          ...(window['__comlibs_rt_'] || []),
-        ];
-        comlibs.forEach((lib) => {
-          const comAray = lib.comAray;
-          if (comAray && Array.isArray(comAray)) {
-            regAry(comAray);
-          }
-        });
-        return comDefs;
-      };
-
-      const React = global.React
-      const ReactDom = global.ReactDOM
-      const { render: renderUI } = global._mybricks_render_web
-      const projectJson = '--projectJson--';//replace it
-      const projectId = '--slot-project-id--';//replace it
-      const domainServicePath = '--domain-service-path--';//replace it
-      const axios = window.axios;
-      const message = window?.antd.message;
-      function uploadApi(fileList) {
-  const form = new FormData();
-  fileList.forEach((file) => {
-    form.append('file', file);
-  });
-
-  form.append('folderPath', `/fiels/${Date.now()}`);
-
-  return axios.post(
-    `/mybricks-pc-page/paas/api/flow/saveFile`, form,
-    {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    }
-  )
-    .then((e) => {
-      if (e && e.data?.code === 1) {
-        message.success(`上传成功`);
-        const resData = e.data?.data
-        return Array.isArray(resData) ? resData : [resData];
-      }
-      console.warn(`上传失败`, e?.data || e);
-      message.error(`上传失败`);
-      throw new Error(`调用接口失败`)
-    })
-    .catch((e) => {
-      console.warn(`上传失败`, e);
-      message.error(`上传失败`);
-      throw e
-    });
-}
-      function Page(props) {
-        return renderUI(projectJson, {
-          env: {
-            silent: true,
-            showErrorNotification: false,
-            canvasElement: document.body,
-            get vars() {
-              // 环境变量
-              return {
-                get getQuery() {
-                  return () => {
-                    return parseQuery(location.search);
-                  };
-                },
-                get getCookies() {
-                  return () => {
-                    const cookies = document.cookie.split('; ').reduce((s, e) => {
-                        const p = e.indexOf('=');
-                        s[e.slice(0, p)] = e.slice(p + 1);
-                        return s;
-                    }, {});
-
-                    return cookies
-                  };
-                },
-                get getRouter() {
-                  const isUri = (url) => {
-                    return /^http[s]?:\/\/([\w\-\.]+)+[\w-]*([\w\-\.\/\?%&=]+)?$/gi.test(
-                      url,
-                    );
-                  };
-                  return () => ({
-                    reload: () => location.reload(),
-                    redirect: ({ url }) => location.replace(url),
-                    back: () => history.back(),
-                    forward: () => history.forward(),
-                    pushState: ({
-                      state,
-                      title,
-                      url,
-                    }) => {
-                      if (isUri(url)) {
-                        //兼容uri
-                        location.href = url;
-                      } else {
-                        history.pushState(state, title, url);
-                      }
-                    },
-                    openTab: ({ url, title }) =>
-                      open(url, title || '_blank'),
-                  });
-                },
-              };
-            },
-	          projectId,
-	          /** 调用领域模型 */
-	          callDomainModel(domainModel, type, params) {
-		          return pluginConnectorDomain.call(domainModel, params, {
-								action: type,
-			          before(options) {
-									if (domainModel.type === 'domain') {
-										let newOptions = { ...options }
-										if (projectId) {
-											Object.assign(newOptions.data, {
-												projectId: projectId
-											})
-										}
-										return {
-											...newOptions,
-											url: domainServicePath
-										}
-                  } else {
-										return options;
-                  }
-			          }
-							});
-	          },
-            callConnector(connector, params, privateDomainMap) {//调用连接器
-              if (connector.type === 'http') {//服务接口类型
-                return pluginConnectorHttp.call({ script: connector.script, params }, params)
-              } else if (connector.type === 'http-sql') {
-                return pluginConnectorHttp.call({ script: connector.script, params }, params, {
-                  before(options) {
-                    let newOptions = { ...options }
-                    if (projectId) {
-                      Object.assign(newOptions.data, {
-                        projectId: projectId
-                      })
-                    }
-                    return {
-                      ...newOptions,
-                      url: domainServicePath
-                    }
-                  }
-                })
+        const getComs = () => {
+          const comDefs = {}
+          const regAry = (comAray) => {
+            comAray.forEach((comDef) => {
+              if (comDef.comAray) {
+                regAry(comDef.comAray)
               } else {
-                return Promise.reject('错误的连接器类型.')
+                comDefs[`${comDef.namespace}-${comDef.version}`] = comDef
               }
-            },
-            getMainProps: () => { // 获取主应用参数方法，如：token等参数，取决于主应用传入
-              if (!props) return undefined;
-              return props.mainProps
-            },
-            renderCom(json, opts, coms) {
-              return renderUI(
-                    json,
-                    {
-                      comDefs: { ...getComs(), ...coms },
-                      // observable: window['rxui'].observable,
-                      ...(opts || {}),
-                    }
-                  )
-            },
-            uploadFile: uploadApi
+            })
           }
-        });
-      }
+          // Object.keys(window['CloudComponentDependentComponents']).forEach((key) => {
+          //   const [namespace, version] = key.split('@');
 
-
-      function render(props) {
-        ReactDom.render(React.createElement(
-          antd.ConfigProvider, {
-            locale: antd.locale['zh_CN'].default
-          }, React.createElement(Page)), document.querySelector('#qiankun-container'))
-        return Promise.resolve();
-      }
-
-      console.log('app load', !!global.__POWERED_BY_QIANKUN__)
-      if (global.__POWERED_BY_QIANKUN__) {
-        global['purehtml'] = {
-          bootstrap: () => {
-            console.log('purehtml bootstrap');
-            return Promise.resolve();
-          },
-          mount: (props) => {
-            console.log('purehtml mount', props);
-            return render(props);
-          },
-          unmount: (props) => {
-            const { container } = props;
-            ReactDOM && ReactDOM.unmountComponentAtNode((container || document).querySelector('#qiankun-container'));
-            return Promise.resolve();
-          },
+          //   comDefs[`${namespace}-${version}`] =
+          //     window['CloudComponentDependentComponents'][key];
+          // });
+          const comlibs = [
+            ...(window['__comlibs_edit_'] || []),
+            ...(window['__comlibs_rt_'] || []),
+          ]
+          comlibs.forEach((lib) => {
+            const comAray = lib.comAray
+            if (comAray && Array.isArray(comAray)) {
+              regAry(comAray)
+            }
+          })
+          return comDefs
         }
-      } else {
-        render();
-      }
 
-    })(window);
-  </script>
+        const React = global.React
+        const ReactDom = global.ReactDOM
+        const { render: renderUI } = global._mybricks_render_web
+        const projectJson = '--projectJson--' //replace it
+        const projectId = '--slot-project-id--' //replace it
+        const axios = window.axios
+        const message = window?.antd.message
+        function uploadApi(fileList) {
+          const form = new FormData()
+          fileList.forEach((file) => {
+            form.append('file', file)
+          })
 
-</body>
+          form.append('folderPath', `/fiels/${Date.now()}`)
+
+          return axios
+            .post(`/mybricks-pc-page/paas/api/flow/saveFile`, form, {
+              headers: { 'Content-Type': 'multipart/form-data' },
+            })
+            .then((e) => {
+              if (e && e.data?.code === 1) {
+                message.success(`上传成功`)
+                const resData = e.data?.data
+                return Array.isArray(resData) ? resData : [resData]
+              }
+              console.warn(`上传失败`, e?.data || e)
+              message.error(`上传失败`)
+              throw new Error(`调用接口失败`)
+            })
+            .catch((e) => {
+              console.warn(`上传失败`, e)
+              message.error(`上传失败`)
+              throw e
+            })
+        }
+        function Page(props) {
+          return renderUI(projectJson, {
+            env: {
+              silent: true,
+              showErrorNotification: false,
+              canvasElement: document.body,
+              get vars() {
+                // 环境变量
+                return {
+                  get getQuery() {
+                    return () => {
+                      return parseQuery(location.search)
+                    }
+                  },
+                  get getCookies() {
+                    return () => {
+                      const cookies = document.cookie
+                        .split('; ')
+                        .reduce((s, e) => {
+                          const p = e.indexOf('=')
+                          s[e.slice(0, p)] = e.slice(p + 1)
+                          return s
+                        }, {})
+
+                      return cookies
+                    }
+                  },
+                  get getRouter() {
+                    const isUri = (url) => {
+                      return /^http[s]?:\/\/([\w\-\.]+)+[\w-]*([\w\-\.\/\?%&=]+)?$/gi.test(
+                        url
+                      )
+                    }
+                    return () => ({
+                      reload: () => location.reload(),
+                      redirect: ({ url }) => location.replace(url),
+                      back: () => history.back(),
+                      forward: () => history.forward(),
+                      pushState: ({ state, title, url }) => {
+                        if (isUri(url)) {
+                          //兼容uri
+                          location.href = url
+                        } else {
+                          history.pushState(state, title, url)
+                        }
+                      },
+                      openTab: ({ url, title }) => open(url, title || '_blank'),
+                    })
+                  },
+                }
+              },
+              projectId,
+              /** 调用领域模型 */
+              callDomainModel(domainModel, type, params) {
+                return pluginConnectorDomain.call(domainModel, params, {
+                  action: type,
+                  before(options) {
+                    if (domainModel.type === 'domain') {
+                      let newOptions = { ...options }
+                      if (projectId) {
+                        Object.assign(newOptions.data, {
+                          projectId: projectId,
+                        })
+                      }
+                      return {
+                        ...newOptions,
+                        url: domainServicePath,
+                      }
+                    } else {
+                      return options
+                    }
+                  },
+                })
+              },
+              callConnector(connector, params, privateDomainMap) {
+                //调用连接器
+                if (connector.type === 'http') {
+                  //服务接口类型
+                  return pluginConnectorHttp.call(
+                    { script: connector.script, params },
+                    params
+                  )
+                } else {
+                  return Promise.reject('错误的连接器类型.')
+                }
+              },
+              getMainProps: () => {
+                // 获取主应用参数方法，如：token等参数，取决于主应用传入
+                if (!props) return undefined
+                return props.mainProps
+              },
+              renderCom(json, opts, coms) {
+                return renderUI(json, {
+                  comDefs: { ...getComs(), ...coms },
+                  // observable: window['rxui'].observable,
+                  ...(opts || {}),
+                })
+              },
+              uploadFile: uploadApi,
+            },
+          })
+        }
+
+        function render(props) {
+          ReactDom.render(
+            React.createElement(
+              antd.ConfigProvider,
+              {
+                locale: antd.locale['zh_CN'].default,
+              },
+              React.createElement(Page)
+            ),
+            document.querySelector('#qiankun-container')
+          )
+          return Promise.resolve()
+        }
+
+        console.log('app load', !!global.__POWERED_BY_QIANKUN__)
+        
+        if (global.__POWERED_BY_QIANKUN__) {
+          global['purehtml'] = {
+            bootstrap: () => {
+              console.log('purehtml bootstrap')
+              return Promise.resolve()
+            },
+            mount: (props) => {
+              console.log('purehtml mount', props)
+              return render(props)
+            },
+            unmount: (props) => {
+              const { container } = props
+              ReactDOM &&
+                ReactDOM.unmountComponentAtNode(
+                  (container || document).querySelector('#qiankun-container')
+                )
+              return Promise.resolve()
+            },
+          }
+        } else {
+          render()
+        }
+      })(window)
+    </script>
+  </body>
+</html>
