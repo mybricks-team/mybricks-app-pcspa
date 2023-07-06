@@ -19,11 +19,13 @@ import css from './app.less'
 
 const appName = 'mybricks-app-pcspa-for-manatee'
 
+// 暂时写死，后续统一走 物料中心
 const defaultComlibs = [BasicEditUrl, ComlibEditUrl, ChartsEditUrl]
 
 export default function MyDesigner({ appData }) {
-  const { comlibs = [], designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.82/index.min.js' } = appData.config[appName]?.config ?? {}
+  const { comlibs = [] } = appData.config[appName]?.config ?? {}
   // const configComlibs = comlibs.map(lib => lib.editJs)
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.82/index.min.js'
   
   const [ctx] = useState({
     sdk: appData,
