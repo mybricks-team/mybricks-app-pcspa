@@ -47,6 +47,10 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string) =>
     editConfig.upload = async (file: File) => {
       const formData = new FormData();
       formData.append("files", file)
+      if(!uploadService) {
+        message.error('无上传服务，请先配置应用上传服务');
+        return;
+      }
       const res = await axios({
         url: uploadService,
         method: 'post',
