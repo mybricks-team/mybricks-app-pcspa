@@ -1,0 +1,49 @@
+{
+  "name": "mybricks-app-pcspa-for-manatee",
+  "version": "1.0.0",
+  "description": "mybricks PC页面",
+  "scripts": {
+    "start:watch": "nodemon --ext js,ts --exec 'NODE_ENV=development node nodejs/index.js'",
+    "dev:be": "ts-node -T ./nodejs/main.ts",
+    "build:fe": "cd pages && npm run build",
+    "publishToNpm": "npm run build:fe && npm publish --registry=https://registry.npmjs.org"
+  },
+  "keywords": [
+    "mybricks",
+    "application"
+  ],
+  "files": [
+    "nodejs/module",
+    "nodejs/index.module.ts",
+    "package.json",
+    "assets"
+  ],
+  "author": "MyBricks Team",
+  "license": "ISC",
+  "dependencies": {
+    "@mybricks/rocker-dao": "^0.0.6",
+    "@mybricks/sdk-for-app": "0.1.56",
+    "@nestjs/common": "^8.0.0",
+    "@nestjs/core": "^8.0.0",
+    "@nestjs/platform-express": "^8.0.0",
+    "dayjs": "^1.11.5",
+    "form-data": "^4.0.0",
+    "lodash": "^4.17.21",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.6.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "mybricks": {
+    "extName": "pc-page",
+    "icon": "https://assets.mybricks.world/icon/pcpage.svg",
+    "title": "PC页面",
+    "setting": "setting.html"
+  }
+}

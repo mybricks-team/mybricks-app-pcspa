@@ -1,0 +1,52 @@
+@btnHeight: 50px;
+
+.body {
+  .title {
+    // padding: 10px 0px;
+    padding-bottom: 10px;
+    width: 100%;
+    display: flex;
+    font-size: 16px;
+    font-weight: 700;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .form {
+    height: calc(100vh - @btnHeight);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  
+  .btnGroups {
+    min-height: @btnHeight;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    button {
+      
+    }
+  }
+
+  .envs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    .envCard {
+      width: calc((100% / 2) - 10px);
+      margin-bottom: 20px;
+    }
+  }
+
+  :global {
+    .ant-card-body {
+      padding: 15px;
+      min-height: 210px;
+    }
+
+    .ant-form-item-with-help {
+      margin-bottom: 24px;
+    }
+  }
+}
