@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import API from '@mybricks/sdk-for-app/api'
 
 import ConfigComlib from './ConfigComlib'
+import ConfigServer from './ConfigServer'
 
 export const _NAMESPACE_ = 'mybricks-app-pcspa-for-manatee'
 
@@ -16,6 +17,8 @@ export default () => {
   }, [])
 
   return (
-    <ConfigComlib user={loginUser} />
+    <div style={{ padding: 24 }}>
+      <ConfigServer user={loginUser} />
+    </div>
   )
 }

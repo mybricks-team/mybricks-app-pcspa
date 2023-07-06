@@ -14,6 +14,7 @@ import comlibLoaderFunc from './configs/comlibLoader'
 import { comLibAdderFunc } from './configs/comLibAdder'
 import SQLPanel from './plugin/sqlPanel';
 import { uploadApi } from '@/utils';
+import axios from 'axios';
 
 const getComs = () => {
   const comDefs = {};
@@ -39,6 +40,24 @@ const getComs = () => {
   });
   return comDefs;
 };
+
+const injectUpload = (editConfig: Record<string, any>, uploadService: string) => {
+  if (!!editConfig && !editConfig.upload) {
+    editConfig.upload = async (file: File) => {
+      const formData = new FormData();
+      formData.append("files", file)
+      const res = await axios({
+        url: uploadService,
+        method: 'post',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      });
+      return res
+    };
+  }
+}
 
 export default function (ctx, save) {
   return {
@@ -107,6 +126,10 @@ export default function (ctx, save) {
       useStrict: false
     },
     editView: {
+      editorAppender(editConfig) {
+        injectUpload(editConfig, ctx.uploadService);
+        return;
+      },
       items({ }, cate0, cate1, cate2) {
         cate0.title = `实例项目`
         cate0.items = [

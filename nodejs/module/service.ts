@@ -103,18 +103,21 @@ export default class PcPageService {
 				.replace(`'--projectJson--'`, JSON.stringify(json))
 				.replace(`'--slot-project-id--'`, projectId ? projectId : JSON.stringify(null))
 
-			const res = await API.Upload.staticServer({
-				content: template,
-				folderPath,
-				fileName,
-        noHash: true
-			})
+
+		// 	const res = await API.Upload.staticServer({
+		// 		content: template,
+		// 		folderPath,
+		// 		fileName,
+        // noHash: true
+		// 	})
+
+		const res = await uploadStatic(template)
 			
 			await API.File.publish({
 				userId,
 				fileId,
 				extName: 'pc-page',
-				content: JSON.stringify(res),
+				content: template,
 				type: envType
 			})
 		} catch (e) {
@@ -161,8 +164,34 @@ export default class PcPageService {
 	
 }
 
+const getUploadService = async () => {
+  const _NAMESPACE_ = "mybricks-app-pcspa-for-manatee";
+  const res = await API.Setting.getSetting([_NAMESPACE_]);
+  const { uploadService } = res[_NAMESPACE_]?.config?.uploadServer ?? {};
+  if (!uploadService) {
+    throw Error("无上传服务，请先配置应用上传服务");
+  }
+  return uploadService;
+};
+
+const uploadStatic = async (content: string) => {
+  var blob = new Blob([content], { type: "text/html" });
+  const uploadService = await getUploadService();
+  const formData = new FormData();
+  formData.append("files", blob)
+  const res = await axios({
+	url: uploadService,
+	method: 'post',
+	data: formData,
+	headers: {
+	  'Content-Type': 'multipart/form-data',
+	}
+  });
+  return res
+};
+
 function getRealHostName(requestHeaders) {
-  let hostName = requestHeaders.host
+  let hostName = requestHeaders.ho
   if(requestHeaders['x-forwarded-host']) {
     hostName = requestHeaders['x-forwarded-host']
   } else if(requestHeaders['x-host']) {
