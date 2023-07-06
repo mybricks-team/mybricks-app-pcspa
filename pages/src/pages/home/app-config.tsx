@@ -44,14 +44,14 @@ const getComs = () => {
 
 const injectUpload = (editConfig: Record<string, any>, uploadService: string) => {
   if (!!editConfig && !editConfig.upload) {
-    editConfig.upload = async (file: File) => {
+    editConfig.upload = async (files: Array<File>): Promise<Array<string>> => {
       const formData = new FormData();
-      formData.append("files", file)
-      if(!uploadService) {
+      formData.append("files", files[0])
+      if (!uploadService) {
         message.error('无上传服务，请先配置应用上传服务');
         return;
       }
-      const res = await axios({
+      const res = await axios<any, { url: string }>({
         url: uploadService,
         method: 'post',
         data: formData,
@@ -59,7 +59,7 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string) =>
           'Content-Type': 'multipart/form-data',
         }
       });
-      return res
+      return [res.url]
     };
   }
 }

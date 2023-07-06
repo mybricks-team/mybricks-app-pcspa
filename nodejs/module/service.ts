@@ -111,7 +111,7 @@ export default class PcPageService {
         // noHash: true
 		// 	})
 
-		const res = await uploadStatic(template)
+			await uploadStatic(template)
 			
 			await API.File.publish({
 				userId,
