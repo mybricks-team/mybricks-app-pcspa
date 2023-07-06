@@ -12,7 +12,7 @@ import toolsPlugin from "@mybricks/plugin-tools";
 import { render as renderUI } from '@mybricks/render-web';
 import comlibLoaderFunc from './configs/comlibLoader'
 import { comLibAdderFunc } from './configs/comLibAdder'
-import { uploadApi } from '@/utils';
+// import { uploadApi } from '@/utils';
 
 const getComs = () => {
   const comDefs = {};
@@ -183,9 +183,9 @@ export default function (ctx, save) {
             return Promise.reject('错误的连接器类型.')
           }
         },
-        uploadFile(files) {
-          return uploadApi(files)
-        },
+        // uploadFile(files) {
+        //   return uploadApi(files)
+        // },
         vars: {
           getQuery: () => ({ ...(ctx.debugQuery || {}) }),
           get getRouter() {
