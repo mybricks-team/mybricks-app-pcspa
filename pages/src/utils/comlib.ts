@@ -222,6 +222,18 @@ export class ComboComlibURL {
 
 
 export const getMySelfLibComsFromUrl = (url) => {
+  
+  if(url?.split('components=')?.[1]?.length === 0) {
+    window['__comlibs_edit_'].unshift({
+      comAray: [],
+      id: '_myself_',
+      title: '我的组件',
+      defined: true,
+    });
+    // 跳过空请求
+    return Promise.resolve([])
+  }
+
   return new Promise((resolve, reject) => {
     myRequire([url], () => {
       reject(new Error('加载我的组件失败'))

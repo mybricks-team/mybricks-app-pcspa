@@ -11,6 +11,7 @@ import { message } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
+import { getManateeUserInfo } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { ComlibEditUrl, ChartsEditUrl, BasicEditUrl } from '../../constants'
@@ -82,6 +83,8 @@ export default function MyDesigner({ appData }) {
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
 	const [SPADesigner, setSPADesigner] = useState(null);
+
+  const [manateeUserInfo] = useState(getManateeUserInfo())
 	
 	useEffect(() => {
 		console.log('应用数据:', appData);
