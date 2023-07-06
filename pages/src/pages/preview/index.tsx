@@ -3,11 +3,9 @@ import { ConfigProvider } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN';
 import { call as callConnectorHttp } from '@mybricks/plugin-connector-http'
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
-import { ComlibRtUrl, ChartsRtUrl } from './../../constants'
+import { ComlibRtUrl, ChartsRtUrl, BasicRtUrl } from './../../constants'
 import { getQueryString } from './../../utils'
 import { PreviewStorage } from './../../utils/previewStorage'
-import axios from 'axios'
-import { message } from 'antd'
 const { render: renderUI } = (window as any)._mybricks_render_web
 
 const fileId = getQueryString('fileId')
@@ -22,39 +20,39 @@ if (!dumpJson) {
 
 if (!comlibs) {
   console.warn('数据错误: 组件库缺失')
-  comlibs = [ComlibRtUrl, ChartsRtUrl]
+  comlibs = [ComlibRtUrl, ChartsRtUrl, BasicRtUrl]
 }
 
-function uploadApi(fileList: File[]) {
-  const form = new FormData();
-  fileList.forEach((file: File) => {
-    form.append('file', file);
-  });
+// function uploadApi(fileList: File[]) {
+//   const form = new FormData();
+//   fileList.forEach((file: File) => {
+//     form.append('file', file);
+//   });
 
-  form.append('folderPath', `/fiels/${Date.now()}`);
+//   form.append('folderPath', `/fiels/${Date.now()}`);
 
-  return axios.post(
-    `/mybricks-pc-page/paas/api/flow/saveFile`, form,
-    {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    }
-  )
-    .then((e) => {
-      if (e && e.data?.code === 1) {
-        message.success(`上传成功`);
-        const resData = e.data?.data
-        return Array.isArray(resData) ? resData : [resData];
-      }
-      console.warn(`上传失败`, e?.data || e);
-      message.error(`上传失败`);
-      throw new Error(`调用接口失败`)
-    })
-    .catch((e) => {
-      console.warn(`上传失败`, e);
-      message.error(`上传失败`);
-      throw e
-    });
-}
+//   return axios.post(
+//     `/mybricks-pc-page/paas/api/flow/saveFile`, form,
+//     {
+//       headers: { 'Content-Type': 'multipart/form-data' }
+//     }
+//   )
+//     .then((e) => {
+//       if (e && e.data?.code === 1) {
+//         message.success(`上传成功`);
+//         const resData = e.data?.data
+//         return Array.isArray(resData) ? resData : [resData];
+//       }
+//       console.warn(`上传失败`, e?.data || e);
+//       message.error(`上传失败`);
+//       throw new Error(`调用接口失败`)
+//     })
+//     .catch((e) => {
+//       console.warn(`上传失败`, e);
+//       message.error(`上传失败`);
+//       throw e
+//     });
+// }
 
 const requireScript = (src) => {
   var script = document.createElement('script')
@@ -166,20 +164,6 @@ function Page() {
                       { script: connector.script, useProxy: true },
                       params
                     )
-                  } else if (connector.type === 'http-sql') {
-                    return callConnectorHttp(
-                      { script: connector.script },
-                      params,
-                      {
-                        // 发送请求前的钩子函数
-                        before(options) {
-                          let newOptions = { ...options }
-                          return {
-                            ...newOptions
-                          }
-                        }
-                      }
-                    )
                   } else {
                     return Promise.reject('错误的连接器类型.')
                   }
@@ -202,20 +186,6 @@ function Page() {
               return callConnectorHttp(
                 { script: connector.script, useProxy: true },
                 params
-              )
-            } else if (connector.type === 'http-sql') {
-              return callConnectorHttp(
-                { script: connector.script },
-                params,
-                {
-                  // 发送请求前的钩子函数
-                  before(options) {
-                    let newOptions = { ...options }
-                    return {
-                      ...newOptions
-                    }
-                  }
-                }
               )
             } else {
               return Promise.reject('错误的连接器类型.')
@@ -255,7 +225,7 @@ function Page() {
               });
             },
           },
-          uploadFile: uploadApi
+          // uploadFile: uploadApi
         },
         events: [
           //配置事件
