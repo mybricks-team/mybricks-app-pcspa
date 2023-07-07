@@ -5,6 +5,7 @@ import axios from "axios";
 import * as path from "path";
 import API from "@mybricks/sdk-for-app/api";
 import { parse } from "url";
+import { Blob } from 'buffer'
 const FormData = require("form-data");
 
 @Injectable()
@@ -184,8 +185,9 @@ const uploadStatic = async (
   manateeUserInfo: { token: string; session: string }
 ): Promise<{ url: string }> => {
   // @ts-ignore
-  const blob = new Buffer.from(content, { type: "text/html" });
+  const blob = new Blob([content], { type: "text/html" });
   const uploadService = await getUploadService();
+// const uploadService = "http://dev.manateeai.com/biz/uploadExternalFileLocal";
   const formData = new FormData();
   formData.append("file", blob);
   const { url } = await axios<any, { url: string }>({
@@ -199,7 +201,6 @@ const uploadStatic = async (
       //   session: "d79136092b16fea8b2aa0e9189139021",
     },
   });
-  //"http://dev.manateeai.com/biz/uploadExternalFileLocal"
   const { host, protocol } = parse(
     uploadService
   );
