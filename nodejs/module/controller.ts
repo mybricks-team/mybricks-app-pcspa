@@ -3,8 +3,11 @@ import {
   Post,
   Body,
   Inject,
-  Controller
+  Controller,
+  UploadedFile,
+  UseInterceptors
 } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
 
 import Service from './service'
 
@@ -30,6 +33,15 @@ export default class PcPageController {
 		
 		return error ? { code: 0, message: error } : { code: 1, message: '发布完成' };
 	}
+
+  @Post('/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async upload(
+    @UploadedFile() file,
+    @Req() req
+  ){
+    return await this.service.upload(req, {file})
+  }
 	
   // @Post('/generateHTML')
   // async generateHTML(

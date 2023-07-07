@@ -133,6 +133,21 @@ export default class PcPageService {
     }
   }
 
+  async upload(req, {file}) {
+	const uploadService = await getUploadService();
+	const formData = new FormData();
+	formData.append("file", file);
+	return await axios<any, { url: string }>({
+		url: uploadService,
+		method: "post",
+		data: formData,
+		headers: {
+			"Content-Type": "multipart/form-data",
+			token: req.headers.token,
+			session: req.headers.session,
+		}
+	  });
+  }
 	// 专供模块安装时使用
 	// async generateHTML(req, {json, fileId}) {
 	// 	const domainServicePath = '/runtime/api/domain/service/run';
@@ -173,7 +188,6 @@ const getUploadService = async () => {
   const { uploadService } = res[_NAMESPACE_]?.config
     ? JSON.parse(res[_NAMESPACE_].config).uploadServer ?? {}
     : {};
-  console.log("------uploadService------", uploadService);
   if (!uploadService) {
     throw Error("无上传服务，请先配置应用上传服务");
   }

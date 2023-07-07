@@ -20,7 +20,7 @@ import css from './app.less'
 
 const appName = 'mybricks-app-pcspa-for-manatee'
 
-const DefaultUploadService = 'http://dev.manateeai.com/biz/uploadExternalFileLocal'
+const DefaultUploadService = '/biz/uploadExternalFileLocal'
 
 // 暂时写死，后续统一走 物料中心
 const defaultComlibs = [BasicEditUrl, ComlibEditUrl, ChartsEditUrl]
