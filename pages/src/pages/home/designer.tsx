@@ -11,6 +11,7 @@ import { message } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
+import { getManateeUserInfo } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { ComlibEditUrl, ChartsEditUrl, BasicEditUrl } from '../../constants'
@@ -26,6 +27,8 @@ export default function MyDesigner({ appData }) {
   const { comlibs = [] } = appData.config[appName]?.config ?? {}
   // const configComlibs = comlibs.map(lib => lib.editJs)
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.82/index.min.js'
+
+  const [manateeUserInfo] = useState(getManateeUserInfo())
   
   const [ctx] = useState({
     sdk: appData,
@@ -39,6 +42,7 @@ export default function MyDesigner({ appData }) {
     debugQuery: appData.fileContent?.content?.debugQuery,
     versionApi: null,
     uploadService: appData.config[appName]?.config ? JSON.parse(appData.config[appName]?.config).uploadServer?.uploadService : '',
+    manateeUserInfo,
     saveContent(content) {
       ctx.save({ content})
     },
@@ -82,6 +86,8 @@ export default function MyDesigner({ appData }) {
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
 	const [SPADesigner, setSPADesigner] = useState(null);
+
+
 	
 	useEffect(() => {
 		console.log('应用数据:', appData);
@@ -212,7 +218,8 @@ export default function MyDesigner({ appData }) {
           userId: ctx.user?.email,
           fileId: ctx.fileId,
           json: json.toJSON,
-          envType: 'prod'
+          envType: 'prod',
+          manateeUserInfo
         })
 
         message.success({

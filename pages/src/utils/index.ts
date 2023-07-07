@@ -159,3 +159,13 @@ export async function uploadApi(fileList: File[]) {
       throw e
     });
 }
+
+
+export function getManateeUserInfo() {
+  let userInfo: { session?: string, token?: string } = {}
+  try {
+    userInfo = JSON.parse(localStorage.getItem('HAINIU_Userinfo'))
+  } catch (e) { }
+
+  return userInfo
+}

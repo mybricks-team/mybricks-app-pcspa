@@ -19,13 +19,14 @@ export default class PcPageController {
     @Body('fileId') fileId: number,
     @Body('json') json: any,
     @Body('envType') envType: 'test' | 'prod',
+    @Body('manateeUserInfo') manateeUserInfo: {token: string, session: string},
     @Req() req: any
 	) {
 		if (!isDefined(json) || !isDefined(userId) || !isDefined(fileId)) {
 			return { code: 0, message: '参数 json、userId、fileId 不能为空' };
 		}
 		
-		const error = await this.service.publish(req, { json, userId, fileId, envType });
+		const error = await this.service.publish(req, { json, userId, fileId, envType, manateeUserInfo });
 		
 		return error ? { code: 0, message: error } : { code: 1, message: '发布完成' };
 	}

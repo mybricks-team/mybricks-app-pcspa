@@ -42,7 +42,7 @@ const getComs = () => {
   return comDefs;
 };
 
-const injectUpload = (editConfig: Record<string, any>, uploadService: string) => {
+const injectUpload = (editConfig: Record<string, any>, uploadService: string, manateeUserInfo: { token: string, session: string }) => {
   if (!!editConfig && !editConfig.upload) {
     editConfig.upload = async (files: Array<File>): Promise<Array<string>> => {
       const formData = new FormData();
@@ -57,6 +57,7 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string) =>
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data',
+          ...manateeUserInfo
         }
       });
       return [res.url]
@@ -120,7 +121,7 @@ export default function (ctx, save) {
     },
     editView: {
       editorAppender(editConfig) {
-        injectUpload(editConfig, ctx.uploadService);
+        injectUpload(editConfig, ctx.uploadService, ctx.manateeUserInfo);
         return;
       },
       items({ }, cate0, cate1, cate2) {

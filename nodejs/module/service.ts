@@ -87,7 +87,7 @@ export default class PcPageService {
 		return comlibScripts + mySelfComlibRt
 	}
 
-	async publish(req, {json, userId, fileId, envType}) {
+	async publish(req, {json, userId, fileId, envType, manateeUserInfo}) {
 		let error = ''
 
 		try {
@@ -113,7 +113,7 @@ export default class PcPageService {
         // noHash: true
 		// 	})
 
-      const { url } = await uploadStatic(template);
+      const { url } = await uploadStatic(template, manateeUserInfo);
 
       await API.File.publish({
         userId,
@@ -179,24 +179,29 @@ const getUploadService = async () => {
   return uploadService;
 };
 
-const uploadStatic = async (content: string): Promise<{ url: string }> => {
+const uploadStatic = async (
+  content: string,
+  manateeUserInfo: { token: string; session: string }
+): Promise<{ url: string }> => {
   // @ts-ignore
   const blob = new Buffer.from(content, { type: "text/html" });
   const uploadService = await getUploadService();
   const formData = new FormData();
   formData.append("file", blob);
   const { url } = await axios<any, { url: string }>({
-    url: "http://dev.manateeai.com/biz/uploadExternalFileLocal",
+    url: uploadService,
     method: "post",
     data: formData,
     headers: {
       "Content-Type": "multipart/form-data",
-      token: "b373dbe105f94c5308a38290afab97d8",
-      session: "d79136092b16fea8b2aa0e9189139021",
+      ...manateeUserInfo,
+      //   token: "b373dbe105f94c5308a38290afab97d8",
+      //   session: "d79136092b16fea8b2aa0e9189139021",
     },
   });
+  //"http://dev.manateeai.com/biz/uploadExternalFileLocal"
   const { host, protocol } = parse(
-    "http://dev.manateeai.com/biz/uploadExternalFileLocal"
+    uploadService
   );
   const domain = `${protocol}//${host}`;
   return { url: `${domain}${url}` };
