@@ -164,7 +164,8 @@ export async function uploadApi(fileList: File[]) {
 export function getManateeUserInfo() {
   let userInfo: { session?: string, token?: string } = {}
   try {
-    userInfo = JSON.parse(JSON.stringify(localStorage.getItem('HAINIU_Userinfo')));
+    userInfo.token =  localStorage.getItem('token')
+    userInfo.session = localStorage.getItem('session')
   } catch (e) { 
     console.error(e)
   }

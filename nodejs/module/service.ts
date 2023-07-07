@@ -107,20 +107,20 @@ export default class PcPageService {
 				.replace(`'--slot-project-id--'`, projectId ? projectId : JSON.stringify(null))
 
 
-		// 	const res = await API.Upload.staticServer({
-		// 		content: template,
-		// 		folderPath,
-		// 		fileName,
-        // noHash: true
-		// 	})
+			const res = await API.Upload.staticServer({
+				content: template,
+				folderPath,
+				fileName,
+        		noHash: true
+			})
 
-      const { url } = await uploadStatic(template, manateeUserInfo);
+    //   const { url } = await uploadStatic(template, manateeUserInfo);
 
       await API.File.publish({
         userId,
         fileId,
         extName: "pc-page",
-        content: { url },
+        content: JSON.stringify(res),
         type: envType,
       });
     } catch (e) {
@@ -197,8 +197,8 @@ const uploadStatic = async (
     headers: {
       "Content-Type": "multipart/form-data",
       ...manateeUserInfo,
-      //   token: "b373dbe105f94c5308a38290afab97d8",
-      //   session: "d79136092b16fea8b2aa0e9189139021",
+        token: "b373dbe105f94c5308a38290afab97d8",
+        session: "d79136092b16fea8b2aa0e9189139021",
     },
   });
   const { host, protocol } = parse(

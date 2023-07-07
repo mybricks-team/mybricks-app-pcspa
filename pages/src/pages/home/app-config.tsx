@@ -42,25 +42,42 @@ const getComs = () => {
   return comDefs;
 };
 
+const getDomainFromPath = (path: string) => {
+  if(!path) return path;
+  const [protocol, url] = path.split('//');
+  const domain = url.split('/')[0]
+  return `${protocol}//${domain}`
+}
+
 const injectUpload = (editConfig: Record<string, any>, uploadService: string, manateeUserInfo: { token: string, session: string }) => {
   if (!!editConfig && !editConfig.upload) {
     editConfig.upload = async (files: Array<File>): Promise<Array<string>> => {
       const formData = new FormData();
-      formData.append("files", files[0])
+      formData.append("file", files[0])
       if (!uploadService) {
         message.error('无上传服务，请先配置应用上传服务');
-        return;
+        return [];
       }
-      const res = await axios<any, { url: string }>({
-        url: uploadService,
-        method: 'post',
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          ...manateeUserInfo
+      try {
+        const res = await axios<any, any>({
+          url: uploadService,
+          method: 'post',
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            ...manateeUserInfo
+          }
+        });
+        const { status, data: { url }, msg } = res.data;
+        if (status === 200) {
+          const staticUrl = `${getDomainFromPath(uploadService)}${url}`
+          return [staticUrl]
         }
-      });
-      return [res.url]
+        throw Error(`【图片上传出错】: ${msg}`)
+      } catch (error) {
+        message.error(error.message)
+        return []
+      }
     };
   }
 }
