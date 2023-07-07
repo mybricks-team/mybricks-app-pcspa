@@ -20,6 +20,8 @@ import css from './app.less'
 
 const appName = 'mybricks-app-pcspa-for-manatee'
 
+const DefaultUploadService = 'http://dev.manateeai.com/biz/uploadExternalFileLocal'
+
 // 暂时写死，后续统一走 物料中心
 const defaultComlibs = [BasicEditUrl, ComlibEditUrl, ChartsEditUrl]
 
@@ -41,7 +43,7 @@ export default function MyDesigner({ appData }) {
     // comlibs: ['http://localhost:8001/libEdt.js', 'http://localhost:8002/libEdt.js'],
     debugQuery: appData.fileContent?.content?.debugQuery,
     versionApi: null,
-    uploadService: appData.config[appName]?.config ? JSON.parse(appData.config[appName]?.config).uploadServer?.uploadService : '',
+    uploadService: appData.config[appName]?.config ? JSON.parse(appData.config[appName]?.config).uploadServer?.uploadService : DefaultUploadService,
     manateeUserInfo,
     saveContent(content) {
       ctx.save({ content})
