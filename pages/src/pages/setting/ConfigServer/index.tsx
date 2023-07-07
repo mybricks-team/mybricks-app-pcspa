@@ -22,7 +22,7 @@ export default ({ user }) => {
     const [loading, setLoading] = useState<boolean>(true)
     useEffect(() => {
         API.Setting.getSetting([_NAMESPACE_]).then((res) => {
-            setConfig(res[_NAMESPACE_]?.config?.uploadServer ?? {})
+            setConfig(res[_NAMESPACE_]?.config ? JSON.parse(res[_NAMESPACE_]?.config).uploadServer ?? {} : {})
             lastConfigRef.current = res[_NAMESPACE_]?.config ?? {};
         }).finally(() => {
             setLoading(false);

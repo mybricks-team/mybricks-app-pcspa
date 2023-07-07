@@ -38,7 +38,7 @@ export default function MyDesigner({ appData }) {
     // comlibs: ['http://localhost:8001/libEdt.js', 'http://localhost:8002/libEdt.js'],
     debugQuery: appData.fileContent?.content?.debugQuery,
     versionApi: null,
-    uploadService: appData.config[appName]?.config?.uploadServer?.uploadService,
+    uploadService: appData.config[appName]?.config ? JSON.parse(appData.config[appName]?.config).uploadServer?.uploadService : '',
     saveContent(content) {
       ctx.save({ content})
     },

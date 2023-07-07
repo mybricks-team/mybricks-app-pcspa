@@ -29,7 +29,7 @@ module.exports = merge(common, {
       {
         context: ['/api/pcpage/publish'],
         // target: 'https://my.mybricks.world',
-        target: 'http://localhost:9001',
+        target: 'http://localhost:9002',
         secure: false,
         changeOrigin: true,
       },

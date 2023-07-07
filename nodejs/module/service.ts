@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common'
 
-import * as fs from 'fs'
-import axios from 'axios'
-import * as path from 'path'
-import API from '@mybricks/sdk-for-app/api'
+import * as fs from "fs";
+import axios from "axios";
+import * as path from "path";
+import API from "@mybricks/sdk-for-app/api";
+import { parse } from "url";
+const FormData = require("form-data");
 
 @Injectable()
 export default class PcPageService {
@@ -111,24 +113,24 @@ export default class PcPageService {
         // noHash: true
 		// 	})
 
-			await uploadStatic(template)
-			
-			await API.File.publish({
-				userId,
-				fileId,
-				extName: 'pc-page',
-				content: template,
-				type: envType
-			})
-		} catch (e) {
-			console.log('pcpage publish error', e)
-			error = e
-		}
+      const { url } = await uploadStatic(template);
 
-		if (error) {
-			return error
-		}
-	}
+      await API.File.publish({
+        userId,
+        fileId,
+        extName: "pc-page",
+        content: { url },
+        type: envType,
+      });
+    } catch (e) {
+      console.log("pcpage publish error", e);
+      error = e;
+    }
+
+    if (error) {
+      return error;
+    }
+  }
 
 	// 专供模块安装时使用
 	// async generateHTML(req, {json, fileId}) {
@@ -167,27 +169,37 @@ export default class PcPageService {
 const getUploadService = async () => {
   const _NAMESPACE_ = "mybricks-app-pcspa-for-manatee";
   const res = await API.Setting.getSetting([_NAMESPACE_]);
-  const { uploadService } = res[_NAMESPACE_]?.config?.uploadServer ?? {};
+  const { uploadService } = res[_NAMESPACE_]?.config
+    ? JSON.parse(res[_NAMESPACE_].config).uploadServer ?? {}
+    : {};
+  console.log("------uploadService------", uploadService);
   if (!uploadService) {
     throw Error("无上传服务，请先配置应用上传服务");
   }
   return uploadService;
 };
 
-const uploadStatic = async (content: string) => {
-  var blob = new Blob([content], { type: "text/html" });
+const uploadStatic = async (content: string): Promise<{ url: string }> => {
+  // @ts-ignore
+  const blob = new Buffer.from(content, { type: "text/html" });
   const uploadService = await getUploadService();
   const formData = new FormData();
-  formData.append("files", blob)
-  const res = await axios({
-	url: uploadService,
-	method: 'post',
-	data: formData,
-	headers: {
-	  'Content-Type': 'multipart/form-data',
-	}
+  formData.append("file", blob);
+  const { url } = await axios<any, { url: string }>({
+    url: "http://dev.manateeai.com/biz/uploadExternalFileLocal",
+    method: "post",
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data",
+      token: "b373dbe105f94c5308a38290afab97d8",
+      session: "d79136092b16fea8b2aa0e9189139021",
+    },
   });
-  return res
+  const { host, protocol } = parse(
+    "http://dev.manateeai.com/biz/uploadExternalFileLocal"
+  );
+  const domain = `${protocol}//${host}`;
+  return { url: `${domain}${url}` };
 };
 
 function getRealHostName(requestHeaders) {
