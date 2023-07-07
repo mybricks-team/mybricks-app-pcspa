@@ -7,8 +7,8 @@ export const ComlibRtUrl = 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/com
 export const ChartsEditUrl = 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/5952_1.0.0-main.0/2022-12-06_16-24-51/edit.js'
 export const ChartsRtUrl = 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/5952_1.0.0-main.0/2022-12-06_16-24-51/rt.js'
 
-export const BasicEditUrl = 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7182_1.0.21-main.2/2023-06-29_20-10-28/edit.js'
-export const BasicRtUrl = 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7182_1.0.21-main.2/2023-06-29_20-10-28/rt.js'
+export const BasicEditUrl = 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7182_1.0.21/2023-07-07_15-38-37/edit.js'
+export const BasicRtUrl = 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7182_1.0.21/2023-07-07_15-38-37/rt.js'
 
 
 /** 发布时使用，根据 edit 获取 rt 资源 */
