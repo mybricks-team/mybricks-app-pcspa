@@ -241,7 +241,17 @@ export default function (ctx, save) {
                 toast(`open a new tab: ${JSON.stringify({ url, title })}`),
             });
           },
+          get getCookies() {
+            return () => {
+              return {}
+            }
+          }
         },
+        get hasPermission() {
+          return () => {
+            return true
+          }
+        }
       },
       events: [
         //配置事件
