@@ -28,7 +28,7 @@ const defaultComlibs = [BasicEditUrl, ComlibEditUrl, ChartsEditUrl]
 export default function MyDesigner({ appData }) {
   const { comlibs = [] } = appData.config[appName]?.config ?? {}
   // const configComlibs = comlibs.map(lib => lib.editJs)
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.82/index.min.js'
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.83/index.min.js'
 
   const [manateeUserInfo] = useState(getManateeUserInfo())
   
