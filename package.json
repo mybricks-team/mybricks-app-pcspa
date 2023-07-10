@@ -24,7 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "@mybricks/rocker-dao": "^0.0.6",
-    "@mybricks/sdk-for-app": "0.1.58",
+    "@mybricks/sdk-for-app": "0.1.59",
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
