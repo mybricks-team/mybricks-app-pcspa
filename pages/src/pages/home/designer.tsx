@@ -31,6 +31,13 @@ export default function MyDesigner({ appData }) {
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.83/index.min.js'
 
   const [manateeUserInfo] = useState(getManateeUserInfo())
+
+  let uploadService = null;
+  try {
+    uploadService = JSON.parse(appData.config[appName]?.config).uploadServer?.uploadService
+  } catch (error) {
+    
+  }
   
   const [ctx] = useState({
     sdk: appData,
@@ -43,7 +50,7 @@ export default function MyDesigner({ appData }) {
     // comlibs: ['http://localhost:8001/libEdt.js', 'http://localhost:8002/libEdt.js'],
     debugQuery: appData.fileContent?.content?.debugQuery,
     versionApi: null,
-    uploadService: appData.config[appName]?.config ? JSON.parse(appData.config[appName]?.config).uploadServer?.uploadService : DefaultUploadService,
+    uploadService,
     manateeUserInfo,
     saveContent(content) {
       ctx.save({ content})

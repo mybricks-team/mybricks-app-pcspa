@@ -43,12 +43,12 @@ const getComs = () => {
 };
 
 const getDomainFromPath = (path: string) => {
-  if(!path) return path;
-  if(path.startsWith('http') || path.startsWith('https')) {
+  if (!path) return path;
+  if (path.startsWith('http') || path.startsWith('https')) {
     const [protocol, url] = path.split('//');
     const domain = url.split('/')[0]
     return `${protocol}//${domain}`
-  }else{
+  } else {
     return location.origin;
   }
 }
@@ -58,9 +58,10 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
     editConfig.upload = async (files: Array<File>): Promise<Array<string>> => {
       const formData = new FormData();
       formData.append("file", files[0])
-      if (!uploadService) {
-        message.error('无上传服务，请先配置应用上传服务');
-        return [];
+      formData.append('folderPath', `/files/${Date.now()}`)
+      const useConfigService = !!uploadService;
+      if (!useConfigService) {
+        uploadService = '/paas/api/flow/saveFile'
       }
       try {
         const res = await axios<any, any>({
@@ -72,9 +73,9 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
             ...manateeUserInfo
           }
         });
-        const { status, data: { url }, msg } = res.data;
-        if (status === 200) {
-          const staticUrl = `${getDomainFromPath(uploadService)}${url}`
+        const { status, data: { url }, msg, code } = res.data;
+        if (status === 200 || code === 1) {
+          const staticUrl = useConfigService ? `${getDomainFromPath(uploadService)}${url}` : url
           return [staticUrl]
         }
         throw Error(`【图片上传出错】: ${msg}`)
