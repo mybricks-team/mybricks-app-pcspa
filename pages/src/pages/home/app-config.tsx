@@ -44,9 +44,13 @@ const getComs = () => {
 
 const getDomainFromPath = (path: string) => {
   if(!path) return path;
-  const [protocol, url] = path.split('//');
-  const domain = url.split('/')[0]
-  return `${protocol}//${domain}`
+  if(path.startsWith('http') || path.startsWith('https')) {
+    const [protocol, url] = path.split('//');
+    const domain = url.split('/')[0]
+    return `${protocol}//${domain}`
+  }else{
+    return location.origin;
+  }
 }
 
 const injectUpload = (editConfig: Record<string, any>, uploadService: string, manateeUserInfo: { token: string, session: string }) => {
