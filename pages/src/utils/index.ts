@@ -164,9 +164,10 @@ export async function uploadApi(fileList: File[]) {
 export function getManateeUserInfo() {
   let userInfo: { session?: string, token?: string } = {}
   try {
-    
-    userInfo.token =  atob(atob(localStorage.getItem('token')))
-    userInfo.session = atob(atob(localStorage.getItem('session')))
+    const token = localStorage.getItem('token');
+    const session = localStorage.getItem('session')
+    userInfo.token = token? atob(atob(token)):token
+    userInfo.session = session? atob(atob(session)):session
   } catch (e) { 
     console.error(e)
   }
