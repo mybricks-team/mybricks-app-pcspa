@@ -115,6 +115,9 @@ export default class PcPageService {
 			})
 
     //   const { url } = await uploadStatic(template, manateeUserInfo);
+	if(res?.url?.startsWith('https')){
+		res.url = res.url.replace('https', 'http')
+	}
 
       await API.File.publish({
         userId,
