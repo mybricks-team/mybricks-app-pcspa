@@ -307,6 +307,15 @@ export default function (ctx, save) {
               deletable: false,
               asRoot: true
             },
+          },
+          {
+            type: 'popup',
+            title: '抽屉',
+            template: {
+              namespace: 'mybricks.basic-comlib.drawer',
+              deletable: false,
+              asRoot: true
+            }
           }
         ]
       }
