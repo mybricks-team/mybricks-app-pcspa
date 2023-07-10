@@ -1,6 +1,6 @@
 {
   "name": "mybricks-app-pcspa-for-manatee",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "海牛 PC页面",
   "scripts": {
     "start:watch": "nodemon --ext js,ts --exec 'NODE_ENV=development node nodejs/index.js'",

@@ -76,7 +76,7 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
         const { status, data: { url }, msg, code } = res.data;
         if (status === 200 || code === 1) {
           const staticUrl = useConfigService ? `${getDomainFromPath(uploadService)}${url}` : url
-          return [staticUrl]
+          return [staticUrl].map(url => url.replace('https', 'http'))
         }
         throw Error(`【图片上传出错】: ${msg}`)
       } catch (error) {
