@@ -159,7 +159,13 @@ export default function MyDesigner({ appData }) {
       element: designerRef.current?.geoView.canvasDom,
       // name: `${ctx.fileItem.name}.png`
     }).then(res => {
-      ctx.save({ icon: res }, true)
+      const url = new URL(res)
+
+      if (url.protocol === 'https:') {
+        url.protocol = 'http:'
+      }
+      
+      ctx.save({ icon: url.href }, true)
     }).catch((err) => {
       console.error(err)
     })
