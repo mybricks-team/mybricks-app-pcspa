@@ -12,10 +12,7 @@ import toolsPlugin from "@mybricks/plugin-tools";
 import { render as renderUI } from '@mybricks/render-web';
 import comlibLoaderFunc from './configs/comlibLoader'
 import { comLibAdderFunc } from './configs/comLibAdder'
-import SQLPanel from './plugin/sqlPanel';
-import { uploadApi } from '@/utils';
 import axios from 'axios';
-// import { uploadApi } from '@/utils';
 
 const getComs = () => {
   const comDefs = {};
