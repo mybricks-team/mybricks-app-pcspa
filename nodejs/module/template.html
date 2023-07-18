@@ -210,7 +210,7 @@
                 return pluginConnectorDomain.call(domainModel, params, {
                   action: type,
                   before(options) {
-                    if (domainModel.type === 'domain') {
+                    if (['domain', 'aggregation-model'].includes(domainModel.type)) {
                       let newOptions = { ...options }
                       if (projectId) {
                         Object.assign(newOptions.data, {
