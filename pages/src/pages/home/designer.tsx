@@ -52,8 +52,9 @@ export default function MyDesigner({ appData }) {
     versionApi: null,
     uploadService,
     manateeUserInfo,
+    operable: false,
     saveContent(content) {
-      ctx.save({ content})
+      ctx.save({ content })
     },
     save(
       param: { name?; shareType?; content?; icon? },
@@ -135,6 +136,11 @@ export default function MyDesigner({ appData }) {
   }, [])
 
   const save = useCallback(async () => {
+    if (!ctx.operable) {
+      message.warn('请先点击右上角个人头像上锁获取页面编辑权限')
+      return
+    }
+
     setSaveLoading(true)
     //保存
     const json = designerRef.current?.dump()
@@ -268,6 +274,7 @@ export default function MyDesigner({ appData }) {
       <Locker
         statusChange={(status) => {
           setOperable(status === 1)
+          ctx.operable = status === 1
         }}
       />
     )
@@ -285,7 +292,9 @@ export default function MyDesigner({ appData }) {
         <Toolbar.Save
           disabled={!operable}
           loading={saveLoading}
-          onClick={save}
+          onClick={() => {
+            save()
+          }}
           dotTip={beforeunload}
         />
         <Toolbar.Button onClick={preview}>预览</Toolbar.Button>
