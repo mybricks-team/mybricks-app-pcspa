@@ -126,7 +126,7 @@
         const axios = window.axios
         const message = window?.antd.message
 
-        function Page(props) {
+        function Page({ props }) {
           return renderUI(projectJson, {
             env: {
               silent: true,
@@ -237,7 +237,7 @@
               {
                 locale: antd.locale['zh_CN'].default,
               },
-              React.createElement(Page(props))
+              React.createElement(Page, { props })
             ),
             document.querySelector('#qiankun-container')
           )
