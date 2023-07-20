@@ -127,6 +127,14 @@
         const message = window?.antd.message
 
         function Page({ props }) {
+
+        if(props?.container) {
+            window?.antd?.message?.config({
+              getContainer() {
+                return props?.container
+              }
+            })
+         }
           return renderUI(projectJson, {
             env: {
               silent: true,
