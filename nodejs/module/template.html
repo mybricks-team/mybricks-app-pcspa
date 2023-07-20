@@ -131,7 +131,7 @@
             env: {
               silent: true,
               showErrorNotification: false,
-              canvasElement: document.body,
+              canvasElement: props.container || document.body,
               get vars() {
                 // 环境变量
                 return {
