@@ -160,18 +160,37 @@ export default function (ctx, save) {
             },
           },
           {
-            title: '路由参数',
-            type: 'map',
-            description: '调试模式下，路由参数配置',
-            value: {
-              get() {
-                return ctx.debugQuery
+            title: '调试',
+            items: [
+              {
+                title: '路由参数',
+                type: 'map',
+                description: '调试模式下，路由参数模拟配置',
+                value: {
+                  get() {
+                    return ctx.debugQuery
+                  },
+                  set(context, v) {
+                    ctx.debugQuery = v
+                  }
+                }
               },
-              set(context, v) {
-                ctx.debugQuery = v
+              {
+                title: '主应用参数',
+                type: 'map',
+                description: '调试模式下，主应用参数模拟配置',
+                value: {
+                  get() {
+                    return ctx.debugMainProps
+                  },
+                  set(context, v) {
+                    ctx.debugMainProps = v
+                  }
+                }
               }
-            }
+            ]
           }
+          
         ]
       },
     },
@@ -237,6 +256,7 @@ export default function (ctx, save) {
         // },
         vars: {
           getQuery: () => ({ ...(ctx.debugQuery || {}) }),
+          getProps: () => ({ ...(ctx.debugMainProps || {}) }),
           get getRouter() {
             const toast = (info: string) => {
               message.info(info);

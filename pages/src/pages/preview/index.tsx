@@ -1,4 +1,5 @@
-import { render } from 'react-dom'
+// import { render } from 'react-dom'
+import ReactDOM from 'react-dom';
 import { ConfigProvider } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN';
 import { call as callConnectorHttp } from '@mybricks/plugin-connector-http'
@@ -22,37 +23,6 @@ if (!comlibs) {
   console.warn('数据错误: 组件库缺失')
   comlibs = [ComlibRtUrl, ChartsRtUrl, BasicRtUrl]
 }
-
-// function uploadApi(fileList: File[]) {
-//   const form = new FormData();
-//   fileList.forEach((file: File) => {
-//     form.append('file', file);
-//   });
-
-//   form.append('folderPath', `/fiels/${Date.now()}`);
-
-//   return axios.post(
-//     `/mybricks-pc-page/paas/api/flow/saveFile`, form,
-//     {
-//       headers: { 'Content-Type': 'multipart/form-data' }
-//     }
-//   )
-//     .then((e) => {
-//       if (e && e.data?.code === 1) {
-//         message.success(`上传成功`);
-//         const resData = e.data?.data
-//         return Array.isArray(resData) ? resData : [resData];
-//       }
-//       console.warn(`上传失败`, e?.data || e);
-//       message.error(`上传失败`);
-//       throw new Error(`调用接口失败`)
-//     })
-//     .catch((e) => {
-//       console.warn(`上传失败`, e);
-//       message.error(`上传失败`);
-//       throw e
-//     });
-// }
 
 const requireScript = (src) => {
   var script = document.createElement('script')
@@ -96,11 +66,42 @@ const getComs = () => {
 
 //----------------------------------------------------------------------------
 
-if (comlibs && Array.isArray(comlibs)) {
-  Promise.all(comlibs.map((t) => requireScript(t))).then(() => {
-    render(<Page />, document.querySelector('#root'))
-  })
+
+function render(props) {
+  const { container } = props;
+  if (comlibs && Array.isArray(comlibs)) {
+    Promise.all(comlibs.map((t) => requireScript(t))).then(() => {
+      // render(<Page />, document.querySelector('#root'))
+      ReactDOM.render(<Page props={props} />, container ? container.querySelector('#root') : document.querySelector('#root'));
+    })
+  }
+  
 }
+
+if (!window.__POWERED_BY_QIANKUN__) {
+  render({});
+}
+
+export async function bootstrap() {
+  console.log('react app bootstraped');
+}
+
+export async function mount(props) {
+  // console.log('[react16] props from main framework', props);
+  render(props);
+}
+
+export async function unmount(props) {
+  const { container } = props;
+
+  ReactDOM.unmountComponentAtNode(container ? container.querySelector('#root') : document.querySelector('#root'));
+}
+
+// if (comlibs && Array.isArray(comlibs)) {
+//   Promise.all(comlibs.map((t) => requireScript(t))).then(() => {
+//     render(<Page />, document.querySelector('#root'))
+//   })
+// }
 
 function decode(str: string) {
   try {
@@ -134,7 +135,7 @@ function parseQuery(query) {
   return res
 }
 
-function Page() {
+function Page({ props }) {
   return (
     <ConfigProvider locale={zhCN}>
       {renderUI(dumpJson, {
@@ -193,6 +194,13 @@ function Page() {
           },
           vars: {
             getQuery: () => parseQuery(location.search),
+            get getProps () {
+              return () => {
+                // 获取主应用参数方法，如：token等参数，取决于主应用传入
+                if (!props) return undefined
+                return props
+              }
+            },
             get getRouter() {
               const isUri = (url: string) => {
                 return /^http[s]?:\/\/([\w\-\.]+)+[\w-]*([\w\-\.\/\?%&=]+)?$/gi.test(

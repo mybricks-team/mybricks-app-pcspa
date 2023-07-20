@@ -125,34 +125,7 @@
         const projectId = '--slot-project-id--' //replace it
         const axios = window.axios
         const message = window?.antd.message
-        // function uploadApi(fileList) {
-        //   const form = new FormData()
-        //   fileList.forEach((file) => {
-        //     form.append('file', file)
-        //   })
 
-        //   form.append('folderPath', `/fiels/${Date.now()}`)
-
-        //   return axios
-        //     .post(`/mybricks-pc-page/paas/api/flow/saveFile`, form, {
-        //       headers: { 'Content-Type': 'multipart/form-data' },
-        //     })
-        //     .then((e) => {
-        //       if (e && e.data?.code === 1) {
-        //         message.success(`上传成功`)
-        //         const resData = e.data?.data
-        //         return Array.isArray(resData) ? resData : [resData]
-        //       }
-        //       console.warn(`上传失败`, e?.data || e)
-        //       message.error(`上传失败`)
-        //       throw new Error(`调用接口失败`)
-        //     })
-        //     .catch((e) => {
-        //       console.warn(`上传失败`, e)
-        //       message.error(`上传失败`)
-        //       throw e
-        //     })
-        // }
         function Page(props) {
           return renderUI(projectJson, {
             env: {
@@ -165,6 +138,12 @@
                   get getQuery() {
                     return () => {
                       return parseQuery(location.search)
+                    }
+                  },
+                  get getProps () { // 获取主应用参数方法，如：token等参数，取决于主应用传入
+                    return () => {
+                      if (!props) return undefined
+                      return props
                     }
                   },
                   get getCookies() {
@@ -238,11 +217,6 @@
                 } else {
                   return Promise.reject('错误的连接器类型.')
                 }
-              },
-              getMainProps: () => {
-                // 获取主应用参数方法，如：token等参数，取决于主应用传入
-                if (!props) return undefined
-                return props.mainProps
               },
               renderCom(json, opts, coms) {
                 return renderUI(json, {

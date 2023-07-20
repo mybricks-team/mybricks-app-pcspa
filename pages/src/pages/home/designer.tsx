@@ -49,6 +49,7 @@ export default function MyDesigner({ appData }) {
     comlibs: (appData.fileContent?.content?.comlibs?.filter?.((comlib) => comlib.defined) || []).concat(defaultComlibs),
     // comlibs: ['http://localhost:8001/libEdt.js', 'http://localhost:8002/libEdt.js'],
     debugQuery: appData.fileContent?.content?.debugQuery,
+    debugMainProps: appData.fileContent?.content?.debugMainProps,
     versionApi: null,
     uploadService,
     manateeUserInfo,
@@ -146,19 +147,20 @@ export default function MyDesigner({ appData }) {
     const json = designerRef.current?.dump()
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
+    json.debugMainProps = ctx.debugMainProps
 
-    // const scripts = await ComlibService.getRtSourceCode(ctx.comlibs)
     json.toJSON = JSON.parse(JSON.stringify({...designerRef?.current?.toJSON(), configuration: {
-      // scripts: encodeURIComponent(scripts),
       comlibs: ctx.comlibs,
       title: ctx.fileItem.name,
       projectId: ctx.sdk.projectId,
       folderPath: '/app/pcpage',
       fileName: `${ctx.fileItem.id}.html`
     }}));
+
 		json.projectId = ctx.sdk.projectId;
-    json.debugQuery = ctx.debugQuery;
+
     ctx.save({name: ctx.fileItem.name, content: JSON.stringify(json)})
+
     setBeforeunload(false)
 
     API.App.getPreviewImage({ // Todo... name 中文乱码
