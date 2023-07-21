@@ -28,7 +28,7 @@ const defaultComlibs = [BasicEditUrl, ComlibEditUrl, ChartsEditUrl]
 export default function MyDesigner({ appData }) {
   const { comlibs = [] } = appData.config[appName]?.config ?? {}
   // const configComlibs = comlibs.map(lib => lib.editJs)
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.85/index.min.js'
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.86/index.min.js'
 
   const [manateeUserInfo] = useState(getManateeUserInfo())
 
@@ -49,11 +49,13 @@ export default function MyDesigner({ appData }) {
     comlibs: (appData.fileContent?.content?.comlibs?.filter?.((comlib) => comlib.defined) || []).concat(defaultComlibs),
     // comlibs: ['http://localhost:8001/libEdt.js', 'http://localhost:8002/libEdt.js'],
     debugQuery: appData.fileContent?.content?.debugQuery,
+    debugMainProps: appData.fileContent?.content?.debugMainProps,
     versionApi: null,
     uploadService,
     manateeUserInfo,
+    operable: false,
     saveContent(content) {
-      ctx.save({ content})
+      ctx.save({ content })
     },
     save(
       param: { name?; shareType?; content?; icon? },
@@ -135,24 +137,30 @@ export default function MyDesigner({ appData }) {
   }, [])
 
   const save = useCallback(async () => {
+    if (!ctx.operable) {
+      message.warn('请先点击右上角个人头像上锁获取页面编辑权限')
+      return
+    }
+
     setSaveLoading(true)
     //保存
     const json = designerRef.current?.dump()
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
+    json.debugMainProps = ctx.debugMainProps
 
-    // const scripts = await ComlibService.getRtSourceCode(ctx.comlibs)
     json.toJSON = JSON.parse(JSON.stringify({...designerRef?.current?.toJSON(), configuration: {
-      // scripts: encodeURIComponent(scripts),
       comlibs: ctx.comlibs,
       title: ctx.fileItem.name,
       projectId: ctx.sdk.projectId,
       folderPath: '/app/pcpage',
       fileName: `${ctx.fileItem.id}.html`
     }}));
+
 		json.projectId = ctx.sdk.projectId;
-    json.debugQuery = ctx.debugQuery;
+
     ctx.save({name: ctx.fileItem.name, content: JSON.stringify(json)})
+
     setBeforeunload(false)
 
     API.App.getPreviewImage({ // Todo... name 中文乱码
@@ -268,6 +276,7 @@ export default function MyDesigner({ appData }) {
       <Locker
         statusChange={(status) => {
           setOperable(status === 1)
+          ctx.operable = status === 1
         }}
       />
     )
@@ -285,7 +294,9 @@ export default function MyDesigner({ appData }) {
         <Toolbar.Save
           disabled={!operable}
           loading={saveLoading}
-          onClick={save}
+          onClick={() => {
+            save()
+          }}
           dotTip={beforeunload}
         />
         <Toolbar.Button onClick={preview}>预览</Toolbar.Button>
