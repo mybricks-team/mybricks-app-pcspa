@@ -11,7 +11,7 @@ import { message } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
-import { getManateeUserInfo } from '../../utils'
+import { fetchPlugins, getManateeUserInfo } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { ComlibEditUrl, ChartsEditUrl, BasicEditUrl } from '../../constants'
@@ -26,7 +26,7 @@ const DefaultUploadService = '/biz/uploadExternalFileLocal'
 const defaultComlibs = [BasicEditUrl, ComlibEditUrl, ChartsEditUrl]
 
 export default function MyDesigner({ appData }) {
-  const { comlibs = [] } = appData.config[appName]?.config ?? {}
+  const { comlibs = [], plugins = [] } = JSON.parse(appData.config[appName]?.config ?? "{}");
   // const configComlibs = comlibs.map(lib => lib.editJs)
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.86/index.min.js'
 
@@ -96,15 +96,14 @@ export default function MyDesigner({ appData }) {
   const [saveTip, setSaveTip] = useState('')
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
-	const [SPADesigner, setSPADesigner] = useState(null);
+  const [SPADesigner, setSPADesigner] = useState(null);
+  const [remotePlugins, setRemotePlugins] = useState([]);
 
-
-	
-	useEffect(() => {
-		console.log('应用数据:', appData);
-	}, [])
-	
-	useMemo(() => {
+  useEffect(() => {
+    fetchPlugins(plugins, setRemotePlugins);
+    console.log('应用数据:', appData);
+  }, [])
+  useMemo(() => {
 		if (designer) {
 			const script = document.createElement('script');
 			script.src = designer
@@ -311,7 +310,7 @@ export default function MyDesigner({ appData }) {
 					<>
 	          <SPADesigner
 	            ref={designerRef}
-	            config={config(ctx, save)}
+              config={config(ctx, save, remotePlugins)}
 	            onEdit={onEdit}
 	            onMessage={onMessage}
 	            _onError_={(ex: any) => {
