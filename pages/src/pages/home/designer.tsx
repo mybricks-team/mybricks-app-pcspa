@@ -238,7 +238,7 @@ export default function MyDesigner({ appData }) {
 
 		    setBeforeunload(false);
 
-        await axios.post('/api/pcpage/publish', {
+        const res: { code: number, message: string } = await axios.post('/api/pcpage/publish', {
           userId: ctx.user?.email,
           fileId: ctx.fileId,
           json: json.toJSON,
@@ -246,27 +246,37 @@ export default function MyDesigner({ appData }) {
           manateeUserInfo
         })
 
-        message.success({
-          key: 'publish',
-          content: '发布成功',
-          duration: 2,
-        })
+        if (res.code === 1) {
+          message.success({
+            key: 'publish',
+            content: '发布成功',
+            duration: 2,
+          })
+
+          designerRef.current?.switchActivity?.('@mybricks/plugins/version')
+          setTimeout(() => {
+            ctx?.versionApi?.switchAciveTab?.('publish', void 0)
+          }, 0)
+        } else {
+          message.error({
+            content: res.message || '发布失败',
+            duration: 2,
+          })
+        }
+
         setPublishLoading(false)
 
-        designerRef.current?.switchActivity?.('@mybricks/plugins/version')
-        setTimeout(() => {
-          // ctx?.versionApi?.switchAciveTab?.('publish', option?.name)
-          ctx?.versionApi?.switchAciveTab?.('publish', void 0)
-        }, 0)
       })()
         .catch((e) => {
+          console.error(e)
           message.error({
             key: 'publish',
-            content: e?.message || '发布失败',
+            content: '网络错误，请稍后再试',
             duration: 2,
           })
         }).finally(() => {
           publishingRef.current = false
+          setPublishLoading(false)
         })
     },
     []
