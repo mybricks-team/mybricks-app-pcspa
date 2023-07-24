@@ -7,8 +7,8 @@
     "watch:be": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=https://my.mybricks.world node nodejs/index.js'",
     "dev:be": "ts-node -T ./nodejs/main.ts",
     "build:fe": "cd pages && npm run build",
-    "publishToNpm": "npm run build:fe && npm publish --registry=https://registry.npmjs.org",
-    "publishToNpm:beta": "npm run build:fe && npm publish --tag beta --registry=https://registry.npmjs.org --access=public"
+    "publishToNpm": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world",
+    "publishToNpm:beta": "npm run build:fe && npm publish --tag beta --registry=https://registry.npmjs.org --access=public && node sync.js --origin=https://my.mybricks.world"
   },
   "keywords": [
     "mybricks",
