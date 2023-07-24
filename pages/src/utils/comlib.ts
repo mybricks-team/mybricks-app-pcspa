@@ -136,18 +136,13 @@ export const getRtComlibsFromEdit = (comlibs) => {
   })
 }
 
-export const getRtComlibsFromConfigEdit = (edits, comlibs = []) => {
-  return edits.map(lib => {
-    const comlib = comlibs.find(({editJs}) => editJs===lib)
-    if(comlib){
-      return comlib.rtJs
-    }
+export const getRtComlibsFromConfigEdit = (comlibs = []) => {
+  return comlibs.map(lib => {
     if (lib?.id === MySelfId) {
       const comboComlib = new ComboComlibURL()
       comboComlib.setComponents(JSON.parse(JSON.stringify(lib?.comAray)))
       return comboComlib.toRtUrl()
     }
-
     if (lib?.rtJs) {
       return lib.rtJs
     }

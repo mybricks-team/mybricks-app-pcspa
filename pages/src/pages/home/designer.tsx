@@ -15,6 +15,8 @@ import { getManateeUserInfo } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { ComlibEditUrl, ChartsEditUrl, BasicEditUrl } from '../../constants'
+import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
+
 
 import css from './app.less'
 
@@ -26,8 +28,7 @@ const DefaultUploadService = '/biz/uploadExternalFileLocal'
 const defaultComlibs = [BasicEditUrl, ComlibEditUrl, ChartsEditUrl]
 
 export default function MyDesigner({ appData }) {
-  const { comlibs = [] } = appData.config[appName]?.config ?? {}
-  // const configComlibs = comlibs.map(lib => lib.editJs)
+  const comlibs = appData.fileContent?.content?.comlibs??[MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB]
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.86/index.min.js'
 
   const [manateeUserInfo] = useState(getManateeUserInfo())
@@ -46,8 +47,8 @@ export default function MyDesigner({ appData }) {
     fileItem: appData.fileContent || {},
     setting: appData.config || {},
     hasMaterialApp: appData.hasMaterialApp,
-    comlibs: (appData.fileContent?.content?.comlibs?.filter?.((comlib) => comlib.defined) || []).concat(defaultComlibs),
-    // comlibs: ['http://localhost:8001/libEdt.js', 'http://localhost:8002/libEdt.js'],
+    comlibs,
+    latestComlibs: appData?.defaultComlibs,
     debugQuery: appData.fileContent?.content?.debugQuery,
     debugMainProps: appData.fileContent?.content?.debugMainProps,
     versionApi: null,
@@ -186,7 +187,7 @@ export default function MyDesigner({ appData }) {
     const previewStorage = new PreviewStorage({ fileId: ctx.fileId })
     previewStorage.savePreviewPageData({
       dumpJson: json,
-      comlibs: getRtComlibsFromConfigEdit(ctx.comlibs, comlibs),
+      comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
     })
 
     window.open(`./preview.html?fileId=${ctx.fileId}`)

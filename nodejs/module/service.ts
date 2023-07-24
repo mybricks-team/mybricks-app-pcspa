@@ -22,12 +22,12 @@ export default class PcPageService {
 		let comlibScripts = ''
 
 		comlibs.forEach((comlib) => {
-			if (typeof comlib === 'string') {
-				comlibScripts += `<script src="${comlib.replace('edit.js', 'rt.js')}"></script>`
-			} else if (comlib?.defined && Array.isArray(comlib.comAray)) {
+			if (comlib?.defined && Array.isArray(comlib.comAray)) {
 				comlib.comAray.forEach((com) => {
 					mySelfComMap[`${com.namespace}@${com.version}`] = true
 				})
+			}else{
+				comlibScripts += `<script src="${comlib?.rtJs}"></script>`
 			}
 		})
 

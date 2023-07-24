@@ -4,7 +4,7 @@ import { ConfigProvider } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN';
 import { call as callConnectorHttp } from '@mybricks/plugin-connector-http'
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
-import { ComlibRtUrl, ChartsRtUrl, BasicRtUrl } from './../../constants'
+import { ComlibRtUrl, ChartsRtUrl, BasicRtUrl, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from './../../constants'
 import { getQueryString } from './../../utils'
 import { PreviewStorage } from './../../utils/previewStorage'
 const { render: renderUI } = (window as any)._mybricks_render_web
@@ -21,7 +21,7 @@ if (!dumpJson) {
 
 if (!comlibs) {
   console.warn('数据错误: 组件库缺失')
-  comlibs = [ComlibRtUrl, ChartsRtUrl, BasicRtUrl]
+  comlibs = [PC_NORMAL_COM_LIB.rtJs, CHARS_COM_LIB.rtJs, BASIC_COM_LIB.rtJs]
 }
 
 const requireScript = (src) => {
