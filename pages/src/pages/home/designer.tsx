@@ -28,7 +28,7 @@ const DefaultUploadService = '/biz/uploadExternalFileLocal'
 const defaultComlibs = [BasicEditUrl, ComlibEditUrl, ChartsEditUrl]
 
 export default function MyDesigner({ appData }) {
-  const comlibs = appData.fileContent?.content?.comlibs??[MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB]
+  const comlibs = appData.fileContent?.content?.comlibs??[MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.86/index.min.js'
 
   const [manateeUserInfo] = useState(getManateeUserInfo())
