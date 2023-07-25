@@ -273,7 +273,7 @@ export default function (ctx, save, remotePlugins = []) {
           if (connector.type === 'http') {
             //服务接口类型
             return callConnectorHttp(
-              { script: connector.script, useProxy: true },
+              { script: connector.script, useProxy: true, executeEnv: ctx.executeEnv },
               params
             )
           } else {
