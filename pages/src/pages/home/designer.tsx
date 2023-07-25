@@ -24,7 +24,7 @@ const appName = 'mybricks-app-pcspa-for-manatee'
 
 const DefaultUploadService = '/biz/uploadExternalFileLocal'
 
-// 暂时写死，后续统一走 物料中心
+// 兜底物料
 const defaultComlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
 
 export default function MyDesigner({ appData }) {
@@ -40,7 +40,10 @@ export default function MyDesigner({ appData }) {
   }else{
     coms.push(...defaultComlibs)
   }
-  const comlibs = appData.fileContent?.content?.comlibs ?? coms.unshift(MySelf_COM_LIB)
+  if(!appData.fileContent?.content?.comlibs){
+    coms.unshift(MySelf_COM_LIB)
+  }
+  const comlibs = appData.fileContent?.content?.comlibs ?? coms
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.86/index.min.js'
 
   const [manateeUserInfo] = useState(getManateeUserInfo())

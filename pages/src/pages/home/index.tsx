@@ -9,6 +9,6 @@ axios.defaults.withCredentials = true
 
 import App from './app'
 
-console.log('version: 1.0.30-beta.3')
+console.log('version: 1.0.30-beta.4')
 
 render(<App />, document.getElementById('root'))
