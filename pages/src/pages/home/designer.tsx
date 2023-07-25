@@ -45,7 +45,7 @@ export default function MyDesigner({ appData }) {
     coms.unshift(MySelf_COM_LIB)
   }
   const comlibs = appData.fileContent?.content?.comlibs ?? coms
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.86/index.min.js'
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.88/index.min.js'
 
   const [manateeUserInfo] = useState(getManateeUserInfo())
 
