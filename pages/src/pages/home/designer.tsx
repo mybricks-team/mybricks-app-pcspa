@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useCallback
 } from 'react'
-import axios from 'axios'
+import { fAxios } from '../../services/http'
 import moment from 'moment'
 import { message } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
@@ -14,7 +14,6 @@ import config from './app-config'
 import { getManateeUserInfo } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
-import { ComlibEditUrl, ChartsEditUrl, BasicEditUrl } from '../../constants'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
 
 
@@ -253,14 +252,13 @@ export default function MyDesigner({ appData }) {
 
 		    setBeforeunload(false);
 
-        const res: { code: number, message: string } = await axios.post('/api/pcpage/publish', {
+        const res: { code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
           userId: ctx.user?.email,
           fileId: ctx.fileId,
           json: json.toJSON,
           envType: 'prod',
           manateeUserInfo
         })
-
         if (res.code === 1) {
           message.success({
             key: 'publish',

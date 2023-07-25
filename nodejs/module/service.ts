@@ -89,8 +89,6 @@ export default class PcPageService {
 	}
 
 	async publish(req, { json, userId, fileId, envType, manateeUserInfo }) {
-		let error = ''
-
 		try {
 			let template = fs.readFileSync(path.resolve(__dirname, './template.html'), 'utf8')
 			const { title, comlibs, projectId, fileName, folderPath } = json.configuration
@@ -106,33 +104,28 @@ export default class PcPageService {
 				.replace(`'--projectJson--'`, JSON.stringify(json))
 				.replace(`'--slot-project-id--'`, projectId ? projectId : JSON.stringify(null))
 
-
 			const res = await API.Upload.staticServer({
 				content: template,
 				folderPath,
 				fileName,
 				noHash: true
 			})
-
 			//   const { url } = await uploadStatic(template, manateeUserInfo);
 			if (res?.url?.startsWith('https')) {
 				res.url = res.url.replace('https', 'http')
 			}
 
-			await API.File.publish({
+			const result = await API.File.publish({
 				userId,
 				fileId,
 				extName: "pc-page",
 				content: JSON.stringify(res),
 				type: envType,
 			});
+			return result
 		} catch (e) {
 			console.log("pcpage publish error", e);
-			error = e;
-		}
-
-		if (error) {
-			return error;
+			throw e
 		}
 	}
 

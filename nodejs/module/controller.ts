@@ -28,10 +28,12 @@ export default class PcPageController {
 		if (!isDefined(json) || !isDefined(userId) || !isDefined(fileId)) {
 			return { code: 0, message: '参数 json、userId、fileId 不能为空' };
 		}
-		
-		const error = await this.service.publish(req, { json, userId, fileId, envType, manateeUserInfo });
-		
-		return error ? { code: 0, message: error } : { code: 1, message: '发布完成' };
+		try {
+      const result = await this.service.publish(req, { json, userId, fileId, envType, manateeUserInfo });
+      return {code: 1, data: result, message: '发布完成'}
+    } catch (error) {
+      return {code: -1, message: error.message || '发布失败'}
+    }
 	}
 
   @Post('/upload')
