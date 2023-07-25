@@ -1,34 +1,22 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { Card, Button, Popconfirm, Descriptions, message, Typography, Divider } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import API from "@mybricks/sdk-for-app/api";
 import dayjs from "dayjs";
 import css from './index.less';
 import { _NAMESPACE_ } from "../app";
 import { PluginType } from "./type";
 import AppendModal from "./Modal";
+import { TConfigProps } from "../useConfig";
 
-export default ({ user }) => {
+export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
     const [visible, setVisible] = useState<boolean>(false);
     const [status, setStatus] = useState<"edit" | "append">();
-    const [plugins, setPlugins] = useState<PluginType[]>([]);
-    const [loading, setLoading] = useState<boolean>(true)
     const [currentPlugin, setCurrentPlugin] = useState<PluginType & { index: number }>();
-    const configRef = useRef({});
 
-    useEffect(() => {
-        API.Setting.getSetting([_NAMESPACE_]).then((res) => {
-            const config = JSON.parse(res[_NAMESPACE_]?.config ?? "{}");
-            configRef.current = config;
-            setPlugins(config.plugins ?? []);
-        }).finally(() => {
-            setLoading(false);
-        });
-    }, []);
+    const plugins: PluginType[] = config?.plugins || [];
 
     const onOk = async (values) => {
         setVisible(false);
-        setLoading(true);
         const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
         if (status === "edit") {
             plugins.splice(currentPlugin.index, 1, {
@@ -43,9 +31,9 @@ export default ({ user }) => {
                 updateTime,
             });
         }
-        await saveConfig({ ...configRef.current, plugins });
-        setLoading(false);
-        setPlugins([...plugins]);
+        mergeUpdateConfig({
+            plugins
+        })
         message.success(status === "edit" ? "更新成功" : "添加成功");
     };
     const onCancel = () => {
@@ -66,14 +54,7 @@ export default ({ user }) => {
 
     const onDelete = async (index: number) => {
         plugins.splice(index, 1);
-        setLoading(true);
-        await saveConfig({ ...configRef.current, plugins });
-        setLoading(false);
-        setPlugins([...plugins]);
-    };
-
-    const saveConfig = async (config: Record<string, any>) => {
-        return await API.Setting.saveSetting(_NAMESPACE_, JSON.stringify(config), user.email);
+        mergeUpdateConfig({ plugins });
     };
 
     return (
