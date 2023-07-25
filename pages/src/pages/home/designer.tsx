@@ -28,23 +28,32 @@ export const defaultComlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
 
 export default function MyDesigner({ appData }) {
   const coms = []
-  if(appData?.defaultComlibs?.length){
+  if (appData?.defaultComlibs?.length) {
     appData?.defaultComlibs.forEach(lib => {
-      const {namespace, content, version} = lib;
-      const com = defaultComlibs.find(lib => lib.namespace===namespace)
-      if(com){
-        coms.push({id: com.id, namespace, ...JSON.parse(content), version })
-      }else {
-        coms.push({...lib, ...JSON.parse(content)})
+      const { namespace, content, version } = lib;
+      const com = defaultComlibs.find(lib => lib.namespace === namespace)
+      if (com) {
+        coms.push({ id: com.id, namespace, ...JSON.parse(content), version })
+      } else {
+        coms.push({ ...lib, ...JSON.parse(content) })
       }
     })
-  }else{
+  } else {
     coms.push(...defaultComlibs)
   }
-  if(!appData.fileContent?.content?.comlibs){
+  let comlibs = [];
+  if (!appData.fileContent?.content?.comlibs) {
     coms.unshift(MySelf_COM_LIB)
+    comlibs = coms;
+  } else {
+    const myselfComlib = appData.fileContent?.content?.comlibs?.find(lib => lib.id === "_myself_") ?? MySelf_COM_LIB
+    coms.unshift(myselfComlib)
+    if(appData.fileContent?.content?.comlibs?.some(lib => typeof lib === 'string')){
+      comlibs = coms;
+    }else{
+      comlibs = appData.fileContent?.content?.comlibs;
+    }
   }
-  const comlibs = appData.fileContent?.content?.comlibs ?? coms
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.88/index.min.js'
 
   const [manateeUserInfo] = useState(getManateeUserInfo())
@@ -53,9 +62,9 @@ export default function MyDesigner({ appData }) {
   try {
     uploadService = JSON.parse(appData.config[appName]?.config).uploadServer?.uploadService
   } catch (error) {
-    
+
   }
-  
+
   const [ctx] = useState({
     sdk: appData,
     user: appData.user,
@@ -75,7 +84,7 @@ export default function MyDesigner({ appData }) {
       ctx.save({ content })
     },
     save(
-      param: { name?; shareType?; content?; icon? },
+      param: { name?; shareType?; content?; icon?},
       skipMessage?: boolean
     ) {
       const { name, shareType, content, icon } = param
@@ -113,25 +122,25 @@ export default function MyDesigner({ appData }) {
   const [saveTip, setSaveTip] = useState('')
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
-	const [SPADesigner, setSPADesigner] = useState(null);
+  const [SPADesigner, setSPADesigner] = useState(null);
 
 
-	
-	useEffect(() => {
-		console.log('应用数据:', appData);
-	}, [])
-	
-	useMemo(() => {
-		if (designer) {
-			const script = document.createElement('script');
-			script.src = designer
-			document.head.appendChild(script);
-			script.onload = () => {
-				(window as any).mybricks.SPADesigner && setSPADesigner((window as any).mybricks.SPADesigner);
-			};
-		}
-	}, [designer])
-	
+
+  useEffect(() => {
+    console.log('应用数据:', appData);
+  }, [])
+
+  useMemo(() => {
+    if (designer) {
+      const script = document.createElement('script');
+      script.src = designer
+      document.head.appendChild(script);
+      script.onload = () => {
+        (window as any).mybricks.SPADesigner && setSPADesigner((window as any).mybricks.SPADesigner);
+      };
+    }
+  }, [designer])
+
   useEffect(() => {
     if (beforeunload) {
       window.onbeforeunload = () => {
@@ -143,7 +152,7 @@ export default function MyDesigner({ appData }) {
   }, [beforeunload])
 
   const onEdit = useCallback(() => {
-		setBeforeunload(true);
+    setBeforeunload(true);
   }, [])
 
   const handleSwitch2SaveVersion = useCallback(() => {
@@ -166,17 +175,19 @@ export default function MyDesigner({ appData }) {
     json.debugQuery = ctx.debugQuery
     json.debugMainProps = ctx.debugMainProps
 
-    json.toJSON = JSON.parse(JSON.stringify({...designerRef?.current?.toJSON(), configuration: {
-      comlibs: ctx.comlibs,
-      title: ctx.fileItem.name,
-      projectId: ctx.sdk.projectId,
-      folderPath: '/app/pcpage',
-      fileName: `${ctx.fileItem.id}.html`
-    }}));
+    json.toJSON = JSON.parse(JSON.stringify({
+      ...designerRef?.current?.toJSON(), configuration: {
+        comlibs: ctx.comlibs,
+        title: ctx.fileItem.name,
+        projectId: ctx.sdk.projectId,
+        folderPath: '/app/pcpage',
+        fileName: `${ctx.fileItem.id}.html`
+      }
+    }));
 
-		json.projectId = ctx.sdk.projectId;
+    json.projectId = ctx.sdk.projectId;
 
-    ctx.save({name: ctx.fileItem.name, content: JSON.stringify(json)})
+    ctx.save({ name: ctx.fileItem.name, content: JSON.stringify(json) })
 
     setBeforeunload(false)
 
@@ -189,7 +200,7 @@ export default function MyDesigner({ appData }) {
       if (url.protocol === 'https:') {
         url.protocol = 'http:'
       }
-      
+
       ctx.save({ icon: url.href }, true)
     }).catch((err) => {
       console.error(err)
@@ -209,7 +220,7 @@ export default function MyDesigner({ appData }) {
     window.open(`./preview.html?fileId=${ctx.fileId}`)
   }, [])
 
-  const publish= useCallback(
+  const publish = useCallback(
     () => {
       if (publishingRef.current) {
         return
@@ -224,75 +235,77 @@ export default function MyDesigner({ appData }) {
         content: '页面发布中',
         duration: 0,
       })
-      ;(async () => {
-		    /** 先保存 */
-		    const json = designerRef.current?.dump();
-        json.comlibs = ctx.comlibs
-        json.debugQuery = ctx.debugQuery
+        ; (async () => {
+          /** 先保存 */
+          const json = designerRef.current?.dump();
+          json.comlibs = ctx.comlibs
+          json.debugQuery = ctx.debugQuery
 
-        // let folderPath;
+          // let folderPath;
 
-        // if (type === 'staging') {
-        //   folderPath = '/staging/app/pcpage'
-        // } else {
-        //   folderPath = '/app/pcpage'
-        // }
+          // if (type === 'staging') {
+          //   folderPath = '/staging/app/pcpage'
+          // } else {
+          //   folderPath = '/app/pcpage'
+          // }
 
-		    json.toJSON = JSON.parse(JSON.stringify({...designerRef?.current?.toJSON(), configuration: {
-          // scripts: encodeURIComponent(scripts),
-          comlibs: ctx.comlibs,
-          title: ctx.fileItem.name,
-          projectId: ctx.sdk.projectId,
-          // 非模块下的页面直接发布到项目空间下
-          folderPath: '/app/pcpage',
-          fileName: `${ctx.fileItem.id}.html`
-        }}));
+          json.toJSON = JSON.parse(JSON.stringify({
+            ...designerRef?.current?.toJSON(), configuration: {
+              // scripts: encodeURIComponent(scripts),
+              comlibs: ctx.comlibs,
+              title: ctx.fileItem.name,
+              projectId: ctx.sdk.projectId,
+              // 非模块下的页面直接发布到项目空间下
+              folderPath: '/app/pcpage',
+              fileName: `${ctx.fileItem.id}.html`
+            }
+          }));
 
-        json.projectId = ctx.sdk.projectId;
-        
-		    await ctx.save({ content: JSON.stringify(json), name: ctx.fileItem.name }, true);
+          json.projectId = ctx.sdk.projectId;
 
-		    setBeforeunload(false);
+          await ctx.save({ content: JSON.stringify(json), name: ctx.fileItem.name }, true);
 
-        const res: { code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
-          userId: ctx.user?.email,
-          fileId: ctx.fileId,
-          json: json.toJSON,
-          envType: 'prod',
-          manateeUserInfo
-        })
-        if (res.code === 1) {
-          message.success({
-            key: 'publish',
-            content: '发布成功',
-            duration: 2,
+          setBeforeunload(false);
+
+          const res: { code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
+            userId: ctx.user?.email,
+            fileId: ctx.fileId,
+            json: json.toJSON,
+            envType: 'prod',
+            manateeUserInfo
           })
+          if (res.code === 1) {
+            message.success({
+              key: 'publish',
+              content: '发布成功',
+              duration: 2,
+            })
 
-          designerRef.current?.switchActivity?.('@mybricks/plugins/version')
-          setTimeout(() => {
-            ctx?.versionApi?.switchAciveTab?.('publish', void 0)
-          }, 0)
-        } else {
-          message.error({
-            content: res.message || '发布失败',
-            duration: 2,
-          })
-        }
+            designerRef.current?.switchActivity?.('@mybricks/plugins/version')
+            setTimeout(() => {
+              ctx?.versionApi?.switchAciveTab?.('publish', void 0)
+            }, 0)
+          } else {
+            message.error({
+              content: res.message || '发布失败',
+              duration: 2,
+            })
+          }
 
-        setPublishLoading(false)
-
-      })()
-        .catch((e) => {
-          console.error(e)
-          message.error({
-            key: 'publish',
-            content: '网络错误，请稍后再试',
-            duration: 2,
-          })
-        }).finally(() => {
-          publishingRef.current = false
           setPublishLoading(false)
-        })
+
+        })()
+          .catch((e) => {
+            console.error(e)
+            message.error({
+              key: 'publish',
+              content: '网络错误，请稍后再试',
+              duration: 2,
+            })
+          }).finally(() => {
+            publishingRef.current = false
+            setPublishLoading(false)
+          })
     },
     []
   )
@@ -333,19 +346,19 @@ export default function MyDesigner({ appData }) {
         >发布</Toolbar.Button>
       </Toolbar>
       <div className={css.designer}>
-	      {SPADesigner && (
-					<>
-	          <SPADesigner
-	            ref={designerRef}
-	            config={config(ctx, save)}
-	            onEdit={onEdit}
-	            onMessage={onMessage}
-	            _onError_={(ex: any) => {
-	              console.error(ex);
-	              onMessage('error', ex.message);
-	            }}
-	          />
-					</>
+        {SPADesigner && (
+          <>
+            <SPADesigner
+              ref={designerRef}
+              config={config(ctx, save)}
+              onEdit={onEdit}
+              onMessage={onMessage}
+              _onError_={(ex: any) => {
+                console.error(ex);
+                onMessage('error', ex.message);
+              }}
+            />
+          </>
         )}
       </div>
     </div>
