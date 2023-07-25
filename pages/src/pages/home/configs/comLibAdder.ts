@@ -63,14 +63,13 @@ export const comLibAdderFunc = ctx => (targetComlib) => {
         type: 'com_lib',
       },
       onSuccess: async ({ materials }: { materials: MaterialComlib[] }) => {
-        console.log(materials)
         /** 物料中心传过来的ID是物料中心ID，需要修改成组件本身的fileid */
         const material = ctx.comlibs.find(lib => lib.namespace === materials[0]?.namespace)
         if(material) {
           //更新
           const comlib = {
             ...material, 
-            editJs:materials[0].editJs, 
+            editJs: materials[0].editJs, 
             rtJs: materials[0].rtJs, 
             version: materials[0].version
           }

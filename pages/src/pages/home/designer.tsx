@@ -34,6 +34,8 @@ export default function MyDesigner({ appData }) {
       const com = defaultComlibs.find(lib => lib.namespace===namespace)
       if(com){
         coms.push({id: com.id, namespace, ...JSON.parse(content), version })
+      }else {
+        coms.push({...lib, ...JSON.parse(content)})
       }
     })
   }else{
