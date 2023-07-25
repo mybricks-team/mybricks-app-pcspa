@@ -5,7 +5,7 @@ import { MaterialComlib } from './../../../types'
 import { ComboComlibURL, getMySelfLibComsFromUrl, getComlibsByNamespaceAndVersion } from './../../../utils/comlib'
 import { loadMaterials } from './loadMaterials'
 import { addComlib } from './addComlib'
-import { upgradeComlib } from './upgradeComlib'
+import { upgradeLatestComlib, upgradeComlibByVersion } from './upgradeLatestComlib'
 import { deleteComlib } from './deleteComlib'
 
 const init = () => {
@@ -179,7 +179,7 @@ export default (ctx) => (libDesc) => {
             resolve(true);
             break
           case 'upgradeComLib':
-            const upgradedComlib = await upgradeComlib(ctx, libId)
+            const upgradedComlib = await upgradeLatestComlib(ctx, libId)
             return resolve(upgradedComlib)
           default:
             break
@@ -191,58 +191,23 @@ export default (ctx) => (libDesc) => {
       if (!libDesc) {
         const comlibs = await loadMaterials(ctx)
         return resolve(comlibs)
-
-        /** 没有物料中心的情况 */
-        // if (!ctx?.hasMaterialApp) {
-        //   resolve(ctx.comlibs.filter(lib => lib?.id !== MySelfId).map(t => t?.editJs?? t))
-        //   return
-        // }
-       
-        // /** 没有comlibs的情况，理论上没有这种情况 */
-        // if (!ctx?.comlibs) {
-        //   resolve([])
-        //   return
-        // }
-
-        // /** 没有我的组件 */
-        // if (!mySelfLib && Array.isArray(ctx.comlibs)) {
-        //   const selfLib = {
-        //     comAray: [],
-        //     id: '_myself_',
-        //     title: '我的组件',
-        //     defined: true,
-        //   };
-        //   ctx.comlibs.unshift(selfLib);
-        //   resolve(JSON.parse(JSON.stringify(ctx.comlibs.map(t => t?.editJs ? t.editJs : t))))
-        //   return
-        // }
-
-        // const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId)
-
-        // getComlibsByNamespaceAndVersion(mySelfLib?.comAray).then((newComlib) => {
-        //   resolve([{
-        //     id: '_myself_',
-        //     title: '我的组件',
-        //     defined: true,
-        //     comAray: newComlib?.comAray || []
-        //   }, ...ctx.comlibs.filter(lib => lib?.id !== MySelfId).map(t => t?.editJs ? t.editJs : t)])
-        // })
       }
       /** 不带命令，增加、更新组件库，新增时comLibAdder resolve的组件库会带到libDesc来 */
       if (libDesc?.editJs) {
-        const curLib: MaterialComlib = libDesc
-        let libs = ctx.comlibs
-        let comlib;
-        const targetIndex = libs.findIndex((lib) => Number(lib?.id) === Number(curLib.id));
-        if (targetIndex === -1) {
-          /** 新增组件库 */
-          comlib = await addComlib(ctx, curLib)
-        } else {
-          /** 更新组件库 */
-          // upgradeComlib(ctx, String(curLib.id))
-          // libs[targetIndex] = curLib
+        const material = ctx.comlibs.find(lib => lib.namespace === libDesc?.namespace || lib.id === libDesc?.id)
+        if(material){
+          //更新
+          const comlib = {
+            ...material, 
+            ...libDesc
+          }
+          const addedComlib = await upgradeComlibByVersion(ctx, comlib)
+          return resolve(addedComlib)
+        }else{
+          //新增
+          const addedComlib = await addComlib(ctx, libDesc)
+          return resolve(addedComlib)
         }
-        return resolve(comlib)
       }
 
     })().catch(() => {})

@@ -24,7 +24,7 @@ const appName = 'mybricks-app-pcspa-for-manatee'
 const DefaultUploadService = '/biz/uploadExternalFileLocal'
 
 // 兜底物料
-const defaultComlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
+export const defaultComlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
 
 export default function MyDesigner({ appData }) {
   const coms = []
