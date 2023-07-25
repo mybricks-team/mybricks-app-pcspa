@@ -6,43 +6,44 @@ import dayjs from "dayjs";
 import { TConfigProps } from '../useConfig';
 const { Meta } = Card;
 
+const fieldName = `publishApi`
+
 export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   const [form] = Form.useForm();
 
-  const uploadConfig = config?.uploadServer || {}
+  const publishApiConfig = config?.publishApiConfig || {}
   useEffect(() => {
-    form.setFieldsValue(uploadConfig)
-  }, [uploadConfig])
+    form.setFieldsValue(publishApiConfig)
+  }, [publishApiConfig])
 
   const onSubmit = (values) => {
     const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     mergeUpdateConfig({
-      uploadServer: { ...values, updateTime, user: user?.email }
+      publishApiConfig: { ...values, updateTime, user: user?.email }
     })
   }
 
   const onReset = () => {
     const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     mergeUpdateConfig({
-      uploadServer: { uploadService: '', updateTime, user: user?.email }
+      publishApiConfig: { [fieldName]: '', updateTime, user: user?.email }
     }).finally(() => {
       form.resetFields()
-
     })
   }
 
-  return <Card title="服务地址" style={{ width: '50vw' }} loading={loading}>
-    <Form form={form} onFinish={onSubmit} onReset={onReset} >
-      <Form.Item name="uploadService" label="上传接口地址" required rules={[{ required: true, message: '请输入服务接口' }]}>
-        <Input />
+  return <>
+    <Form form={form} onFinish={onSubmit} onReset={onReset} style={{ marginTop: 12 }}>
+      <Form.Item name={fieldName} label="发布接口地址" required rules={[{ required: true, message: '请输入发布接口' }]}>
+        <Input placeholder='https://my.mybricks.world/publish' />
       </Form.Item>
       <Form.Item style={{ textAlign: 'right' }}>
+        {Object.keys(publishApiConfig).length > 0 && <Meta description={`${publishApiConfig.user} 更新于 ${publishApiConfig.updateTime}`} />}
         <Button htmlType='reset' style={{ marginRight: 8 }}>清空</Button>
         <Button type="primary" htmlType="submit">
           提交
         </Button>
       </Form.Item>
     </Form>
-    {Object.keys(uploadConfig).length > 0 && <Meta description={`${uploadConfig.user} 更新于 ${uploadConfig.updateTime}`} />}
-  </Card>
+  </>
 }

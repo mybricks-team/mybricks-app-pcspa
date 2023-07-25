@@ -100,6 +100,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
     })
   }
 
+
   return <Card title="发布环境" style={{ width: '50vw', marginTop: 24 }} loading={loading}>
     <Space>
       {envList.map(item => {
@@ -114,7 +115,9 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
             />,
           ]}
         >
-          <Descriptions title={title} layout="horizontal" column={1}>
+          <Descriptions title={title} layout="horizontal" column={1} labelStyle={{
+            fontWeight: '500'
+          }}>
             <Descriptions.Item label="name">{name}</Descriptions.Item>
             <Descriptions.Item label="接口前缀">{defaultApiPrePath}</Descriptions.Item>
           </Descriptions>

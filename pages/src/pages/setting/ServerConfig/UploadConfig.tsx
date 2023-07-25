@@ -1,0 +1,48 @@
+import React, { useEffect, useRef, useState } from 'react'
+import { Form, Input, Card, Button } from 'antd'
+import API from "@mybricks/sdk-for-app/api";
+import { _NAMESPACE_ } from "../app";
+import dayjs from "dayjs";
+import { TConfigProps } from '../useConfig';
+const { Meta } = Card;
+
+export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
+  const [form] = Form.useForm();
+
+  const uploadConfig = config?.uploadServer || {}
+  useEffect(() => {
+    form.setFieldsValue(uploadConfig)
+  }, [uploadConfig])
+
+  const onSubmit = (values) => {
+    const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    mergeUpdateConfig({
+      uploadServer: { ...values, updateTime, user: user?.email }
+    })
+  }
+
+  const onReset = () => {
+    const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+    mergeUpdateConfig({
+      uploadServer: { uploadService: '', updateTime, user: user?.email }
+    }).finally(() => {
+      form.resetFields()
+
+    })
+  }
+
+  return <>
+    <Form form={form} onFinish={onSubmit} onReset={onReset}>
+      <Form.Item name="uploadService" label="上传接口地址" required rules={[{ required: true, message: '请输入服务接口' }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item style={{ textAlign: 'right' }}>
+        {Object.keys(uploadConfig).length > 0 && <Meta description={`${uploadConfig.user} 更新于 ${uploadConfig.updateTime}`} />}
+        <Button htmlType='reset' style={{ marginRight: 8 }}>清空</Button>
+        <Button type="primary" htmlType="submit">
+          提交
+        </Button>
+      </Form.Item>
+    </Form>
+  </>
+}
