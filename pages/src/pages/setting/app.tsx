@@ -4,7 +4,7 @@ import API from '@mybricks/sdk-for-app/api'
 import ConfigComlib from './ConfigComlib'
 import ConfigServer from './ConfigServer'
 
-export const _NAMESPACE_ = 'mybricks-app-pcspa-for-manatee'
+export const _NAMESPACE_ = 'mybricks-app-pcspa'
 
 export default () => {
   const [loginUser, setLoginUser] = useState(null)

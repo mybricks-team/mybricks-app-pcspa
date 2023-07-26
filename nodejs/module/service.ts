@@ -179,7 +179,7 @@ export default class PcPageService {
 }
 
 const getUploadService = async () => {
-	const _NAMESPACE_ = "mybricks-app-pcspa-for-manatee";
+	const _NAMESPACE_ = "mybricks-app-pcspa";
 	const res = await API.Setting.getSetting([_NAMESPACE_]);
 	const { uploadService } = res[_NAMESPACE_]?.config
 		? JSON.parse(res[_NAMESPACE_].config).uploadServer ?? {}

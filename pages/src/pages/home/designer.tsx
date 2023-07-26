@@ -19,7 +19,7 @@ import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from 
 
 import css from './app.less'
 
-const appName = 'mybricks-app-pcspa-for-manatee'
+const appName = 'mybricks-app-pcspa'
 
 // const DefaultUploadService = '/biz/uploadExternalFileLocal'
 
