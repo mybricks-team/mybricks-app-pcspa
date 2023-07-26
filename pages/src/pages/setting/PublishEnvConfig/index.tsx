@@ -24,8 +24,6 @@ export type TPublishEnv = {
 
 export type TPublishConfig = {
   envList: Array<TPublishEnv>,
-  // 发布接口
-  publishApi: string,
 }
 
 export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
@@ -33,8 +31,8 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   const [status, setStatus] = useState<"edit" | "append">()
   const [publishEnv, setPublishEnv] = useState<TPublishEnv>()
 
-  const publishConfig: TPublishConfig = config?.publishConfig || {}
-  const { envList = [], publishApi = '' } = publishConfig
+  const publishEnvConfig: TPublishConfig = config?.publishEnvConfig || {}
+  const { envList = [] } = publishEnvConfig
 
   const onClickAdd = () => {
     setStatus('append')
@@ -66,7 +64,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       newEnvList.push(currentPublishEnv);
     }
     await mergeUpdateConfig({
-      publishConfig: { envList: newEnvList, publishApi }
+      publishEnvConfig: { envList: newEnvList }
     }).then(() => {
       message.success(status === "edit" ? "更新成功" : "添加成功");
     })
@@ -92,7 +90,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         );
         newEnvList.splice(index, 1);
         return mergeUpdateConfig({
-          publishConfig: { envList: newEnvList, publishApi }
+          publishEnvConfig: { envList: newEnvList }
         }).then(() => {
           message.success("删除成功");
         })

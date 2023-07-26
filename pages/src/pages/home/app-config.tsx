@@ -85,12 +85,15 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
 }
 
 export default function (ctx, save, remotePlugins = []) {
+  const envList = ctx?.appConfig?.publishEnvConfig?.envList || []
   return {
     shortcuts: {
       'ctrl+s': [save],
     },
     plugins: [
-      servicePlugin({}),
+      servicePlugin({
+        envList,
+      }),
       domainServicePlugin({
         addActions: [
           { type: 'aggregation-model', title: '聚合模型' }
@@ -164,6 +167,23 @@ export default function (ctx, save, remotePlugins = []) {
             title: '调试',
             items: [
               {
+                title: '测试环境',
+                type: 'select',
+                description: '选择调试时采用的环境配置，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
+                options: envList.map(item => ({
+                  value: item.name,
+                  label: item.title
+                })),
+                value: {
+                  get() {
+                    return ctx.executeEnv || ''
+                  },
+                  set(context, v) {
+                    ctx.executeEnv = v
+                  }
+                }
+              },
+              {
                 title: '路由参数',
                 type: 'map',
                 description: '调试模式下，路由参数模拟配置',
@@ -218,7 +238,7 @@ export default function (ctx, save, remotePlugins = []) {
                 if (connector.type === 'http') {
                   //服务接口类型
                   return callConnectorHttp(
-                    { script: connector.script, useProxy: true },
+                    { script: connector.script, useProxy: true, executeEnv: ctx.executeEnv },
                     params
                   )
                 } else {

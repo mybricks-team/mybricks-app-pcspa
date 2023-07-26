@@ -62,10 +62,11 @@ export default function MyDesigner({ appData }) {
   // const [manateeUserInfo] = useState(getManateeUserInfo())
 
   let uploadService = null;
+  let appConfig = null // 记录应用所有配置
   try {
-    uploadService = JSON.parse(appData.config[appName]?.config).uploadServer?.uploadService
+    appConfig = JSON.parse(appData.config[appName]?.config)
+    uploadService = appConfig?.uploadServer?.uploadService
   } catch (error) {
-
   }
 
   const [ctx] = useState({
@@ -78,8 +79,10 @@ export default function MyDesigner({ appData }) {
     comlibs,
     latestComlibs: appData?.defaultComlibs,
     debugQuery: appData.fileContent?.content?.debugQuery,
+    executeEnv: appData.fileContent?.content?.executeEnv || '',
     debugMainProps: appData.fileContent?.content?.debugMainProps,
     versionApi: null,
+    appConfig,
     uploadService,
     // manateeUserInfo,
     operable: false,
@@ -175,6 +178,7 @@ export default function MyDesigner({ appData }) {
     const json = designerRef.current?.dump()
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
+    json.executeEnv = ctx.executeEnv
     json.debugMainProps = ctx.debugMainProps
 
     json.toJSON = JSON.parse(JSON.stringify({
@@ -216,6 +220,7 @@ export default function MyDesigner({ appData }) {
     const previewStorage = new PreviewStorage({ fileId: ctx.fileId })
     previewStorage.savePreviewPageData({
       dumpJson: json,
+      executeEnv: ctx.executeEnv,
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
     })
 
@@ -242,6 +247,7 @@ export default function MyDesigner({ appData }) {
           const json = designerRef.current?.dump();
           json.comlibs = ctx.comlibs
           json.debugQuery = ctx.debugQuery
+          json.executeEnv = ctx.executeEnv
 
           // let folderPath;
 

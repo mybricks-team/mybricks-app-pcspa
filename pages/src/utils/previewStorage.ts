@@ -9,14 +9,16 @@ export class PreviewStorage {
 
   getFileKeyTemplate = (fileId) => `--preview-${fileId}-`;
 
-  savePreviewPageData = ({ dumpJson, comlibs }) => {
+  savePreviewPageData = ({ dumpJson, comlibs, executeEnv }) => {
     sessionStorage.setItem(`--preview-${this.fileId}-`, JSON.stringify(dumpJson))
     sessionStorage.setItem(`--preview--comlibs--${this.fileId}-`, JSON.stringify(comlibs))
+    sessionStorage.setItem(`--preview--executeEnv--${this.fileId}-`, executeEnv)
   }
 
   getPreviewPageData = () => {
     let dumpJson = sessionStorage.getItem(`--preview-${this.fileId}-`)
     let comlibs = sessionStorage.getItem(`--preview--comlibs--${this.fileId}-`)
+    let executeEnv = sessionStorage.getItem(`--preview--executeEnv--${this.fileId}-`)
 
     try {
       dumpJson = JSON.parse(dumpJson)
@@ -27,10 +29,10 @@ export class PreviewStorage {
     try {
       comlibs = JSON.parse(comlibs)
     } catch (error) {
-      
+
     }
 
-    return { dumpJson, comlibs }
+    return { dumpJson, comlibs, executeEnv }
   }
 }
 

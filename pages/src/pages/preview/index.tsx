@@ -13,7 +13,7 @@ const fileId = getQueryString('fileId')
 
 const previewStorage = new PreviewStorage({ fileId })
 
-let { dumpJson, comlibs } = previewStorage.getPreviewPageData()
+let { dumpJson, comlibs, executeEnv } = previewStorage.getPreviewPageData()
 
 if (!dumpJson) {
   throw new Error('数据错误：项目数据缺失')
@@ -75,7 +75,7 @@ function render(props) {
       ReactDOM.render(<Page props={props} />, container ? container.querySelector('#root') : document.querySelector('#root'));
     })
   }
-  
+
 }
 
 if (!window.__POWERED_BY_QIANKUN__) {
@@ -136,6 +136,7 @@ function parseQuery(query) {
 }
 
 function Page({ props }) {
+
   return (
     <ConfigProvider locale={zhCN}>
       {renderUI(dumpJson, {
@@ -162,7 +163,7 @@ function Page({ props }) {
                   if (connector.type === 'http') {
                     //服务接口类型
                     return callConnectorHttp(
-                      { script: connector.script, useProxy: true },
+                      { script: connector.script, useProxy: true, executeEnv },
                       params
                     )
                   } else {
@@ -194,7 +195,7 @@ function Page({ props }) {
           },
           vars: {
             getQuery: () => parseQuery(location.search),
-            get getProps () {
+            get getProps() {
               return () => {
                 // 获取主应用参数方法，如：token等参数，取决于主应用传入
                 if (!props) return undefined

@@ -3,7 +3,7 @@ import API from '@mybricks/sdk-for-app/api'
 
 import ConfigComlib from './ConfigComlib'
 import ServerConfig from './ServerConfig'
-import PublishCconfig from './PublishCconfig'
+import PublishEnvConfig from './PublishEnvConfig'
 import useConfig from './useConfig'
 import ConfigPlugin from './ConfigPlugin'
 
@@ -15,7 +15,7 @@ export default () => {
   return (
     <div style={{ padding: 24 }}>
       <ServerConfig {...configContext} />
-      <PublishCconfig {...configContext} />
+      <PublishEnvConfig {...configContext} />
     </div>
   )
 }
