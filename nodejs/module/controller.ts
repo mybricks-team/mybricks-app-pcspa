@@ -22,17 +22,25 @@ export default class PcPageController {
     @Body('fileId') fileId: number,
     @Body('json') json: any,
     @Body('envType') envType: 'test' | 'prod',
-    @Body('manateeUserInfo') manateeUserInfo: {token: string, session: string},
+    // @Body('manateeUserInfo') manateeUserInfo: {token: string, session: string},
     @Req() req: any
 	) {
 		if (!isDefined(json) || !isDefined(userId) || !isDefined(fileId)) {
 			return { code: 0, message: '参数 json、userId、fileId 不能为空' };
 		}
 		try {
-      const result = await this.service.publish(req, { json, userId, fileId, envType, manateeUserInfo });
-      return {code: 1, data: result, message: '发布完成'}
+      const result = await this.service.publish(req, { json, userId, fileId, envType });
+
+      return {
+        code: 1,
+        data: result,
+        message: '发布完成'
+      }
     } catch (error) {
-      return {code: -1, message: error.message || '发布失败'}
+      return {
+        code: -1,
+        message: error.message || '发布失败'
+      }
     }
 	}
 

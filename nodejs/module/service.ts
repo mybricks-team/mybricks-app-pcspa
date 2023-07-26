@@ -88,7 +88,7 @@ export default class PcPageService {
 		return comlibScripts + mySelfComlibRt
 	}
 
-	async publish(req, { json, userId, fileId, envType, manateeUserInfo }) {
+	async publish(req, { json, userId, fileId, envType }) {
 		try {
 			let template = fs.readFileSync(path.resolve(__dirname, './template.html'), 'utf8')
 			const { title, comlibs, projectId, fileName, folderPath } = json.configuration

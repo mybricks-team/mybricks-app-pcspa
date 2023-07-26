@@ -11,7 +11,7 @@ import { message } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
-import { getManateeUserInfo } from '../../utils'
+// import { getManateeUserInfo } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
@@ -21,7 +21,7 @@ import css from './app.less'
 
 const appName = 'mybricks-app-pcspa-for-manatee'
 
-const DefaultUploadService = '/biz/uploadExternalFileLocal'
+// const DefaultUploadService = '/biz/uploadExternalFileLocal'
 
 // 兜底物料
 export const defaultComlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
@@ -54,9 +54,10 @@ export default function MyDesigner({ appData }) {
       comlibs = appData.fileContent?.content?.comlibs;
     }
   }
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.88/index.min.js'
 
-  const [manateeUserInfo] = useState(getManateeUserInfo())
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.89/index.min.js'
+
+  // const [manateeUserInfo] = useState(getManateeUserInfo())
 
   let uploadService = null;
   try {
@@ -78,7 +79,7 @@ export default function MyDesigner({ appData }) {
     debugMainProps: appData.fileContent?.content?.debugMainProps,
     versionApi: null,
     uploadService,
-    manateeUserInfo,
+    // manateeUserInfo,
     operable: false,
     saveContent(content) {
       ctx.save({ content })
@@ -272,7 +273,7 @@ export default function MyDesigner({ appData }) {
             fileId: ctx.fileId,
             json: json.toJSON,
             envType: 'prod',
-            manateeUserInfo
+            // manateeUserInfo
           })
           if (res.code === 1) {
             message.success({
