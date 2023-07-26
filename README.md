@@ -1,3 +1,3 @@
-# mybricks-app-pcspa-for-manatee
+# mybricks-app-pcspa
 
-PC应用 For 海牛
+PC应用通用版本
