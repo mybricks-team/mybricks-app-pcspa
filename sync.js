@@ -16,7 +16,7 @@ if (!args[0] || !args[0].startsWith('--origin=')) {
   process.exit();
 }
 const domain = args[0].replace('--origin=', '');
-const serviceChanged = args[1] && args[1].indexOf('--serviceChanged') > -1;
+const noServiceUpdate = args[1] && args[1].indexOf('--noServiceUpdate') > -1;
 
 // /** 遍历文件 */
 function read (zip, files, dirPath) {
@@ -77,7 +77,7 @@ zip.generateAsync({
     installInfo: JSON.stringify({
       path: `/asset/app/${packageJSON.name}/${packageJSON.version}/${packageJSON.name}.zip`,
       changeLog: '优化部分逻辑，修复若干 bug',
-      serviceChanged: serviceChanged || false
+      noServiceUpdate: noServiceUpdate
     }),
     creator_name: Buffer.from('em91eW9uZ3NoZW5nQGt1YWlzaG91LmNvbQ==', 'base64').toString('utf-8') || '',
     icon: packageJSON.mybricks ? packageJSON.mybricks.icon : '',
