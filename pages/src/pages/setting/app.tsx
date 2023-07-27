@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import API from '@mybricks/sdk-for-app/api'
 
 import ConfigComlib from './ConfigComlib'
-import ServerConfig from './ServerConfig'
-import PublishEnvConfig from './PublishEnvConfig'
+import ServerConfig from './ConfigServer'
+import ConfigPublishEnv from './ConfigPublishEnv'
 import useConfig from './useConfig'
 import ConfigPlugin from './ConfigPlugin'
 
@@ -15,7 +15,8 @@ export default () => {
   return (
     <div style={{ padding: 24 }}>
       <ServerConfig {...configContext} />
-      <PublishEnvConfig {...configContext} />
+      <ConfigPublishEnv {...configContext} />
+      <ConfigPlugin {...configContext} />
     </div>
   )
 }

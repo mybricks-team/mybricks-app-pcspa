@@ -16,7 +16,7 @@ import { fetchPlugins, getManateeUserInfo } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
-
+import PublishModal from './components/PublishModal'
 
 import css from './app.less'
 
@@ -130,6 +130,7 @@ export default function MyDesigner({ appData }) {
   const [publishLoading, setPublishLoading] = useState(false)
   const [SPADesigner, setSPADesigner] = useState(null);
   const [remotePlugins, setRemotePlugins] = useState([]);
+  const [publishModalVisible, setPublishModalVisible] = useState(false)
 
   useEffect(() => {
     fetchPlugins(plugins, setRemotePlugins);
@@ -228,7 +229,7 @@ export default function MyDesigner({ appData }) {
   }, [])
 
   const publish = useCallback(
-    () => {
+    (publishConfig) => {
       if (publishingRef.current) {
         return
       }
@@ -242,7 +243,7 @@ export default function MyDesigner({ appData }) {
         content: '页面发布中',
         duration: 0,
       })
-        ; (async () => {
+        ; return (async () => {
           /** 先保存 */
           const json = designerRef.current?.dump();
           json.comlibs = ctx.comlibs
@@ -279,8 +280,13 @@ export default function MyDesigner({ appData }) {
             userId: ctx.user?.email,
             fileId: ctx.fileId,
             json: json.toJSON,
+<<<<<<< HEAD
             envType: 'prod',
             // manateeUserInfo
+=======
+            envType: publishConfig.executeEnv,
+            manateeUserInfo
+>>>>>>> 99fb525 (feat: add env publish)
           })
           if (res.code === 1) {
             message.success({
@@ -350,7 +356,7 @@ export default function MyDesigner({ appData }) {
         <Toolbar.Button
           disabled={!operable}
           loading={publishLoading}
-          onClick={publish}
+          onClick={() => setPublishModalVisible(true)}
         >发布</Toolbar.Button>
       </Toolbar>
       <div className={css.designer}>
@@ -369,6 +375,10 @@ export default function MyDesigner({ appData }) {
           </>
         )}
       </div>
+      <PublishModal envList={ctx?.appConfig?.publishEnvConfig?.envList || []} visible={publishModalVisible} onOk={(publishConfig) => {
+        publish(publishConfig)
+        setPublishModalVisible(false)
+      }} onCancel={() => setPublishModalVisible(false)} />
     </div>
   )
 }

@@ -86,6 +86,13 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
 
 export default function (ctx, save, remotePlugins = []) {
   const envList = ctx?.appConfig?.publishEnvConfig?.envList || []
+
+  // 获得环境信息映射表
+  const envMap = envList.reduce((res, item) => {
+    res[item.name] = item.title
+    return res
+  }, {})
+
   return {
     shortcuts: {
       'ctrl+s': [save],
@@ -106,6 +113,7 @@ export default function (ctx, save, remotePlugins = []) {
         user: ctx.user,
         file: ctx.fileItem,
         disabled: ctx.disabled,
+        envMap,
         onInit: (versionApi) => {
           ctx.versionApi = versionApi
         },
