@@ -9,7 +9,7 @@
     <meta http-equiv="Access-Control-Allow-Origin" content="*" />
     <link
       rel="stylesheet"
-      href="//lib.baomitu.com/antd/4.21.6/antd.min.css"
+      href="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443413081.antd_4.21.6_antd.min.css"
     />
 
     <title>--title--</title>
@@ -17,26 +17,25 @@
     <style></style>
 
     <!-- react about -->
-    <script src="//lib.baomitu.com/react/18.0.0/umd/react.production.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.production.min.js"></script>
+    <script src="https://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690446345009.react.18.0.0.production.min.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443341846.umd_react-dom.production.min.js"></script>
 
     <!-- antd about -->
-    <script src="//lib.baomitu.com/moment.js/2.29.4/moment.min.js"></script>
-    <script src="//lib.baomitu.com/moment.js/2.29.4/locale/zh-cn.min.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443543399.2.29.4_moment.min.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443577599.2.29.4_locale_zh-cn.min.js"></script>
 
-    <script src="//lib.baomitu.com/antd/4.21.6/antd.min.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444184854.4.21.6_antd.min.js"></script>
     <script src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>
-    <script src="//lib.baomitu.com/ant-design-icons/4.7.0/index.umd.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/@ant-design/charts@1.2.14/dist/charts.min.js"></script>
-    <script
-      crossorigin="anonymous"
-      src="//lib.baomitu.com/axios/0.18.1/axios.min.js"
+    <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444248634.ant-design-icons_4.7.0_min.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444283932.ant-design_charts@1.2.14.min.js"></script>
+    <script crossorigin="anonymous"
+      src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444304807.0.18.1_axios.min.js"
     ></script>
-    <script src="//cdn.jsdelivr.net/npm/@mybricks/plugin-connector-http@1.1.35/runtime/index.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/@mybricks/plugin-connector-domain@0.0.44/runtime/index.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690445660913.mybricks_plugin-connector-http@1.1.39.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690445635042.mybricks_plugin-connector-domain@0.0.44.js"></script>
 
     <!-- mybricks-render-web -->
-    <script src="//cdn.jsdelivr.net/npm/@mybricks/render-web@1.1.70/index.min.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690445687648.mybricks_render-web@1.1.70.js"></script>
 
     <!-- comlib-rt 替换成特定的组件库rt地址 -->
     <!-- <script src="--ComlibRtUrl--"></script> -->
@@ -123,6 +122,7 @@
         const { render: renderUI } = global._mybricks_render_web
         const projectJson = '--projectJson--' //replace it
         const projectId = '--slot-project-id--' //replace it
+        const executeEnv = '--executeEnv--' //replace it
         const axios = window.axios
         const message = window?.antd.message
 
@@ -139,6 +139,7 @@
             env: {
               silent: true,
               showErrorNotification: false,
+              executeEnv,
               canvasElement: ( props && props.container )|| document.body,
               get vars() {
                 // 环境变量
@@ -219,7 +220,7 @@
                 if (connector.type === 'http') {
                   //服务接口类型
                   return pluginConnectorHttp.call(
-                    { script: connector.script, params },
+                    { script: connector.script, params, executeEnv },
                     params
                   )
                 } else {

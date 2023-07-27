@@ -160,7 +160,7 @@ export default class PcPageService {
       });
       return result
     } catch (e) {
-      console.log("pcpage publish error", e);
+      console.error("pcpage publish error", e);
       throw e
     }
   }
@@ -220,7 +220,6 @@ const getAppConfig = async () => {
   let config = {} as any
   try {
     config = JSON.parse(res[_NAMESPACE_]?.config)
-    console.log('config', config)
   } catch (e) {
     console.error("getAppConfig error", e);
   }
