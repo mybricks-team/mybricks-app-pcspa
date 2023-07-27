@@ -44,6 +44,7 @@ export default ({
           label="发布环境"
           name="executeEnv"
           required
+          rules={[{ required: true, message: "请选择发布环境" }]}
         >
           <Select options={envOptions} />
         </Form.Item>

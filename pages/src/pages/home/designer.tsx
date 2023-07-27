@@ -132,6 +132,14 @@ export default function MyDesigner({ appData }) {
   const [remotePlugins, setRemotePlugins] = useState([]);
   const [publishModalVisible, setPublishModalVisible] = useState(false)
 
+  const envList = useMemo(() => {
+    const list = ctx?.appConfig?.publishEnvConfig?.envList || []
+    return list.map(item => ({
+      label: item.title,
+      type: item.name
+    }))
+  }, [])
+
   useEffect(() => {
     fetchPlugins(plugins, setRemotePlugins);
     console.log('应用数据:', appData);
@@ -229,7 +237,7 @@ export default function MyDesigner({ appData }) {
   }, [])
 
   const publish = useCallback(
-    (publishConfig) => {
+    (envType) => {
       if (publishingRef.current) {
         return
       }
@@ -280,13 +288,7 @@ export default function MyDesigner({ appData }) {
             userId: ctx.user?.email,
             fileId: ctx.fileId,
             json: json.toJSON,
-<<<<<<< HEAD
-            envType: 'prod',
-            // manateeUserInfo
-=======
-            envType: publishConfig.executeEnv,
-            manateeUserInfo
->>>>>>> 99fb525 (feat: add env publish)
+            envType
           })
           if (res.code === 1) {
             message.success({
@@ -353,11 +355,12 @@ export default function MyDesigner({ appData }) {
           dotTip={beforeunload}
         />
         <Toolbar.Button onClick={preview}>预览</Toolbar.Button>
-        <Toolbar.Button
+        <Toolbar.Publish
           disabled={!operable}
           loading={publishLoading}
-          onClick={() => setPublishModalVisible(true)}
-        >发布</Toolbar.Button>
+          onClick={publish}
+          envList={envList}
+        />
       </Toolbar>
       <div className={css.designer}>
         {SPADesigner && (

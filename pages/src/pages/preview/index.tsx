@@ -186,7 +186,7 @@ function Page({ props }) {
             if (connector.type === 'http') {
               //服务接口类型
               return callConnectorHttp(
-                { script: connector.script, useProxy: true },
+                { script: connector.script, useProxy: true, executeEnv },
                 params
               )
             } else {
