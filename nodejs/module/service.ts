@@ -88,10 +88,10 @@ export default class PcPageService {
     return comlibScripts + mySelfComlibRt
   }
 
-  async publish(req, { json, userId, fileId, envType }) {
+  async publish(req, { json, userId, fileId, envType, commitInfo }) {
     try {
       let template = fs.readFileSync(path.resolve(__dirname, './template.html'), 'utf8')
-      const { title, comlibs, projectId, fileName, folderPath } = json.configuration
+      const { title, comlibs, projectId, fileName, folderPath, publisherEmail, publisherName } = json.configuration
       Reflect.deleteProperty(json, 'configuration')
 
       /** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
@@ -102,24 +102,60 @@ export default class PcPageService {
         .replace(`<!-- comlib-rt -->`, await this._generateComLibRT(comlibs, json, { domainName }))
         .replace(`--title--`, title)
         .replace(`'--projectJson--'`, JSON.stringify(json))
+        .replace(`'--executeEnv--'`, JSON.stringify(envType))
         .replace(`'--slot-project-id--'`, projectId ? projectId : JSON.stringify(null))
 
-      const res = await API.Upload.staticServer({
-        content: template,
-        folderPath,
-        fileName,
-        noHash: true
-      })
-      //   const { url } = await uploadStatic(template, manateeUserInfo);
-      if (res?.url?.startsWith('https')) {
-        res.url = res.url.replace('https', 'http')
+
+      let publishMaterialInfo
+      const customPublishApi = await getCustomPublishApi()
+      if (customPublishApi) {
+        const latestPub = (await API.File.getLatestPub({
+          fileId
+        }))?.[0];
+        const version = getNextVersion(latestPub?.version)
+        const dataForCustom = {
+          env: envType,
+          productId: fileId,
+          productName: title,
+          publisherEmail,
+          publisherName,
+          version,
+          type: 'pc-page',
+          content: {
+            json,
+            html: template,
+          }
+        }
+        const { code, message, data } = await axios({
+          url: customPublishApi,
+          method: "post",
+          data: dataForCustom,
+        }).then(res => res.data);
+
+        if (code !== 1) {
+          throw new Error(`发布集成接口出错: ${message}`)
+        } else {
+          publishMaterialInfo = data
+        }
+      } else {
+        publishMaterialInfo = await API.Upload.staticServer({
+          content: template,
+          folderPath,
+          fileName,
+          noHash: true
+        })
+        //   const { url } = await uploadStatic(template, manateeUserInfo);
+        if (publishMaterialInfo?.url?.startsWith('https')) {
+          publishMaterialInfo.url = publishMaterialInfo.url.replace('https', 'http')
+        }
       }
 
       const result = await API.File.publish({
         userId,
         fileId,
         extName: "pc-page",
-        content: JSON.stringify(res),
+        commitInfo,
+        content: JSON.stringify(publishMaterialInfo),
         type: envType,
       });
       return result
@@ -178,17 +214,36 @@ export default class PcPageService {
 
 }
 
-const getUploadService = async () => {
+const getAppConfig = async () => {
   const _NAMESPACE_ = "mybricks-app-pcspa";
   const res = await API.Setting.getSetting([_NAMESPACE_]);
-  const { uploadService } = res[_NAMESPACE_]?.config
-    ? JSON.parse(res[_NAMESPACE_].config).uploadServer ?? {}
-    : {};
+  let config = {} as any
+  try {
+    config = JSON.parse(res[_NAMESPACE_]?.config)
+    console.log('config', config)
+  } catch (e) {
+    console.error("getAppConfig error", e);
+  }
+  return config
+};
+
+const getUploadService = async () => {
+  const { uploadServer = {} } = await getAppConfig()
+  const { uploadService } = uploadServer
   if (!uploadService) {
     throw Error("无上传服务，请先配置应用上传服务");
   }
   return uploadService;
 };
+
+const getCustomPublishApi = async () => {
+  const { publishApiConfig = {} } = await getAppConfig()
+  const { publishApi } = publishApiConfig
+  if (!publishApi) {
+    console.warn(`未配置发布集成接口`)
+  }
+  return publishApi;
+}
 
 const uploadStatic = async (
   content: string,
@@ -237,4 +292,32 @@ function getRealDomain(request) {
   let protocol = request.headers?.['connection'].toLowerCase() === 'upgrade' ? 'https' : 'http'
   let domain = `${protocol}:\/\/${hostName}`
   return domain
+}
+
+function getNextVersion(version, max = 100) {
+  if (!version) return "1.0.0";
+  const vAry = version.split(".");
+  let carry = false;
+  const isMaster = vAry.length === 3;
+  if (!isMaster) {
+    max = -1;
+  }
+
+  for (let i = vAry.length - 1; i >= 0; i--) {
+    const res = Number(vAry[i]) + 1;
+    if (i === 0) {
+      vAry[i] = res;
+    } else {
+      if (res === max) {
+        vAry[i] = 0;
+        carry = true;
+      } else {
+        vAry[i] = res;
+        carry = false;
+      }
+    }
+    if (!carry) break;
+  }
+
+  return vAry.join(".");
 }

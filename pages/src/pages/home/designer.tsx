@@ -132,14 +132,6 @@ export default function MyDesigner({ appData }) {
   const [remotePlugins, setRemotePlugins] = useState([]);
   const [publishModalVisible, setPublishModalVisible] = useState(false)
 
-  const envList = useMemo(() => {
-    const list = ctx?.appConfig?.publishEnvConfig?.envList || []
-    return list.map(item => ({
-      label: item.title,
-      type: item.name
-    }))
-  }, [])
-
   useEffect(() => {
     fetchPlugins(plugins, setRemotePlugins);
     console.log('应用数据:', appData);
@@ -194,6 +186,8 @@ export default function MyDesigner({ appData }) {
       ...designerRef?.current?.toJSON(), configuration: {
         comlibs: ctx.comlibs,
         title: ctx.fileItem.name,
+        publisherEmail: ctx.user.email,
+        publisherName: ctx.user?.name,
         projectId: ctx.sdk.projectId,
         folderPath: '/app/pcpage',
         fileName: `${ctx.fileItem.id}.html`
@@ -237,16 +231,16 @@ export default function MyDesigner({ appData }) {
   }, [])
 
   const publish = useCallback(
-    (envType) => {
+    (publishConfig) => {
       if (publishingRef.current) {
         return
       }
-
+      const { envType, commitInfo } = publishConfig
       publishingRef.current = true
 
       setPublishLoading(true)
 
-      message.loading({
+      const close = message.loading({
         key: 'publish',
         content: '页面发布中',
         duration: 0,
@@ -271,6 +265,8 @@ export default function MyDesigner({ appData }) {
               // scripts: encodeURIComponent(scripts),
               comlibs: ctx.comlibs,
               title: ctx.fileItem.name,
+              publisherEmail: ctx.user.email,
+              publisherName: ctx.user?.name,
               projectId: ctx.sdk.projectId,
               // 非模块下的页面直接发布到项目空间下
               folderPath: '/app/pcpage',
@@ -288,9 +284,11 @@ export default function MyDesigner({ appData }) {
             userId: ctx.user?.email,
             fileId: ctx.fileId,
             json: json.toJSON,
-            envType
+            envType,
+            commitInfo
           })
           if (res.code === 1) {
+            close()
             message.success({
               key: 'publish',
               content: '发布成功',
@@ -302,6 +300,7 @@ export default function MyDesigner({ appData }) {
               ctx?.versionApi?.switchAciveTab?.('publish', void 0)
             }, 0)
           } else {
+            close()
             message.error({
               content: res.message || '发布失败',
               duration: 2,
@@ -313,6 +312,7 @@ export default function MyDesigner({ appData }) {
         })()
           .catch((e) => {
             console.error(e)
+            close()
             message.error({
               key: 'publish',
               content: '网络错误，请稍后再试',
@@ -355,12 +355,11 @@ export default function MyDesigner({ appData }) {
           dotTip={beforeunload}
         />
         <Toolbar.Button onClick={preview}>预览</Toolbar.Button>
-        <Toolbar.Publish
+        <Toolbar.Button
           disabled={!operable}
           loading={publishLoading}
-          onClick={publish}
-          envList={envList}
-        />
+          onClick={() => setPublishModalVisible(true)}
+        >发布</Toolbar.Button>
       </Toolbar>
       <div className={css.designer}>
         {SPADesigner && (
@@ -385,3 +384,4 @@ export default function MyDesigner({ appData }) {
     </div>
   )
 }
+

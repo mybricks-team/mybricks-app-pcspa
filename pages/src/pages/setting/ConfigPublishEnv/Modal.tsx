@@ -68,12 +68,12 @@ export default ({
           <Input disabled={status === "edit"} placeholder="dev/test/prod..." />
         </Form.Item>
         <Form.Item
-          label="接口前缀"
+          label="接口路径前缀"
           name="defaultApiPrePath"
           required
           tooltip="该环境下发起的请求会自动带上此前缀（不包含已有域名前缀的接口）"
           rules={[
-            { required: true, message: "请输入接口前缀" },
+            { required: true, message: "请输入接口路径前缀" },
             { pattern: /^https?:\/\/.+$/, message: "请输入正确的url地址" },
           ]}
         >

@@ -42,11 +42,19 @@ export default ({
       <Form form={form} labelCol={{ span: 5 }} wrapperCol={{ span: 19 }}>
         <Form.Item
           label="发布环境"
-          name="executeEnv"
+          name="envType"
           required
           rules={[{ required: true, message: "请选择发布环境" }]}
         >
           <Select options={envOptions} />
+        </Form.Item>
+        <Form.Item
+          label="发布内容"
+          name="commitInfo"
+          required
+          rules={[{ required: true, message: "请填写本次发布的内容" }, { min: 4, message: '发布的内容不少于四个字' }]}
+        >
+          <Input placeholder="请输入本次发布的内容" />
         </Form.Item>
       </Form>
     </Modal>
