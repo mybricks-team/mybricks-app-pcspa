@@ -155,7 +155,7 @@ export default class PcPageService {
         fileId,
         extName: "pc-page",
         commitInfo,
-        content: JSON.stringify(publishMaterialInfo),
+        content: JSON.stringify({ ...publishMaterialInfo, json }),
         type: envType,
       });
       return result
