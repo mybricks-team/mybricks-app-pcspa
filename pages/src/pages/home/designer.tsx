@@ -129,7 +129,7 @@ export default function MyDesigner({ appData }) {
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
   const [SPADesigner, setSPADesigner] = useState(null);
-  const [remotePlugins, setRemotePlugins] = useState([]);
+  const [remotePlugins, setRemotePlugins] = useState(null);
   const [publishModalVisible, setPublishModalVisible] = useState(false)
 
   useEffect(() => {
@@ -362,7 +362,7 @@ export default function MyDesigner({ appData }) {
         >发布</Toolbar.Button>
       </Toolbar>
       <div className={css.designer}>
-        {SPADesigner && (
+        {SPADesigner && remotePlugins && (
           <>
             <SPADesigner
               ref={designerRef}
