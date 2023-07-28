@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import { Modal, Select, Form, Input, ModalProps } from "antd";
+import TextArea from "antd/lib/input/TextArea";
 
 export default ({
   visible,
@@ -54,7 +55,7 @@ export default ({
           required
           rules={[{ required: true, message: "请填写本次发布的内容" }, { min: 4, message: '发布的内容不少于四个字' }]}
         >
-          <Input placeholder="请输入本次发布的内容" />
+          <TextArea placeholder="请输入本次发布的内容" />
         </Form.Item>
       </Form>
     </Modal>

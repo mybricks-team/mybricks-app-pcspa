@@ -107,11 +107,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         return <Card
           style={{ width: 320 }}
           actions={[
-            <EditOutlined key="edit" onClick={() => onEdit(item)} />,
-            <DeleteOutlined
-              key="delete"
-              onClick={() => onDelete(item)}
-            />,
+            <EditOutlined key="edit" onClick={() => onEdit(item)} />
           ]}
         >
           <Descriptions title={title} layout="horizontal" column={1} labelStyle={{
