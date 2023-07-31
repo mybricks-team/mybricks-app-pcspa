@@ -228,13 +228,16 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             },
             items: [
               {
-                title: '测试环境',
+                title: '调试环境',
                 type: 'select',
                 description: '选择调试时采用的环境配置，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
-                options: envList.map(item => ({
-                  value: item.name,
-                  label: item.title
-                })),
+                options: {
+                  options: envList.map(item => ({
+                    value: item.name,
+                    label: item.title
+                  })),
+                  placeholder: '请选择调试环境'
+                },
                 value: {
                   get() {
                     return ctx.executeEnv || ''

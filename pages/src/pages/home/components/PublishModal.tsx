@@ -53,7 +53,7 @@ export default ({
           required
           rules={[{ required: true, message: "请选择发布环境" }]}
         >
-          <Select options={envOptions} />
+          <Select options={envOptions} placeholder="请选择发布环境" />
         </Form.Item>}
         <Form.Item
           label="发布内容"
