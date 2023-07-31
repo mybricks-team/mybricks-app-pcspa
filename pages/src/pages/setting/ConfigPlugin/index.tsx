@@ -25,6 +25,10 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         updateTime,
       });
     } else if (status === "append") {
+      if (plugins.find((plugin) => plugin.name === values.name)) {
+        message.info("添加失败：已存在name标识相同的插件！");
+        return;
+      }
       plugins.push({
         ...values,
         user,
