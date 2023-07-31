@@ -56,16 +56,19 @@ export default function MyDesigner({ appData }) {
     }
   }
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.90/index.min.js'
-  const { plugins = [] } = JSON.parse(appData.config[appName]?.config ?? "{}");
   // const configComlibs = comlibs.map(lib => lib.editJs)
 
   // const [manateeUserInfo] = useState(getManateeUserInfo())
 
   let uploadService = null;
+  let plugins = [],
+    envList = [];
   let appConfig = null // 记录应用所有配置
   try {
     appConfig = JSON.parse(appData.config[appName]?.config)
     uploadService = appConfig?.uploadServer?.uploadService
+    plugins = appConfig?.plugins;
+    envList = appConfig?.publishEnvConfig?.envList;
   } catch (error) {
   }
 
@@ -133,7 +136,7 @@ export default function MyDesigner({ appData }) {
   const [publishModalVisible, setPublishModalVisible] = useState(false)
 
   useEffect(() => {
-    fetchPlugins(plugins).then(setRemotePlugins);
+    fetchPlugins(plugins, { envList }).then(setRemotePlugins);
     console.log('应用数据:', appData);
   }, [])
   useMemo(() => {

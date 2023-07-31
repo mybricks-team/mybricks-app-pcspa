@@ -235,13 +235,13 @@ const importScript = (() => {
 /**
  * 批量加载远程插件
  * @param plugins 插件数组
- * @param cb 回调函数
+ * @param commonConfig 插件加载的参数
  * @returns 
  */
-export const fetchPlugins = async (plugins: PluginType[]) => {
+export const fetchPlugins = async (plugins: PluginType[], commonConfig?) => {
   const promises = plugins.map((plugin) => importScript(plugin)
     .then(com => {
-      return com()
+      return com(commonConfig);
     }).catch(e => {
       message.error(`${plugin.title} 插件加载失败，失败信息：${e}`);
       console.error(`${plugin.title} 插件加载失败，失败信息：${e}`);

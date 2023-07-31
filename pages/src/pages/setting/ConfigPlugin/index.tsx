@@ -26,7 +26,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       });
     } else if (status === "append") {
       if (plugins.find((plugin) => plugin.name === values.name)) {
-        message.info("添加失败：已存在name标识相同的插件！");
+        message.info("添加失败：已存在相同name标识的插件！");
         return;
       }
       plugins.push({
