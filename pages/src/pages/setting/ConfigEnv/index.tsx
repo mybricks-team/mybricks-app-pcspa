@@ -97,7 +97,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
 
 
   return <Card
-    size='small' title="发布环境" style={{ width: '50vw', marginTop: 24 }} loading={loading}>
+    size='small' title="发布环境" style={{ marginTop: 24 }} loading={loading}>
     <div style={{ maxHeight: '50vh', overflowY: 'scroll' }}>
       {envList.map(item => {
         const { title = '', name = '', defaultApiPrePath = '', updateTime, user } = item
