@@ -28,6 +28,12 @@ export default ({
     }))
   }, [envList])
 
+  useEffect(() => {
+    if (visible) {
+      form.resetFields()
+    }
+  }, [visible])
+
   return (
     <Modal
       visible={visible}
