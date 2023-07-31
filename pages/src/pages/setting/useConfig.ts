@@ -40,7 +40,7 @@ export default <T = any>(namespace, defaultValue = {} as T): TConfigProps<T> => 
   const mergeUpdateConfig = useCallback((values: Partial<T>) => {
     setLoading(true)
     const config = { ...lastConfigRef.current, ...values }
-    return API.Setting.saveSetting(namespace, JSON.stringify(config), user.email).then(() => {
+    return API.Setting.saveSetting(namespace, JSON.stringify(config), user?.email).then(() => {
       setConfig({ ...config });
     }).finally(() => {
       setLoading(false);

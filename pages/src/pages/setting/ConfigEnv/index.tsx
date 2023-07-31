@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { message, Form, Input, Card, Button, Space, Descriptions, Modal } from 'antd'
+import { message, Form, Input, Card, Button, Space, Descriptions, Modal, Col, Popconfirm, Typography, Divider } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { _NAMESPACE_ } from "../app";
 import dayjs from "dayjs";
@@ -19,7 +19,7 @@ export type TPublishEnv = {
   // 该环境下的接口前缀
   defaultApiPrePath: string
   updateTime: string
-  user: string
+  user: any
 }
 
 export type TPublishConfig = {
@@ -41,7 +41,9 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       title: '',
       defaultApiPrePath: '',
       updateTime: '',
-      user: '',
+      user: {
+        email: ''
+      },
     })
     setVisible(true)
   };
@@ -81,48 +83,84 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   }
 
   const onDelete = async (publishEnv: TPublishEnv) => {
-    Modal.confirm({
-      title: `确认删除环境：【${publishEnv.title}】？`,
-      onOk() {
-        const newEnvList = [...envList]
-        const index = envList.findIndex(
-          ({ name }) => name === publishEnv.name
-        );
-        newEnvList.splice(index, 1);
-        return mergeUpdateConfig({
-          publishEnvConfig: { envList: newEnvList }
-        }).then(() => {
-          message.success("删除成功");
-        })
-      }
+    const newEnvList = [...envList]
+    const index = envList.findIndex(
+      ({ name }) => name === publishEnv.name
+    );
+    newEnvList.splice(index, 1);
+    return mergeUpdateConfig({
+      publishEnvConfig: { envList: newEnvList }
+    }).then(() => {
+      message.success("删除成功");
     })
   }
 
 
   return <Card
     size='small' title="发布环境" style={{ width: '50vw', marginTop: 24 }} loading={loading}>
-    <Space>
+    <div style={{ maxHeight: '50vh', overflowY: 'scroll' }}>
       {envList.map(item => {
         const { title = '', name = '', defaultApiPrePath = '', updateTime, user } = item
-        return <Card
-          style={{ width: 320 }}
-          actions={[
-            <EditOutlined key="edit" onClick={() => onEdit(item)} />
-          ]}
-        >
-          <Descriptions title={title} layout="horizontal" column={1} labelStyle={{
-            fontWeight: '500'
-          }}>
-            <Descriptions.Item label="name">{name}</Descriptions.Item>
-            <Descriptions.Item label="接口前缀">{defaultApiPrePath}</Descriptions.Item>
+        // return <Card
+        //   style={{ width: '100%' }}
+        //   actions={[
+        //     <EditOutlined key="edit" onClick={() => onEdit(item)} />
+        //   ]}
+        // >
+        //   <Descriptions title={title} layout="horizontal" column={1} labelStyle={{
+        //     fontWeight: '500'
+        //   }}>
+        //     <Descriptions.Item label="name">{name}</Descriptions.Item>
+        //     <Descriptions.Item label="接口前缀">{defaultApiPrePath}</Descriptions.Item>
+        //   </Descriptions>
+        //   <Meta
+        //     description={`${user.email} 更新于 ${updateTime}`}
+        //   />
+        // </Card>
+        return <>
+          <Descriptions
+            title={title}
+            column={1}
+            labelStyle={{
+              fontWeight: '500'
+            }}
+            extra={
+              <>
+                <Button
+                  type="link"
+                  icon={<EditOutlined />}
+                  onClick={() => { onEdit(item) }}
+                >
+                  编辑
+                </Button>
+                <Popconfirm
+                  title={`确定删除环境 ${item.title} 吗？`}
+                  onConfirm={() => { onDelete(item) }}
+                  okText="确定"
+                  cancelText="再想想"
+                >
+                  <Button
+                    type="link"
+                    icon={<DeleteOutlined />}
+                  >
+                    删除
+                  </Button>
+                </Popconfirm>
+              </>
+            }
+          >
+            <Descriptions.Item label="环境名称">{title}</Descriptions.Item>
+            <Descriptions.Item label="环境标识">{name}</Descriptions.Item>
+            <Descriptions.Item label="接口默认前缀">{defaultApiPrePath}</Descriptions.Item>
           </Descriptions>
-          <Meta
-            description={`${user.email} 更新于 ${updateTime}`}
-          />
-        </Card>
+          <Typography.Paragraph type="secondary" style={{ textAlign: 'right' }}>
+            {user?.email} 更新于 {updateTime}
+          </Typography.Paragraph>
+          <Divider />
+        </>
       })}
-      <Button onClick={onClickAdd} type="primary" icon={<PlusOutlined />}>添加</Button>
-    </Space>
+    </div>
+    <Button onClick={onClickAdd} type="dashed" block icon={<PlusOutlined />}>添加</Button>
     <EditModal visible={visible} status={status} publishEnv={publishEnv} onOk={onOk} onCancel={onCancel} />
   </Card>
 }

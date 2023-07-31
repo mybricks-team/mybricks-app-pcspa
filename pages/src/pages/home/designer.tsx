@@ -133,7 +133,7 @@ export default function MyDesigner({ appData }) {
   const [publishModalVisible, setPublishModalVisible] = useState(false)
 
   useEffect(() => {
-    fetchPlugins(plugins, setRemotePlugins);
+    fetchPlugins(plugins).then(setRemotePlugins);
     console.log('应用数据:', appData);
   }, [])
   useMemo(() => {

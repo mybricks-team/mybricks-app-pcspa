@@ -231,25 +231,17 @@ const importScript = (() => {
  * @param cb 回调函数
  * @returns 
  */
-export const fetchPlugins = (plugins: PluginType[], cb?) => {
-  const remotePlugins = [];
-  return new Promise((resolve, reject) => {
-    plugins.forEach((plugin, index) => {
-      importScript(plugin)
-        .then(com => {
-          remotePlugins.push(com());
-          if (index === plugins.length - 1) {
-            resolve(remotePlugins);
-            cb(remotePlugins);
-          }
-        }).catch(e => {
-          message.error(`${plugin.title} 插件加载失败，失败信息：${e}`);
-          console.error(`${plugin.title} 插件加载失败，失败信息：${e}`);
-          if (index === plugins.length - 1) {
-            resolve(remotePlugins);
-            cb(remotePlugins);
-          }
-        });
-    });
-  })
+export const fetchPlugins = async (plugins: PluginType[]) => {
+  const promises = plugins.map((plugin, index) => importScript(plugin)
+    .then(com => {
+      return com()
+    }).catch(e => {
+      message.error(`${plugin.title} 插件加载失败，失败信息：${e}`);
+      console.error(`${plugin.title} 插件加载失败，失败信息：${e}`);
+      return null
+    })
+  );
+
+  const loadedPlugins = await Promise.all(promises)
+  return loadedPlugins.filter(item => item !== null)
 }
