@@ -41,14 +41,14 @@ export default ({
       onCancel={onCancel}
     >
       <Form form={form} labelCol={{ span: 5 }} wrapperCol={{ span: 19 }}>
-        <Form.Item
+        {envOptions.length > 0 && <Form.Item
           label="发布环境"
           name="envType"
           required
           rules={[{ required: true, message: "请选择发布环境" }]}
         >
           <Select options={envOptions} />
-        </Form.Item>
+        </Form.Item>}
         <Form.Item
           label="发布内容"
           name="commitInfo"

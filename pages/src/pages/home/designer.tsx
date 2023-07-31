@@ -235,7 +235,7 @@ export default function MyDesigner({ appData }) {
       if (publishingRef.current) {
         return
       }
-      const { envType, commitInfo } = publishConfig
+      const { envType = 'prod', commitInfo } = publishConfig
       publishingRef.current = true
 
       setPublishLoading(true)
