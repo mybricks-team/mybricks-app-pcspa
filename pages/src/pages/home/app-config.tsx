@@ -70,9 +70,18 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
             ...manateeUserInfo
           }
         });
-        const { status, data: { url }, message, code } = res.data;
+        const { status, data, message, code } = res.data;
         if (status === 200 || code === 1) {
-          const staticUrl = useConfigService ? `${getDomainFromPath(uploadService)}${url}` : url
+          let url = ''
+          if (Array.isArray(data)) {
+            url = data?.[0]?.url
+          } else {
+            url = data.url
+          }
+          if (!url) {
+            throw Error(`没有返回图片地址`)
+          }
+          const staticUrl = /^http/.test(url) ? url : `${getDomainFromPath(uploadService)}${url}`
           return [staticUrl].map(url => url.replace('https', 'http'))
         }
         throw Error(`【图片上传出错】: ${message}`)
