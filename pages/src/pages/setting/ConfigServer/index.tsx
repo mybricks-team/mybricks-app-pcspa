@@ -34,8 +34,8 @@ export default (props: TConfigProps) => {
     })
   }
 
-  return <Card size='small' title="服务地址" loading={loading}>
+  return <>
     <UploadConfig {...props} />
     <PublishApi {...props} />
-  </Card>
+  </>
 }

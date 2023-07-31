@@ -96,71 +96,68 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   }
 
 
-  return <Card
-    size='small' title="发布环境" style={{ marginTop: 24 }} loading={loading}>
-    <div style={{ maxHeight: '50vh', overflowY: 'scroll' }}>
-      {envList.map(item => {
-        const { title = '', name = '', defaultApiPrePath = '', updateTime, user } = item
-        // return <Card
-        //   style={{ width: '100%' }}
-        //   actions={[
-        //     <EditOutlined key="edit" onClick={() => onEdit(item)} />
-        //   ]}
-        // >
-        //   <Descriptions title={title} layout="horizontal" column={1} labelStyle={{
-        //     fontWeight: '500'
-        //   }}>
-        //     <Descriptions.Item label="name">{name}</Descriptions.Item>
-        //     <Descriptions.Item label="接口前缀">{defaultApiPrePath}</Descriptions.Item>
-        //   </Descriptions>
-        //   <Meta
-        //     description={`${user.email} 更新于 ${updateTime}`}
-        //   />
-        // </Card>
-        return <>
-          <Descriptions
-            title={title}
-            column={1}
-            labelStyle={{
-              fontWeight: '500'
-            }}
-            extra={
-              <>
+  return <>
+    {envList.map(item => {
+      const { title = '', name = '', defaultApiPrePath = '', updateTime, user } = item
+      // return <Card
+      //   style={{ width: '100%' }}
+      //   actions={[
+      //     <EditOutlined key="edit" onClick={() => onEdit(item)} />
+      //   ]}
+      // >
+      //   <Descriptions title={title} layout="horizontal" column={1} labelStyle={{
+      //     fontWeight: '500'
+      //   }}>
+      //     <Descriptions.Item label="name">{name}</Descriptions.Item>
+      //     <Descriptions.Item label="接口前缀">{defaultApiPrePath}</Descriptions.Item>
+      //   </Descriptions>
+      //   <Meta
+      //     description={`${user.email} 更新于 ${updateTime}`}
+      //   />
+      // </Card>
+      return <>
+        <Descriptions
+          title={title}
+          column={1}
+          labelStyle={{
+            fontWeight: '500'
+          }}
+          extra={
+            <>
+              <Button
+                type="link"
+                icon={<EditOutlined />}
+                onClick={() => { onEdit(item) }}
+              >
+                编辑
+              </Button>
+              <Popconfirm
+                title={`确定删除环境 ${item.title} 吗？`}
+                onConfirm={() => { onDelete(item) }}
+                okText="确定"
+                cancelText="再想想"
+              >
                 <Button
                   type="link"
-                  icon={<EditOutlined />}
-                  onClick={() => { onEdit(item) }}
+                  icon={<DeleteOutlined />}
                 >
-                  编辑
+                  删除
                 </Button>
-                <Popconfirm
-                  title={`确定删除环境 ${item.title} 吗？`}
-                  onConfirm={() => { onDelete(item) }}
-                  okText="确定"
-                  cancelText="再想想"
-                >
-                  <Button
-                    type="link"
-                    icon={<DeleteOutlined />}
-                  >
-                    删除
-                  </Button>
-                </Popconfirm>
-              </>
-            }
-          >
-            <Descriptions.Item label="环境名称">{title}</Descriptions.Item>
-            <Descriptions.Item label="环境标识">{name}</Descriptions.Item>
-            <Descriptions.Item label="接口默认前缀">{defaultApiPrePath}</Descriptions.Item>
-          </Descriptions>
-          <Typography.Paragraph type="secondary" style={{ textAlign: 'right' }}>
-            {user?.email} 更新于 {updateTime}
-          </Typography.Paragraph>
-          <Divider />
-        </>
-      })}
-    </div>
+              </Popconfirm>
+            </>
+          }
+        >
+          <Descriptions.Item label="环境名称">{title}</Descriptions.Item>
+          <Descriptions.Item label="环境标识">{name}</Descriptions.Item>
+          <Descriptions.Item label="接口默认前缀">{defaultApiPrePath}</Descriptions.Item>
+        </Descriptions>
+        <Typography.Paragraph type="secondary" style={{ textAlign: 'right' }}>
+          {user?.email} 更新于 {updateTime}
+        </Typography.Paragraph>
+        <Divider />
+      </>
+    })}
     <Button onClick={onClickAdd} type="dashed" block icon={<PlusOutlined />}>添加</Button>
     <EditModal visible={visible} status={status} publishEnv={publishEnv} onOk={onOk} onCancel={onCancel} />
-  </Card>
+  </>
 }

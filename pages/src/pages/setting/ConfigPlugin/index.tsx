@@ -62,58 +62,54 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   };
 
   return (
-    <div className={css.wrapper}>
-      <Card size='small' title="插件配置" loading={loading}>
-        <div className={css.list}>
-          {plugins.map((plugin, index) => {
-            const { title, name, url, description, updateTime, user } = plugin;
-            return <>
-              <Descriptions
-                title={title}
-                column={1}
-                labelStyle={{
-                  fontWeight: '500'
-                }}
-                extra={
-                  <>
-                    <Button
-                      type="link"
-                      icon={<EditOutlined />}
-                      onClick={() => { onEdit(plugin, index) }}
-                    >
-                      编辑
-                    </Button>
-                    <Popconfirm
-                      title={`确定删除插件 ${plugin.title} 吗？`}
-                      onConfirm={() => { onDelete(index) }}
-                      okText="确定"
-                      cancelText="再想想"
-                    >
-                      <Button
-                        type="link"
-                        icon={<DeleteOutlined />}
-                      >
-                        删除
-                      </Button>
-                    </Popconfirm>
-                  </>
-                }
-              >
-                <Descriptions.Item label="唯一标识">{name}</Descriptions.Item>
-                <Descriptions.Item label="资源地址">{url}</Descriptions.Item>
-                <Descriptions.Item label="更新信息">{description}</Descriptions.Item>
-              </Descriptions>
-              <Typography.Paragraph type="secondary" style={{ textAlign: 'right' }}>
-                {user?.email} 更新于 {updateTime}
-              </Typography.Paragraph>
-              <Divider />
-            </>
-          })}
-        </div>
-        <Button type="dashed" onClick={onAdd} block icon={<PlusOutlined />}>
-          添加插件
-        </Button>
-      </Card>
+    <>
+      {plugins.map((plugin, index) => {
+        const { title, name, url, description, updateTime, user } = plugin;
+        return <>
+          <Descriptions
+            title={title}
+            column={1}
+            labelStyle={{
+              fontWeight: '500'
+            }}
+            extra={
+              <>
+                <Button
+                  type="link"
+                  icon={<EditOutlined />}
+                  onClick={() => { onEdit(plugin, index) }}
+                >
+                  编辑
+                </Button>
+                <Popconfirm
+                  title={`确定删除插件 ${plugin.title} 吗？`}
+                  onConfirm={() => { onDelete(index) }}
+                  okText="确定"
+                  cancelText="再想想"
+                >
+                  <Button
+                    type="link"
+                    icon={<DeleteOutlined />}
+                  >
+                    删除
+                  </Button>
+                </Popconfirm>
+              </>
+            }
+          >
+            <Descriptions.Item label="唯一标识">{name}</Descriptions.Item>
+            <Descriptions.Item label="资源地址">{url}</Descriptions.Item>
+            <Descriptions.Item label="更新信息">{description}</Descriptions.Item>
+          </Descriptions>
+          <Typography.Paragraph type="secondary" style={{ textAlign: 'right' }}>
+            {user?.email} 更新于 {updateTime}
+          </Typography.Paragraph>
+          <Divider />
+        </>
+      })}
+      <Button type="dashed" onClick={onAdd} block icon={<PlusOutlined />}>
+        添加插件
+      </Button>
       <AppendModal
         visible={visible}
         status={status}
@@ -121,6 +117,6 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         onOk={onOk}
         onCancel={onCancel}
       />
-    </div>
+    </>
   );
 };
