@@ -214,7 +214,7 @@ const importScript = (() => {
         // 获取到导出的组件
         const res = !lastWindowKeys.includes(newLastWindowKey) && (window[newLastWindowKey]);
         if (!res) {
-          reject('格式错误！');
+          reject('插件未挂载到window');
         }
         lastWindowKeys.push(newLastWindowKey);
         const Com = res.default ? res.default : res
