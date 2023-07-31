@@ -182,6 +182,8 @@ export function getManateeUserInfo() {
 const importScript = (() => {
   // 自执行函数，创建一个闭包，保存 cache 结果
   const cache = {};
+  // 新增 window 属性 合集
+  const lastWindowKeys = [];
   // 先把React挂载到window上
   if (!window["react"]) {
     window["react"] = window.React || React;
@@ -197,6 +199,7 @@ const importScript = (() => {
     return new Promise((resolve, reject) => {
       // 保存最后一个 window 属性 key
       const lastWindowKey = Object.keys(window).pop()
+      lastWindowKeys.push(lastWindowKey);
       // 创建 script
       const script = document.createElement('script')
       script.setAttribute('src', url)
@@ -209,7 +212,11 @@ const importScript = (() => {
         const newLastWindowKey = Object.keys(window).pop()
 
         // 获取到导出的组件
-        const res = lastWindowKey !== newLastWindowKey ? (window[newLastWindowKey]) : ({})
+        const res = !lastWindowKeys.includes(newLastWindowKey) && (window[newLastWindowKey]);
+        if (!res) {
+          reject('格式错误！');
+        }
+        lastWindowKeys.push(newLastWindowKey);
         const Com = res.default ? res.default : res
 
         cache[url] = Com
@@ -232,7 +239,7 @@ const importScript = (() => {
  * @returns 
  */
 export const fetchPlugins = async (plugins: PluginType[]) => {
-  const promises = plugins.map((plugin, index) => importScript(plugin)
+  const promises = plugins.map((plugin) => importScript(plugin)
     .then(com => {
       return com()
     }).catch(e => {
@@ -242,6 +249,6 @@ export const fetchPlugins = async (plugins: PluginType[]) => {
     })
   );
 
-  const loadedPlugins = await Promise.all(promises)
-  return loadedPlugins.filter(item => item !== null)
+  const loadedPlugins = await Promise.all(promises);
+  return loadedPlugins.filter(item => item !== null);
 }
