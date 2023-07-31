@@ -12,6 +12,7 @@ import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
 // import { getManateeUserInfo } from '../../utils'
+import { fetchPlugins, getManateeUserInfo } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
@@ -48,14 +49,15 @@ export default function MyDesigner({ appData }) {
   } else {
     const myselfComlib = appData.fileContent?.content?.comlibs?.find(lib => lib.id === "_myself_") ?? MySelf_COM_LIB
     coms.unshift(myselfComlib)
-    if(appData.fileContent?.content?.comlibs?.some(lib => typeof lib === 'string')){
+    if (appData.fileContent?.content?.comlibs?.some(lib => typeof lib === 'string')) {
       comlibs = coms;
-    }else{
+    } else {
       comlibs = appData.fileContent?.content?.comlibs;
     }
   }
-
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.90/index.min.js'
+  const { plugins = [] } = JSON.parse(appData.config[appName]?.config ?? "{}");
+  // const configComlibs = comlibs.map(lib => lib.editJs)
 
   // const [manateeUserInfo] = useState(getManateeUserInfo())
 
@@ -124,13 +126,12 @@ export default function MyDesigner({ appData }) {
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
   const [SPADesigner, setSPADesigner] = useState(null);
-
-
+  const [remotePlugins, setRemotePlugins] = useState([]);
 
   useEffect(() => {
+    fetchPlugins(plugins, setRemotePlugins);
     console.log('应用数据:', appData);
   }, [])
-
   useMemo(() => {
     if (designer) {
       const script = document.createElement('script');
@@ -351,7 +352,7 @@ export default function MyDesigner({ appData }) {
           <>
             <SPADesigner
               ref={designerRef}
-              config={config(ctx, save)}
+              config={config(ctx, save, remotePlugins)}
               onEdit={onEdit}
               onMessage={onMessage}
               _onError_={(ex: any) => {

@@ -84,7 +84,7 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
   }
 }
 
-export default function (ctx, save) {
+export default function (ctx, save, remotePlugins = []) {
   return {
     shortcuts: {
       'ctrl+s': [save],
@@ -107,7 +107,8 @@ export default function (ctx, save) {
           ctx.versionApi = versionApi
         },
       }),
-      toolsPlugin()
+      toolsPlugin(),
+      ...remotePlugins
     ],
     ...(ctx.hasMaterialApp ? {
       comLibAdder: comLibAdderFunc(ctx),
@@ -190,7 +191,7 @@ export default function (ctx, save) {
               }
             ]
           }
-          
+
         ]
       },
     },

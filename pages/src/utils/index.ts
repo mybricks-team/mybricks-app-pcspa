@@ -1,6 +1,9 @@
 import { ComlibRtUrl, ComlibEditUrl } from './../constants'
 import axios from 'axios'
+import React from "react"
+import ReactDOM from "react-dom"
 import { message } from 'antd'
+import { PluginType } from '@/pages/setting/ConfigPlugin/type'
 
 export function getApiUrl(uri) {
   return uri
@@ -49,8 +52,6 @@ export function copyText(txt: string): boolean {
   document.body.removeChild(input)
   return true
 }
-
-import React from "react"
 
 /**
  * 事件操作
@@ -166,11 +167,89 @@ export function getManateeUserInfo() {
   try {
     const token = localStorage.getItem('token');
     const session = localStorage.getItem('session')
-    userInfo.token = token? atob(atob(token)):token
-    userInfo.session = session? atob(atob(session)):session
-  } catch (e) { 
+    userInfo.token = token ? atob(atob(token)) : token
+    userInfo.session = session ? atob(atob(session)) : session
+  } catch (e) {
     console.error(e)
   }
 
   return userInfo
+}
+
+/**
+ * 加载远程插件，获取挂载到window的全局变量
+ */
+const importScript = (() => {
+  // 自执行函数，创建一个闭包，保存 cache 结果
+  const cache = {};
+  // 先把React挂载到window上
+  if (!window["react"]) {
+    window["react"] = window.React || React;
+  }
+  if (!window["react-dom"]) {
+    window["react-dom"] = window.ReactDOM || ReactDOM;
+  }
+  return (plugin: PluginType) => {
+    const { url } = plugin;
+    // 如果有缓存，则直接返回缓存内容
+    if (cache[url]) return Promise.resolve(cache[url])
+
+    return new Promise((resolve, reject) => {
+      // 保存最后一个 window 属性 key
+      const lastWindowKey = Object.keys(window).pop()
+      // 创建 script
+      const script = document.createElement('script')
+      script.setAttribute('src', url)
+      document.head.appendChild(script)
+
+      // 监听加载完成事件
+      script.addEventListener('load', () => {
+        document.head.removeChild(script)
+        // 最后一个新增的 key，是 umd 挂载的
+        const newLastWindowKey = Object.keys(window).pop()
+
+        // 获取到导出的组件
+        const res = lastWindowKey !== newLastWindowKey ? (window[newLastWindowKey]) : ({})
+        const Com = res.default ? res.default : res
+
+        cache[url] = Com
+
+        resolve(Com)
+      })
+
+      // 监听加载失败情况
+      script.addEventListener('error', (error) => {
+        reject(error)
+      })
+    })
+  }
+})()
+
+/**
+ * 批量加载远程插件
+ * @param plugins 插件数组
+ * @param cb 回调函数
+ * @returns 
+ */
+export const fetchPlugins = (plugins: PluginType[], cb?) => {
+  const remotePlugins = [];
+  return new Promise((resolve, reject) => {
+    plugins.forEach((plugin, index) => {
+      importScript(plugin)
+        .then(com => {
+          remotePlugins.push(com());
+          if (index === plugins.length - 1) {
+            resolve(remotePlugins);
+            cb(remotePlugins);
+          }
+        }).catch(e => {
+          message.error(`${plugin.title} 插件加载失败，失败信息：${e}`);
+          console.error(`${plugin.title} 插件加载失败，失败信息：${e}`);
+          if (index === plugins.length - 1) {
+            resolve(remotePlugins);
+            cb(remotePlugins);
+          }
+        });
+    });
+  })
 }
