@@ -68,7 +68,7 @@ export default ({
           <Input disabled={status === "edit"} placeholder="dev/test/prod..." />
         </Form.Item>
         <Form.Item
-          label="接口路径前缀"
+          label="接口默认前缀"
           name="defaultApiPrePath"
           required
           tooltip="该环境下发起的请求会自动带上此前缀（不包含已有域名前缀的接口）"

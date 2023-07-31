@@ -182,6 +182,9 @@ export default function (ctx, save, remotePlugins = []) {
           },
           {
             title: '调试',
+            ifVisible({ data }) {
+              return envList?.length > 0;
+            },
             items: [
               {
                 title: '测试环境',

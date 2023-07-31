@@ -141,7 +141,7 @@ export default class PcPageService {
         publishMaterialInfo = await API.Upload.staticServer({
           content: template,
           folderPath,
-          fileName,
+          fileName: `${envType || 'prod'}_${fileName}`,
           noHash: true
         })
         //   const { url } = await uploadStatic(template, manateeUserInfo);
