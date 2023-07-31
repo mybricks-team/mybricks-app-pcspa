@@ -81,6 +81,8 @@ export default function MyDesigner({ appData }) {
     debugQuery: appData.fileContent?.content?.debugQuery,
     executeEnv: appData.fileContent?.content?.executeEnv || '',
     debugMainProps: appData.fileContent?.content?.debugMainProps,
+    hasPermissionFn: appData.fileContent?.content?.hasPermissionFn,
+    debugHasPermissionFn: appData.fileContent?.content?.debugHasPermissionFn,
     versionApi: null,
     appConfig,
     uploadService,
@@ -181,18 +183,20 @@ export default function MyDesigner({ appData }) {
     json.debugQuery = ctx.debugQuery
     json.executeEnv = ctx.executeEnv
     json.debugMainProps = ctx.debugMainProps
+    json.hasPermissionFn = ctx.hasPermissionFn
+    json.debugHasPermissionFn = ctx.debugHasPermissionFn
 
-    json.toJSON = JSON.parse(JSON.stringify({
-      ...designerRef?.current?.toJSON(), configuration: {
-        comlibs: ctx.comlibs,
-        title: ctx.fileItem.name,
-        publisherEmail: ctx.user.email,
-        publisherName: ctx.user?.name,
-        projectId: ctx.sdk.projectId,
-        folderPath: '/app/pcpage',
-        fileName: `${ctx.fileItem.id}.html`
-      }
-    }));
+    // json.toJSON = JSON.parse(JSON.stringify({
+    //   ...designerRef?.current?.toJSON(), configuration: {
+    //     comlibs: ctx.comlibs,
+    //     title: ctx.fileItem.name,
+    //     publisherEmail: ctx.user.email,
+    //     publisherName: ctx.user?.name,
+    //     projectId: ctx.sdk.projectId,
+    //     folderPath: '/app/pcpage',
+    //     fileName: `${ctx.fileItem.id}.html`
+    //   }
+    // }));
 
     json.projectId = ctx.sdk.projectId;
 
@@ -225,6 +229,7 @@ export default function MyDesigner({ appData }) {
       dumpJson: json,
       executeEnv: ctx.executeEnv,
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
+      hasPermissionFn: ctx.hasPermissionFn
     })
 
     window.open(`./preview.html?fileId=${ctx.fileId}`)
@@ -245,69 +250,75 @@ export default function MyDesigner({ appData }) {
         content: '页面发布中',
         duration: 0,
       })
-        ; return (async () => {
-          /** 先保存 */
-          const json = designerRef.current?.dump();
-          json.comlibs = ctx.comlibs
-          json.debugQuery = ctx.debugQuery
-          json.executeEnv = ctx.executeEnv
+      ; return (async () => {
+        /** 先保存 */
+        const json = designerRef.current?.dump();
 
-          // let folderPath;
+        json.comlibs = ctx.comlibs
+        json.debugQuery = ctx.debugQuery
+        json.executeEnv = ctx.executeEnv
+        json.debugMainProps = ctx.debugMainProps
+        json.hasPermissionFn = ctx.hasPermissionFn
+        json.debugHasPermissionFn = ctx.debugHasPermissionFn
+        json.projectId = ctx.sdk.projectId;
 
-          // if (type === 'staging') {
-          //   folderPath = '/staging/app/pcpage'
-          // } else {
-          //   folderPath = '/app/pcpage'
-          // }
+        // let folderPath;
 
-          json.toJSON = JSON.parse(JSON.stringify({
-            ...designerRef?.current?.toJSON(), configuration: {
-              // scripts: encodeURIComponent(scripts),
-              comlibs: ctx.comlibs,
-              title: ctx.fileItem.name,
-              publisherEmail: ctx.user.email,
-              publisherName: ctx.user?.name,
-              projectId: ctx.sdk.projectId,
-              // 非模块下的页面直接发布到项目空间下
-              folderPath: '/app/pcpage',
-              fileName: `${ctx.fileItem.id}.html`
-            }
-          }));
+        // if (type === 'staging') {
+        //   folderPath = '/staging/app/pcpage'
+        // } else {
+        //   folderPath = '/app/pcpage'
+        // }
 
-          json.projectId = ctx.sdk.projectId;
+        await ctx.save({ content: JSON.stringify(json), name: ctx.fileItem.name }, true);
 
-          await ctx.save({ content: JSON.stringify(json), name: ctx.fileItem.name }, true);
+        setBeforeunload(false);
 
-          setBeforeunload(false);
+        const toJSON = JSON.parse(JSON.stringify({
+          ...designerRef?.current?.toJSON(),
+          configuration: {
+            // scripts: encodeURIComponent(scripts),
+            comlibs: ctx.comlibs,
+            title: ctx.fileItem.name,
+            publisherEmail: ctx.user.email,
+            publisherName: ctx.user?.name,
+            projectId: ctx.sdk.projectId,
+            // 非模块下的页面直接发布到项目空间下
+            folderPath: '/app/pcpage',
+            fileName: `${ctx.fileItem.id}.html`
+          },
+          hasPermissionFn: ctx.hasPermissionFn
+        }));
 
-          const res: { code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
-            userId: ctx.user?.email,
-            fileId: ctx.fileId,
-            json: json.toJSON,
-            envType,
-            commitInfo
+        const res: { code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
+          userId: ctx.user?.email,
+          fileId: ctx.fileId,
+          json: toJSON,
+          envType,
+          commitInfo
+        })
+
+        if (res.code === 1) {
+          close()
+          message.success({
+            key: 'publish',
+            content: '发布成功',
+            duration: 2,
           })
-          if (res.code === 1) {
-            close()
-            message.success({
-              key: 'publish',
-              content: '发布成功',
-              duration: 2,
-            })
 
-            designerRef.current?.switchActivity?.('@mybricks/plugins/version')
-            setTimeout(() => {
-              ctx?.versionApi?.switchAciveTab?.('publish', void 0)
-            }, 0)
-          } else {
-            close()
-            message.error({
-              content: res.message || '发布失败',
-              duration: 2,
-            })
-          }
+          designerRef.current?.switchActivity?.('@mybricks/plugins/version')
+          setTimeout(() => {
+            ctx?.versionApi?.switchAciveTab?.('publish', void 0)
+          }, 0)
+        } else {
+          close()
+          message.error({
+            content: res.message || '发布失败',
+            duration: 2,
+          })
+        }
 
-          setPublishLoading(false)
+        setPublishLoading(false)
 
         })()
           .catch((e) => {
@@ -366,7 +377,7 @@ export default function MyDesigner({ appData }) {
           <>
             <SPADesigner
               ref={designerRef}
-              config={config(ctx, save, remotePlugins)}
+              config={config(ctx, save, designerRef, remotePlugins)}
               onEdit={onEdit}
               onMessage={onMessage}
               _onError_={(ex: any) => {

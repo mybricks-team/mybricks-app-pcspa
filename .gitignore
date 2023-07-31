@@ -43,3 +43,6 @@ package-lock.json
 node_modules
 
 assets
+
+// 发布模版
+nodejs/module/template

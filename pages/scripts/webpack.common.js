@@ -5,6 +5,7 @@ module.exports = {
     ['index']: path.resolve(__dirname, '../src/pages/home/index.tsx'),
     ['preview']: path.resolve(__dirname, '../src/pages/preview/index.tsx'),
     ['setting']: path.resolve(__dirname, '../src/pages/setting/index.tsx'),
+    ['publish']: path.resolve(__dirname, '../src/pages/publish/index.tsx'),
   },
   output: {
     // 打包文件根目录

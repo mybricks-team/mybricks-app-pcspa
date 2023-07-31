@@ -90,24 +90,54 @@ export default class PcPageService {
 
   async publish(req, { json, userId, fileId, envType, commitInfo }) {
     try {
-      let template = fs.readFileSync(path.resolve(__dirname, './template.html'), 'utf8')
-      const { title, comlibs, projectId, fileName, folderPath, publisherEmail, publisherName } = json.configuration
+
+      const publishFilePath = path.resolve(__dirname, './template')
+
+      // // let templateJS = ''
+      // let templateHTMl = ''
+
+      // if(fs.existsSync(publishFilePath)) {
+      //   const files = fs.readdirSync(publishFilePath)
+
+      //   files.forEach(file => {
+      //     if (/\.js$/.test(file)) {
+      //       templateJS = fs.readFileSync(publishFilePath + '/' + file, 'utf-8')
+      //     }
+      //   })
+
+      //   templateHTMl = fs.readFileSync(publishFilePath + '/publish.html', 'utf8')
+      // }
+
+      // let template = fs.readFileSync(path.resolve(__dirname, './template.html'), 'utf8')
+
+      let template = fs.readFileSync(publishFilePath + '/publish.html', 'utf8')
+
+      const {
+        title,
+        comlibs,
+        projectId,
+        fileName,
+        folderPath,
+        publisherEmail,
+        publisherName
+      } = json.configuration
+
       Reflect.deleteProperty(json, 'configuration')
 
       /** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
       const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
 
-      template = template
-        // .replace(`--RENDER_WEB--`, 'https://f2.eckwai.com/kos/nlav12333/mybricks/render-web/index.min.1.1.46.js')
-        .replace(`<!-- comlib-rt -->`, await this._generateComLibRT(comlibs, json, { domainName }))
-        .replace(`--title--`, title)
-        .replace(`'--projectJson--'`, JSON.stringify(json))
-        .replace(`'--executeEnv--'`, JSON.stringify(envType))
-        .replace(`'--slot-project-id--'`, projectId ? projectId : JSON.stringify(null))
+      template = template.replace(`--title--`, title)
+        .replace(`-- comlib-rt --`, await this._generateComLibRT(comlibs, json, { domainName }))
+        .replace(`"--projectJson--"`, JSON.stringify(json))
+        .replace(`"--executeEnv--"`, JSON.stringify(envType))
+        .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null))
 
 
       let publishMaterialInfo
+
       const customPublishApi = await getCustomPublishApi()
+
       if (customPublishApi) {
         const latestPub = (await API.File.getLatestPub({
           fileId

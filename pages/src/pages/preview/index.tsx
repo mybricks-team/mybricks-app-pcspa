@@ -6,6 +6,7 @@ import { call as callConnectorHttp } from '@mybricks/plugin-connector-http'
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
 import { ComlibRtUrl, ChartsRtUrl, BasicRtUrl, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from './../../constants'
 import { getQueryString } from './../../utils'
+import { runJs } from './../../utils/runJs'
 import { PreviewStorage } from './../../utils/previewStorage'
 const { render: renderUI } = (window as any)._mybricks_render_web
 
@@ -13,7 +14,7 @@ const fileId = getQueryString('fileId')
 
 const previewStorage = new PreviewStorage({ fileId })
 
-let { dumpJson, comlibs, executeEnv } = previewStorage.getPreviewPageData()
+let { dumpJson, comlibs, hasPermissionFn, executeEnv } = previewStorage.getPreviewPageData()
 
 if (!dumpJson) {
   throw new Error('数据错误：项目数据缺失')
@@ -72,7 +73,7 @@ function render(props) {
   if (comlibs && Array.isArray(comlibs)) {
     Promise.all(comlibs.map((t) => requireScript(t))).then(() => {
       // render(<Page />, document.querySelector('#root'))
-      ReactDOM.render(<Page props={props} />, container ? container.querySelector('#root') : document.querySelector('#root'));
+      ReactDOM.render(<Page props={props} hasPermissionFn={hasPermissionFn} />, container ? container.querySelector('#root') : document.querySelector('#root'));
     })
   }
 
@@ -135,7 +136,7 @@ function parseQuery(query) {
   return res
 }
 
-function Page({ props }) {
+function Page({ props, hasPermissionFn }) {
 
   return (
     <ConfigProvider locale={zhCN}>
@@ -233,6 +234,36 @@ function Page({ props }) {
                   open(url, title || '_blank'),
               });
             },
+          },
+          get hasPermission() {
+            return ({ key }) => {
+
+              if (!hasPermissionFn) {
+                return true;
+              }
+    
+              let result;
+    
+              try {
+                result = runJs(decodeURIComponent(hasPermissionFn), [
+                  { key },
+                ]);
+    
+                if (typeof result !== 'boolean') {
+                  result = true;
+                  console.warn(
+                    `权限方法返回值类型应为 Boolean 请检查，[key] ${key}; [返回值] type: ${typeof result}; value: ${JSON.stringify(
+                      result,
+                    )}`,
+                  );
+                }
+              } catch (error) {
+                result = true;
+                console.error(`权限方法出错 [key] ${key}；`, error);
+              }
+    
+              return result;
+            };
           },
           // uploadFile: uploadApi
         },

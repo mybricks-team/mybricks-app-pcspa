@@ -12,7 +12,25 @@ import toolsPlugin from "@mybricks/plugin-tools";
 import { render as renderUI } from '@mybricks/render-web';
 import comlibLoaderFunc from './configs/comlibLoader'
 import { comLibAdderFunc } from './configs/comLibAdder'
+import { runJs } from '../../utils/runJs'
+
 import axios from 'axios';
+
+const defaultPermissionComments = `/**
+*
+* interface Props {
+*   key: string // 权限key
+* }
+*
+* @param {object} props: Props
+* @return {boolean}
+*/
+`
+
+const defaultPermissionFn = `export default function ({ key }) {
+  return true
+}
+`
 
 const getComs = () => {
   const comDefs = {};
@@ -93,7 +111,7 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
   }
 }
 
-export default function (ctx, save, remotePlugins = []) {
+export default function (ctx, save, designerRef, remotePlugins = []) {
   const envList = ctx?.appConfig?.publishEnvConfig?.envList || []
 
   // 获得环境信息映射表
@@ -165,7 +183,7 @@ export default function (ctx, save, remotePlugins = []) {
         return;
       },
       items({ }, cate0, cate1, cate2) {
-        cate0.title = `实例项目`
+        cate0.title = `项目`
         cate0.items = [
           {
             title: '名称',
@@ -179,6 +197,29 @@ export default function (ctx, save, remotePlugins = []) {
                 ctx.setName(v)
               },
             },
+          },
+          {
+            title: '全局方法',
+            items: [
+              {
+                title: '权限校验',
+                type: 'code',
+                description: '设置权限校验方法，调试模式下默认不会启用',
+                options: {
+                  title: '权限校验',
+                  comments: defaultPermissionComments,
+                  displayType: 'button'
+                },
+                value: {
+                  get () {
+                    return decodeURIComponent(ctx?.hasPermissionFn || defaultPermissionFn)
+                  },
+                  set (context, v: string) {
+                    ctx.hasPermissionFn = encodeURIComponent(v)
+                  }
+                }
+              }
+            ]
           },
           {
             title: '调试',
@@ -200,6 +241,19 @@ export default function (ctx, save, remotePlugins = []) {
                   },
                   set(context, v) {
                     ctx.executeEnv = v
+                  }
+                }
+              },
+              {
+                title: '权限校验',
+                type: 'Switch',
+                description: '调试模式下，是否开启权限校验',
+                value: {
+                  get() {
+                    return ctx.debugHasPermissionFn
+                  },
+                  set(context, v) {
+                    ctx.debugHasPermissionFn = v
                   }
                 }
               },
@@ -328,9 +382,52 @@ export default function (ctx, save, remotePlugins = []) {
           }
         },
         get hasPermission() {
-          return () => {
-            return true
-          }
+
+          return ({ key }) => {
+            const hasPermissionFn = ctx?.hasPermissionFn;
+
+            if (!ctx.debugHasPermissionFn) {
+              return true
+            }
+
+            if (!hasPermissionFn) {
+              return true;
+            }
+    
+            let result: boolean;
+    
+            try {
+              result = runJs(decodeURIComponent(hasPermissionFn), [
+                { key },
+              ]);
+    
+              if (typeof result !== 'boolean') {
+                result = true;
+                designerRef.current?.console?.log.error(
+                  '权限方法',
+                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${key}; [返回值] Type: ${typeof result}; Value: ${JSON.stringify(
+                    result,
+                  )}`,
+                );
+
+                console.error(
+                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${key}; [返回值] Type: ${typeof result}; Value: ${JSON.stringify(
+                    result,
+                  )}`,
+                );
+              }
+            } catch (error) {
+              result = true;
+              designerRef.current?.console?.log.error(
+                '权限方法',
+                `${error.message}`,
+              );
+              // ctx.console?.log.error('权限方法', `${error.message}`)
+              console.error(`权限方法出错 [Key] ${key}；`, error);
+            }
+    
+            return result;
+          };
         }
       },
       events: [
