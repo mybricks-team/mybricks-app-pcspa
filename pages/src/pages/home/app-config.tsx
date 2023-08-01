@@ -223,13 +223,13 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
           },
           {
             title: '调试',
-            ifVisible({ data }) {
-              return envList?.length > 0;
-            },
             items: [
               {
                 title: '调试环境',
                 type: 'select',
+                ifVisible({ data }) {
+                  return envList?.length > 0;
+                },
                 description: '选择调试时采用的环境配置，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
                 options: {
                   options: envList.map(item => ({
@@ -262,30 +262,60 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               },
               {
                 title: '路由参数',
-                type: 'map',
-                description: '调试模式下，路由参数模拟配置',
+                type: 'code',
+                description: '调试模式下，路由的参数配置',
+                options: {
+                  title: '编辑路由参数',
+                  language: 'json',
+                  width: 500,
+                  minimap: {
+                    enabled: false
+                  },
+                  displayType: 'button'
+                },
                 value: {
                   get() {
-                    return ctx.debugQuery
+                    return ctx.debugQuery ? JSON.stringify(ctx.debugQuery, null, 2) : '{}'
                   },
-                  set(context, v) {
-                    ctx.debugQuery = v
+                  set(context: any, v: string) {
+                    const jsonString = decodeURIComponent(v);
+                    try {
+                      const jsonData = JSON.parse(jsonString);
+                      ctx.debugQuery = jsonData
+                    } catch {
+                      console.error('路由参数数据格式错误');
+                    }
                   }
                 }
               },
               {
                 title: '主应用参数',
-                type: 'map',
-                description: '调试模式下，主应用参数模拟配置',
+                type: 'code',
+                description: '调试模式下，主应用参数配置',
+                options: {
+                  title: '编辑主应用参数',
+                  language: 'json',
+                  width: 500,
+                  minimap: {
+                    enabled: false
+                  },
+                  displayType: 'button'
+                },
                 value: {
                   get() {
-                    return ctx.debugMainProps
+                    return ctx.debugMainProps ? JSON.stringify(ctx.debugMainProps, null, 2) : '{}'
                   },
-                  set(context, v) {
-                    ctx.debugMainProps = v
+                  set(context: any, v: string) {
+                    const jsonString = decodeURIComponent(v);
+                    try {
+                      const jsonData = JSON.parse(jsonString);
+                      ctx.debugMainProps = jsonData
+                    } catch {
+                      console.error('主应用参数数据格式错误');
+                    }
                   }
                 }
-              }
+              },
             ]
           }
 
