@@ -42,7 +42,9 @@ export default function MyDesigner({ appData }) {
   } else {
     coms.push(...defaultComlibs)
   }
+
   let comlibs = [];
+
   if (!appData.fileContent?.content?.comlibs) {
     coms.unshift(MySelf_COM_LIB)
     comlibs = coms;
@@ -55,7 +57,9 @@ export default function MyDesigner({ appData }) {
       comlibs = appData.fileContent?.content?.comlibs;
     }
   }
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.90/index.min.js'
+
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.91/index.min.js'
+
   const { plugins = [] } = JSON.parse(appData.config[appName]?.config ?? "{}");
   // const configComlibs = comlibs.map(lib => lib.editJs)
 
@@ -86,7 +90,6 @@ export default function MyDesigner({ appData }) {
     versionApi: null,
     appConfig,
     uploadService,
-    // manateeUserInfo,
     operable: false,
     saveContent(content) {
       ctx.save({ content })
@@ -138,6 +141,7 @@ export default function MyDesigner({ appData }) {
     fetchPlugins(plugins).then(setRemotePlugins);
     console.log('应用数据:', appData);
   }, [])
+
   useMemo(() => {
     if (designer) {
       const script = document.createElement('script');
@@ -185,18 +189,6 @@ export default function MyDesigner({ appData }) {
     json.debugMainProps = ctx.debugMainProps
     json.hasPermissionFn = ctx.hasPermissionFn
     json.debugHasPermissionFn = ctx.debugHasPermissionFn
-
-    // json.toJSON = JSON.parse(JSON.stringify({
-    //   ...designerRef?.current?.toJSON(), configuration: {
-    //     comlibs: ctx.comlibs,
-    //     title: ctx.fileItem.name,
-    //     publisherEmail: ctx.user.email,
-    //     publisherName: ctx.user?.name,
-    //     projectId: ctx.sdk.projectId,
-    //     folderPath: '/app/pcpage',
-    //     fileName: `${ctx.fileItem.id}.html`
-    //   }
-    // }));
 
     json.projectId = ctx.sdk.projectId;
 
@@ -261,14 +253,6 @@ export default function MyDesigner({ appData }) {
         json.hasPermissionFn = ctx.hasPermissionFn
         json.debugHasPermissionFn = ctx.debugHasPermissionFn
         json.projectId = ctx.sdk.projectId;
-
-        // let folderPath;
-
-        // if (type === 'staging') {
-        //   folderPath = '/staging/app/pcpage'
-        // } else {
-        //   folderPath = '/app/pcpage'
-        // }
 
         await ctx.save({ content: JSON.stringify(json), name: ctx.fileItem.name }, true);
 
