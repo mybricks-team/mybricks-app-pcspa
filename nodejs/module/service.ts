@@ -148,18 +148,21 @@ export default class PcPageService {
           productId: fileId,
           productName: title,
           publisherEmail,
-          publisherName,
+          publisherName: publisherName || '',
           version,
+          commitInfo,
           type: 'pc-page',
           content: {
-            json,
+            json: JSON.stringify(json),
             html: template,
           }
         }
-        const { code, message, data } = await axios({
-          url: customPublishApi,
-          method: "post",
+        const { code, message, data } = await axios.post(customPublishApi, {
           data: dataForCustom,
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }).then(res => res.data);
 
         if (code !== 1) {

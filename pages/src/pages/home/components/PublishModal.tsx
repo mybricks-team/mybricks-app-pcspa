@@ -45,6 +45,7 @@ export default ({
       maskClosable={false}
       onOk={_onOk}
       onCancel={onCancel}
+      zIndex={1001}
     >
       <Form form={form} labelCol={{ span: 5 }} wrapperCol={{ span: 19 }}>
         {envOptions.length > 0 && <Form.Item
