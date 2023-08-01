@@ -340,16 +340,13 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               callDomainModel(domainModel, type, params) {
                 return callDomainHttp(domainModel, params, { action: type });
               },
-              callConnector(connector, params) {
-                //调用连接器
-                if (connector.type === 'http') {
-                  //服务接口类型
-                  return callConnectorHttp(
-                    { script: connector.script, useProxy: true, executeEnv: ctx.executeEnv },
-                    params
-                  )
+              callConnector(connector, params, connectorConfig) {
+                const plugin = designerRef.current?.getPlugin(connector.connectorName || '@mybricks/plugins/service');
+
+                if (plugin) {
+                  return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, connectorConfig);
                 } else {
-                  return Promise.reject('错误的连接器类型.')
+                  return Promise.reject('错误的连接器类型.');
                 }
               }
             }
@@ -364,19 +361,12 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
           return callDomainHttp(domainModel, params, { action: type });
         },
         callConnector(connector, params, connectorConfig) {
-          /** 启动 Mock */
-          if (connectorConfig?.openMock) {
-            return connectorHttpMock({ ...connector, outputSchema: connectorConfig.mockSchema });
-          }
-          //调用连接器
-          if (connector.type === 'http') {
-            //服务接口类型
-            return callConnectorHttp(
-              { script: connector.script, useProxy: true, executeEnv: ctx.executeEnv },
-              params
-            )
+          const plugin = designerRef.current?.getPlugin(connector.connectorName || '@mybricks/plugins/service');
+
+          if (plugin) {
+            return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, connectorConfig);
           } else {
-            return Promise.reject('错误的连接器类型.')
+            return Promise.reject('错误的连接器类型.');
           }
         },
         // uploadFile(files) {

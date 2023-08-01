@@ -31,7 +31,7 @@
     <script crossorigin="anonymous"
       src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444304807.0.18.1_axios.min.js"
     ></script>
-    <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690445660913.mybricks_plugin-connector-http@1.1.39.js"></script>
+    <script src="//f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.1.44/index.js"></script>
     <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690445635042.mybricks_plugin-connector-domain@0.0.44.js"></script>
 
     <!-- mybricks-render-web -->
@@ -215,18 +215,19 @@
                   },
                 })
               },
-              callConnector(connector, params, privateDomainMap) {
-                //调用连接器
-                if (connector.type === 'http') {
-                  //服务接口类型
-                  return pluginConnectorHttp.call(
-                    { script: connector.script, params, executeEnv },
-                    params
-                  )
-                } else {
-                  return Promise.reject('错误的连接器类型.')
-                }
-              },
+							callConnector(connector, params) {
+								const connectorName = connector.connectorName || '@mybricks/plugins/service';
+								const plugin = window[connectorName];
+
+								if (plugin) {
+									/** 兼容云组件，云组件会自带 script */
+									const curConnector = connector.script ? connector : (projectJson.plugins[connectorName] || []).find(con => con.id === connector.id);
+
+									return curConnector ? plugin.call({ ...connector, ...curConnector, executeEnv }, params) : Promise.reject('找不到对应连接器 Script 执行脚本.');
+								} else {
+									return Promise.reject('错误的连接器类型.');
+								}
+							},
               renderCom(json, opts, coms) {
                 return renderUI(json, {
                   comDefs: { ...getComs(), ...coms },

@@ -1,8 +1,6 @@
-// import { render } from 'react-dom'
 import ReactDOM from 'react-dom';
 import { ConfigProvider } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN';
-import { call as callConnectorHttp } from '@mybricks/plugin-connector-http'
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
 import { ComlibRtUrl, ChartsRtUrl, BasicRtUrl, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from './../../constants'
 import { getQueryString } from './../../utils'
@@ -157,18 +155,15 @@ function Page({ props, hasPermissionFn }) {
                 },
                 /** 调用领域模型 */
                 callDomainModel(domainModel, type, params) {
-                  return callDomainHttp(domainModel, params, { action: type });
+                  return callDomainHttp(domainModel, params, { action: type } as any);
                 },
                 callConnector(connector, params) {
-                  //调用连接器
-                  if (connector.type === 'http') {
-                    //服务接口类型
-                    return callConnectorHttp(
-                      { script: connector.script, useProxy: true, executeEnv },
-                      params
-                    )
+                  const plugin = window[connector.connectorName || '@mybricks/plugins/service'];
+
+                  if (plugin) {
+                    return plugin.call({ ...connector, useProxy: true, executeEnv }, params);
                   } else {
-                    return Promise.reject('错误的连接器类型.')
+                    return Promise.reject('错误的连接器类型.');
                   }
                 }
               }
@@ -180,18 +175,17 @@ function Page({ props, hasPermissionFn }) {
           },
           /** 调用领域模型 */
           callDomainModel(domainModel, type, params) {
-            return callDomainHttp(domainModel, params, { action: type });
+            return callDomainHttp(domainModel, params, { action: type } as any);
           },
           callConnector(connector, params) {
-            //调用连接器
-            if (connector.type === 'http') {
-              //服务接口类型
-              return callConnectorHttp(
-                { script: connector.script, useProxy: true, executeEnv },
-                params
-              )
+            const connectorName = connector.connectorName || '@mybricks/plugins/service';
+            const plugin = window[connectorName];
+
+            if (plugin) {
+              const curConnector = (dumpJson.plugins[connectorName] || []).find(con => con.id === connector.id);
+              return curConnector ? plugin.call({ ...connector, ...curConnector, executeEnv, useProxy: true }, params) : Promise.reject('找不到对应连接器 Script 执行脚本.');
             } else {
-              return Promise.reject('错误的连接器类型.')
+              return Promise.reject('错误的连接器类型.');
             }
           },
           vars: {

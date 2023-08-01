@@ -169,16 +169,17 @@ function Page({ props }) {
           },
         })
       },
-      callConnector(connector, params, privateDomainMap) {
-        //调用连接器
-        if (connector.type === 'http') {
-          //服务接口类型
-          return window.pluginConnectorHttp.call(
-            { script: connector.script, params, executeEnv },
-            params
-          )
+      callConnector(connector, params) {
+        const connectorName = connector.connectorName || '@mybricks/plugins/service';
+        const plugin = window[connectorName];
+
+        if (plugin) {
+          /** 兼容云组件，云组件会自带 script */
+          const curConnector = connector.script ? connector : (projectJson.plugins[connectorName] || []).find(con => con.id === connector.id);
+
+          return curConnector ? plugin.call({ ...connector, ...curConnector, executeEnv }, params) : Promise.reject('找不到对应连接器 Script 执行脚本.');
         } else {
-          return Promise.reject('错误的连接器类型.')
+          return Promise.reject('错误的连接器类型.');
         }
       },
       renderCom(json, opts, coms) {
