@@ -241,14 +241,14 @@ function Page({ props, hasPermissionFn }) {
               if (!hasPermissionFn) {
                 return true;
               }
-    
+
               let result;
-    
+
               try {
                 result = runJs(decodeURIComponent(hasPermissionFn), [
                   { key },
                 ]);
-    
+
                 if (typeof result !== 'boolean') {
                   result = true;
                   console.warn(
@@ -261,7 +261,7 @@ function Page({ props, hasPermissionFn }) {
                 result = true;
                 console.error(`权限方法出错 [key] ${key}；`, error);
               }
-    
+
               return result;
             };
           },
