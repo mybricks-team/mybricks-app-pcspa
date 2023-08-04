@@ -306,7 +306,7 @@ const uploadStatic = async (
 };
 
 function getRealHostName(requestHeaders) {
-  let hostName = requestHeaders.ho
+  let hostName = requestHeaders.host
   if (requestHeaders['x-forwarded-host']) {
     hostName = requestHeaders['x-forwarded-host']
   } else if (requestHeaders['x-host']) {
