@@ -1,8 +1,7 @@
 import { Modal, message } from 'antd'
 import { MaterialComlib } from './../../../types'
 import { addComlib } from './addComlib'
-import { upgradeComlibByVersion } from './upgradeLatestComlib'
-import { defaultComlibs } from '../designer'
+import { upgradeComlibByVersion } from './upgradeComlib'
 
 function compareVersion(version1, version2) {
   return version1 === version2 ? 0 : 1;
@@ -77,15 +76,7 @@ export const comLibAdderFunc = ctx => (targetComlib) => {
           resolve(addedComlib)
         }else {
           //新增
-          const { id } = defaultComlibs.find(lib => lib.namespace===materials[0].namespace) ?? {}
-          const comlib = {
-            namespace: materials[0].namespace, 
-            editJs:materials[0].editJs, 
-            rtJs: materials[0].rtJs, 
-            version: materials[0].version, 
-            id: id ?? materials[0].material_id 
-          };
-          const addedComlib = await addComlib(ctx, comlib)
+          const addedComlib = await addComlib(ctx, materials[0])
           resolve(addedComlib)
         }
       }

@@ -3,9 +3,9 @@ import { Modal, message } from 'antd'
 import { MaterialService } from './../../../services'
 import { MaterialComlib } from './../../../types'
 import { ComboComlibURL, getMySelfLibComsFromUrl, getComlibsByNamespaceAndVersion } from './../../../utils/comlib'
-import { loadMaterials } from './loadMaterials'
+import { initMaterials } from './initMaterials'
 import { addComlib } from './addComlib'
-import { upgradeLatestComlib, upgradeComlibByVersion } from './upgradeLatestComlib'
+import { upgradeLatestComlib, upgradeComlibByVersion } from './upgradeComlib'
 import { deleteComlib } from './deleteComlib'
 
 const init = () => {
@@ -175,11 +175,11 @@ export default (ctx) => (libDesc) => {
             
             break
           case 'deleteComLib':
-            deleteComlib(ctx, libId)
+            deleteComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace})
             resolve(true);
             break
           case 'upgradeComLib':
-            const upgradedComlib = await upgradeLatestComlib(ctx, libId)
+            const upgradedComlib = await upgradeLatestComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace})
             return resolve(upgradedComlib)
           default:
             break
@@ -189,23 +189,23 @@ export default (ctx) => (libDesc) => {
 
       /** 不带命令，且描述为空，即页面初始化，加载组件及组件库 */
       if (!libDesc) {
-        const comlibs = await loadMaterials(ctx)
+        const comlibs = await initMaterials(ctx);
         return resolve(comlibs)
       }
       /** 不带命令，增加、更新组件库，新增时comLibAdder resolve的组件库会带到libDesc来 */
       if (libDesc?.editJs) {
-        const material = ctx.comlibs.find(lib => lib.namespace === libDesc?.namespace || lib.id === libDesc?.id)
+        const material = ctx.comlibs.find(lib => lib.namespace === libDesc?.libNamespace)
         if(material){
           //更新
           const comlib = {
             ...material, 
             ...libDesc
           }
-          const addedComlib = await upgradeComlibByVersion(ctx, comlib)
+          const addedComlib = await upgradeComlibByVersion(ctx, {...comlib, namespace: comlib?.libNamespace, id: libDesc?.libId})
           return resolve(addedComlib)
         }else{
           //新增
-          const addedComlib = await addComlib(ctx, libDesc)
+          const addedComlib = await addComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace, id: libDesc?.libId})
           return resolve(addedComlib)
         }
       }

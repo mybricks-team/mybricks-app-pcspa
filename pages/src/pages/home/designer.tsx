@@ -3,7 +3,8 @@ import React, {
   useMemo,
   useState,
   useEffect,
-  useCallback
+  useCallback,
+  useLayoutEffect
 } from 'react'
 import { fAxios } from '../../services/http'
 import moment from 'moment'
@@ -32,10 +33,11 @@ export default function MyDesigner({ appData }) {
     appData?.defaultComlibs.forEach(lib => {
       const { namespace, content, version } = lib;
       const com = defaultComlibs.find(lib => lib.namespace === namespace)
+      const { editJs, rtJs } = JSON.parse(content)
       if (com) {
-        coms.push({ id: com.id, namespace, ...JSON.parse(content), version })
+        coms.push({ id: com.id, namespace, version, editJs, rtJs })
       } else {
-        coms.push({ ...lib, ...JSON.parse(content) })
+        coms.push({ ...lib, editJs, rtJs })
       }
     })
   } else {
@@ -55,7 +57,7 @@ export default function MyDesigner({ appData }) {
     }
   }
 
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.2.89/index.min.js'
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.3/index.min.js'
 
   // const [manateeUserInfo] = useState(getManateeUserInfo())
 
@@ -66,7 +68,15 @@ export default function MyDesigner({ appData }) {
 
   }
 
-  const [ctx] = useState({
+
+  useLayoutEffect(() => {
+    API.Material.getLatestComponentLibrarys(comlibs.filter(lib => lib.id !== "_myself_").map(lib => lib.namespace)).then(( res: any )=> {
+      const latestComlibs = (res || []).map(lib => ({...lib, ...JSON.parse(lib.content)}))
+      setCtx(pre => ({...pre, latestComlibs}))
+    })
+  }, [JSON.stringify(comlibs)])
+
+  const [ctx, setCtx] = useState({
     sdk: appData,
     user: appData.user,
     fileId: appData.fileId,
@@ -74,7 +84,7 @@ export default function MyDesigner({ appData }) {
     setting: appData.config || {},
     hasMaterialApp: appData.hasMaterialApp,
     comlibs,
-    latestComlibs: appData?.defaultComlibs,
+    latestComlibs: [],
     debugQuery: appData.fileContent?.content?.debugQuery,
     debugMainProps: appData.fileContent?.content?.debugMainProps,
     versionApi: null,
