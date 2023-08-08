@@ -12,6 +12,7 @@ export const initMaterials = async (ctx: Record<string, any>) => {
     if(myselfLib && hasMaterialApp) {
         await getComlibsByNamespaceAndVersion(myselfLib?.comAray)
     }
+    const styleArr = [];
     await Promise.all(
         libs.map(lib => requireScript(lib?.editJs??lib))
     ).then((res) => {
@@ -21,8 +22,8 @@ export const initMaterials = async (ctx: Record<string, any>) => {
                 ...window[ComLib_Edit][index+1],
                 id: libs[index].id,
                 namespace: libs[index].namespace,
-                _styleAry: styles
             }
+            styleArr.push(...styles)
         })
     })
     latestComlibs.forEach(latestLib => {
@@ -31,5 +32,9 @@ export const initMaterials = async (ctx: Record<string, any>) => {
             shouldUpdateLib.latestComlib = latestLib;
         }
     })
+    const comlibIndex = window[ComLib_Edit].findIndex((comlib) => comlib.id !== '_myself_');
+    if (comlibIndex !== -1) {
+        window[ComLib_Edit][comlibIndex]._styleAry = styleArr;
+    }
     return window[ComLib_Edit];
 }
