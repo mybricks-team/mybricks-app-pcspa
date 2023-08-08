@@ -8,6 +8,7 @@ const outputPath = path.resolve(rootPath, '../assets');
 const BuildPlugin = require('./buildplugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const WebpackBar = require('webpackbar')
+const HtmlWebpackInlineSourcePlugin = require('@effortlessmotion/html-webpack-inline-source-plugin');
 
 module.exports = merge(common, {
   mode: 'production',
@@ -46,5 +47,14 @@ module.exports = merge(common, {
       template: path.resolve(__dirname, '../templates/setting.html'),
       chunks: ['setting'],
     }),
+    new HtmlWebpackPlugin({
+      filename: 'publish.html',
+      template: path.resolve(__dirname, '../templates/publish.html'),
+      inlineSource: '.(js)$',
+      inject: 'body',
+      removeComments: false,
+      chunks: ['publish'],
+    }),
+    new HtmlWebpackInlineSourcePlugin()
   ]
 });

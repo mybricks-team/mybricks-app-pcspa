@@ -13,10 +13,11 @@ import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
 // import { getManateeUserInfo } from '../../utils'
+import { fetchPlugins, getManateeUserInfo } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
-
+import PublishModal from './components/PublishModal'
 
 import css from './app.less'
 
@@ -43,29 +44,35 @@ export default function MyDesigner({ appData }) {
   } else {
     coms.push(...defaultComlibs)
   }
+
   let comlibs = [];
+
   if (!appData.fileContent?.content?.comlibs) {
     coms.unshift(MySelf_COM_LIB)
     comlibs = coms;
   } else {
     const myselfComlib = appData.fileContent?.content?.comlibs?.find(lib => lib.id === "_myself_") ?? MySelf_COM_LIB
     coms.unshift(myselfComlib)
-    if(appData.fileContent?.content?.comlibs?.some(lib => typeof lib === 'string')){
+    if (appData.fileContent?.content?.comlibs?.some(lib => typeof lib === 'string')) {
       comlibs = coms;
-    }else{
+    } else {
       comlibs = appData.fileContent?.content?.comlibs;
     }
   }
 
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.3/index.min.js'
 
+  const { plugins = [] } = JSON.parse(appData.config[appName]?.config ?? "{}");
+  // const configComlibs = comlibs.map(lib => lib.editJs)
+
   // const [manateeUserInfo] = useState(getManateeUserInfo())
 
   let uploadService = null;
+  let appConfig = null // 记录应用所有配置
   try {
-    uploadService = JSON.parse(appData.config[appName]?.config).uploadServer?.uploadService
+    appConfig = JSON.parse(appData.config[appName]?.config)
+    uploadService = appConfig?.uploadServer?.uploadService
   } catch (error) {
-
   }
 
 
@@ -86,10 +93,13 @@ export default function MyDesigner({ appData }) {
     comlibs,
     latestComlibs: [],
     debugQuery: appData.fileContent?.content?.debugQuery,
+    executeEnv: appData.fileContent?.content?.executeEnv || '',
     debugMainProps: appData.fileContent?.content?.debugMainProps,
+    hasPermissionFn: appData.fileContent?.content?.hasPermissionFn,
+    debugHasPermissionFn: appData.fileContent?.content?.debugHasPermissionFn,
     versionApi: null,
+    appConfig,
     uploadService,
-    // manateeUserInfo,
     operable: false,
     saveContent(content) {
       ctx.save({ content })
@@ -134,10 +144,11 @@ export default function MyDesigner({ appData }) {
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
   const [SPADesigner, setSPADesigner] = useState(null);
-
-
+  const [remotePlugins, setRemotePlugins] = useState(null);
+  const [publishModalVisible, setPublishModalVisible] = useState(false)
 
   useEffect(() => {
+    fetchPlugins(plugins).then(setRemotePlugins);
     console.log('应用数据:', appData);
   }, [])
 
@@ -184,17 +195,10 @@ export default function MyDesigner({ appData }) {
     const json = designerRef.current?.dump()
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
+    json.executeEnv = ctx.executeEnv
     json.debugMainProps = ctx.debugMainProps
-
-    json.toJSON = JSON.parse(JSON.stringify({
-      ...designerRef?.current?.toJSON(), configuration: {
-        comlibs: ctx.comlibs,
-        title: ctx.fileItem.name,
-        projectId: ctx.sdk.projectId,
-        folderPath: '/app/pcpage',
-        fileName: `${ctx.fileItem.id}.html`
-      }
-    }));
+    json.hasPermissionFn = ctx.hasPermissionFn
+    json.debugHasPermissionFn = ctx.debugHasPermissionFn
 
     json.projectId = ctx.sdk.projectId;
 
@@ -225,67 +229,71 @@ export default function MyDesigner({ appData }) {
     const previewStorage = new PreviewStorage({ fileId: ctx.fileId })
     previewStorage.savePreviewPageData({
       dumpJson: json,
+      executeEnv: ctx.executeEnv,
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
+      hasPermissionFn: ctx.hasPermissionFn
     })
 
     window.open(`./preview.html?fileId=${ctx.fileId}`)
   }, [])
 
   const publish = useCallback(
-    () => {
+    (publishConfig) => {
       if (publishingRef.current) {
         return
       }
-
+      const { envType = 'prod', commitInfo } = publishConfig
       publishingRef.current = true
 
       setPublishLoading(true)
 
-      message.loading({
+      const close = message.loading({
         key: 'publish',
         content: '页面发布中',
         duration: 0,
       })
-        ; (async () => {
+        ; return (async () => {
           /** 先保存 */
           const json = designerRef.current?.dump();
+
           json.comlibs = ctx.comlibs
           json.debugQuery = ctx.debugQuery
-
-          // let folderPath;
-
-          // if (type === 'staging') {
-          //   folderPath = '/staging/app/pcpage'
-          // } else {
-          //   folderPath = '/app/pcpage'
-          // }
-
-          json.toJSON = JSON.parse(JSON.stringify({
-            ...designerRef?.current?.toJSON(), configuration: {
-              // scripts: encodeURIComponent(scripts),
-              comlibs: ctx.comlibs,
-              title: ctx.fileItem.name,
-              projectId: ctx.sdk.projectId,
-              // 非模块下的页面直接发布到项目空间下
-              folderPath: '/app/pcpage',
-              fileName: `${ctx.fileItem.id}.html`
-            }
-          }));
-
+          json.executeEnv = ctx.executeEnv
+          json.debugMainProps = ctx.debugMainProps
+          json.hasPermissionFn = ctx.hasPermissionFn
+          json.debugHasPermissionFn = ctx.debugHasPermissionFn
           json.projectId = ctx.sdk.projectId;
 
           await ctx.save({ content: JSON.stringify(json), name: ctx.fileItem.name }, true);
 
           setBeforeunload(false);
 
+          const toJSON = JSON.parse(JSON.stringify({
+            ...designerRef?.current?.toJSON(),
+            configuration: {
+              // scripts: encodeURIComponent(scripts),
+              comlibs: ctx.comlibs,
+              title: ctx.fileItem.name,
+              publisherEmail: ctx.user.email,
+              publisherName: ctx.user?.name,
+              projectId: ctx.sdk.projectId,
+              // 非模块下的页面直接发布到项目空间下
+              folderPath: '/app/pcpage',
+              fileName: `${ctx.fileItem.id}.html`
+            },
+            hasPermissionFn: ctx.hasPermissionFn
+          }));
+
           const res: { code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
             userId: ctx.user?.email,
             fileId: ctx.fileId,
-            json: json.toJSON,
-            envType: 'prod',
-            // manateeUserInfo
+            json: toJSON,
+            envType,
+            commitInfo
           })
+
           if (res.code === 1) {
+            close()
             message.success({
               key: 'publish',
               content: '发布成功',
@@ -297,6 +305,7 @@ export default function MyDesigner({ appData }) {
               ctx?.versionApi?.switchAciveTab?.('publish', void 0)
             }, 0)
           } else {
+            close()
             message.error({
               content: res.message || '发布失败',
               duration: 2,
@@ -308,6 +317,7 @@ export default function MyDesigner({ appData }) {
         })()
           .catch((e) => {
             console.error(e)
+            close()
             message.error({
               key: 'publish',
               content: '网络错误，请稍后再试',
@@ -353,15 +363,15 @@ export default function MyDesigner({ appData }) {
         <Toolbar.Button
           disabled={!operable}
           loading={publishLoading}
-          onClick={publish}
+          onClick={() => setPublishModalVisible(true)}
         >发布</Toolbar.Button>
       </Toolbar>
       <div className={css.designer}>
-        {SPADesigner && (
+        {SPADesigner && remotePlugins && (
           <>
             <SPADesigner
               ref={designerRef}
-              config={config(ctx, save)}
+              config={config(ctx, save, designerRef, remotePlugins)}
               onEdit={onEdit}
               onMessage={onMessage}
               _onError_={(ex: any) => {
@@ -372,6 +382,11 @@ export default function MyDesigner({ appData }) {
           </>
         )}
       </div>
+      <PublishModal envList={ctx?.appConfig?.publishEnvConfig?.envList || []} visible={publishModalVisible} onOk={(publishConfig) => {
+        publish(publishConfig)
+        setPublishModalVisible(false)
+      }} onCancel={() => setPublishModalVisible(false)} />
     </div>
   )
 }
+

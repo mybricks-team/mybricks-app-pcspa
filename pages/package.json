@@ -4,7 +4,8 @@
   "description": "mybricks PC页面",
   "scripts": {
     "dev": "webpack serve --config ./scripts/webpack.dev.js",
-    "build": "npm install && webpack --config ./scripts/webpack.prod.js"
+    "build": "npm install && webpack --config ./scripts/webpack.prod.js && node ./scripts/publishRemove.js",
+    "build-test": "webpack --config ./scripts/webpack.prod.js && node ./scripts/publishRemove.js"
   },
   "keywords": [
     "mybricks",
@@ -21,6 +22,7 @@
     "@babel/core": "^7.18.10",
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/preset-react": "^7.18.6",
+    "@effortlessmotion/html-webpack-inline-source-plugin": "^1.0.3",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
     "@types/lodash": "^4.14.182",
     "@types/react-dom": "^18.0.6",
@@ -54,17 +56,17 @@
   },
   "dependencies": {
     "@mybricks/plugin-connector-domain": "0.0.46",
-    "@mybricks/plugin-connector-http": "1.1.36",
-    "@mybricks/plugin-tools": "1.0.16",
-    "@mybricks/render-web": "1.1.70",
     "@mybricks/sdk-for-app": "0.1.71",
+    "@mybricks/plugin-connector-http": "1.1.43",
+    "@mybricks/plugin-tools": "1.0.17",
+    "@mybricks/render-web": "1.1.72",
     "antd": "^4.23.6",
     "classnames": "^2.3.1",
     "compare-versions": "^6.0.0",
     "dayjs": "^1.11.3",
     "html-to-image": "^1.10.8",
     "lodash": "^4.17.21",
-    "mybricks-plugin-version": "^0.0.6",
+    "mybricks-plugin-version": "^0.0.9",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
