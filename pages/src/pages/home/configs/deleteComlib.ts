@@ -1,5 +1,8 @@
+import { message } from "antd";
+
 export const deleteComlib = (ctx: Record<string, any>, libDesc: Record<string, any>) => {
     const { namespace } = libDesc;
+    if(!namespace) return message.error('缺少物料namespace')
     const index = ctx.comlibs.findIndex((lib) => lib.namespace===namespace);
     if (index !== -1) {
         ctx.comlibs.splice(index, 1)

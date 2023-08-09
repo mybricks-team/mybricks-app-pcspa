@@ -1,11 +1,13 @@
+import { message } from 'antd';
 import { myRequire } from '../../../utils/comlib'
 const COMLIBS_EDIT = '__comlibs_edit_';
 
 export const upgradeLatestComlib = async (ctx: Record<string, any>, comlib: Record<string, any>) => {
-    const { namespace, libId } = comlib;
+    const { namespace, id } = comlib;
+    if(!namespace) return message.error('缺少物料namespace')
     const index = ctx.comlibs.findIndex((lib) => namespace===lib.namespace)
     const winIndex = window[COMLIBS_EDIT].findIndex(lib => lib.namespace===namespace)
-    if(index===-1 || winIndex===-1) return;
+    if(index===-1 || winIndex===-1) return message.error(`找不到namespace为【${namespace}】的物料，检查物料namespace`);
     const { latestComlib } = window[COMLIBS_EDIT][winIndex] ?? {}
     const { editJs, rtJs } = latestComlib;
     try {
@@ -13,10 +15,14 @@ export const upgradeLatestComlib = async (ctx: Record<string, any>, comlib: Reco
         const { styles } =  await myRequire([editJs], (error) => {
             Promise.reject(error)
         })
-        ctx.comlibs[index] = {...ctx.comlibs[index], version: latestComlib.version, editJs, rtJs, id: libId}
-        const loadedComlib = window[COMLIBS_EDIT][window[COMLIBS_EDIT].length-1];
-        loadedComlib.id = libId;
-        loadedComlib.namespace = namespace;
+        ctx.comlibs[index] = {...ctx.comlibs[index], version: latestComlib.version, editJs, rtJs, id}
+        const loadedComlib = window[COMLIBS_EDIT].find(lib => lib.namespace===namespace);
+        /**
+         * 同步中心服务物料id
+         */
+        if(id){
+            loadedComlib.id = id;
+        }
         loadedComlib._styleAry = styles;
         return loadedComlib
     } catch (error) {
@@ -27,18 +33,23 @@ export const upgradeLatestComlib = async (ctx: Record<string, any>, comlib: Reco
 
 export const upgradeComlibByVersion = async (ctx: Record<string, any>, comlib: Record<string, any>) => {
     const { id, namespace } = comlib;
+    if(!namespace) return message.error('缺少物料namespace')
     const index = ctx.comlibs.findIndex((lib) => namespace===lib.namespace)
     const winIndex = window[COMLIBS_EDIT].findIndex(lib => lib.namespace===namespace)
-    if(index===-1 || winIndex===-1) return;
+    if(index===-1 || winIndex===-1) return message.error(`找不到namespace为【${namespace}】的物料，检查物料namespace`);
     try {
         window[COMLIBS_EDIT].splice(winIndex, 1)
         const { styles } =  await myRequire([comlib.editJs], (error) => {
             Promise.reject(error)
         })
         ctx.comlibs.splice(index, 1, comlib);
-        const loadedComlib = window[COMLIBS_EDIT][window[COMLIBS_EDIT].length-1];
-        loadedComlib.id = id;
-        loadedComlib.namespace = namespace;
+        const loadedComlib = window[COMLIBS_EDIT].find(lib => lib.namespace===namespace);
+        /**
+         * 同步中心服务物料id
+         */
+        if(id){
+            loadedComlib.id = id;
+        }
         loadedComlib._styleAry = styles;
         return loadedComlib
     } catch (error) {

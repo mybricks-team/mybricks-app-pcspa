@@ -179,7 +179,7 @@ export default (ctx) => (libDesc) => {
             resolve(true);
             break
           case 'upgradeComLib':
-            const upgradedComlib = await upgradeLatestComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace})
+            const upgradedComlib = await upgradeLatestComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace, id: libId})
             return resolve(upgradedComlib)
           default:
             break
@@ -196,7 +196,7 @@ export default (ctx) => (libDesc) => {
       if (libDesc?.editJs) {
         const material = ctx.comlibs.find(lib => lib.namespace === libDesc?.libNamespace)
         if(material){
-          //更新
+          //upgrade
           const comlib = {
             ...material, 
             ...libDesc
