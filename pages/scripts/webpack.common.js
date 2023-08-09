@@ -1,5 +1,5 @@
 const path = require('path')
-
+const webpack = require('webpack')
 module.exports = {
   entry: {
     ['index']: path.resolve(__dirname, '../src/pages/home/index.tsx'),
@@ -13,7 +13,13 @@ module.exports = {
     libraryTarget: 'umd',
     library: '[name]',
   },
-  plugins: [],
+  plugins: [
+    new webpack.DefinePlugin({
+      APP_NAME: JSON.stringify(require('../../package.json').name),
+      APP_VERSION: JSON.stringify(require('../../package.json').version),
+      RENDERWEB_VERSION: JSON.stringify(require('../node_modules/@mybricks/render-web/package.json').version),
+    }),
+  ],
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
