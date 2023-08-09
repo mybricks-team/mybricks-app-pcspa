@@ -42,7 +42,7 @@ export const initMaterials = async (ctx: Record<string, any>) => {
     /**
      * without namespace tips
      */
-    const libWithoutNamespace = window[ComLib_Edit].filter(lib => !lib.namespace);
+    const libWithoutNamespace = window[ComLib_Edit].filter(lib => !lib.namespace && lib.id !== '_myself_');
     if(libWithoutNamespace.length){
         const titleStr = libWithoutNamespace.map(lib => lib.title).join('、')
         message.error(`组件库【${titleStr}】未找到namespace，无法进行更新、删除操作`);
