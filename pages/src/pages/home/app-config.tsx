@@ -113,7 +113,6 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
 
 export default function (ctx, save, designerRef, remotePlugins = []) {
   const envList = ctx?.appConfig?.publishEnvConfig?.envList || []
-
   // 获得环境信息映射表
   const envMap = envList.reduce((res, item) => {
     res[item.name] = item.title
@@ -211,10 +210,10 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                   displayType: 'button'
                 },
                 value: {
-                  get () {
+                  get() {
                     return decodeURIComponent(ctx?.hasPermissionFn || defaultPermissionFn)
                   },
-                  set (context, v: string) {
+                  set(context, v: string) {
                     ctx.hasPermissionFn = encodeURIComponent(v)
                   }
                 }
@@ -426,14 +425,14 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             if (!hasPermissionFn) {
               return true;
             }
-    
+
             let result: boolean;
-    
+
             try {
               result = runJs(decodeURIComponent(hasPermissionFn), [
                 { key },
               ]);
-    
+
               if (typeof result !== 'boolean') {
                 result = true;
                 designerRef.current?.console?.log.error(
@@ -458,7 +457,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               // ctx.console?.log.error('权限方法', `${error.message}`)
               console.error(`权限方法出错 [Key] ${key}；`, error);
             }
-    
+
             return result;
           };
         }

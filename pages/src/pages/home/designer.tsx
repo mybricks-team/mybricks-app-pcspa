@@ -21,8 +21,6 @@ import PublishModal from './components/PublishModal'
 
 import css from './app.less'
 
-const appName = 'mybricks-app-pcspa'
-
 // const DefaultUploadService = '/biz/uploadExternalFileLocal'
 
 // 兜底物料
@@ -62,7 +60,7 @@ export default function MyDesigner({ appData }) {
 
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.3/index.min.js'
 
-  const { plugins = [] } = JSON.parse(appData.config[appName]?.config ?? "{}");
+  const { plugins = [] } = JSON.parse(appData.config[APP_NAME]?.config ?? "{}");
   // const configComlibs = comlibs.map(lib => lib.editJs)
 
   // const [manateeUserInfo] = useState(getManateeUserInfo())
@@ -70,16 +68,16 @@ export default function MyDesigner({ appData }) {
   let uploadService = null;
   let appConfig = null // 记录应用所有配置
   try {
-    appConfig = JSON.parse(appData.config[appName]?.config)
+    appConfig = JSON.parse(appData.config[APP_NAME]?.config)
     uploadService = appConfig?.uploadServer?.uploadService
   } catch (error) {
   }
 
 
   useLayoutEffect(() => {
-    API.Material.getLatestComponentLibrarys(comlibs.filter(lib => lib.id !== "_myself_").map(lib => lib.namespace)).then(( res: any )=> {
-      const latestComlibs = (res || []).map(lib => ({...lib, ...JSON.parse(lib.content)}))
-      setCtx(pre => ({...pre, latestComlibs}))
+    API.Material.getLatestComponentLibrarys(comlibs.filter(lib => lib.id !== "_myself_").map(lib => lib.namespace)).then((res: any) => {
+      const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))
+      setCtx(pre => ({ ...pre, latestComlibs }))
     })
   }, [JSON.stringify(comlibs)])
 
@@ -150,6 +148,48 @@ export default function MyDesigner({ appData }) {
   useEffect(() => {
     fetchPlugins(plugins).then(setRemotePlugins);
     console.log('应用数据:', appData);
+  }, [])
+
+  useEffect(() => {
+    let designerSPAVerison = ''
+    const regex = /(\d+?\.\d+\.\d+)/g;
+    const matches = designer.match(regex);
+    if (matches) {
+      designerSPAVerison = matches[0];
+    }
+    const appInfo = {
+      app: {
+        verison: APP_VERSION || '',
+        name: APP_NAME || ''
+      },
+      designerSPAVerison,
+      renderWebVersion: RENDERWEB_VERSION || '',
+      plugins: plugins.map(item => {
+        const { name, title, updateTime } = item || {}
+        return {
+          name,
+          title,
+          updateTime
+        }
+      }),
+      comlibs: comlibs.filter(item => item.id !== "_myself_").map(item => {
+        const { id, namespace: name, version } = item || {}
+        return {
+          id,
+          name,
+          version
+        }
+      }),
+    }
+
+    // 简单判断本地环境，不上报数据
+    if (window.location.origin.includes('http://localhost')) return
+    appData.report({
+      jsonData: {
+        type: 'appInfo',
+        payload: appInfo,
+      }
+    })
   }, [])
 
   useMemo(() => {

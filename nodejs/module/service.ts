@@ -36,7 +36,7 @@ export default class PcPageService {
       return mySelfComMap[`${item.namespace}@${item.version}`]
     })
 
-
+    console.info("[publish] get material begin");
     const finalComponents = await Promise.all(components.map((component) => {
       return new Promise((resolve) => {
         axios({
@@ -48,6 +48,7 @@ export default class PcPageService {
       })
     }))
 
+    console.info("[publish] get material ok");
     let mySelfComlibRt = ''
 
     finalComponents.forEach((finalComponent) => {
@@ -126,6 +127,7 @@ export default class PcPageService {
 
       /** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
       const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
+      console.info("[publish] domainName is:", domainName);
 
       template = template.replace(`--title--`, title)
         .replace(`-- comlib-rt --`, await this._generateComLibRT(comlibs, json, { domainName }))
@@ -137,11 +139,14 @@ export default class PcPageService {
       let publishMaterialInfo
 
       const customPublishApi = await getCustomPublishApi()
+      console.info("[publish] getCustomPublishApi=", customPublishApi);
 
       if (customPublishApi) {
+        console.info("[publish] getLatestPub begin");
         const latestPub = (await API.File.getLatestPub({
           fileId
         }))?.[0];
+        console.info("[publish] getLatestPub ok");
         const version = getNextVersion(latestPub?.version)
         const dataForCustom = {
           env: envType,
@@ -171,18 +176,20 @@ export default class PcPageService {
           publishMaterialInfo = data
         }
       } else {
+        console.info("[publish] upload to static server");
         publishMaterialInfo = await API.Upload.staticServer({
           content: template,
           folderPath: `${folderPath}/${envType || 'prod'}`,
           fileName,
           noHash: true
         })
+        console.info("[publish] upload to static server ok");
         //   const { url } = await uploadStatic(template, manateeUserInfo);
         if (publishMaterialInfo?.url?.startsWith('https')) {
           publishMaterialInfo.url = publishMaterialInfo.url.replace('https', 'http')
         }
       }
-
+      console.info("[publish] API.File.publish: begin ");
       const result = await API.File.publish({
         userId,
         fileId,
@@ -191,6 +198,7 @@ export default class PcPageService {
         content: JSON.stringify({ ...publishMaterialInfo, json }),
         type: envType,
       });
+      console.info("[publish] API.File.publish: ok ");
       return result
     } catch (e) {
       console.error("pcpage publish error", e);
