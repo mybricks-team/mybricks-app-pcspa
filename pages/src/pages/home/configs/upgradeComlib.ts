@@ -17,6 +17,7 @@ export const upgradeLatestComlib = async (ctx: Record<string, any>, comlib: Reco
         })
         ctx.comlibs[index] = {...ctx.comlibs[index], version: latestComlib.version, editJs, rtJs, id}
         const loadedComlib = window[COMLIBS_EDIT].find(lib => lib.namespace===namespace);
+        loadedComlib.id = id;
         loadedComlib._styleAry = styles;
         return loadedComlib
     } catch (error) {
@@ -38,6 +39,7 @@ export const upgradeComlibByVersion = async (ctx: Record<string, any>, comlib: R
         })
         ctx.comlibs.splice(index, 1, comlib);
         const loadedComlib = window[COMLIBS_EDIT].find(lib => lib.namespace===namespace);
+        loadedComlib.id = id;
         loadedComlib._styleAry = styles;
         return loadedComlib
     } catch (error) {

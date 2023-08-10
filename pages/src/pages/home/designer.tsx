@@ -74,12 +74,7 @@ export default function MyDesigner({ appData }) {
   }
 
 
-  useLayoutEffect(() => {
-    API.Material.getLatestComponentLibrarys(comlibs.filter(lib => lib.id !== "_myself_").map(lib => lib.namespace)).then((res: any) => {
-      const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))
-      setCtx(pre => ({ ...pre, latestComlibs }))
-    })
-  }, [JSON.stringify(comlibs)])
+ 
 
   const [ctx, setCtx] = useState({
     sdk: appData,
@@ -144,6 +139,14 @@ export default function MyDesigner({ appData }) {
   const [SPADesigner, setSPADesigner] = useState(null);
   const [remotePlugins, setRemotePlugins] = useState(null);
   const [publishModalVisible, setPublishModalVisible] = useState(false)
+  const [latestComlibs, setLatestComlibs] = useState<[]>()
+
+  useEffect(() => {
+    API.Material.getLatestComponentLibrarys(comlibs.filter(lib => lib.id !== "_myself_").map(lib => lib.namespace)).then((res: any) => {
+      const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))
+      setLatestComlibs(latestComlibs)
+    })
+  }, [JSON.stringify(comlibs.map(lib => lib.namespace))])
 
   useEffect(() => {
     fetchPlugins(plugins).then(setRemotePlugins);
@@ -407,11 +410,11 @@ export default function MyDesigner({ appData }) {
         >发布</Toolbar.Button>
       </Toolbar>
       <div className={css.designer}>
-        {SPADesigner && remotePlugins && (
+        {SPADesigner && remotePlugins && latestComlibs && (
           <>
             <SPADesigner
               ref={designerRef}
-              config={config(ctx, save, designerRef, remotePlugins)}
+              config={config({...ctx, latestComlibs}, save, designerRef, remotePlugins)}
               onEdit={onEdit}
               onMessage={onMessage}
               _onError_={(ex: any) => {

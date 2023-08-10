@@ -179,7 +179,7 @@ export default (ctx) => (libDesc) => {
             resolve(true);
             break
           case 'upgradeComLib':
-            const upgradedComlib = await upgradeLatestComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace, id: libId})
+            const upgradedComlib = await upgradeLatestComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace, id: libId});
             return resolve(upgradedComlib)
           default:
             break

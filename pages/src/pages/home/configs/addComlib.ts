@@ -10,6 +10,7 @@ export const addComlib = async (ctx: Record<string, any>, newComlib: Record<stri
         })
         ctx.comlibs.push(newComlib);
         const loadedComlib = window[ComLib_Edit].find(lib => lib.namespace===namespace);
+        loadedComlib.id = id;
         loadedComlib._styleAry = styles;
         return loadedComlib
     } catch (error) {
