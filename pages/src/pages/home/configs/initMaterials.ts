@@ -1,7 +1,6 @@
 import { compareVersions } from 'compare-versions';
 import { getComlibsByNamespaceAndVersion } from '../../../utils/comlib'
 import { myRequire } from '../../../utils/comlib'
-import { message } from 'antd';
 
 const MySelfId = '_myself_';
 const ComLib_Edit = '__comlibs_edit_'
@@ -39,13 +38,25 @@ export const initMaterials = async (ctx: Record<string, any>) => {
       window[ComLib_Edit][comlibIndex]._styleAry = styles;
     }
 
+     /**
+     * 兼容中间没有namespace存量页面数据
+     */
+     window[ComLib_Edit].forEach(winLib => {
+        if(!winLib.namespace){
+            const lib = libs.find(lib => lib.id===winLib.id);
+            if(lib) {
+                winLib.namespace = lib.namespace;
+            }
+        }
+    });
+
     /**
      * without namespace tips
      */
     const libWithoutNamespace = window[ComLib_Edit].filter(lib => !lib.namespace && lib.id !== '_myself_');
     if(libWithoutNamespace.length){
         const titleStr = libWithoutNamespace.map(lib => lib.title).join('、')
-        message.error(`组件库【${titleStr}】未找到namespace，无法进行更新、删除操作`);
+        console.error(`组件库【${titleStr}】未找到namespace，无法进行更新、删除操作`);
     }
 
     /**
@@ -62,10 +73,10 @@ export const initMaterials = async (ctx: Record<string, any>) => {
      * insert latestComlib for upgrade
      */
     latestComlibs.forEach(latestLib => {
-        const shouldUpdateLib = window[ComLib_Edit].find(lib => lib.namespace===latestLib.namespace && compareVersions(latestLib.version, lib.version)>0);
+        const shouldUpdateLib = window[ComLib_Edit].find(lib => (lib.namespace===latestLib.namespace || lib.id===latestLib.id) && compareVersions(latestLib.version, lib.version)>0);
         if(shouldUpdateLib){
             shouldUpdateLib.latestComlib = latestLib;
         }
-    })
+    });
     return window[ComLib_Edit];
 }
