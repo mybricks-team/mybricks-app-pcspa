@@ -9,8 +9,8 @@ export const _NAMESPACE_ = 'mybricks-app-pcspa'
 import style from './app.less'
 import { Collapse, Spin } from 'antd'
 
-export default () => {
-  const configContext = useConfig(_NAMESPACE_, {})
+export default (props) => {
+  const configContext = useConfig(_NAMESPACE_, {}, props?.options)
 
   return <Spin spinning={configContext.loading}>
     <Collapse style={{ padding: 24 }} className={style.wrapper} defaultActiveKey={[1, 2, 3]}>

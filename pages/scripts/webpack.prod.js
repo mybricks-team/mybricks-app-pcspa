@@ -1,14 +1,14 @@
-const { merge } = require('webpack-merge');
-const path = require('path');
-const common = require('./webpack.common');
+const { merge } = require('webpack-merge')
+const path = require('path')
+const common = require('./webpack.common')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const rootPath = path.resolve(__dirname, './../');
-const outputPath = path.resolve(rootPath, '../assets');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const rootPath = path.resolve(__dirname, './../')
+const outputPath = path.resolve(rootPath, '../assets')
 const BuildPlugin = require('./buildplugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const WebpackBar = require('webpackbar')
-const HtmlWebpackInlineSourcePlugin = require('@effortlessmotion/html-webpack-inline-source-plugin');
+const HtmlWebpackInlineSourcePlugin = require('@effortlessmotion/html-webpack-inline-source-plugin')
 
 module.exports = merge(common, {
   mode: 'production',
@@ -48,6 +48,11 @@ module.exports = merge(common, {
       chunks: ['setting'],
     }),
     new HtmlWebpackPlugin({
+      filename: 'groupSetting.html',
+      template: path.resolve(__dirname, '../templates/groupSetting.html'),
+      chunks: ['groupSetting'],
+    }),
+    new HtmlWebpackPlugin({
       filename: 'publish.html',
       template: path.resolve(__dirname, '../templates/publish.html'),
       inlineSource: '.(js)$',
@@ -57,4 +62,4 @@ module.exports = merge(common, {
     }),
     new HtmlWebpackInlineSourcePlugin()
   ]
-});
+})

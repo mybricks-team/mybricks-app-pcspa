@@ -3,7 +3,7 @@ import { Card, Button, Popconfirm, Descriptions, message, Typography, Divider } 
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import css from './index.less';
-import { _NAMESPACE_ } from "../app";
+import { _NAMESPACE_ } from "..";
 import { PluginType } from "./type";
 import AppendModal from "./Modal";
 import { TConfigProps } from "../useConfig";
