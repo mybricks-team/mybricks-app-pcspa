@@ -140,7 +140,7 @@ export default class PcPageService {
 
       let publishMaterialInfo
 
-      const customPublishApi = await getCustomPublishApi({ groupId })
+      const customPublishApi = await getCustomPublishApi()
       console.info("[publish] getCustomPublishApi=", customPublishApi);
 
       if (customPublishApi) {
@@ -211,7 +211,7 @@ export default class PcPageService {
   }
 
   async upload(req, { file }, { groupId = '' } = {}) {
-    const uploadService = await getUploadService({ groupId });
+    const uploadService = await getUploadService();
     const formData = new FormData();
     formData.append("file", file);
     return await axios<any, { url: string }>({
@@ -259,10 +259,12 @@ export default class PcPageService {
 
 }
 
-const getAppConfig = async ({ groupId }) => {
+// 不传groupId表示获取的是全局配置
+const getAppConfig = async ({ groupId } = {} as any) => {
   const _NAMESPACE_ = "mybricks-app-pcspa";
   const options = !!groupId ? { type: 'group', id: groupId } : {}
   const res = await API.Setting.getSetting([_NAMESPACE_], options);
+
   let config = {} as any
   const originConfig = res[_NAMESPACE_]?.config || {}
   try {
@@ -273,8 +275,9 @@ const getAppConfig = async ({ groupId }) => {
   return config
 };
 
-const getUploadService = async ({ groupId }) => {
-  const { uploadServer = {} } = await getAppConfig({ groupId })
+// 使用平台设置的上传接口，不使用协作组的
+const getUploadService = async () => {
+  const { uploadServer = {} } = await getAppConfig()
   const { uploadService } = uploadServer
   if (!uploadService) {
     throw Error("无上传服务，请先配置应用上传服务");
@@ -282,8 +285,10 @@ const getUploadService = async ({ groupId }) => {
   return uploadService;
 };
 
-const getCustomPublishApi = async ({ groupId }) => {
-  const { publishApiConfig = {} } = await getAppConfig({ groupId })
+
+// 使用平台设置的集成接口，不使用协作组的
+const getCustomPublishApi = async () => {
+  const { publishApiConfig = {} } = await getAppConfig()
   const { publishApi } = publishApiConfig
   if (!publishApi) {
     console.warn(`未配置发布集成接口`)
@@ -298,7 +303,7 @@ const uploadStatic = async (
 ): Promise<{ url: string }> => {
   // @ts-ignore
   const blob = new Blob([content], { type: "text/html" });
-  const uploadService = await getUploadService({ groupId });
+  const uploadService = await getUploadService();
   // const uploadService = "http://dev.manateeai.com/biz/uploadExternalFileLocal";
   const formData = new FormData();
   formData.append("file", blob);
