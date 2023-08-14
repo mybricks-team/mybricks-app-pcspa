@@ -120,7 +120,9 @@ export default class PcPageService {
         fileName,
         folderPath,
         publisherEmail,
-        publisherName
+        publisherName,
+        groupId,
+        groupName,
       } = json.configuration
 
       Reflect.deleteProperty(json, 'configuration')
@@ -138,7 +140,7 @@ export default class PcPageService {
 
       let publishMaterialInfo
 
-      const customPublishApi = await getCustomPublishApi()
+      const customPublishApi = await getCustomPublishApi({ groupId })
       console.info("[publish] getCustomPublishApi=", customPublishApi);
 
       if (customPublishApi) {
@@ -157,6 +159,8 @@ export default class PcPageService {
           version,
           commitInfo,
           type: 'pc-page',
+          groupId,
+          groupName,
           content: {
             json: JSON.stringify(json),
             html: template,
@@ -206,8 +210,8 @@ export default class PcPageService {
     }
   }
 
-  async upload(req, { file }) {
-    const uploadService = await getUploadService();
+  async upload(req, { file }, { groupId = '' } = {}) {
+    const uploadService = await getUploadService({ groupId });
     const formData = new FormData();
     formData.append("file", file);
     return await axios<any, { url: string }>({
@@ -255,20 +259,22 @@ export default class PcPageService {
 
 }
 
-const getAppConfig = async () => {
+const getAppConfig = async ({ groupId }) => {
   const _NAMESPACE_ = "mybricks-app-pcspa";
-  const res = await API.Setting.getSetting([_NAMESPACE_]);
+  const options = !!groupId ? { type: 'group', id: groupId } : {}
+  const res = await API.Setting.getSetting([_NAMESPACE_], options);
   let config = {} as any
+  const originConfig = res[_NAMESPACE_]?.config || {}
   try {
-    config = JSON.parse(res[_NAMESPACE_]?.config)
+    config = typeof originConfig === 'string' ? JSON.parse(originConfig) : originConfig
   } catch (e) {
     console.error("getAppConfig error", e);
   }
   return config
 };
 
-const getUploadService = async () => {
-  const { uploadServer = {} } = await getAppConfig()
+const getUploadService = async ({ groupId }) => {
+  const { uploadServer = {} } = await getAppConfig({ groupId })
   const { uploadService } = uploadServer
   if (!uploadService) {
     throw Error("无上传服务，请先配置应用上传服务");
@@ -276,8 +282,8 @@ const getUploadService = async () => {
   return uploadService;
 };
 
-const getCustomPublishApi = async () => {
-  const { publishApiConfig = {} } = await getAppConfig()
+const getCustomPublishApi = async ({ groupId }) => {
+  const { publishApiConfig = {} } = await getAppConfig({ groupId })
   const { publishApi } = publishApiConfig
   if (!publishApi) {
     console.warn(`未配置发布集成接口`)
@@ -287,11 +293,12 @@ const getCustomPublishApi = async () => {
 
 const uploadStatic = async (
   content: string,
+  groupId: string,
   manateeUserInfo: { token: string; session: string }
 ): Promise<{ url: string }> => {
   // @ts-ignore
   const blob = new Blob([content], { type: "text/html" });
-  const uploadService = await getUploadService();
+  const uploadService = await getUploadService({ groupId });
   // const uploadService = "http://dev.manateeai.com/biz/uploadExternalFileLocal";
   const formData = new FormData();
   formData.append("file", blob);
