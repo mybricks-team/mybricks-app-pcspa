@@ -58,7 +58,7 @@ export default function MyDesigner({ appData }) {
     }
   }
 
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.4/index.min.js'
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.6/index.min.js'
 
   const { plugins = [] } = JSON.parse(appData.config[APP_NAME]?.config ?? "{}");
   // const configComlibs = comlibs.map(lib => lib.editJs)
@@ -74,7 +74,7 @@ export default function MyDesigner({ appData }) {
   }
 
 
- 
+
 
   const [ctx, setCtx] = useState({
     sdk: appData,
@@ -414,7 +414,7 @@ export default function MyDesigner({ appData }) {
           <>
             <SPADesigner
               ref={designerRef}
-              config={config({...ctx, latestComlibs}, save, designerRef, remotePlugins)}
+              config={config({ ...ctx, latestComlibs }, save, designerRef, remotePlugins)}
               onEdit={onEdit}
               onMessage={onMessage}
               _onError_={(ex: any) => {
