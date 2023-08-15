@@ -56,7 +56,7 @@ export const comLibAdderFunc = ctx => (targetComlib) => {
       url: 'MYBRICKS://mybricks-material/materialSelectorPage',
       params: {
         defaultSelected: ctx.comlibs,
-        userId: ctx.user?.email,
+        userId: ctx.user?.id,
         combo: true,
 	      title: '选择组件库',
         type: 'com_lib',

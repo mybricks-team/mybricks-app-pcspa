@@ -82,7 +82,7 @@ export default ({ user }) => {
   };
 
   const saveConfig = async (config: Record<string, any>) => {
-    return await API.Setting.saveSetting(_NAMESPACE_, config, user.email);
+    return await API.Setting.saveSetting(_NAMESPACE_, config, user.id);
   };
 	
 	const onChangeDesigner = event => {
