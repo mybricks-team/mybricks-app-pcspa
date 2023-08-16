@@ -60,21 +60,23 @@ export default function MyDesigner({ appData }) {
 
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.6/index.min.js'
 
-  const { plugins = [] } = JSON.parse(appData.config[APP_NAME]?.config ?? "{}");
   // const configComlibs = comlibs.map(lib => lib.editJs)
 
   // const [manateeUserInfo] = useState(getManateeUserInfo())
 
-  let uploadService = null;
-  let appConfig = null // 记录应用所有配置
-  try {
-    appConfig = JSON.parse(appData.config[APP_NAME]?.config)
-    uploadService = appConfig?.uploadServer?.uploadService
-  } catch (error) {
-  }
+  const appConfig = useMemo(() => {
+    let config = null
+    try {
+      const originConfig = appData.config[APP_NAME]?.config || {}
+      config = typeof originConfig === 'string' ? JSON.parse(originConfig) : originConfig
+    } catch (error) {
+      console.error('get appConfig error', error)
+    }
+    return config || {}
+  }, [appData.config[APP_NAME]?.config])
 
-
-
+  const { plugins = [] } = appConfig
+  const uploadService = appConfig?.uploadServer?.uploadService || '';
 
   const [ctx, setCtx] = useState({
     sdk: appData,
@@ -322,7 +324,9 @@ export default function MyDesigner({ appData }) {
               projectId: ctx.sdk.projectId,
               // 非模块下的页面直接发布到项目空间下
               folderPath: '/app/pcpage',
-              fileName: `${ctx.fileItem.id}.html`
+              fileName: `${ctx.fileItem.id}.html`,
+              groupName: appData?.hierarchy?.groupName || '',
+              groupId: appData?.hierarchy?.groupId || 0
             },
             hasPermissionFn: ctx.hasPermissionFn
           }));
@@ -371,7 +375,7 @@ export default function MyDesigner({ appData }) {
             setPublishLoading(false)
           })
     },
-    []
+    [appData]
   )
 
   const RenderLocker = useMemo(() => {

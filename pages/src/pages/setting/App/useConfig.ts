@@ -7,10 +7,10 @@ export type TConfigProps<T = any> = {
   loading: boolean,
   user: {
     email: string,
-  }
+  },
 }
 
-export default <T = any>(namespace, defaultValue = {} as T): TConfigProps<T> => {
+export default <T = any>(namespace, defaultValue = {} as T, options = {}): TConfigProps<T> => {
   const [config, setConfig] = useState<T>(defaultValue)
   const lastConfigRef = useRef<T>({} as T)
   const [user, setUser] = useState(null)
@@ -21,9 +21,9 @@ export default <T = any>(namespace, defaultValue = {} as T): TConfigProps<T> => 
       setUser(user)
     })
     setLoading(true)
-    API.Setting.getSetting([namespace]).then((res) => {
+    API.Setting.getSetting([namespace], options).then((res) => {
       try {
-        const newConfig = JSON.parse(res[namespace]?.config)
+        const newConfig = typeof res[namespace]?.config === 'string' ? JSON.parse(res[namespace]?.config) : (res[namespace]?.config || {})
         setConfig(newConfig)
         lastConfigRef.current = newConfig ?? {};
       } catch (error) {
@@ -40,7 +40,7 @@ export default <T = any>(namespace, defaultValue = {} as T): TConfigProps<T> => 
   const mergeUpdateConfig = useCallback((values: Partial<T>) => {
     setLoading(true)
     const config = { ...lastConfigRef.current, ...values }
-    return API.Setting.saveSetting(namespace, JSON.stringify(config), user?.id).then(() => {
+    return API.Setting.saveSetting(namespace, config, user?.id, options).then(() => {
       setConfig({ ...config });
     }).finally(() => {
       setLoading(false);

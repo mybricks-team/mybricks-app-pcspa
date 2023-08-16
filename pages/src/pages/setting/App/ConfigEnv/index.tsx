@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { message, Form, Input, Card, Button, Space, Descriptions, Modal, Col, Popconfirm, Typography, Divider } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { _NAMESPACE_ } from "../app";
+import { _NAMESPACE_ } from "..";
 import dayjs from "dayjs";
 import styles from "./index.less";
 import { TConfigProps } from '../useConfig';

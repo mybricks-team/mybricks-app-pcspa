@@ -1,10 +1,10 @@
 {
   "name": "mybricks-app-pcspa",
-  "version": "1.0.71",
+  "version": "1.0.72",
   "description": "中后台类PC页面搭建",
   "scripts": {
+    "watch:be-local": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://localhost:3100 node nodejs/index.js'",
     "watch:be": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=https://my.mybricks.world node nodejs/index.js'",
-    "dev:be": "ts-node -T ./nodejs/main.ts",
     "build:fe": "cd pages && npm run build",
     "publishToNpm:serviceUpdate": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world",
     "publishToNpm": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world --noServiceUpdate",
@@ -24,7 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "@mybricks/rocker-dao": "^0.0.6",
-    "@mybricks/sdk-for-app": "0.1.79",
+    "@mybricks/sdk-for-app": "0.1.83",
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
@@ -49,6 +49,7 @@
     "extName": "pc-page",
     "icon": "https://assets.mybricks.world/icon/pcpage.svg",
     "title": "PC页面",
-    "setting": "setting.html"
+    "setting": "setting.html",
+    "groupSetting": "groupSetting.html"
   }
 }

@@ -120,7 +120,9 @@ export default class PcPageService {
         fileName,
         folderPath,
         publisherEmail,
-        publisherName
+        publisherName,
+        groupId,
+        groupName,
       } = json.configuration
 
       Reflect.deleteProperty(json, 'configuration')
@@ -157,6 +159,8 @@ export default class PcPageService {
           version,
           commitInfo,
           type: 'pc-page',
+          groupId,
+          groupName,
           content: {
             json: JSON.stringify(json),
             html: template,
@@ -206,7 +210,7 @@ export default class PcPageService {
     }
   }
 
-  async upload(req, { file }) {
+  async upload(req, { file }, { groupId = '' } = {}) {
     const uploadService = await getUploadService();
     const formData = new FormData();
     formData.append("file", file);
@@ -255,18 +259,23 @@ export default class PcPageService {
 
 }
 
-const getAppConfig = async () => {
+// 不传groupId表示获取的是全局配置
+const getAppConfig = async ({ groupId } = {} as any) => {
   const _NAMESPACE_ = "mybricks-app-pcspa";
-  const res = await API.Setting.getSetting([_NAMESPACE_]);
+  const options = !!groupId ? { type: 'group', id: groupId } : {}
+  const res = await API.Setting.getSetting([_NAMESPACE_], options);
+
   let config = {} as any
+  const originConfig = res[_NAMESPACE_]?.config || {}
   try {
-    config = JSON.parse(res[_NAMESPACE_]?.config)
+    config = typeof originConfig === 'string' ? JSON.parse(originConfig) : originConfig
   } catch (e) {
     console.error("getAppConfig error", e);
   }
   return config
 };
 
+// 使用平台设置的上传接口，不使用协作组的
 const getUploadService = async () => {
   const { uploadServer = {} } = await getAppConfig()
   const { uploadService } = uploadServer
@@ -276,6 +285,8 @@ const getUploadService = async () => {
   return uploadService;
 };
 
+
+// 使用平台设置的集成接口，不使用协作组的
 const getCustomPublishApi = async () => {
   const { publishApiConfig = {} } = await getAppConfig()
   const { publishApi } = publishApiConfig
@@ -287,6 +298,7 @@ const getCustomPublishApi = async () => {
 
 const uploadStatic = async (
   content: string,
+  groupId: string,
   manateeUserInfo: { token: string; session: string }
 ): Promise<{ url: string }> => {
   // @ts-ignore
