@@ -49,7 +49,7 @@ export default class PcPageService {
               .then(({ data }) => {
                 resolve(data.data);
               })
-              .catch(reject);
+              .catch(error => reject(error));
           });
         })
       );
