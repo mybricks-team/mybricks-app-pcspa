@@ -35,35 +35,43 @@ export default class PcPageService {
     const components = deps.filter((item) => {
       return mySelfComMap[`${item.namespace}@${item.version}`]
     })
-
-    console.info("[publish] get material begin");
-    const finalComponents = await Promise.all(components.map((component) => {
-      return new Promise((resolve) => {
-        axios({
-          method: 'get',
-          url: `${domainName}/api/material/namespace/content?namespace=${component.namespace}&version=${component.version}`,
-        }).then(({ data }) => {
-          resolve(data.data)
+    let mySelfComlibRt = "";
+    try {
+      console.info("[publish] get material begin");
+      const finalComponents = await Promise.all(
+        components.map((component) => {
+          return new Promise((resolve, reject) => {
+            axios({
+              method: "get",
+              url: `${domainName}/api/material/namespace/content?namespace=${component.namespace}&version=${component.version}`,
+              timeout: 30 * 1000,
+            })
+              .then(({ data }) => {
+                resolve(data.data);
+              })
+              .catch(error => reject(error));
+          });
         })
-      })
-    }))
+      );
+      console.info("[publish] get material ok");
 
-    console.info("[publish] get material ok");
-    let mySelfComlibRt = ''
+      finalComponents.forEach((finalComponent) => {
+        const { version, namespace, runtime } = finalComponent;
 
-    finalComponents.forEach((finalComponent) => {
-      const { version, namespace, runtime } = finalComponent
-
-      if (version && namespace && runtime) {
-        mySelfComlibRt += `
+        if (version && namespace && runtime) {
+          mySelfComlibRt += `
 					comAray.push({
 						namespace: '${namespace}',
 						version: '${version}',
 						runtime: ${runtime}
 					})
-				`
-      }
-    })
+				`;
+        }
+      });
+    } catch (error) {
+      throw Error(error.message || error.msg || '获取物料信息异常')
+    }
+    
 
     mySelfComlibRt = `
 			<script type="text/javascript">
@@ -82,7 +90,7 @@ export default class PcPageService {
 
 					${mySelfComlibRt}
 
-					comlibList.push(newComlib);
+					comlibList.unshift(newComlib);
 				})()
 			</script>
 		`
@@ -338,6 +346,8 @@ function getRealHostName(requestHeaders) {
 /** 有问题找zouyongsheng */
 function getRealDomain(request) {
   let hostName = getRealHostName(request.headers);
+  const {origin} = request.headers
+  if(origin) return origin
   // let protocol = request.headers['x-scheme'] ? 'https' : 'http'
   /** TODO: 暂时写死 https */
   // let protocol = 'https';
