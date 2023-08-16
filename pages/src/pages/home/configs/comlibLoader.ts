@@ -100,16 +100,17 @@ export default (ctx) => (libDesc) => {
 
             if (index !== -1) {
               com = comlib.comAray[index];
-
+              const closeLoad = message.loading({
+                key: 'loading',
+                content: '物料加载中……',
+                duration: 200,
+              })
               const component = await MaterialService.getMateralMaterialInfo({ namespace: comNamespace })
+              closeLoad()
               if (component.version === com.version) {
                 message.warn('当前组件已经是最新版本了～')
                 return
               }
-
-              // message.info('更新功能正在内测，马上就来')
-              // return
-
               Modal.confirm({
                 className: 'fangzhou-theme',
                 okText: '确定',
@@ -127,11 +128,9 @@ export default (ctx) => (libDesc) => {
                       comAray: newComlib?.comAray || []
                     })
                   })
-                  // resolve(ctx?.comlibs.find(t => t?.id === MySelfId));
                 },
               });
             }
-            // resolve([])
             break;
           case 'deleteCom': /** 需要resolve一个comlib对象 */
             index = comlib.comAray.findIndex((com) => com.namespace === comNamespace);
