@@ -4,6 +4,7 @@ import API from '@mybricks/sdk-for-app/api'
 export type TConfigProps<T = any> = {
   config: T,
   mergeUpdateConfig: (values: Partial<T>) => Promise<void>,
+  updateConfig: (values: T) => Promise<void>,
   loading: boolean,
   user: {
     email: string,
@@ -12,7 +13,6 @@ export type TConfigProps<T = any> = {
 
 export default <T = any>(namespace, defaultValue = {} as T, options = {}): TConfigProps<T> => {
   const [config, setConfig] = useState<T>(defaultValue)
-  const lastConfigRef = useRef<T>({} as T)
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -25,7 +25,6 @@ export default <T = any>(namespace, defaultValue = {} as T, options = {}): TConf
       try {
         const newConfig = typeof res[namespace]?.config === 'string' ? JSON.parse(res[namespace]?.config) : (res[namespace]?.config || {})
         setConfig(newConfig)
-        lastConfigRef.current = newConfig ?? {};
       } catch (error) {
         setConfig({})
         return
@@ -36,16 +35,24 @@ export default <T = any>(namespace, defaultValue = {} as T, options = {}): TConf
     });
   }, [])
 
-  // 合并更新，参数只提供要修改的部分即可
-  const mergeUpdateConfig = useCallback((values: Partial<T>) => {
+  // 完整更新更新
+  const updateConfig = useCallback((values) => {
     setLoading(true)
-    const config = { ...lastConfigRef.current, ...values }
-    return API.Setting.saveSetting(namespace, config, user?.email, options).then(() => {
-      setConfig({ ...config });
+    return API.Setting.saveSetting(namespace, values, user?.email, options).then(() => {
+      setConfig({ ...values });
     }).finally(() => {
       setLoading(false);
     });
   }, [user])
 
-  return { config, mergeUpdateConfig, loading, user }
+  // 合并更新，参数只提供要修改的部分即可
+  const mergeUpdateConfig = useCallback((values: Partial<T>) => {
+    return updateConfig({
+      ...config,
+      ...values
+    })
+  }, [config, updateConfig])
+
+
+  return { config, mergeUpdateConfig, updateConfig, loading, user }
 }
