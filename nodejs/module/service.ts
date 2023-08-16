@@ -42,6 +42,7 @@ export default class PcPageService {
         axios({
           method: 'get',
           url: `${domainName}/api/material/namespace/content?namespace=${component.namespace}&version=${component.version}`,
+          timeout: 30*1000
         }).then(({ data }) => {
           resolve(data.data)
         })
