@@ -346,6 +346,8 @@ function getRealHostName(requestHeaders) {
 /** 有问题找zouyongsheng */
 function getRealDomain(request) {
   let hostName = getRealHostName(request.headers);
+  const {origin} = request.headers
+  if(origin) return origin
   // let protocol = request.headers['x-scheme'] ? 'https' : 'http'
   /** TODO: 暂时写死 https */
   // let protocol = 'https';
