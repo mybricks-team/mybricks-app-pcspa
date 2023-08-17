@@ -71,7 +71,7 @@ export default class PcPageService {
     } catch (error) {
       throw Error(error.message || error.msg || '获取物料信息异常')
     }
-    
+
 
     mySelfComlibRt = `
 			<script type="text/javascript">
@@ -346,8 +346,8 @@ function getRealHostName(requestHeaders) {
 /** 有问题找zouyongsheng */
 function getRealDomain(request) {
   let hostName = getRealHostName(request.headers);
-  const {origin} = request.headers
-  if(origin) return origin
+  const { origin } = request.headers
+  if (origin) return origin
   // let protocol = request.headers['x-scheme'] ? 'https' : 'http'
   /** TODO: 暂时写死 https */
   // let protocol = 'https';
