@@ -161,7 +161,7 @@ function Page({ props, hasPermissionFn }) {
                 },
                 callConnector(connector, params) {
                   //调用连接器
-                  if (connector.type === 'http') {
+                  if (connector.type === 'http' || connector.type === 'http-manatee') {
                     //服务接口类型
                     return callConnectorHttp(
                       { script: connector.script, useProxy: true, executeEnv },
@@ -184,7 +184,7 @@ function Page({ props, hasPermissionFn }) {
           },
           callConnector(connector, params) {
             //调用连接器
-            if (connector.type === 'http') {
+            if (connector.type === 'http' || connector.type === 'http-manatee') {
               //服务接口类型
               return callConnectorHttp(
                 { script: connector.script, useProxy: true, executeEnv },

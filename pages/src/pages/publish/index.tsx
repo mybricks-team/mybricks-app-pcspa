@@ -171,7 +171,7 @@ function Page({ props }) {
       },
       callConnector(connector, params, privateDomainMap) {
         //调用连接器
-        if (connector.type === 'http') {
+        if (connector.type === 'http' || connector.type === 'http-manatee') {
           //服务接口类型
           return window.pluginConnectorHttp.call(
             { script: connector.script, params, executeEnv },
