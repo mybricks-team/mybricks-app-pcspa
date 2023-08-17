@@ -105,7 +105,7 @@ export default function MyDesigner({ appData }) {
     ) {
       const { name, shareType, content, icon } = param
       API.File.save({
-        userId: ctx.user?.id,
+        userId: ctx.user?.email,
         fileId: ctx.fileId,
         name,
         shareType,
@@ -332,7 +332,7 @@ export default function MyDesigner({ appData }) {
           }));
 
           const res: { code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
-            userId: ctx.user?.id,
+            userId: ctx.user?.email,
             fileId: ctx.fileId,
             json: toJSON,
             envType,

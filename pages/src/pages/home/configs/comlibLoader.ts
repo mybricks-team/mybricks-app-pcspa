@@ -156,7 +156,7 @@ export default (ctx) => (libDesc) => {
 	            url: 'MYBRICKS://mybricks-material/materialSelectorPage',
 	            params: {
 		            defaultSelected: getSelfComponents(),
-		            userId: ctx.user?.id,
+		            userId: ctx.user?.email,
 		            combo: true
 	            },
 	            onSuccess: ({ materials, updatedMaterials }) => {

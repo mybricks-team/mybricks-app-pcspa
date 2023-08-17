@@ -38,7 +38,7 @@ export default <T = any>(namespace, defaultValue = {} as T, options = {}): TConf
   // 完整更新更新
   const updateConfig = useCallback((values) => {
     setLoading(true)
-    return API.Setting.saveSetting(namespace, values, user?.id, options).then(() => {
+    return API.Setting.saveSetting(namespace, values, user?.email, options).then(() => {
       setConfig({ ...values });
     }).finally(() => {
       setLoading(false);
