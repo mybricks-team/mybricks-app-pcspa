@@ -418,7 +418,7 @@ export default function MyDesigner({ appData }) {
           <>
             <SPADesigner
               ref={designerRef}
-              config={config({ ...ctx, latestComlibs }, save, designerRef, remotePlugins)}
+              config={config(Object.assign(ctx, { latestComlibs }), save, designerRef, remotePlugins)}
               onEdit={onEdit}
               onMessage={onMessage}
               _onError_={(ex: any) => {
