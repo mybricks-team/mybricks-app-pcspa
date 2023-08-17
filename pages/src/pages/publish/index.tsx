@@ -232,7 +232,7 @@ function render(props) {
       },
       React.createElement(Page, { props })
     ),
-    document.querySelector('#qiankun-container')
+    document.querySelector('#root')
   )
   return Promise.resolve()
 }
@@ -279,6 +279,6 @@ export async function unmount(props) {
   const { container } = props
   ReactDOM &&
     ReactDOM.unmountComponentAtNode(
-      (container || document).querySelector('#qiankun-container')
+      (container || document).querySelector('#root')
     )
 }
