@@ -341,7 +341,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               },
               callConnector(connector, params) {
                 //调用连接器
-                if (connector.type === 'http') {
+                if (connector.type === 'http' || connector.type === 'http-manatee') {
                   //服务接口类型
                   return callConnectorHttp(
                     { script: connector.script, useProxy: true, executeEnv: ctx.executeEnv },
@@ -368,7 +368,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             return connectorHttpMock({ ...connector, outputSchema: connectorConfig.mockSchema });
           }
           //调用连接器
-          if (connector.type === 'http') {
+          if (connector.type === 'http' || connector.type === 'http-manatee') {
             //服务接口类型
             return callConnectorHttp(
               { script: connector.script, useProxy: true, executeEnv: ctx.executeEnv },
