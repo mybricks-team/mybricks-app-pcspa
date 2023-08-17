@@ -1,6 +1,6 @@
 {
   "name": "mybricks-app-pcspa",
-  "version": "1.0.80",
+  "version": "1.0.80-rc.1",
   "description": "中后台类PC页面搭建",
   "scripts": {
     "watch:be-local": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://localhost:3100 node nodejs/index.js'",
@@ -25,7 +25,7 @@
   "license": "ISC",
   "dependencies": {
     "@mybricks/rocker-dao": "^0.0.6",
-    "@mybricks/sdk-for-app": "^0.1.84",
+    "@mybricks/sdk-for-app": "^0.1.82",
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
