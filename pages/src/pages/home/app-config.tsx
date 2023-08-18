@@ -8,6 +8,7 @@ import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-co
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
 import toolsPlugin from "@mybricks/plugin-tools";
+import { use as useTheme } from '@mybricks/plugin-theme';
 
 import { render as renderUI } from '@mybricks/render-web';
 import comlibLoaderFunc from './configs/comlibLoader'
@@ -145,6 +146,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
         },
       }),
       toolsPlugin(),
+      useTheme({sdk: ctx.sdk}),
       ...remotePlugins
     ],
     ...(ctx.hasMaterialApp ? {
@@ -505,7 +507,12 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             }
           }
         ]
-      }
+      },
+      theme:{
+        css:[
+          'https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/antd.variable.min.css'
+        ],
+      },
     }
   }
 }

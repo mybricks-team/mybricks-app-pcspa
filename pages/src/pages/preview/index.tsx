@@ -20,6 +20,32 @@ if (!dumpJson) {
   throw new Error('数据错误：项目数据缺失')
 }
 
+function cssVariable (dumpJson) {
+  const themes = dumpJson?.plugins?.['@mybricks/plugins/theme/use']?.themes
+  if (Array.isArray(themes)) {
+    themes.forEach(({ namespace, content }) => {
+      const variables = content?.variables
+
+      if (Array.isArray(variables)) {
+        const style = document.createElement('style')
+        style.id = namespace
+        let innerHTML = ''
+
+        variables.forEach(({ config }) => {
+          Object.entries(config).forEach(([key, value]) => {
+            innerHTML = innerHTML + `${key}: ${value};\n`
+          })
+        })
+
+        style.innerHTML = `:root {\n${innerHTML}}`
+        document.body.appendChild(style)
+      }
+    })
+  }
+}
+
+cssVariable(dumpJson)
+
 if (!comlibs) {
   console.warn('数据错误: 组件库缺失')
   comlibs = [PC_NORMAL_COM_LIB.rtJs, CHARS_COM_LIB.rtJs, BASIC_COM_LIB.rtJs]
