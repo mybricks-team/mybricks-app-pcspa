@@ -139,7 +139,30 @@ export default class PcPageService {
       const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
       console.info("[publish] domainName is:", domainName);
 
+      let themesStyleStr = ''
+
+      const themes = json?.plugins?.['@mybricks/plugins/theme/use']?.themes
+      if (Array.isArray(themes)) {
+        themes.forEach(({ namespace, content }) => {
+          const variables = content?.variables
+    
+          if (Array.isArray(variables)) {
+            let styleHtml = ''
+    
+            variables.forEach(({ config }) => {
+              Object.entries(config).forEach(([key, value]) => {
+                styleHtml = styleHtml + `${key}: ${value};\n`
+              })
+            })
+    
+            styleHtml = `<style id="${namespace}">\n:root {\n${styleHtml}}\n</style>\n`
+            themesStyleStr = themesStyleStr + styleHtml
+          }
+        })
+      }
+
       template = template.replace(`--title--`, title)
+        .replace(`<!-- themes-style -->`, themesStyleStr)
         .replace(`-- comlib-rt --`, await this._generateComLibRT(comlibs, json, { domainName }))
         .replace(`"--projectJson--"`, JSON.stringify(json))
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
