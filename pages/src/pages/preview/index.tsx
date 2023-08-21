@@ -195,6 +195,9 @@ function Page({ props, hasPermissionFn }) {
             }
           },
           vars: {
+            get getExecuteEnv() {
+              return () => executeEnv
+            },
             getQuery: () => parseQuery(location.search),
             get getProps() {
               return () => {
