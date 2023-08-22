@@ -90,11 +90,13 @@ function Page({ props }) {
     env: {
       silent: true,
       showErrorNotification: false,
-      executeEnv,
-      canvasElement: ( props && props.container )|| document.body,
+      canvasElement: (props && props.container) || document.body,
       get vars() {
         // 环境变量
         return {
+          get getExecuteEnv() {
+            return () => executeEnv
+          },
           get getQuery() {
             return () => {
               return parseQuery(location.search)

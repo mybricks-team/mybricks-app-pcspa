@@ -384,6 +384,9 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
         //   return uploadApi(files)
         // },
         vars: {
+          get getExecuteEnv() {
+            return () => ctx.executeEnv
+          },
           getQuery: () => ({ ...(ctx.debugQuery || {}) }),
           getProps: () => ({ ...(ctx.debugMainProps || {}) }),
           get getRouter() {
