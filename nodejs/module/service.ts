@@ -145,16 +145,16 @@ export default class PcPageService {
       if (Array.isArray(themes)) {
         themes.forEach(({ namespace, content }) => {
           const variables = content?.variables
-    
+
           if (Array.isArray(variables)) {
             let styleHtml = ''
-    
+
             variables.forEach(({ config }) => {
               Object.entries(config).forEach(([key, value]) => {
                 styleHtml = styleHtml + `${key}: ${value};\n`
               })
             })
-    
+
             styleHtml = `<style id="${namespace}">\n:root {\n${styleHtml}}\n</style>\n`
             themesStyleStr = themesStyleStr + styleHtml
           }
@@ -197,9 +197,7 @@ export default class PcPageService {
             html: template,
           }
         }
-        const { code, message, data } = await axios.post(customPublishApi, {
-          data: dataForCustom,
-        }, {
+        const { code, message, data } = await axios.post(customPublishApi, dataForCustom, {
           headers: {
             'Content-Type': 'application/json'
           }

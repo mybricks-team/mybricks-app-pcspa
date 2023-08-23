@@ -14,7 +14,5 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3
-      - name: install deps
-        run: npm install
       - name: build app
         run: npm run publishToNpm:serviceUpdate
