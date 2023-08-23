@@ -12,7 +12,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-      - name: build app
-        run: npm run publishToNpm:serviceUpdate
+      - name: Check commit message
+        id: check_commit
+        run: echo "::set-output name=message::$(git log -1 --pretty=format:'%B')"
+
+      - name: Run CI based on commit message
+        run: |
+          commit_message="${{ steps.commit.outputs.message }}"
+          if [[ $commit_message == *"ci serviceUpdate"* ]]; then
+            echo "编译带服务器更新的app"
+            npm run publishToNpm:serviceUpdate
+          elif [[ $commit_message == *"ci"* ]]; then
+            echo "编译不带服务器更新的app"
+            npm run publishToNpm
+          else
+            echo "No specific action triggered."
+          fi
