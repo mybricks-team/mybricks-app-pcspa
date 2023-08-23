@@ -12,16 +12,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check out code
+        uses: actions/checkout@v3
       - name: Check commit message
         id: check_commit
-        run: echo "commit_message=$(git log -1 --pretty=format:'%B')" >> $GITHUB_ENV
+        run: echo "COMMIT_MESSAGE=$(git log -1 --pretty=format:'%B')" >> $GITHUB_ENV
 
       - name: Run CI based on commit message
         run: |
-          if [[ $commit_message == *"ci serviceUpdate"* ]]; then
+          if [[ $COMMIT_MESSAGE == *"ci serviceUpdate"* ]]; then
             echo "编译带服务器更新的app"
             npm run publishToNpm:serviceUpdate
-          elif [[ $commit_message == *"ci"* ]]; then
+          elif [[ $COMMIT_MESSAGE == *"ci"* ]]; then
             echo "编译不带服务器更新的app"
             npm run publishToNpm
           else
