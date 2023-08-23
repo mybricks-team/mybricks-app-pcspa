@@ -96,6 +96,7 @@ export default function MyDesigner({ appData }) {
     appConfig,
     uploadService,
     operable: false,
+    isDebugMode: false,
     saveContent(content) {
       ctx.save({ content })
     },
@@ -142,6 +143,7 @@ export default function MyDesigner({ appData }) {
   const [remotePlugins, setRemotePlugins] = useState(null);
   const [publishModalVisible, setPublishModalVisible] = useState(false)
   const [latestComlibs, setLatestComlibs] = useState<[]>()
+  const [isDebugMode, setIsDebugMode] = useState(false)
 
   useEffect(() => {
     API.Material.getLatestComponentLibrarys(comlibs.filter(lib => lib.id !== "_myself_").map(lib => lib.namespace)).then((res: any) => {
@@ -232,6 +234,10 @@ export default function MyDesigner({ appData }) {
   const save = useCallback(async () => {
     if (!ctx.operable) {
       message.warn('请先点击右上角个人头像上锁获取页面编辑权限')
+      return
+    }
+    if (ctx.isDebugMode) {
+      console.warn('请退出调试模式，再进行保存')
       return
     }
 
@@ -394,21 +400,35 @@ export default function MyDesigner({ appData }) {
     message[type](msg);
   }, []);
 
+  const onDebug = useCallback(() => {
+    setIsDebugMode(true)
+    ctx.isDebugMode = true
+    return () => {
+      setIsDebugMode(false)
+      ctx.isDebugMode = false
+    }
+  }, [])
+
   return (
     <div className={`${css.view} fangzhou-theme`}>
-      <Toolbar title={ctx.fileItem?.name} updateInfo={<Toolbar.LastUpdate content={saveTip} onClick={handleSwitch2SaveVersion} />}>
+      <Toolbar
+        title={ctx.fileItem?.name}
+        updateInfo={<Toolbar.LastUpdate
+        content={saveTip}
+        onClick={handleSwitch2SaveVersion} />}
+      >
         {RenderLocker}
         <Toolbar.Save
-          disabled={!operable}
+          disabled={!operable || isDebugMode}
           loading={saveLoading}
           onClick={() => {
             save()
           }}
           dotTip={beforeunload}
         />
-        <Toolbar.Button onClick={preview}>预览</Toolbar.Button>
+        <Toolbar.Button disabled={isDebugMode} onClick={preview}>预览</Toolbar.Button>
         <Toolbar.Button
-          disabled={!operable}
+          disabled={!operable || isDebugMode}
           loading={publishLoading}
           onClick={() => setPublishModalVisible(true)}
         >发布</Toolbar.Button>
@@ -421,6 +441,7 @@ export default function MyDesigner({ appData }) {
               config={config(Object.assign(ctx, { latestComlibs }), save, designerRef, remotePlugins)}
               onEdit={onEdit}
               onMessage={onMessage}
+              onDebug={onDebug}
               _onError_={(ex: any) => {
                 console.error(ex);
                 onMessage('error', ex.message);
