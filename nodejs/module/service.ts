@@ -142,9 +142,16 @@ export default class PcPageService {
         })
       }
 
+      console.info("[publish] getLatestPub begin");
+      const latestPub = (await API.File.getLatestPub({
+        fileId
+      }))?.[0];
+      console.info("[publish] getLatestPub ok");
+      const version = getNextVersion(latestPub?.version)
+
       template = template.replace(`--title--`, title)
         .replace(`<!-- themes-style -->`, themesStyleStr)
-        .replace(`-- comlib-rt --`, `<script src="./${fileId}.js"></script>`)
+        .replace(`-- comlib-rt --`, `<script src="./${fileId}-${version}.js"></script>`)
         .replace(`"--projectJson--"`, JSON.stringify(json))
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
@@ -156,12 +163,6 @@ export default class PcPageService {
       console.info("[publish] getCustomPublishApi=", customPublishApi);
 
       if (customPublishApi) {
-        console.info("[publish] getLatestPub begin");
-        const latestPub = (await API.File.getLatestPub({
-          fileId
-        }))?.[0];
-        console.info("[publish] getLatestPub ok");
-        const version = getNextVersion(latestPub?.version)
         const dataForCustom = {
           env: envType,
           productId: fileId,
@@ -176,7 +177,7 @@ export default class PcPageService {
           content: {
             json: JSON.stringify(json),
             html: template,
-            js: [{ name: `${fileId}.js`, content: script }]
+            js: [{ name: `${fileId}-${version}.js`, content: script }]
           }
         }
         const { code, message, data } = await axios.post(customPublishApi, dataForCustom, {
@@ -195,7 +196,7 @@ export default class PcPageService {
         await API.Upload.staticServer({
           content: script,
           folderPath: `${folderPath}/${envType || 'prod'}`,
-          fileName: `${fileId}.js`,
+          fileName: `${fileId}-${version}.js`,
           noHash: true
         })
         publishMaterialInfo = await API.Upload.staticServer({
