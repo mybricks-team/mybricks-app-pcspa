@@ -6,12 +6,13 @@ import * as path from "path";
 import API from "@mybricks/sdk-for-app/api";
 import { parse } from "url";
 import { Blob } from 'buffer'
+import { generateComLib } from "./generateComLib";
 const FormData = require("form-data");
 
 @Injectable()
 export default class PcPageService {
 
-  async _generateComLibRT(comlibs, json, { domainName }) {
+  async _generateComLibRT(comlibs, json, { domainName, fileId }) {
     /**
        * TODO:
        * 1.目前应用里配置的edit.js 一定有 rt.js
@@ -19,7 +20,7 @@ export default class PcPageService {
        * 3.目前只有匹配到“我的组件”内组件才去物料中心拉组件代码
        */
     let mySelfComMap = {}
-    let comlibScripts = ''
+    const comLibs = [];
 
     comlibs.forEach((comlib) => {
       if (comlib?.defined && Array.isArray(comlib.comAray)) {
@@ -27,74 +28,54 @@ export default class PcPageService {
           mySelfComMap[`${com.namespace}@${com.version}`] = true
         })
       } else {
-        comlibScripts += `<script src="${comlib?.rtJs}"></script>`
+        /** 获取所有组件库物料内容 */
+        comLibs.push(API.Material.getMaterialContent({ namespace: comlib.namespace, version: comlib.version, codeType: 'com_lib' }));
       }
     })
 
     const deps = json.scenes.reduce((pre, scene) => [...pre, ...scene.deps], []);
-    const components = deps.filter((item) => {
-      return mySelfComMap[`${item.namespace}@${item.version}`]
-    })
-    let mySelfComlibRt = "";
-    try {
-      console.info("[publish] get material begin");
-      const finalComponents = await Promise.all(
-        components.map((component) => {
-          return new Promise((resolve, reject) => {
-            axios({
-              method: "get",
-              url: `${domainName}/api/material/namespace/content?namespace=${component.namespace}&version=${component.version}`,
-              timeout: 30 * 1000,
-            })
-              .then(({ data }) => {
-                resolve(data.data);
-              })
-              .catch(error => reject(error));
-          });
-        })
-      );
-      console.info("[publish] get material ok");
-
-      finalComponents.forEach((finalComponent) => {
-        const { version, namespace, runtime } = finalComponent;
-
-        if (version && namespace && runtime) {
-          mySelfComlibRt += `
-					comAray.push({
-						namespace: '${namespace}',
-						version: '${version}',
-						runtime: ${runtime}
-					})
-				`;
-        }
-      });
-    } catch (error) {
-      throw Error(error.message || error.msg || '获取物料信息异常')
+    const selfComponents = deps.filter((item) => mySelfComMap[`${item.namespace}@${item.version}`]);
+    let comLibContents = [];
+    /** 组件库 */
+    if (deps.filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`]).length) {
+      comLibContents = (await Promise.all(comLibs)).map(lib => lib.content.coms || []);
     }
 
+    /** 处理我的组件 */
+    if (selfComponents.length) {
+      try {
+        const finalComponents = await Promise.all(
+          selfComponents.map((component) => {
+            return new Promise((resolve, reject) => {
+              axios({
+                method: "get",
+                url: `${domainName}/api/material/namespace/content?namespace=${component.namespace}&version=${component.version}`,
+                timeout: 30 * 1000,
+              })
+                .then(({ data }) => {
+                  resolve(data.data);
+                })
+                .catch(error => reject(error));
+            });
+          })
+        );
 
-    mySelfComlibRt = `
-			<script type="text/javascript">
-				(function() {
-					let comlibList = window['__comlibs_rt_'];
-					if(!comlibList){
-						comlibList = window['__comlibs_rt_'] = [];
-					}
-					let comAray = [];
-					const newComlib = {
-						id: '_myself_',
-						title: '我的组件',
-						comAray: comAray,
-						defined: true,
-					};
+        if (!comLibContents) {
+          comLibContents.push({});
+        }
+        finalComponents.forEach((finalComponent) => {
+          const { version, namespace, runtime } = finalComponent;
 
-					${mySelfComlibRt}
+          if (version && namespace && runtime) {
+            comLibContents[0][namespace + '@' + version] = { version, runtime };
+          }
+        });
+      } catch (error) {
+        throw Error(error.message || error.msg || '获取我的组件物料信息异常')
+      }
+    }
 
-					comlibList.unshift(newComlib);
-				})()
-			</script>
-		`
-    return comlibScripts + mySelfComlibRt
+    return generateComLib(comLibContents, deps, fileId);
   }
 
   async publish(req, { json, userId, fileId, envType, commitInfo }) {
@@ -163,11 +144,11 @@ export default class PcPageService {
 
       template = template.replace(`--title--`, title)
         .replace(`<!-- themes-style -->`, themesStyleStr)
-        .replace(`-- comlib-rt --`, await this._generateComLibRT(comlibs, json, { domainName }))
+        .replace(`-- comlib-rt --`, `<script src="./${fileId}.js"></script>`)
         .replace(`"--projectJson--"`, JSON.stringify(json))
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
-        .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null))
-
+        .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
+      const script = await this._generateComLibRT(comlibs, json, { domainName, fileId });
 
       let publishMaterialInfo
 
@@ -195,6 +176,7 @@ export default class PcPageService {
           content: {
             json: JSON.stringify(json),
             html: template,
+            js: [{ name: `${fileId}.js`, content: script }]
           }
         }
         const { code, message, data } = await axios.post(customPublishApi, dataForCustom, {
@@ -210,6 +192,12 @@ export default class PcPageService {
         }
       } else {
         console.info("[publish] upload to static server");
+        await API.Upload.staticServer({
+          content: script,
+          folderPath: `${folderPath}/${envType || 'prod'}`,
+          fileName: `${fileId}.js`,
+          noHash: true
+        })
         publishMaterialInfo = await API.Upload.staticServer({
           content: template,
           folderPath: `${folderPath}/${envType || 'prod'}`,
