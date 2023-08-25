@@ -245,6 +245,7 @@ export default function MyDesigner({ appData }) {
     setSaveLoading(true)
     //保存
     const json = designerRef.current?.dump()
+    ctx.comlibs.forEach(lib => lib.coms = undefined);
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
     json.executeEnv = ctx.executeEnv
@@ -308,6 +309,7 @@ export default function MyDesigner({ appData }) {
           /** 先保存 */
           const json = designerRef.current?.dump();
 
+          ctx.comlibs.forEach(lib => lib.coms = undefined);
           json.comlibs = ctx.comlibs
           json.debugQuery = ctx.debugQuery
           json.executeEnv = ctx.executeEnv
