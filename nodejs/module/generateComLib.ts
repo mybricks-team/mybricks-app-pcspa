@@ -20,7 +20,8 @@ export const generateComLib = (allComLibs: any[], allComponents: any[], comLibId
 		}
 
 		script += `
-			comAray.push({ namespace: ${component.namespace}, version: ${curComponent.version}, runtime: ${curComponent.runtime} });
+			eval(${JSON.stringify(decodeURIComponent(curComponent.runtime))});
+			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version}', runtime: window.fangzhouComDef.default });
 		`;
 	});
 
