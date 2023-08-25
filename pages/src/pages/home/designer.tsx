@@ -57,6 +57,7 @@ export default function MyDesigner({ appData }) {
       comlibs = appData.fileContent?.content?.comlibs;
     }
   }
+  comlibs.forEach(lib => lib.coms = undefined);
 
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.8/index.min.js'
 
