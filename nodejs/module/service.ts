@@ -12,7 +12,7 @@ const FormData = require("form-data");
 @Injectable()
 export default class PcPageService {
 
-  async _generateComLibRT(comlibs, json, { domainName, fileId }) {
+  async _generateComLibRT(comlibs, json, { domainName, fileId, componentRuntimeMap }) {
     /**
        * TODO:
        * 1.目前应用里配置的edit.js 一定有 rt.js
@@ -35,11 +35,11 @@ export default class PcPageService {
 
     const deps = json.scenes.reduce((pre, scene) => [...pre, ...scene.deps], []);
     const selfComponents = deps.filter((item) => mySelfComMap[`${item.namespace}@${item.version}`]);
-    let comLibContents = [];
-    /** 组件库 */
-    if (deps.filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`]).length) {
-      comLibContents = (await Promise.all(comLibs)).map(lib => lib.content.coms || []);
-    }
+    let comLibContents = componentRuntimeMap || [];
+    // /** 组件库 */
+    // if (deps.filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`]).length) {
+    //   comLibContents = (await Promise.all(comLibs)).map(lib => lib.content.coms || []);
+    // }
 
     /** 处理我的组件 */
     if (selfComponents.length) {
@@ -60,7 +60,7 @@ export default class PcPageService {
           })
         );
 
-        if (!comLibContents) {
+        if (!comLibContents.length) {
           comLibContents.push({});
         }
         finalComponents.forEach((finalComponent) => {
@@ -112,6 +112,7 @@ export default class PcPageService {
         publisherName,
         groupId,
         groupName,
+        componentRuntimeMap,
       } = json.configuration
 
       Reflect.deleteProperty(json, 'configuration')
@@ -155,7 +156,7 @@ export default class PcPageService {
         .replace(`"--projectJson--"`, JSON.stringify(json))
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
-      const script = await this._generateComLibRT(comlibs, json, { domainName, fileId });
+      const script = await this._generateComLibRT(comlibs, json, { domainName, fileId, componentRuntimeMap });
 
       let publishMaterialInfo
 

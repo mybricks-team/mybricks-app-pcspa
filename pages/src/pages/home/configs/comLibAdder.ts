@@ -68,8 +68,9 @@ export const comLibAdderFunc = ctx => (targetComlib) => {
           //更新
           const comlib = {
             ...material, 
-            editJs: materials[0].editJs, 
-            rtJs: materials[0].rtJs, 
+            coms: materials[0].coms,
+            editJs: materials[0].editJs,
+            rtJs: materials[0].rtJs,
             version: materials[0].version
           }
           const addedComlib = await upgradeComlibByVersion(ctx, comlib)

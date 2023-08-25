@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useLayoutEffect
 } from 'react'
+import axios from 'axios'
 import { fAxios } from '../../services/http'
 import moment from 'moment'
 import { message } from 'antd'
@@ -32,11 +33,11 @@ export default function MyDesigner({ appData }) {
     appData?.defaultComlibs.forEach(lib => {
       const { namespace, content, version } = lib;
       const com = defaultComlibs.find(lib => lib.namespace === namespace)
-      const { editJs, rtJs } = JSON.parse(content)
+      const { editJs, rtJs, coms } = JSON.parse(content)
       if (com) {
-        coms.push({ id: com.id, namespace, version, editJs, rtJs })
+        coms.push({ id: com.id, namespace, version, editJs, rtJs, coms })
       } else {
-        coms.push({ ...lib, editJs, rtJs })
+        coms.push({ ...lib, editJs, rtJs, coms })
       }
     })
   } else {
@@ -57,7 +58,6 @@ export default function MyDesigner({ appData }) {
       comlibs = appData.fileContent?.content?.comlibs;
     }
   }
-  comlibs.forEach(lib => lib.coms = undefined);
 
   const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.8/index.min.js'
 
@@ -245,7 +245,6 @@ export default function MyDesigner({ appData }) {
     setSaveLoading(true)
     //保存
     const json = designerRef.current?.dump()
-    ctx.comlibs.forEach(lib => lib.coms = undefined);
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
     json.executeEnv = ctx.executeEnv
@@ -309,7 +308,6 @@ export default function MyDesigner({ appData }) {
           /** 先保存 */
           const json = designerRef.current?.dump();
 
-          ctx.comlibs.forEach(lib => lib.coms = undefined);
           json.comlibs = ctx.comlibs
           json.debugQuery = ctx.debugQuery
           json.executeEnv = ctx.executeEnv
@@ -319,14 +317,54 @@ export default function MyDesigner({ appData }) {
           json.projectId = ctx.sdk.projectId;
 
           await ctx.save({ content: JSON.stringify(json), name: ctx.fileItem.name }, true);
-
           setBeforeunload(false);
 
+          const curToJSON = designerRef?.current?.toJSON();
+          const mySelfComMap = {}
+          ctx.comlibs.forEach((comlib) => {
+            if (comlib?.defined && Array.isArray(comlib.comAray)) {
+              comlib.comAray.forEach((com) => {
+                mySelfComMap[`${com.namespace}@${com.version}`] = true
+              })
+            }
+          })
+          const deps = curToJSON.scenes.reduce((pre, scene) => [...pre, ...scene.deps], []).filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`]);
+          const componentRuntimeMap = [];
+
+          if (deps.length) {
+            const allComLibs = (
+              await Promise.all(ctx.comlibs.filter(lib => !lib?.defined)
+                .map(lib => axios.get(lib.coms, { withCredentials: false })))
+            )
+              .map(data => data.data);
+            componentRuntimeMap.push({});
+            deps.forEach(component => {
+              let lib = allComLibs.find(lib => lib[component.namespace + '@' + component.version]);
+              let curComponent = null;
+              if (lib) {
+                curComponent = lib[component.namespace + '@' + component.version];
+              } else {
+                lib = allComLibs.find(lib => Object.keys(lib).find(key => key.startsWith(component.namespace)));
+
+                if (!lib) {
+                  throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+                }
+                curComponent = lib[Object.keys(lib).find(key => key.startsWith(component.namespace))];
+              }
+
+              if (!curComponent) {
+                throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+              }
+              componentRuntimeMap[0][component.namespace + '@' + curComponent.version] = curComponent;
+            });
+          }
+
           const toJSON = JSON.parse(JSON.stringify({
-            ...designerRef?.current?.toJSON(),
+            ...curToJSON,
             configuration: {
               // scripts: encodeURIComponent(scripts),
               comlibs: ctx.comlibs,
+              componentRuntimeMap,
               title: ctx.fileItem.name,
               publisherEmail: ctx.user.email,
               publisherName: ctx.user?.name,
