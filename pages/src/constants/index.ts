@@ -21,8 +21,8 @@ export const PC_COMMON_MAP = {
 export const PC_NORMAL_COM_LIB = {
   id: "7632",
   namespace: 'mybricks.normal-pc',
-  editJs: 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.2.19/2023-07-25_22-00-20/edit.js',
-  rtJs: 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.2.19/2023-07-25_22-00-20/rt.js',
+  editJs: "https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
+  rtJs: "https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
   version: '1.2.19'
 }
 

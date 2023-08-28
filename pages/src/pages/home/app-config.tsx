@@ -508,6 +508,15 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               deletable: false,
               asRoot: true
             }
+          },
+          {
+            type: 'popup',
+            title: '打印对话框',
+            template: {
+              namespace: 'mybricks.normal-pc.print',
+              deletable: false,
+              asRoot: true
+            }
           }
         ]
       },
