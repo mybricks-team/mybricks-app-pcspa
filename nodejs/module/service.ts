@@ -12,7 +12,7 @@ const FormData = require("form-data");
 @Injectable()
 export default class PcPageService {
 
-  async _generateComLibRT(comlibs, json, { domainName, fileId, componentRuntimeMap }) {
+  async _generateComLibRT(comlibs, json, { domainName, fileId, noThrowError }) {
     /**
        * TODO:
        * 1.目前应用里配置的edit.js 一定有 rt.js
@@ -20,26 +20,18 @@ export default class PcPageService {
        * 3.目前只有匹配到“我的组件”内组件才去物料中心拉组件代码
        */
     let mySelfComMap = {}
-    const comLibs = [];
 
     comlibs.forEach((comlib) => {
       if (comlib?.defined && Array.isArray(comlib.comAray)) {
         comlib.comAray.forEach((com) => {
           mySelfComMap[`${com.namespace}@${com.version}`] = true
         })
-      } else {
-        /** 获取所有组件库物料内容 */
-        comLibs.push(API.Material.getMaterialContent({ namespace: comlib.namespace, version: comlib.version, codeType: 'com_lib' }));
       }
     })
 
     const deps = json.scenes.reduce((pre, scene) => [...pre, ...scene.deps], []);
     const selfComponents = deps.filter((item) => mySelfComMap[`${item.namespace}@${item.version}`]);
-    let comLibContents = componentRuntimeMap || [];
-    // /** 组件库 */
-    // if (deps.filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`]).length) {
-    //   comLibContents = (await Promise.all(comLibs)).map(lib => lib.content.coms || []);
-    // }
+    const comLibContents = [...comlibs];
 
     /** 处理我的组件 */
     if (selfComponents.length) {
@@ -60,14 +52,18 @@ export default class PcPageService {
           })
         );
 
-        if (!comLibContents.length) {
-          comLibContents.push({});
-        }
+        comLibContents.unshift({
+          comAray: [],
+          id: '_myself_',
+          title: '我的组件',
+          defined: true,
+          componentRuntimeMap: {}
+        });
         finalComponents.forEach((finalComponent) => {
           const { version, namespace, runtime } = finalComponent;
 
           if (version && namespace && runtime) {
-            comLibContents[0][namespace + '@' + version] = { version, runtime };
+            comLibContents[0].componentRuntimeMap[namespace + '@' + version] = { version, runtime: encodeURIComponent(runtime) };
           }
         });
       } catch (error) {
@@ -75,7 +71,7 @@ export default class PcPageService {
       }
     }
 
-    return generateComLib(comLibContents, deps, fileId);
+    return generateComLib(comLibContents.filter(lib => !!lib.componentRuntimeMap), deps, { comLibId: fileId, noThrowError });
   }
 
   async publish(req, { json, userId, fileId, envType, commitInfo }) {
@@ -112,7 +108,6 @@ export default class PcPageService {
         publisherName,
         groupId,
         groupName,
-        componentRuntimeMap,
       } = json.configuration
 
       Reflect.deleteProperty(json, 'configuration')
@@ -148,20 +143,39 @@ export default class PcPageService {
         fileId
       }))?.[0];
       console.info("[publish] getLatestPub ok");
-      const version = getNextVersion(latestPub?.version)
+      const version = getNextVersion(latestPub?.version);
+      let comLibRtScript = '';
+      let needCombo = false;
+      let hasOldComLib = false;
+      comlibs.forEach(lib => {
+        /** 旧组件库，未带组件 runtime 描述文件 */
+        if (!lib.coms && !lib.defined) {
+          comLibRtScript += `<script src="${lib.rtJs}"></script>`;
+          hasOldComLib = true;
+        }
+      });
+
+      /** 需要聚合的组件资源 */
+      if (comlibs.find(lib => lib?.defined)?.comAray?.length || comlibs.find(lib => lib.componentRuntimeMap)) {
+        comLibRtScript += `<script src="./${fileId}-${version}.js"></script>`;
+        needCombo = true;
+      }
 
       template = template.replace(`--title--`, title)
         .replace(`<!-- themes-style -->`, themesStyleStr)
-        .replace(`-- comlib-rt --`, `<script src="./${fileId}-${version}.js"></script>`)
+        .replace(`-- comlib-rt --`, comLibRtScript)
         .replace(`"--projectJson--"`, JSON.stringify(json))
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
-      const script = await this._generateComLibRT(comlibs, json, { domainName, fileId, componentRuntimeMap });
 
       let publishMaterialInfo
-
       const customPublishApi = await getCustomPublishApi()
       console.info("[publish] getCustomPublishApi=", customPublishApi);
+      let comboScriptText = '';
+      /** 生成 combo 组件库代码 */
+      if (needCombo) {
+        comboScriptText = await this._generateComLibRT(comlibs, json, {domainName, fileId, noThrowError: hasOldComLib});
+      }
 
       if (customPublishApi) {
         const dataForCustom = {
@@ -178,7 +192,7 @@ export default class PcPageService {
           content: {
             json: JSON.stringify(json),
             html: template,
-            js: [{ name: `${fileId}-${version}.js`, content: script }]
+            js: needCombo ? [{ name: `${fileId}-${version}.js`, content: comboScriptText }] : []
           }
         }
         const { code, message, data } = await axios.post(customPublishApi, dataForCustom, {
@@ -194,8 +208,8 @@ export default class PcPageService {
         }
       } else {
         console.info("[publish] upload to static server");
-        await API.Upload.staticServer({
-          content: script,
+        needCombo && await API.Upload.staticServer({
+          content: comboScriptText,
           folderPath: `${folderPath}/${envType || 'prod'}`,
           fileName: `${fileId}-${version}.js`,
           noHash: true

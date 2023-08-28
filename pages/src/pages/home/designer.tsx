@@ -319,43 +319,54 @@ export default function MyDesigner({ appData }) {
           await ctx.save({ content: JSON.stringify(json), name: ctx.fileItem.name }, true);
           setBeforeunload(false);
 
+          const curComLibs = JSON.parse(JSON.stringify(ctx.comlibs));
           const curToJSON = designerRef?.current?.toJSON();
           const mySelfComMap = {}
-          ctx.comlibs.forEach((comlib) => {
-            if (comlib?.defined && Array.isArray(comlib.comAray)) {
-              comlib.comAray.forEach((com) => {
+          ctx.comlibs.forEach((comLib) => {
+            if (comLib?.defined && Array.isArray(comLib.comAray)) {
+              comLib.comAray.forEach((com) => {
                 mySelfComMap[`${com.namespace}@${com.version}`] = true
               })
             }
           })
           const deps = curToJSON.scenes.reduce((pre, scene) => [...pre, ...scene.deps], []).filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`]);
-          const componentRuntimeMap = [];
 
           if (deps.length) {
-            const allComLibs = (
-              await Promise.all(ctx.comlibs.filter(lib => !lib?.defined)
-                .map(lib => axios.get(lib.coms, { withCredentials: false })))
-            )
+            const willFetchComLibs = curComLibs.filter(lib => !lib?.defined && lib.coms);
+            const allComLibsRuntimeMap = (await Promise.all(willFetchComLibs.map(lib => axios.get(lib.coms, { withCredentials: false }))))
               .map(data => data.data);
-            componentRuntimeMap.push({});
-            deps.forEach(component => {
-              let lib = allComLibs.find(lib => lib[component.namespace + '@' + component.version]);
-              let curComponent = null;
-              if (lib) {
-                curComponent = lib[component.namespace + '@' + component.version];
-              } else {
-                lib = allComLibs.find(lib => Object.keys(lib).find(key => key.startsWith(component.namespace)));
+            const noThrowError = comlibs.some(lib => !lib.coms && !lib.defined);
 
-                if (!lib) {
-                  throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+            deps.forEach(component => {
+              let libIndex = allComLibsRuntimeMap.findIndex(lib => lib[component.namespace + '@' + component.version]);
+              let curComponent = null;
+              if (libIndex !== -1) {
+                curComponent = allComLibsRuntimeMap[libIndex][component.namespace + '@' + component.version];
+              } else {
+                libIndex = allComLibsRuntimeMap.findIndex(lib => Object.keys(lib).find(key => key.startsWith(component.namespace)));
+
+                if (libIndex === -1) {
+                  if (noThrowError) {
+                    return;
+                  } else {
+                    throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+                  }
                 }
-                curComponent = lib[Object.keys(lib).find(key => key.startsWith(component.namespace))];
+                curComponent = allComLibsRuntimeMap[libIndex][Object.keys(allComLibsRuntimeMap[libIndex]).find(key => key.startsWith(component.namespace))];
               }
 
               if (!curComponent) {
-                throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+                if (noThrowError) {
+                  return;
+                } else {
+                  throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+                }
               }
-              componentRuntimeMap[0][component.namespace + '@' + curComponent.version] = curComponent;
+
+              if (!willFetchComLibs[libIndex].componentRuntimeMap) {
+                willFetchComLibs[libIndex].componentRuntimeMap = {};
+              }
+              willFetchComLibs[libIndex].componentRuntimeMap[component.namespace + '@' + curComponent.version] = curComponent;
             });
           }
 
@@ -363,8 +374,7 @@ export default function MyDesigner({ appData }) {
             ...curToJSON,
             configuration: {
               // scripts: encodeURIComponent(scripts),
-              comlibs: ctx.comlibs,
-              componentRuntimeMap,
+              comlibs: curComLibs,
               title: ctx.fileItem.name,
               publisherEmail: ctx.user.email,
               publisherName: ctx.user?.name,

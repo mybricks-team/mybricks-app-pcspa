@@ -1,25 +1,36 @@
-export const generateComLib = (allComLibs: any[], allComponents: any[], comLibId: number) => {
+export const generateComLib = (allComLibs: any[], allComponents: any[], options: { comLibId: number; noThrowError: boolean }) => {
+	const { comLibId, noThrowError } = options;
 	let script = '';
 
 	allComponents.forEach(component => {
-		let lib = allComLibs.find(lib => lib[component.namespace + '@' + component.version]);
+		let lib = allComLibs.find(lib => lib.componentRuntimeMap[component.namespace + '@' + component.version]);
 		let curComponent = null;
 		if (lib) {
-			curComponent = lib[component.namespace + '@' + component.version];
+			curComponent = lib.componentRuntimeMap[component.namespace + '@' + component.version];
 		} else {
-			lib = allComLibs.find(lib => Object.keys(lib).find(key => key.startsWith(component.namespace)));
+			lib = allComLibs.find(lib => Object.keys(lib.componentRuntimeMap).find(key => key.startsWith(component.namespace)));
 
 			if (!lib) {
-				throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+				if (noThrowError) {
+					return;
+				} else {
+					throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+				}
 			}
-			curComponent = lib[Object.keys(lib).find(key => key.startsWith(component.namespace))];
+			curComponent = lib.componentRuntimeMap[Object.keys(lib.componentRuntimeMap).find(key => key.startsWith(component.namespace))];
 		}
 
 		if (!curComponent) {
-			throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+			if (noThrowError) {
+				return;
+			} else {
+				throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+			}
 		}
 
-		script += `
+		script += lib.defined ? `
+			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version}', runtime: ${decodeURIComponent(curComponent.runtime)} });
+		` : `
 			eval(${JSON.stringify(decodeURIComponent(curComponent.runtime))});
 			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version}', runtime: window.fangzhouComDef.default });
 		`;
