@@ -33,11 +33,11 @@ export default function MyDesigner({ appData }) {
     appData?.defaultComlibs.forEach(lib => {
       const { namespace, content, version } = lib;
       const com = defaultComlibs.find(lib => lib.namespace === namespace)
-      const { editJs, rtJs, coms } = JSON.parse(content)
+      const { editJs, rtJs, coms: componentComs } = JSON.parse(content)
       if (com) {
-        coms.push({ id: com.id, namespace, version, editJs, rtJs, coms })
+        coms.push({ id: com.id, namespace, version, editJs, rtJs, coms: componentComs })
       } else {
-        coms.push({ ...lib, editJs, rtJs, coms })
+        coms.push({ ...lib, editJs, rtJs, coms: componentComs })
       }
     })
   } else {
