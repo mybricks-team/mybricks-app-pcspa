@@ -150,9 +150,15 @@ export default class PcPageService {
             let styleHtml = ''
 
             variables.forEach(({ config }) => {
-              Object.entries(config).forEach(([key, value]) => {
-                styleHtml = styleHtml + `${key}: ${value};\n`
-              })
+              if (Array.isArray(config)) {
+                config.forEach(({ key, value }) => {
+                  styleHtml = styleHtml + `${key}: ${value};\n`
+                })
+              } else {
+                Object.entries(config).forEach(([key, value]) => {
+                  styleHtml = styleHtml + `${key}: ${value};\n`
+                })
+              }
             })
 
             styleHtml = `<style id="${namespace}">\n:root {\n${styleHtml}}\n</style>\n`

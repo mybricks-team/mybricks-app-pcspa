@@ -32,9 +32,15 @@ function cssVariable (dumpJson) {
         let innerHTML = ''
 
         variables.forEach(({ config }) => {
-          Object.entries(config).forEach(([key, value]) => {
-            innerHTML = innerHTML + `${key}: ${value};\n`
-          })
+          if (Array.isArray(config)) {
+            config.forEach(({ key, value }) => {
+              innerHTML = innerHTML + `${key}: ${value};\n`
+            })
+          } else {
+            Object.entries(config).forEach(([key, value]) => {
+              innerHTML = innerHTML + `${key}: ${value};\n`
+            })
+          }
         })
 
         style.innerHTML = `:root {\n${innerHTML}}`
