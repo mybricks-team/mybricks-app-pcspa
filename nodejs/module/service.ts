@@ -31,6 +31,8 @@ export default class PcPageService {
       }
     })
 
+    console.log(comlibScripts)
+
     const deps = json.scenes.reduce((pre, scene) => [...pre, ...scene.deps], []);
     const components = deps.filter((item) => {
       return mySelfComMap[`${item.namespace}@${item.version}`]
@@ -94,6 +96,8 @@ export default class PcPageService {
 				})()
 			</script>
 		`
+
+    console.log(comlibScripts + mySelfComlibRt)
     return comlibScripts + mySelfComlibRt
   }
 
@@ -173,7 +177,6 @@ export default class PcPageService {
         .replace(`"--projectJson--"`, JSON.stringify(json))
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null))
-
 
       let publishMaterialInfo
 
