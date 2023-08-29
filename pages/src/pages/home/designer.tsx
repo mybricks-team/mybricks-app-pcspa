@@ -328,8 +328,19 @@ export default function MyDesigner({ appData }) {
                 mySelfComMap[`${com.namespace}@${com.version}`] = true
               })
             }
-          })
-          const deps = curToJSON.scenes.reduce((pre, scene) => [...pre, ...scene.deps], []).filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`]);
+          });
+          const ignoreNamespaces = [
+            'mybricks.core-comlib.fn',
+            'mybricks.core-comlib.var',
+            'mybricks.core-comlib.type-change',
+            'mybricks.core-comlib.connector',
+            'mybricks.core-comlib.frame-input',
+            'mybricks.core-comlib.scenes'
+          ];
+          const deps = curToJSON.scenes
+            .reduce((pre, scene) => [...pre, ...scene.deps], [])
+            .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+            .filter((item) => !ignoreNamespaces.includes(item.namespace));
 
           if (deps.length) {
             const willFetchComLibs = curComLibs.filter(lib => !lib?.defined && lib.coms);

@@ -29,7 +29,17 @@ export default class PcPageService {
       }
     })
 
-    const deps = json.scenes.reduce((pre, scene) => [...pre, ...scene.deps], []);
+    const ignoreNamespaces = [
+      'mybricks.core-comlib.fn',
+      'mybricks.core-comlib.var',
+      'mybricks.core-comlib.type-change',
+      'mybricks.core-comlib.connector',
+      'mybricks.core-comlib.frame-input',
+      'mybricks.core-comlib.scenes'
+    ];
+    const deps = json.scenes
+      .reduce((pre, scene) => [...pre, ...scene.deps], [])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace));
     const selfComponents = deps.filter((item) => mySelfComMap[`${item.namespace}@${item.version}`]);
     const comLibContents = [...comlibs];
 
