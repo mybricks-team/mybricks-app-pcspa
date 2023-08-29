@@ -153,13 +153,9 @@ export default class PcPageService {
           if (Array.isArray(variables)) {
             let styleHtml = ''
 
-            variables.forEach(({ config }) => {
-              if (Array.isArray(config)) {
-                config.forEach(({ key, value }) => {
-                  styleHtml = styleHtml + `${key}: ${value};\n`
-                })
-              } else {
-                Object.entries(config).forEach(([key, value]) => {
+            variables.forEach(({ configs }) => {
+              if (Array.isArray(configs)) {
+                configs.forEach(({ key, value }) => {
                   styleHtml = styleHtml + `${key}: ${value};\n`
                 })
               }

@@ -31,13 +31,9 @@ function cssVariable (dumpJson) {
         style.id = namespace
         let innerHTML = ''
 
-        variables.forEach(({ config }) => {
-          if (Array.isArray(config)) {
-            config.forEach(({ key, value }) => {
-              innerHTML = innerHTML + `${key}: ${value};\n`
-            })
-          } else {
-            Object.entries(config).forEach(([key, value]) => {
+        variables.forEach(({ configs }) => {
+          if (Array.isArray(configs)) {
+            configs.forEach(({ key, value }) => {
               innerHTML = innerHTML + `${key}: ${value};\n`
             })
           }
