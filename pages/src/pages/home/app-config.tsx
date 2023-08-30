@@ -128,14 +128,16 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
       servicePlugin({
         envList,
       }),
-      domainServicePlugin({
-        addActions: [
-          { type: 'aggregation-model', title: '聚合模型' }
-        ]
-        // openFileSelector() {
-        //   return openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })
-        // },
-      }),
+      ...remotePlugins,
+      useTheme({ sdk: ctx.sdk }),
+      // domainServicePlugin({
+      //   addActions: [
+      //     { type: 'aggregation-model', title: '聚合模型' }
+      //   ]
+      //   // openFileSelector() {
+      //   //   return openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })
+      //   // },
+      // }),
       versionPlugin({
         user: ctx.user,
         file: ctx.fileItem,
@@ -146,8 +148,6 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
         },
       }),
       toolsPlugin(),
-      useTheme({sdk: ctx.sdk}),
-      ...remotePlugins
     ],
     ...(ctx.hasMaterialApp ? {
       comLibAdder: comLibAdderFunc(ctx),
