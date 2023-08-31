@@ -79,10 +79,10 @@ const getComs = () => {
 }
 
 function Page({ props }) {
-  if (props?.container) {
+  if (props?.canvasElement) {
     message?.config({
       getContainer() {
-        return props?.container
+        return props?.canvasElement
       },
     })
   }
