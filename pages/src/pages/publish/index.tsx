@@ -90,7 +90,7 @@ function Page({ props }) {
     env: {
       silent: true,
       showErrorNotification: false,
-      canvasElement: (props && props.container) || document.body,
+      canvasElement: props?.canvasElement || undefined,
       get vars() {
         // 环境变量
         return {
