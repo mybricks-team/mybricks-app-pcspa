@@ -21,6 +21,11 @@ const defaultPermissionComments = `/**
 *
 * interface Props {
 *   key: string // 权限key
+*   type: string; // 权限类型
+*   register?: { // 权限注册信息
+*       code: string; // 选项编码
+*       title: string; // 权限标题
+*   }; 
 * }
 *
 * @param {object} props: Props
@@ -28,7 +33,7 @@ const defaultPermissionComments = `/**
 */
 `
 
-const defaultPermissionFn = `export default function ({ key }) {
+const defaultPermissionFn = `export default function ({ key, type, register }) {
   return true
 }
 `
@@ -112,7 +117,21 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
   }
 }
 
+/**
+ * FIXME: 似乎编辑态和 DEBUG 态用的是用一个 app-config，这导致 hasPermission 永远只能取到编辑态闭包中的数据
+ * 提升变量作用域，绕过闭包问题，让 app-config 内的函数可以取到最新的数据
+ */
+const memory  = { permissionID2Info: {} }
+
 export default function (ctx, save, designerRef, remotePlugins = []) {
+
+  const curToJSON = designerRef?.current?.toJSON();
+
+  memory.permissionID2Info = (curToJSON?.permissions || []).reduce((pre, info) => {
+    pre[info.id] = info
+    return pre;
+  }, {})
+
   const envList = ctx?.appConfig?.publishEnvConfig?.envList || []
   // 获得环境信息映射表
   const envMap = envList.reduce((res, item) => {
@@ -434,8 +453,9 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             let result: boolean;
 
             try {
+              const info = memory.permissionID2Info[key];
               result = runJs(decodeURIComponent(hasPermissionFn), [
-                { key },
+                { key, type:info.type, register:{ code:info.register.code, title:info.register.title } },
               ]);
 
               if (typeof result !== 'boolean') {
@@ -465,6 +485,11 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
 
             return result;
           };
+        },
+        get getPermissionInfo() {
+          return ({ id }: { id:string })=>{
+            return memory.permissionID2Info[id];
+          }
         }
       },
       events: [
