@@ -21,11 +21,6 @@ const defaultPermissionComments = `/**
 *
 * interface Props {
 *   key: string // 权限key
-*   type: string; // 权限类型
-*   register?: { // 权限注册信息
-*       code: string; // 选项编码
-*       title: string; // 权限标题
-*   }; 
 * }
 *
 * @param {object} props: Props
@@ -33,7 +28,7 @@ const defaultPermissionComments = `/**
 */
 `
 
-const defaultPermissionFn = `export default function ({ key, type, register }) {
+const defaultPermissionFn = `export default function ({ key }) {
   return true
 }
 `
@@ -455,7 +450,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             try {
               const info = memory.permissionID2Info[key];
               result = runJs(decodeURIComponent(hasPermissionFn), [
-                { key, type:info.type, register:{ code:info.register.code, title:info.register.title } },
+                { key: info.register.code },
               ]);
 
               if (typeof result !== 'boolean') {
