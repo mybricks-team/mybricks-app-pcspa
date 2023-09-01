@@ -234,7 +234,7 @@ function render(props) {
       },
       React.createElement(Page, { props })
     ),
-    document.querySelector('#root')
+    document.querySelector('#mybricks-page-root')
   )
   return Promise.resolve()
 }
@@ -281,6 +281,6 @@ export async function unmount(props) {
   const { container } = props
   ReactDOM &&
     ReactDOM.unmountComponentAtNode(
-      (container || document).querySelector('#root')
+      (container || document).querySelector('#mybricks-page-root')
     )
 }
