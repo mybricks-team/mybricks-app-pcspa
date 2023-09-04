@@ -37,7 +37,9 @@ export class PreviewStorage {
     return { 
       // TODO: 没找到 dumpJson 对应的类型，等这个类型补上了吧这里修改掉
       dumpJson: dumpJson as any, 
-      comlibs, hasPermissionFn, 
+      // TODO: 没找到 comlibs 对应的类型，等这个类型补上了吧这里修改掉
+      comlibs: comlibs as any, 
+      hasPermissionFn, 
       executeEnv 
     }
   }
