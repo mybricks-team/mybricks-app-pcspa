@@ -275,13 +275,11 @@ function Page({ props, hasPermissionFn }) {
           },
           get hasPermission() {
             return ({ key }) => {
-              const permissionInfo = permissionID2Info[key];
-
-              console.log('permissionInfo JD==> ',key,permissionInfo);
-
               if (!hasPermissionFn) {
                 return true;
               }
+
+              const permissionInfo = permissionID2Info[key];
 
               let result;
 

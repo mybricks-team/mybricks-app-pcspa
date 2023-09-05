@@ -9,6 +9,14 @@ const projectJson = '--projectJson--' //replace it
 const projectId = '--slot-project-id--' //replace it
 const executeEnv = '--executeEnv--' //replace it
 
+/**
+ * key-value 结构，通过 permissionID 找 permission 配置
+ */
+const permissionID2Info = (projectJson.permissions || []).reduce((pre, info) => {
+  pre[info.id] = info
+  return pre;
+}, {})
+
 function decode(str) {
   try {
     return decodeURIComponent(str)
@@ -196,11 +204,13 @@ function Page({ props }) {
             return true
           }
 
+          const permissionInfo = permissionID2Info[key];
+
           let result
 
           try {
             result = runJs(decodeURIComponent(projectJson?.hasPermissionFn), [
-              { key },
+              { key: permissionInfo.register.code },
             ])
 
             if (typeof result !== 'boolean') {
@@ -217,6 +227,11 @@ function Page({ props }) {
           }
 
           return result
+        }
+      },
+      get getPermissionInfo() {
+        return ({ id }: { id:string })=>{
+          return permissionID2Info[id];
         }
       },
       // uploadFile: uploadApi,
