@@ -120,7 +120,14 @@ const memory  = { permissionID2Info: {} }
 
 export default function (ctx, save, designerRef, remotePlugins = []) {
 
-  const curToJSON = designerRef?.current?.toJSON();
+  let curToJSON;
+  try {
+    curToJSON = designerRef?.current?.toJSON();
+  } catch (e) {
+    message.error("获取 toJSON 数据失败，请刷新重试！")
+    console.error("获取 toJSON 数据失败，请刷新重试！", e);
+  }
+  
 
   memory.permissionID2Info = (curToJSON?.permissions || []).reduce((pre, info) => {
     pre[info.id] = info
