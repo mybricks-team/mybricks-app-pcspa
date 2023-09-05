@@ -234,7 +234,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 },
                 value: {
                   get() {
-                    return decodeURIComponent(ctx?.hasPermissionFn || defaultPermissionFn)
+                    return decodeURIComponent(ctx?.hasPermissionFn || encodeURIComponent(defaultPermissionFn))
                   },
                   set(context, v: string) {
                     ctx.hasPermissionFn = encodeURIComponent(v)
