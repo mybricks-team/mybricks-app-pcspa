@@ -457,7 +457,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             try {
               const info = memory.permissionID2Info[key];
               result = runJs(decodeURIComponent(hasPermissionFn), [
-                { key: info.register.code },
+                { key: info?.register?.code || key },
               ]);
 
               if (typeof result !== 'boolean') {

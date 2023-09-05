@@ -210,7 +210,7 @@ function Page({ props }) {
 
           try {
             result = runJs(decodeURIComponent(projectJson?.hasPermissionFn), [
-              { key: permissionInfo.register.code },
+              { key: permissionInfo?.register?.code || key },
             ])
 
             if (typeof result !== 'boolean') {

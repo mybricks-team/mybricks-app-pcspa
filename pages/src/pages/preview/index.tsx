@@ -285,7 +285,7 @@ function Page({ props, hasPermissionFn }) {
 
               try {
                 result = runJs(decodeURIComponent(hasPermissionFn), [
-                  { key: permissionInfo.register.code },
+                  { key: permissionInfo?.register?.code || key },
                 ]);
 
                 if (typeof result !== 'boolean') {
