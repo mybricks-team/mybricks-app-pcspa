@@ -163,7 +163,7 @@ export default class PcPageService {
       }
 
       template = template.replace(`--title--`, title)
-        .replace(`<!-- themes-style -->`, themesStyleStr)
+        .replace(`-- themes-style --`, themesStyleStr)
         .replace(`-- comlib-rt --`, comLibRtScript)
         .replace(`"--projectJson--"`, JSON.stringify(json))
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
