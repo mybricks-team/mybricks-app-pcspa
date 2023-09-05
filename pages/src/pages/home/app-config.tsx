@@ -480,11 +480,6 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
 
             return result;
           };
-        },
-        get getPermissionInfo() {
-          return ({ id }: { id:string })=>{
-            return memory.permissionID2Info[id];
-          }
         }
       },
       events: [

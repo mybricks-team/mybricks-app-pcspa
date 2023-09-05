@@ -304,11 +304,6 @@ function Page({ props, hasPermissionFn }) {
               return result;
             };
           },
-          get getPermissionInfo() {
-            return ({ id }: { id:string })=>{
-              return permissionID2Info[id];
-            }
-          },
           // uploadFile: uploadApi
         },
         events: [
