@@ -14,7 +14,7 @@ import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
 // import { getManateeUserInfo } from '../../utils'
-import { fetchPlugins, getManateeUserInfo } from '../../utils'
+import { fetchPlugins, getManateeUserInfo, removeBadChar } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
@@ -111,7 +111,7 @@ export default function MyDesigner({ appData }) {
         fileId: ctx.fileId,
         name,
         shareType,
-        content,
+        content: removeBadChar(content),
         icon,
       }).then(() => {
         !skipMessage && message.success(`保存完成`);
@@ -476,8 +476,8 @@ export default function MyDesigner({ appData }) {
       <Toolbar
         title={ctx.fileItem?.name}
         updateInfo={<Toolbar.LastUpdate
-        content={saveTip}
-        onClick={handleSwitch2SaveVersion} />}
+          content={saveTip}
+          onClick={handleSwitch2SaveVersion} />}
       >
         {RenderLocker}
         <Toolbar.Save
