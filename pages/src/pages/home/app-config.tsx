@@ -433,7 +433,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
           }
         },
         get hasPermission() {
-          return ({ permission }) => {
+          return ({ permission, key }) => {
             const hasPermissionFn = ctx?.hasPermissionFn;
 
             if (!ctx.debugHasPermissionFn) {
@@ -444,7 +444,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               return true;
             }
 
-            const code = permission?.register?.code;
+            const code = permission?.register?.code || key;
 
             let result: boolean;
 
