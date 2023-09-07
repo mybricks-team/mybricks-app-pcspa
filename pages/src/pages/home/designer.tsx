@@ -511,8 +511,12 @@ export default function MyDesigner({ appData }) {
           onImport={(value) => {
             try {
               const { content, pageConfig } = JSON.parse(value)
-              setCtx(pre => ({...pre, ...pageConfig}))
+              Object.assign(ctx, pageConfig)
               designerRef.current.loadContent(content)
+              setTimeout(async () => {
+                await save()
+                location.reload()
+              }, 10);
             } catch (e) {
               message.error(e)
               console.error(e)
