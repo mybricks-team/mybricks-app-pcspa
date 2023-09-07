@@ -68,16 +68,20 @@ const getDomainFromPath = (path: string) => {
   }
 }
 
-const injectUpload = (editConfig: Record<string, any>, uploadService: string, manateeUserInfo: { token: string, session: string }) => {
+const injectUpload = (editConfig: Record<string, any>, uploadService: string, manateeUserInfo: { token: string, session: string }, fileId: string) => {
+
   if (!!editConfig && !editConfig.upload) {
     editConfig.upload = async (files: Array<File>): Promise<Array<string>> => {
       const formData = new FormData();
       formData.append("file", files[0])
-      formData.append('folderPath', `/files/${Date.now()}`)
+      formData.append('folderPath', `/files/${fileId}`)
+
       const useConfigService = !!uploadService;
+
       if (!useConfigService) {
         uploadService = '/paas/api/flow/saveFile'
       }
+
       try {
         const res = await axios<any, any>({
           url: uploadService,
@@ -89,6 +93,7 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
           }
         });
         const { status, data, message, code } = res.data;
+
         if (status === 200 || code === 1) {
           let url = ''
           if (Array.isArray(data)) {
@@ -102,6 +107,7 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
           const staticUrl = /^http/.test(url) ? url : `${getDomainFromPath(uploadService)}${url}`
           return [staticUrl].map(url => url.replace('https', 'http'))
         }
+        
         throw Error(`【图片上传出错】: ${message}`)
       } catch (error) {
         message.error(error.message)
@@ -199,7 +205,8 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
     },
     editView: {
       editorAppender(editConfig) {
-        injectUpload(editConfig, ctx.uploadService, ctx.manateeUserInfo);
+        injectUpload(editConfig, ctx.uploadService, ctx.manateeUserInfo, ctx.fileId);
+
         return;
       },
       items({ }, cate0, cate1, cate2) {
