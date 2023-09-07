@@ -191,12 +191,12 @@ function Page({ props }) {
         })
       },
       get hasPermission() {
-        return ({ permission }) => {
+        return ({ permission, key }) => {
           if (!projectJson?.hasPermissionFn) {
             return true
           }
 
-          const code = permission?.register?.code;
+          const code = permission?.register?.code || key;
 
           let result
 

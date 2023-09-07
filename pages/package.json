@@ -60,7 +60,7 @@
     "@mybricks/plugin-theme": "0.0.35",
     "@mybricks/sdk-for-app": "^0.1.89",
     "@mybricks/plugin-tools": "1.0.17",
-    "@mybricks/render-web": "1.1.90",
+    "@mybricks/render-web": "1.1.91",
     "antd": "^4.23.6",
     "classnames": "^2.3.1",
     "compare-versions": "^6.0.0",
