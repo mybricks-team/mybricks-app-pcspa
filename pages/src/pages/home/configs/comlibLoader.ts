@@ -3,9 +3,9 @@ import { Modal, message } from 'antd'
 import { MaterialService } from './../../../services'
 import { MaterialComlib } from './../../../types'
 import { ComboComlibURL, getMySelfLibComsFromUrl, getComlibsByNamespaceAndVersion } from './../../../utils/comlib'
-import { loadMaterials } from './loadMaterials'
+import { initMaterials } from './initMaterials'
 import { addComlib } from './addComlib'
-import { upgradeLatestComlib, upgradeComlibByVersion } from './upgradeLatestComlib'
+import { upgradeLatestComlib, upgradeComlibByVersion } from './upgradeComlib'
 import { deleteComlib } from './deleteComlib'
 
 const init = () => {
@@ -100,16 +100,17 @@ export default (ctx) => (libDesc) => {
 
             if (index !== -1) {
               com = comlib.comAray[index];
-
+              const closeLoad = message.loading({
+                key: 'loading',
+                content: '物料加载中……',
+                duration: 200,
+              })
               const component = await MaterialService.getMateralMaterialInfo({ namespace: comNamespace })
+              closeLoad()
               if (component.version === com.version) {
                 message.warn('当前组件已经是最新版本了～')
                 return
               }
-
-              // message.info('更新功能正在内测，马上就来')
-              // return
-
               Modal.confirm({
                 className: 'fangzhou-theme',
                 okText: '确定',
@@ -127,11 +128,9 @@ export default (ctx) => (libDesc) => {
                       comAray: newComlib?.comAray || []
                     })
                   })
-                  // resolve(ctx?.comlibs.find(t => t?.id === MySelfId));
                 },
               });
             }
-            // resolve([])
             break;
           case 'deleteCom': /** 需要resolve一个comlib对象 */
             index = comlib.comAray.findIndex((com) => com.namespace === comNamespace);
@@ -157,7 +156,7 @@ export default (ctx) => (libDesc) => {
 	            url: 'MYBRICKS://mybricks-material/materialSelectorPage',
 	            params: {
 		            defaultSelected: getSelfComponents(),
-		            userId: ctx.user?.email,
+		            userId: ctx.user?.id,
 		            combo: true
 	            },
 	            onSuccess: ({ materials, updatedMaterials }) => {
@@ -175,11 +174,11 @@ export default (ctx) => (libDesc) => {
             
             break
           case 'deleteComLib':
-            deleteComlib(ctx, libId)
+            deleteComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace})
             resolve(true);
             break
           case 'upgradeComLib':
-            const upgradedComlib = await upgradeLatestComlib(ctx, libId)
+            const upgradedComlib = await upgradeLatestComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace, id: libId});
             return resolve(upgradedComlib)
           default:
             break
@@ -189,23 +188,23 @@ export default (ctx) => (libDesc) => {
 
       /** 不带命令，且描述为空，即页面初始化，加载组件及组件库 */
       if (!libDesc) {
-        const comlibs = await loadMaterials(ctx)
+        const comlibs = await initMaterials(ctx);
         return resolve(comlibs)
       }
       /** 不带命令，增加、更新组件库，新增时comLibAdder resolve的组件库会带到libDesc来 */
       if (libDesc?.editJs) {
-        const material = ctx.comlibs.find(lib => lib.namespace === libDesc?.namespace || lib.id === libDesc?.id)
+        const material = ctx.comlibs.find(lib => lib.namespace === libDesc?.libNamespace)
         if(material){
-          //更新
+          //upgrade
           const comlib = {
             ...material, 
             ...libDesc
           }
-          const addedComlib = await upgradeComlibByVersion(ctx, comlib)
+          const addedComlib = await upgradeComlibByVersion(ctx, {...comlib, namespace: comlib?.libNamespace, id: libDesc?.libId})
           return resolve(addedComlib)
         }else{
           //新增
-          const addedComlib = await addComlib(ctx, libDesc)
+          const addedComlib = await addComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace, id: libDesc?.libId})
           return resolve(addedComlib)
         }
       }

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { message, Form, Input, Card, Button, Space, Descriptions, Modal, Col, Popconfirm, Typography, Divider } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { _NAMESPACE_ } from "../app";
+import { _NAMESPACE_ } from "..";
 import dayjs from "dayjs";
 import styles from "./index.less";
 import { TConfigProps } from '../useConfig';
@@ -26,7 +26,7 @@ export type TPublishConfig = {
   envList: Array<TPublishEnv>,
 }
 
-export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
+export default ({ config, mergeUpdateConfig, updateConfig, loading, user }: TConfigProps) => {
   const [visible, setVisible] = useState(false)
   const [status, setStatus] = useState<"edit" | "append">()
   const [publishEnv, setPublishEnv] = useState<TPublishEnv>()
@@ -42,16 +42,27 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       defaultApiPrePath: '',
       updateTime: '',
       user: {
-        email: ''
+        email: user.email
       },
     })
     setVisible(true)
   };
 
+  const createConfig = (newEnvList) => {
+    let newConfig = { ...config }
+    // 因为平台会合并协作组与全局setting，所以协作组环境没有设置时，需要直接删除publishEnvConfig字段
+    if (newEnvList.length === 0) {
+      delete newConfig.publishEnvConfig
+    } else {
+      newConfig.publishEnvConfig = { envList: newEnvList }
+    }
+    return newConfig
+  }
+
   const onOk = async (publishEnv) => {
     setVisible(false)
     const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss")
-    const currentPublishEnv = { ...publishEnv, user, updateTime }
+    const currentPublishEnv = { ...publishEnv, user: { email: user.email }, updateTime }
     const newEnvList = [...envList]
     if (status === "edit") {
       const index = envList.findIndex(
@@ -65,9 +76,8 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       }
       newEnvList.push(currentPublishEnv);
     }
-    await mergeUpdateConfig({
-      publishEnvConfig: { envList: newEnvList }
-    }).then(() => {
+
+    await updateConfig(createConfig(newEnvList)).then(() => {
       message.success(status === "edit" ? "更新成功" : "添加成功");
     })
   }
@@ -88,9 +98,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       ({ name }) => name === publishEnv.name
     );
     newEnvList.splice(index, 1);
-    return mergeUpdateConfig({
-      publishEnvConfig: { envList: newEnvList }
-    }).then(() => {
+    return updateConfig(createConfig(newEnvList)).then(() => {
       message.success("删除成功");
     })
   }

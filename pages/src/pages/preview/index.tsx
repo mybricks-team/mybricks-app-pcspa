@@ -14,9 +14,45 @@ const previewStorage = new PreviewStorage({ fileId })
 
 let { dumpJson, comlibs, hasPermissionFn, executeEnv } = previewStorage.getPreviewPageData()
 
+/**
+ * key-value 结构，通过 permissionID 找 permission 配置
+ */
+const permissionID2Info = (dumpJson?.permissions || []).reduce((pre, info) => {
+  pre[info.id] = info
+  return pre;
+}, {})
+
 if (!dumpJson) {
   throw new Error('数据错误：项目数据缺失')
 }
+
+function cssVariable (dumpJson) {
+  const themes = dumpJson?.plugins?.['@mybricks/plugins/theme/use']?.themes
+  if (Array.isArray(themes)) {
+    themes.forEach(({ namespace, content }) => {
+      const variables = content?.variables
+
+      if (Array.isArray(variables)) {
+        const style = document.createElement('style')
+        style.id = namespace
+        let innerHTML = ''
+
+        variables.forEach(({ configs }) => {
+          if (Array.isArray(configs)) {
+            configs.forEach(({ key, value }) => {
+              innerHTML = innerHTML + `${key}: ${value};\n`
+            })
+          }
+        })
+
+        style.innerHTML = `:root {\n${innerHTML}}`
+        document.body.appendChild(style)
+      }
+    })
+  }
+}
+
+cssVariable(dumpJson)
 
 if (!comlibs) {
   console.warn('数据错误: 组件库缺失')
@@ -135,7 +171,6 @@ function parseQuery(query) {
 }
 
 function Page({ props, hasPermissionFn }) {
-
   return (
     <ConfigProvider locale={zhCN}>
       {renderUI(dumpJson, {
@@ -189,6 +224,9 @@ function Page({ props, hasPermissionFn }) {
             }
           },
           vars: {
+            get getExecuteEnv() {
+              return () => executeEnv
+            },
             getQuery: () => parseQuery(location.search),
             get getProps() {
               return () => {
@@ -231,18 +269,19 @@ function Page({ props, hasPermissionFn }) {
           },
           get hasPermission() {
             return ({ key }) => {
-
               if (!hasPermissionFn) {
                 return true;
               }
-    
+
+              const permissionInfo = permissionID2Info[key];
+
               let result;
-    
+
               try {
                 result = runJs(decodeURIComponent(hasPermissionFn), [
-                  { key },
+                  { key: permissionInfo?.register?.code || key },
                 ]);
-    
+
                 if (typeof result !== 'boolean') {
                   result = true;
                   console.warn(
@@ -255,7 +294,7 @@ function Page({ props, hasPermissionFn }) {
                 result = true;
                 console.error(`权限方法出错 [key] ${key}；`, error);
               }
-    
+
               return result;
             };
           },

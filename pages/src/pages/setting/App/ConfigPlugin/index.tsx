@@ -3,7 +3,7 @@ import { Card, Button, Popconfirm, Descriptions, message, Typography, Divider } 
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import css from './index.less';
-import { _NAMESPACE_ } from "../app";
+import { _NAMESPACE_ } from "..";
 import { PluginType } from "./type";
 import AppendModal from "./Modal";
 import { TConfigProps } from "../useConfig";
@@ -21,7 +21,9 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
     if (status === "edit") {
       plugins.splice(currentPlugin.index, 1, {
         ...values,
-        user,
+        user: {
+          email: user.email
+        },
         updateTime,
       });
     } else if (status === "append") {
@@ -31,7 +33,9 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       }
       plugins.push({
         ...values,
-        user,
+        user: {
+          email: user.email
+        },
         updateTime,
       });
     }

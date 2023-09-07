@@ -9,6 +9,14 @@ const projectJson = '--projectJson--' //replace it
 const projectId = '--slot-project-id--' //replace it
 const executeEnv = '--executeEnv--' //replace it
 
+/**
+ * key-value 结构，通过 permissionID 找 permission 配置
+ */
+const permissionID2Info = (projectJson.permissions || []).reduce((pre, info) => {
+  pre[info.id] = info
+  return pre;
+}, {})
+
 function decode(str) {
   try {
     return decodeURIComponent(str)
@@ -79,10 +87,10 @@ const getComs = () => {
 }
 
 function Page({ props }) {
-  if (props?.container) {
+  if (props?.canvasElement) {
     message?.config({
       getContainer() {
-        return props?.container
+        return props?.canvasElement
       },
     })
   }
@@ -90,11 +98,13 @@ function Page({ props }) {
     env: {
       silent: true,
       showErrorNotification: false,
-      executeEnv,
-      canvasElement: ( props && props.container )|| document.body,
+      canvasElement: props?.canvasElement || undefined,
       get vars() {
         // 环境变量
         return {
+          get getExecuteEnv() {
+            return () => executeEnv
+          },
           get getQuery() {
             return () => {
               return parseQuery(location.search)
@@ -195,11 +205,13 @@ function Page({ props }) {
             return true
           }
 
+          const permissionInfo = permissionID2Info[key];
+
           let result
 
           try {
             result = runJs(decodeURIComponent(projectJson?.hasPermissionFn), [
-              { key },
+              { key: permissionInfo?.register?.code || key },
             ])
 
             if (typeof result !== 'boolean') {
@@ -233,7 +245,7 @@ function render(props) {
       },
       React.createElement(Page, { props })
     ),
-    document.querySelector('#qiankun-container')
+    document.querySelector('#mybricks-page-root')
   )
   return Promise.resolve()
 }
@@ -280,6 +292,6 @@ export async function unmount(props) {
   const { container } = props
   ReactDOM &&
     ReactDOM.unmountComponentAtNode(
-      (container || document).querySelector('#qiankun-container')
+      (container || document).querySelector('#mybricks-page-root')
     )
 }

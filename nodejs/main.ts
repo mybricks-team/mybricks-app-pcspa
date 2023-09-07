@@ -27,6 +27,11 @@ async function bootstrap() {
 	});
 	
 	app.use(bodyParser.json({ limit: '100mb' }));
+	app.use(function(req, res, next) {
+		req.setTimeout(30*1000);
+		res.setTimeout(30*1000);
+		next();
+	  });
 	await app.listen(9002);
 }
 bootstrap();

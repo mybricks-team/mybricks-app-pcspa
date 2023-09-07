@@ -1,10 +1,11 @@
 {
   "name": "mybricks-app-pcspa",
-  "version": "1.0.51",
+  "version": "1.1.5",
   "description": "中后台类PC页面搭建",
   "scripts": {
+    "watch:be-local": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://localhost:3100 node nodejs/index.js'",
     "watch:be": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=https://my.mybricks.world node nodejs/index.js'",
-    "dev:be": "ts-node -T ./nodejs/main.ts",
+    "watch:testweb": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://testweb.manateeai.com node nodejs/index.js'",
     "build:fe": "cd pages && npm run build",
     "publishToNpm:serviceUpdate": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world",
     "publishToNpm": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world --noServiceUpdate",
@@ -24,7 +25,7 @@
   "license": "ISC",
   "dependencies": {
     "@mybricks/rocker-dao": "^0.0.6",
-    "@mybricks/sdk-for-app": "0.1.64",
+    "@mybricks/sdk-for-app": "^0.1.85",
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
@@ -39,7 +40,7 @@
     "@types/node": "^20.4.0",
     "jszip": "^3.10.1",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.4"
+    "typescript": "^4.9.3"
   },
   "publishConfig": {
     "access": "public",
@@ -49,6 +50,7 @@
     "extName": "pc-page",
     "icon": "https://assets.mybricks.world/icon/pcpage.svg",
     "title": "PC页面",
-    "setting": "setting.html"
+    "setting": "setting.html",
+    "groupSetting": "groupSetting.html"
   }
 }

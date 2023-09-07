@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Form, Input, Card, Button } from 'antd'
 import API from "@mybricks/sdk-for-app/api";
-import { _NAMESPACE_ } from "../app";
+import { _NAMESPACE_ } from "..";
 import dayjs from "dayjs";
 import { TConfigProps } from '../useConfig';
 import UploadConfig from './UploadConfig'

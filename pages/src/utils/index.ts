@@ -252,3 +252,8 @@ export const fetchPlugins = async (plugins: PluginType[]) => {
   const loadedPlugins = await Promise.all(promises);
   return loadedPlugins.filter(item => item !== null);
 }
+
+export const removeBadChar = (content: string) => {
+  if (!content) return content
+  return content.replaceAll(/\\t/g, '')
+}

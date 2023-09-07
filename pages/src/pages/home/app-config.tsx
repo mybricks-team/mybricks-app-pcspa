@@ -7,7 +7,7 @@ import servicePlugin, {
 import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-connector-domain'
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
-import toolsPlugin from "@mybricks/plugin-tools";
+import { use as useTheme } from '@mybricks/plugin-theme';
 
 import { render as renderUI } from '@mybricks/render-web';
 import comlibLoaderFunc from './configs/comlibLoader'
@@ -111,9 +111,29 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
   }
 }
 
-export default function (ctx, save, designerRef, remotePlugins = []) {
-  const envList = ctx?.appConfig?.publishEnvConfig?.envList || []
+/**
+ * FIXME: 似乎编辑态和 DEBUG 态用的是用一个 app-config，这导致 hasPermission 永远只能取到编辑态闭包中的数据
+ * 提升变量作用域，绕过闭包问题，让 app-config 内的函数可以取到最新的数据
+ */
+const memory  = { permissionID2Info: {} }
 
+export default function (ctx, save, designerRef, remotePlugins = []) {
+
+  let curToJSON;
+  try {
+    curToJSON = designerRef?.current?.toJSON();
+  } catch (e) {
+    message.error("获取 toJSON 数据失败，请刷新重试！")
+    console.error("获取 toJSON 数据失败，请刷新重试！", e);
+  }
+
+
+  memory.permissionID2Info = (curToJSON?.permissions || []).reduce((pre, info) => {
+    pre[info.id] = info
+    return pre;
+  }, {})
+
+  const envList = ctx?.appConfig?.publishEnvConfig?.envList || []
   // 获得环境信息映射表
   const envMap = envList.reduce((res, item) => {
     res[item.name] = item.title
@@ -128,14 +148,16 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
       servicePlugin({
         envList,
       }),
-      domainServicePlugin({
-        addActions: [
-          { type: 'aggregation-model', title: '聚合模型' }
-        ]
-        // openFileSelector() {
-        //   return openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })
-        // },
-      }),
+      ...remotePlugins,
+      useTheme({ sdk: ctx.sdk }),
+      // domainServicePlugin({
+      //   addActions: [
+      //     { type: 'aggregation-model', title: '聚合模型' }
+      //   ]
+      //   // openFileSelector() {
+      //   //   return openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })
+      //   // },
+      // }),
       versionPlugin({
         user: ctx.user,
         file: ctx.fileItem,
@@ -145,8 +167,6 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
           ctx.versionApi = versionApi
         },
       }),
-      toolsPlugin(),
-      ...remotePlugins
     ],
     ...(ctx.hasMaterialApp ? {
       comLibAdder: comLibAdderFunc(ctx),
@@ -211,10 +231,10 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                   displayType: 'button'
                 },
                 value: {
-                  get () {
-                    return decodeURIComponent(ctx?.hasPermissionFn || defaultPermissionFn)
+                  get() {
+                    return decodeURIComponent(ctx?.hasPermissionFn || encodeURIComponent(defaultPermissionFn))
                   },
-                  set (context, v: string) {
+                  set(context, v: string) {
                     ctx.hasPermissionFn = encodeURIComponent(v)
                   }
                 }
@@ -373,6 +393,9 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
         //   return uploadApi(files)
         // },
         vars: {
+          get getExecuteEnv() {
+            return () => ctx.executeEnv
+          },
           getQuery: () => ({ ...(ctx.debugQuery || {}) }),
           getProps: () => ({ ...(ctx.debugMainProps || {}) }),
           get getRouter() {
@@ -416,14 +439,15 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             if (!hasPermissionFn) {
               return true;
             }
-    
+
             let result: boolean;
-    
+
             try {
+              const info = memory.permissionID2Info[key];
               result = runJs(decodeURIComponent(hasPermissionFn), [
-                { key },
+                { key: info?.register?.code || key },
               ]);
-    
+
               if (typeof result !== 'boolean') {
                 result = true;
                 designerRef.current?.console?.log.error(
@@ -448,7 +472,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               // ctx.console?.log.error('权限方法', `${error.message}`)
               console.error(`权限方法出错 [Key] ${key}；`, error);
             }
-    
+
             return result;
           };
         }
@@ -494,9 +518,23 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               deletable: false,
               asRoot: true
             }
+          },
+          {
+            type: 'popup',
+            title: '打印对话框',
+            template: {
+              namespace: 'mybricks.normal-pc.print',
+              deletable: false,
+              asRoot: true
+            }
           }
         ]
-      }
+      },
+      theme:{
+        css:[
+          'https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/antd.variable.min.css'
+        ],
+      },
     }
   }
 }

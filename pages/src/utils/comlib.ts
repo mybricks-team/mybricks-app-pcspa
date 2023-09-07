@@ -232,7 +232,7 @@ export const getMySelfLibComsFromUrl = (url) => {
   return new Promise((resolve, reject) => {
     myRequire([url], () => {
       reject(new Error('加载我的组件失败'))
-    }).then(() => {
+    }).then(({styles}) => {
       /** 添加之后会有多组件存储于__comlibs_edit_需要合并下 */
       const firstComIdx = window['__comlibs_edit_'].findIndex(
         (lib) => lib.id === MySelfId,
@@ -246,6 +246,7 @@ export const getMySelfLibComsFromUrl = (url) => {
         ];
         window['__comlibs_edit_'].splice(lastComIndex, 1);
       }
+      setTimeout(() => resolveSelfLibStyle(styles), 1500);
       resolve(window['__comlibs_edit_'][firstComIdx]);
     })
   })
@@ -262,4 +263,30 @@ export const getComlibsByNamespaceAndVersion = (nameAndVersions: NameAndVersion[
   const comboComlibURL = new ComboComlibURL()
   comboComlibURL.setComponents(nameAndVersions)
   return getMySelfLibComsFromUrl(comboLibType === 'edit' ? comboComlibURL.toEditUrl() : comboComlibURL.toRtUrl());
+}
+
+export function resolveSelfLibStyle(styles) {
+  const childNodes = document.querySelector("[class^='canvasTrans']")?.childNodes;
+
+  if (!childNodes) return;
+
+  let shadowRoot;
+
+  for (let i = 0; i < childNodes.length; i++) {
+    // @ts-ignore
+    if (childNodes[i]?.shadowRoot) {
+      // @ts-ignore
+      shadowRoot = childNodes[i]?.shadowRoot;
+      break;
+    }
+  }
+
+  // const shadowRoot = document.querySelector("[class^='canvasTrans']")?.firstChild?.shadowRoot;
+
+  if (shadowRoot) {
+    styles.forEach((node) => {
+      node.setAttribute('lib-id', '_myself_');
+      shadowRoot.appendChild(node);
+    });
+  }
 }

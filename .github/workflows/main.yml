@@ -1,0 +1,34 @@
+name: build and publish mybricks-pcspa
+on:
+  push:
+    branches:
+      - ci
+  pull_request:
+    branches:
+      - ci
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Check commit message
+        id: check_commit
+        run: echo "COMMIT_MESSAGE=$(git log -1 --pretty=format:'%B')" >> $GITHUB_ENV
+
+      - name: Run CI based on commit message
+        env: # Or as an environment variable
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
+          if [[ $COMMIT_MESSAGE == *"ci serviceUpdate"* ]]; then
+            echo "编译带服务器更新的app"
+            npm run publishToNpm:serviceUpdate
+          elif [[ $COMMIT_MESSAGE == *"ci"* ]]; then
+            echo "编译不带服务器更新的app"
+            npm run publishToNpm
+          else
+            echo "没有发现CI打包的命令"
+          fi
