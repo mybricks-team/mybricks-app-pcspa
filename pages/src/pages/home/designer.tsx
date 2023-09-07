@@ -134,7 +134,7 @@ export default function MyDesigner({ appData }) {
     }
   })
   const publishingRef = useRef(false)
-  const designerRef = useRef<{ dump; toJSON; geoView; switchActivity; getPluginData }>()
+  const designerRef = useRef<{ dump; toJSON; geoView; switchActivity; getPluginData, loadContent }>()
   const [beforeunload, setBeforeunload] = useState(false)
   const [operable, setOperable] = useState(false)
   const [saveTip, setSaveTip] = useState('')
@@ -471,6 +471,19 @@ export default function MyDesigner({ appData }) {
     }
   }, [])
 
+  const getDumpJson = useCallback(() => {
+    const json = designerRef.current?.dump()
+    json.pageConfig = {
+      comlibs: ctx.comlibs,
+      debugQuery: ctx.debugQuery,
+      executeEnv: ctx.executeEnv,
+      debugMainProps: ctx.debugMainProps,
+      hasPermissionFn: ctx.hasPermissionFn,
+      debugHasPermissionFn: ctx.debugHasPermissionFn
+    }
+    return json
+  }, [JSON.stringify(ctx)])
+
   return (
     <div className={`${css.view} fangzhou-theme`}>
       <Toolbar
@@ -494,6 +507,24 @@ export default function MyDesigner({ appData }) {
           loading={publishLoading}
           onClick={() => setPublishModalVisible(true)}
         >发布</Toolbar.Button>
+        <Toolbar.Tools
+          onImport={(value) => {
+            try {
+              const { content, pageConfig } = JSON.parse(value)
+              setCtx(pre => ({...pre, ...pageConfig}))
+              designerRef.current.loadContent(content)
+            } catch (e) {
+              message.error(e)
+              console.error(e)
+            }
+          }}
+          getExportDumpJSON={() => {
+            return getDumpJson()
+          }}
+          getExportToJSON={() => {
+            return designerRef.current.toJSON()
+          }}
+        />
       </Toolbar>
       <div className={css.designer}>
         {SPADesigner && remotePlugins && latestComlibs && (
