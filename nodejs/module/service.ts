@@ -301,7 +301,8 @@ export default class PcPageService {
       json?.permissions.forEach(item => {
         permissions.push({
           code: item.register.code,
-          title: item.register.title
+          title: item.register.title,
+          remark: item.register.remark,
         })
       })
     }
