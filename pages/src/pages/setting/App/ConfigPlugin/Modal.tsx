@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo } from "react";
-import { Modal, Form, Input, ModalProps } from "antd";
-import { PluginType } from "./type";
+import { Modal, Form, Input, ModalProps, Select } from "antd";
+import { EnumPluginType, PluginType } from "./type";
+
+export const pluginTypeMap = {
+  [EnumPluginType.NORMAL]: '普通',
+  [EnumPluginType.CONNECTOR]: '连接器'
+}
 
 interface AppendModalProps
   extends ModalProps,
@@ -69,6 +74,18 @@ export default ({
           <Input
             allowClear
           />
+        </Form.Item>
+        <Form.Item
+          label='插件类型'
+          name='type'
+          rules={[{ required: true, message: '请选择插件类型' }]}
+        >
+          <Select
+            defaultValue={'normal'}
+            options={Object.keys(pluginTypeMap).map(item => ({
+              label: pluginTypeMap[item],
+              value: item
+            }))} />
         </Form.Item>
         <Form.Item
           label="插件地址"

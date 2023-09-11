@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom';
-import { ConfigProvider } from 'antd'
+import { ConfigProvider, message } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN';
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
 import { ComlibRtUrl, ChartsRtUrl, BasicRtUrl, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from './../../constants'
@@ -12,13 +12,30 @@ const fileId = getQueryString('fileId')
 
 const previewStorage = new PreviewStorage({ fileId })
 
-let { dumpJson, comlibs, hasPermissionFn, executeEnv } = previewStorage.getPreviewPageData()
+let { dumpJson, comlibs, hasPermissionFn, executeEnv, appConfig } = previewStorage.getPreviewPageData()
+
+const promiseCustomConnector = new Promise((res, rej) => {
+  const { plugins = [] } = appConfig
+  const connectorPlugin = plugins.find(item => item?.type === 'connector')
+  if (!connectorPlugin) {
+    return rej()
+  }
+  if (!connectorPlugin.runtimeUrl) {
+    message.error(`插件【${connectorPlugin}】没有设置runtime地址`)
+    return rej()
+  }
+  const script = document.createElement('script')
+  script.src = connectorPlugin.runtimeUrl
+  script.onload = () => {
+    res(true)
+  }
+})
 
 if (!dumpJson) {
   throw new Error('数据错误：项目数据缺失')
 }
 
-function cssVariable (dumpJson) {
+function cssVariable(dumpJson) {
   const themes = dumpJson?.plugins?.['@mybricks/plugins/theme/use']?.themes
   if (Array.isArray(themes)) {
     themes.forEach(({ namespace, content }) => {
@@ -184,7 +201,8 @@ function Page({ props, hasPermissionFn }) {
                 callDomainModel(domainModel, type, params) {
                   return callDomainHttp(domainModel, params, { action: type } as any);
                 },
-                callConnector(connector, params) {
+                async callConnector(connector, params) {
+                  await promiseCustomConnector
                   const plugin = window[connector.connectorName] || window['@mybricks/plugins/service'];
 
                   if (plugin) {
@@ -204,13 +222,14 @@ function Page({ props, hasPermissionFn }) {
           callDomainModel(domainModel, type, params) {
             return callDomainHttp(domainModel, params, { action: type } as any);
           },
-          callConnector(connector, params) {
+          async callConnector(connector, params) {
+            await promiseCustomConnector
             const plugin = window[connector.connectorName] || window['@mybricks/plugins/service'];
 
             if (plugin) {
               const curConnector = connector.script
-                  ? connector
-                  : (dumpJson.plugins[connector.connectorName] || []).find(con => con.id === connector.id);
+                ? connector
+                : (dumpJson.plugins[connector.connectorName] || []).find(con => con.id === connector.id);
               return curConnector ? plugin.call({ ...connector, ...curConnector, executeEnv, useProxy: true }, params) : Promise.reject('找不到对应连接器 Script 执行脚本.');
             } else {
               return Promise.reject('错误的连接器类型.');

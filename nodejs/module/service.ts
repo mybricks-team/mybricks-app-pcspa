@@ -101,13 +101,14 @@ export default class PcPageService {
         publisherName,
         groupId,
         groupName,
+        appConfig = {}
       } = json.configuration
 
       Reflect.deleteProperty(json, 'configuration')
 
       /** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
       const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
-      
+
       console.info("[publish] domainName is:", domainName);
 
       const themesStyleStr = this._genThemesStyleStr(json)
@@ -123,6 +124,7 @@ export default class PcPageService {
       const version = getNextVersion(latestPub?.version);
 
       let comLibRtScript = '';
+      let pluginScript = '';
       let needCombo = false;
       let hasOldComLib = false;
 
@@ -140,7 +142,13 @@ export default class PcPageService {
         needCombo = true;
       }
 
+      const customConnectorRuntimeUrl = getCustomConnectorRuntime(appConfig)
+      if (customConnectorRuntimeUrl) {
+        pluginScript += `<script src="${customConnectorRuntimeUrl}"></script>`;
+      }
+
       template = template.replace(`--title--`, title)
+        .replace(`-- plugin-runtime --`, pluginScript)
         .replace(`-- themes-style --`, themesStyleStr)
         .replace(`-- comlib-rt --`, comLibRtScript)
         .replace(`"--projectJson--"`, JSON.stringify(json))
@@ -288,7 +296,7 @@ export default class PcPageService {
     return data
   }
 
-  _genThemesStyleStr (json) {
+  _genThemesStyleStr(json) {
     let themesStyleStr = ''
 
     const themes = json?.plugins?.['@mybricks/plugins/theme/use']?.themes
@@ -401,6 +409,20 @@ const getCustomPublishApi = async () => {
     console.warn(`未配置发布集成接口`)
   }
   return publishApi;
+}
+
+// -- plugin-runtime --
+const getCustomConnectorRuntime = (appConfig) => {
+  const { plugins = [] } = appConfig
+  const connectorPlugin = plugins.find(item => item?.type === 'connector')
+  if (!connectorPlugin) {
+    return ''
+  }
+  if (!connectorPlugin.runtimeUrl) {
+    console.error(`插件【${connectorPlugin}】没有设置runtime地址`)
+    return ''
+  }
+  return connectorPlugin.runtimeUrl
 }
 
 const uploadStatic = async (

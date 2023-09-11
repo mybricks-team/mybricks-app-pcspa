@@ -4,8 +4,8 @@ import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import css from './index.less';
 import { _NAMESPACE_ } from "..";
-import { PluginType } from "./type";
-import AppendModal from "./Modal";
+import { EnumPluginType, PluginType } from "./type";
+import AppendModal, { pluginTypeMap } from "./Modal";
 import { TConfigProps } from "../useConfig";
 
 export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
@@ -68,7 +68,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   return (
     <>
       {plugins.map((plugin, index) => {
-        const { title, name, url, runtimeUrl, description, updateTime, user } = plugin;
+        const { title, name, url, runtimeUrl, description, updateTime, user, type = EnumPluginType } = plugin;
         return <>
           <Descriptions
             title={title}
@@ -102,6 +102,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
             }
           >
             <Descriptions.Item label="唯一标识">{name}</Descriptions.Item>
+            <Descriptions.Item label="插件类型">{pluginTypeMap[String(type)]}</Descriptions.Item>
             <Descriptions.Item label="资源地址">{url}</Descriptions.Item>
             <Descriptions.Item label="runtime地址">{runtimeUrl}</Descriptions.Item>
             <Descriptions.Item label="更新信息">{description}</Descriptions.Item>

@@ -280,11 +280,12 @@ export default function MyDesigner({ appData }) {
       dumpJson: json,
       executeEnv: ctx.executeEnv,
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
-      hasPermissionFn: ctx.hasPermissionFn
+      hasPermissionFn: ctx.hasPermissionFn,
+      appConfig: JSON.stringify(appConfig),
     })
 
     window.open(`./preview.html?fileId=${ctx.fileId}`)
-  }, [])
+  }, [appConfig])
 
   const publish = useCallback(
     (publishConfig) => {
@@ -317,7 +318,7 @@ export default function MyDesigner({ appData }) {
           setBeforeunload(false);
 
           const curToJSON = designerRef?.current?.toJSON();
-          
+
           const curComLibs = await genLazyloadComs(ctx.comlibs, curToJSON)
 
           const toJSON = JSON.parse(JSON.stringify({
@@ -333,7 +334,8 @@ export default function MyDesigner({ appData }) {
               folderPath: '/app/pcpage',
               fileName: `${ctx.fileItem.id}.html`,
               groupName: appData?.hierarchy?.groupName || '',
-              groupId: appData?.hierarchy?.groupId || 0
+              groupId: appData?.hierarchy?.groupId || 0,
+              appConfig,
             },
             hasPermissionFn: ctx.hasPermissionFn
           }));

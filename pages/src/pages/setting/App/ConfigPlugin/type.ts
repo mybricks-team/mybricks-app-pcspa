@@ -1,9 +1,14 @@
+export enum EnumPluginType {
+  NORMAL = 'normal',
+  CONNECTOR = 'connector'
+}
 export type PluginType = {
-    name: string;
-    title: string;
-    url: string;
-    runtimeUrl: string;
-    description?: string;
-    updateTime: string;
-    user: Record<string, any>;
+  name: string;
+  title: string;
+  url: string;
+  type: EnumPluginType,
+  runtimeUrl: string;
+  description?: string;
+  updateTime: string;
+  user: Record<string, any>;
 };
