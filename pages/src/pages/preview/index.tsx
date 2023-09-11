@@ -18,17 +18,18 @@ const promiseCustomConnector = new Promise((res, rej) => {
   const { plugins = [] } = appConfig
   const connectorPlugin = plugins.find(item => item?.type === 'connector')
   if (!connectorPlugin) {
-    return rej()
+    return res(false)
   }
   if (!connectorPlugin.runtimeUrl) {
     message.error(`插件【${connectorPlugin}】没有设置runtime地址`)
-    return rej()
+    return res(false)
   }
   const script = document.createElement('script')
   script.src = connectorPlugin.runtimeUrl
   script.onload = () => {
     res(true)
   }
+  document.body.appendChild(script)
 })
 
 if (!dumpJson) {
