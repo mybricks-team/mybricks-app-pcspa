@@ -180,12 +180,13 @@ function Page({ props }) {
         })
       },
       callConnector(connector, params) {
-        const connectorName = connector.connectorName || '@mybricks/plugins/service';
-        const plugin = window[connectorName];
+        const plugin = window[connector.connectorName] || window['@mybricks/plugins/service'];
 
         if (plugin) {
           /** 兼容云组件，云组件会自带 script */
-          const curConnector = connector.script ? connector : (projectJson.plugins[connectorName] || []).find(con => con.id === connector.id);
+          const curConnector = connector.script
+              ? connector
+              : (projectJson.plugins[connector.connectorName] || []).find(con => con.id === connector.id);
 
           return curConnector ? plugin.call({ ...connector, ...curConnector, executeEnv }, params) : Promise.reject('找不到对应连接器 Script 执行脚本.');
         } else {

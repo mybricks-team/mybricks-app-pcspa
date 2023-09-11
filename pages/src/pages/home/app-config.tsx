@@ -361,12 +361,21 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 return callDomainHttp(domainModel, params, { action: type });
               },
               callConnector(connector, params, connectorConfig) {
-                const plugin = designerRef.current?.getPlugin(connector.connectorName || '@mybricks/plugins/service');
-
-                if (plugin) {
-                  return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, connectorConfig);
+                //调用连接器
+                if (connector.type === 'http-manatee') {
+                  //服务接口类型
+                  return callConnectorHttp(
+                      { script: connector.script, useProxy: true, executeEnv: ctx.executeEnv },
+                      params
+                  );
                 } else {
-                  return Promise.reject('错误的连接器类型.');
+                  const plugin = designerRef.current?.getPlugin(connector.connectorName || '@mybricks/plugins/service');
+
+                  if (plugin) {
+                    return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, connectorConfig);
+                  } else {
+                    return Promise.reject('错误的连接器类型.');
+                  }
                 }
               }
             }
@@ -381,12 +390,24 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
           return callDomainHttp(domainModel, params, { action: type });
         },
         callConnector(connector, params, connectorConfig) {
-          const plugin = designerRef.current?.getPlugin(connector.connectorName || '@mybricks/plugins/service');
-
-          if (plugin) {
-            return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, connectorConfig);
+          if (connector.type === 'http-manatee') {
+            /** 启动 Mock */
+            if (connectorConfig?.openMock) {
+              return connectorHttpMock({ ...connector, outputSchema: connectorConfig.mockSchema });
+            }
+            //服务接口类型
+            return callConnectorHttp(
+                { script: connector.script, useProxy: true, executeEnv: ctx.executeEnv },
+                params
+            );
           } else {
-            return Promise.reject('错误的连接器类型.');
+            const plugin = designerRef.current?.getPlugin(connector.connectorName || '@mybricks/plugins/service');
+
+            if (plugin) {
+              return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, connectorConfig);
+            } else {
+              return Promise.reject('错误的连接器类型.');
+            }
           }
         },
         // uploadFile(files) {

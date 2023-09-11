@@ -68,7 +68,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   return (
     <>
       {plugins.map((plugin, index) => {
-        const { title, name, url, description, updateTime, user } = plugin;
+        const { title, name, url, runtimeUrl, description, updateTime, user } = plugin;
         return <>
           <Descriptions
             title={title}
@@ -103,6 +103,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
           >
             <Descriptions.Item label="唯一标识">{name}</Descriptions.Item>
             <Descriptions.Item label="资源地址">{url}</Descriptions.Item>
+            <Descriptions.Item label="runtime地址">{runtimeUrl}</Descriptions.Item>
             <Descriptions.Item label="更新信息">{description}</Descriptions.Item>
           </Descriptions>
           <Typography.Paragraph type="secondary" style={{ textAlign: 'right' }}>

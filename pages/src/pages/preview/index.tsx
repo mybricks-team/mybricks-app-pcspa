@@ -193,7 +193,7 @@ function Page({ props, hasPermissionFn }) {
                   return callDomainHttp(domainModel, params, { action: type } as any);
                 },
                 callConnector(connector, params) {
-                  const plugin = window[connector.connectorName || '@mybricks/plugins/service'];
+                  const plugin = window[connector.connectorName] || window['@mybricks/plugins/service'];
 
                   if (plugin) {
                     return plugin.call({ ...connector, useProxy: true, executeEnv }, params);
@@ -213,11 +213,12 @@ function Page({ props, hasPermissionFn }) {
             return callDomainHttp(domainModel, params, { action: type } as any);
           },
           callConnector(connector, params) {
-            const connectorName = connector.connectorName || '@mybricks/plugins/service';
-            const plugin = window[connectorName];
+            const plugin = window[connector.connectorName] || window['@mybricks/plugins/service'];
 
             if (plugin) {
-              const curConnector = (dumpJson.plugins[connectorName] || []).find(con => con.id === connector.id);
+              const curConnector = connector.script
+                  ? connector
+                  : (dumpJson.plugins[connector.connectorName] || []).find(con => con.id === connector.id);
               return curConnector ? plugin.call({ ...connector, ...curConnector, executeEnv, useProxy: true }, params) : Promise.reject('找不到对应连接器 Script 执行脚本.');
             } else {
               return Promise.reject('错误的连接器类型.');

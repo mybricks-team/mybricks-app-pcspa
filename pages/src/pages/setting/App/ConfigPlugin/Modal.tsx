@@ -80,6 +80,14 @@ export default ({
           />
         </Form.Item>
         <Form.Item
+          label="runtime地址"
+          name='runtimeUrl'
+          rules={[{ required: true, message: '请填写插件Runtime地址' }]}
+          extra="搭建页发布后，生产环境使用"
+        >
+          <Input.TextArea allowClear />
+        </Form.Item>
+        <Form.Item
           label='更新信息'
           name='description'
         >
