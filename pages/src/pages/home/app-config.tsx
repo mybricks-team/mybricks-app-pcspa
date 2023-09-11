@@ -68,16 +68,20 @@ const getDomainFromPath = (path: string) => {
   }
 }
 
-const injectUpload = (editConfig: Record<string, any>, uploadService: string, manateeUserInfo: { token: string, session: string }) => {
+const injectUpload = (editConfig: Record<string, any>, uploadService: string, manateeUserInfo: { token: string, session: string }, fileId: string) => {
+
   if (!!editConfig && !editConfig.upload) {
     editConfig.upload = async (files: Array<File>): Promise<Array<string>> => {
       const formData = new FormData();
       formData.append("file", files[0])
-      formData.append('folderPath', `/files/${Date.now()}`)
+      formData.append('folderPath', `/files/${fileId}`)
+
       const useConfigService = !!uploadService;
+
       if (!useConfigService) {
         uploadService = '/paas/api/flow/saveFile'
       }
+
       try {
         const res = await axios<any, any>({
           url: uploadService,
@@ -89,6 +93,7 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
           }
         });
         const { status, data, message, code } = res.data;
+
         if (status === 200 || code === 1) {
           let url = ''
           if (Array.isArray(data)) {
@@ -102,6 +107,7 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
           const staticUrl = /^http/.test(url) ? url : `${getDomainFromPath(uploadService)}${url}`
           return [staticUrl].map(url => url.replace('https', 'http'))
         }
+
         throw Error(`【图片上传出错】: ${message}`)
       } catch (error) {
         message.error(error.message)
@@ -110,12 +116,6 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
     };
   }
 }
-
-/**
- * FIXME: 似乎编辑态和 DEBUG 态用的是用一个 app-config，这导致 hasPermission 永远只能取到编辑态闭包中的数据
- * 提升变量作用域，绕过闭包问题，让 app-config 内的函数可以取到最新的数据
- */
-const memory  = { permissionID2Info: {} }
 
 export default function (ctx, save, designerRef, remotePlugins = []) {
 
@@ -128,10 +128,6 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
   }
 
 
-  memory.permissionID2Info = (curToJSON?.permissions || []).reduce((pre, info) => {
-    pre[info.id] = info
-    return pre;
-  }, {})
 
   const envList = ctx?.appConfig?.publishEnvConfig?.envList || []
   // 获得环境信息映射表
@@ -199,7 +195,8 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
     },
     editView: {
       editorAppender(editConfig) {
-        injectUpload(editConfig, ctx.uploadService, ctx.manateeUserInfo);
+        injectUpload(editConfig, ctx.uploadService, ctx.manateeUserInfo, ctx.fileId);
+
         return;
       },
       items({ }, cate0, cate1, cate2) {
@@ -449,8 +446,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
           }
         },
         get hasPermission() {
-
-          return ({ key }) => {
+          return ({ permission, key }) => {
             const hasPermissionFn = ctx?.hasPermissionFn;
 
             if (!ctx.debugHasPermissionFn) {
@@ -461,25 +457,26 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               return true;
             }
 
+            const code = permission?.register?.code || key;
+
             let result: boolean;
 
             try {
-              const info = memory.permissionID2Info[key];
               result = runJs(decodeURIComponent(hasPermissionFn), [
-                { key: info?.register?.code || key },
+                { key: code },
               ]);
 
               if (typeof result !== 'boolean') {
                 result = true;
                 designerRef.current?.console?.log.error(
                   '权限方法',
-                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${key}; [返回值] Type: ${typeof result}; Value: ${JSON.stringify(
+                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${code}; [返回值] Type: ${typeof result}; Value: ${JSON.stringify(
                     result,
                   )}`,
                 );
 
                 console.error(
-                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${key}; [返回值] Type: ${typeof result}; Value: ${JSON.stringify(
+                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${code}; [返回值] Type: ${typeof result}; Value: ${JSON.stringify(
                     result,
                   )}`,
                 );
@@ -491,7 +488,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 `${error.message}`,
               );
               // ctx.console?.log.error('权限方法', `${error.message}`)
-              console.error(`权限方法出错 [Key] ${key}；`, error);
+              console.error(`权限方法出错 [Key] ${code}；`, error);
             }
 
             return result;

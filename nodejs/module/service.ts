@@ -112,28 +112,6 @@ export default class PcPageService {
 
       const themesStyleStr = this._genThemesStyleStr(json)
 
-      // const themes = json?.plugins?.['@mybricks/plugins/theme/use']?.themes
-      // if (Array.isArray(themes)) {
-      //   themes.forEach(({ namespace, content }) => {
-      //     const variables = content?.variables
-
-      //     if (Array.isArray(variables)) {
-      //       let styleHtml = ''
-
-      //       variables.forEach(({ configs }) => {
-      //         if (Array.isArray(configs)) {
-      //           configs.forEach(({ key, value }) => {
-      //             styleHtml = styleHtml + `${key}: ${value};\n`
-      //           })
-      //         }
-      //       })
-
-      //       styleHtml = `<style id="${namespace}">\n:root {\n${styleHtml}}\n</style>\n`
-      //       themesStyleStr = themesStyleStr + styleHtml
-      //     }
-      //   })
-      // }
-
       console.info("[publish] getLatestPub begin");
 
       const latestPub = (await API.File.getLatestPub({
@@ -186,35 +164,6 @@ export default class PcPageService {
       console.info("[publish] getCustomPublishApi=", customPublishApi);
 
       if (customPublishApi) {
-        // const dataForCustom = {
-        //   env: envType,
-        //   productId: fileId,
-        //   productName: title,
-        //   publisherEmail,
-        //   publisherName: publisherName || '',
-        //   version,
-        //   commitInfo,
-        //   type: 'pc-page',
-        //   groupId,
-        //   groupName,
-        //   content: {
-        //     json: JSON.stringify(json),
-        //     html: template,
-        //     js: needCombo ? [{ name: `${fileId}-${version}.js`, content: comboScriptText }] : []
-        //   }
-        // }
-
-        // const { code, message, data } = await axios.post(customPublishApi, dataForCustom, {
-        //   headers: {
-        //     'Content-Type': 'application/json'
-        //   }
-        // }).then(res => res.data);
-
-        // if (code !== 1) {
-        //   throw new Error(`发布集成接口出错: ${message}`)
-        // } else {
-        //   publishMaterialInfo = data
-        // }
 
         publishMaterialInfo = await this._customPublish({
           envType,

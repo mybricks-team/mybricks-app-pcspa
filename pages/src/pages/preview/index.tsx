@@ -14,14 +14,6 @@ const previewStorage = new PreviewStorage({ fileId })
 
 let { dumpJson, comlibs, hasPermissionFn, executeEnv } = previewStorage.getPreviewPageData()
 
-/**
- * key-value 结构，通过 permissionID 找 permission 配置
- */
-const permissionID2Info = (dumpJson?.permissions || []).reduce((pre, info) => {
-  pre[info.id] = info
-  return pre;
-}, {})
-
 if (!dumpJson) {
   throw new Error('数据错误：项目数据缺失')
 }
@@ -269,31 +261,31 @@ function Page({ props, hasPermissionFn }) {
             },
           },
           get hasPermission() {
-            return ({ key }) => {
+            return ({ permission, key }) => {
               if (!hasPermissionFn) {
                 return true;
               }
 
-              const permissionInfo = permissionID2Info[key];
+              const code = permission?.register?.code || key;
 
               let result;
 
               try {
                 result = runJs(decodeURIComponent(hasPermissionFn), [
-                  { key: permissionInfo?.register?.code || key },
+                  { key: code },
                 ]);
 
                 if (typeof result !== 'boolean') {
                   result = true;
                   console.warn(
-                    `权限方法返回值类型应为 Boolean 请检查，[key] ${key}; [返回值] type: ${typeof result}; value: ${JSON.stringify(
+                    `权限方法返回值类型应为 Boolean 请检查，[key] ${code}; [返回值] type: ${typeof result}; value: ${JSON.stringify(
                       result,
                     )}`,
                   );
                 }
               } catch (error) {
                 result = true;
-                console.error(`权限方法出错 [key] ${key}；`, error);
+                console.error(`权限方法出错 [key] ${code}；`, error);
               }
 
               return result;
