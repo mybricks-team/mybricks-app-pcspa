@@ -29,6 +29,11 @@ const promiseCustomConnector = new Promise((res, rej) => {
   script.onload = () => {
     res(true)
   }
+  script.onerror = () => {
+    message.error(`插件【${connectorPlugin}】加载失败`)
+    return res(false)
+  }
+
   document.body.appendChild(script)
 })
 
