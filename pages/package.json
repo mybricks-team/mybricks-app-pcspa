@@ -56,7 +56,7 @@
   },
   "dependencies": {
     "@mybricks/plugin-connector-domain": "0.0.48",
-    "@mybricks/plugin-connector-http": "1.1.51",
+    "@mybricks/plugin-connector-http": "1.1.52",
     "@mybricks/plugin-theme": "0.0.35",
     "@mybricks/sdk-for-app": "^0.1.89",
     "@mybricks/plugin-tools": "1.0.17",
