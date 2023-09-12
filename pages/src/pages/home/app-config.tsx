@@ -455,6 +455,11 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
 
             const code = permission?.register?.code || key;
 
+            // 如果没有权限编码，不需要校验
+            if(code === undefined) {
+              return true;
+            }
+
             let result: boolean;
 
             try {
