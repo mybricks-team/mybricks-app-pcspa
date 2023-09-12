@@ -15,6 +15,7 @@ import { comLibAdderFunc } from './configs/comLibAdder'
 import { runJs } from '../../utils/runJs'
 
 import axios from 'axios';
+import { shapeUrlByEnv } from '../../utils';
 
 const defaultPermissionComments = `/**
 *
@@ -31,7 +32,6 @@ const defaultPermissionFn = `export default function ({ key }) {
   return true
 }
 `
-
 const getComs = () => {
   const comDefs = {};
   const regAry = (comAray) => {
@@ -120,6 +120,8 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
 export default function (ctx, save, designerRef, remotePlugins = []) {
 
   let curToJSON;
+  const envList = ctx.envList
+
   try {
     curToJSON = designerRef?.current?.toJSON();
   } catch (e) {
@@ -127,11 +129,8 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
     console.error("获取 toJSON 数据失败，请刷新重试！", e);
   }
 
-
-
-  const envList = ctx?.appConfig?.publishEnvConfig?.envList || []
   // 获得环境信息映射表
-  const envMap = envList.reduce((res, item) => {
+  const envMap = (envList).reduce((res, item) => {
     res[item.name] = item.title
     return res
   }, {})
@@ -141,19 +140,9 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
       'ctrl+s': [save],
     },
     plugins: [
-      servicePlugin({
-        envList,
-      }),
+      servicePlugin(),
       ...remotePlugins,
       useTheme({ sdk: ctx.sdk }),
-      // domainServicePlugin({
-      //   addActions: [
-      //     { type: 'aggregation-model', title: '聚合模型' }
-      //   ]
-      //   // openFileSelector() {
-      //   //   return openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })
-      //   // },
-      // }),
       versionPlugin({
         user: ctx.user,
         file: ctx.fileItem,
@@ -246,7 +235,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 title: '调试环境',
                 type: 'select',
                 ifVisible({ data }) {
-                  return envList?.length > 0;
+                  return envList.length > 0;
                 },
                 description: '选择调试时采用的环境配置，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
                 options: {
@@ -262,6 +251,42 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                   },
                   set(context, v) {
                     ctx.executeEnv = v
+                  }
+                }
+              },
+              {
+                title: '环境信息设置',
+                description: '可以在应用配置处修改使用的环境',
+                ifVisible({ data }) {
+                  return envList.length > 0;
+                },
+                type: 'array',
+                options: {
+                  getTitle: (item) => {
+                    return item.title
+                  },
+                  items: [{
+                    title: '环境标识(禁止修改)',
+                    type: 'text',
+                    value: 'name',
+                    options: {
+                      readonly: true
+                    }
+                  }, {
+                    title: '域名',
+                    type: 'text',
+                    value: 'value'
+                  }],
+                  addable: false,
+                  deletable: false,
+                  draggable: false
+                },
+                value: {
+                  get({ data, focusArea }) {
+                    return envList
+                  },
+                  set({ data, focusArea, output, input, ...res }, value) {
+                    ctx.envList = value
                   }
                 }
               },
@@ -364,8 +389,16 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 if (!plugin) {
                   //服务接口类型
                   return callConnectorHttp(
-                      { script: connector.script, useProxy: true, executeEnv: ctx.executeEnv },
-                      params
+                    { script: connector.script, useProxy: true },
+                    params,
+                    {
+                      before: options => {
+                        return {
+                          ...options,
+                          url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
+                        }
+                      }
+                    }
                   );
                 } else {
                   return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, connectorConfig);
@@ -391,8 +424,16 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             }
             //服务接口类型
             return callConnectorHttp(
-                { ...connector, script: connector.script, useProxy: true, executeEnv: ctx.executeEnv },
-                params
+              { ...connector, script: connector.script, useProxy: true },
+              params,
+              {
+                before: options => {
+                  return {
+                    ...options,
+                    url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
+                  }
+                }
+              }
             );
           } else {
             return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, connectorConfig);
@@ -549,8 +590,8 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
           }
         ]
       },
-      theme:{
-        css:[
+      theme: {
+        css: [
           'https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/antd.variable.min.css'
         ],
       },

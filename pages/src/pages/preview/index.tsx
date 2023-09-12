@@ -3,7 +3,7 @@ import { ConfigProvider, message } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN';
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
 import { ComlibRtUrl, ChartsRtUrl, BasicRtUrl, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from './../../constants'
-import { getQueryString } from './../../utils'
+import { getQueryString, shapeUrlByEnv } from './../../utils'
 import { runJs } from './../../utils/runJs'
 import { PreviewStorage } from './../../utils/previewStorage'
 const { render: renderUI } = (window as any)._mybricks_render_web
@@ -12,7 +12,7 @@ const fileId = getQueryString('fileId')
 
 const previewStorage = new PreviewStorage({ fileId })
 
-let { dumpJson, comlibs, hasPermissionFn, executeEnv, appConfig } = previewStorage.getPreviewPageData()
+let { dumpJson, comlibs, hasPermissionFn, executeEnv, appConfig, envList } = previewStorage.getPreviewPageData()
 
 const promiseCustomConnector = new Promise((res, rej) => {
   const { plugins = [] } = appConfig
@@ -212,7 +212,16 @@ function Page({ props, hasPermissionFn }) {
                   const plugin = window[connector.connectorName] || window['@mybricks/plugins/service'];
 
                   if (plugin) {
-                    return plugin.call({ ...connector, useProxy: true, executeEnv }, params);
+                    return plugin.call({ ...connector, useProxy: true }, params, {
+                      // 只在官方插件上做环境域名处理
+                      before: connector.connectorName === '@mybricks/plugins/service'
+                        ? options => {
+                          return {
+                            ...options,
+                            url: shapeUrlByEnv(envList, executeEnv, options.url)
+                          }
+                        } : undefined
+                    });
                   } else {
                     return Promise.reject('错误的连接器类型.');
                   }
@@ -236,7 +245,16 @@ function Page({ props, hasPermissionFn }) {
               const curConnector = connector.script
                 ? connector
                 : (dumpJson.plugins[connector.connectorName] || []).find(con => con.id === connector.id);
-              return curConnector ? plugin.call({ ...connector, ...curConnector, executeEnv, useProxy: true }, params) : Promise.reject('找不到对应连接器 Script 执行脚本.');
+              return curConnector ? plugin.call({ ...connector, ...curConnector, executeEnv, useProxy: true }, params, {
+                // 只在官方插件上做环境域名处理
+                before: connector.connectorName === '@mybricks/plugins/service'
+                  ? options => {
+                    return {
+                      ...options,
+                      url: shapeUrlByEnv(envList, executeEnv, options.url)
+                    }
+                  } : undefined
+              }) : Promise.reject('找不到对应连接器 Script 执行脚本.');
             } else {
               return Promise.reject('错误的连接器类型.');
             }

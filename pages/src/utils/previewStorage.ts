@@ -9,12 +9,13 @@ export class PreviewStorage {
 
   getFileKeyTemplate = (fileId) => `--preview-${fileId}-`;
 
-  savePreviewPageData = ({ dumpJson, comlibs, hasPermissionFn, executeEnv, appConfig }) => {
+  savePreviewPageData = ({ dumpJson, comlibs, hasPermissionFn, executeEnv, appConfig, envList }) => {
     sessionStorage.setItem(`--preview-${this.fileId}-`, JSON.stringify(dumpJson))
     sessionStorage.setItem(`--preview--comlibs--${this.fileId}-`, JSON.stringify(comlibs))
     sessionStorage.setItem(`--preview--hasPermissionFn--${this.fileId}-`, hasPermissionFn)
     sessionStorage.setItem(`--preview--executeEnv--${this.fileId}-`, executeEnv)
     sessionStorage.setItem(`--preview--appConfig--${this.fileId}-`, appConfig)
+    sessionStorage.setItem(`--preview--envList--${this.fileId}-`, envList)
   }
 
   getPreviewPageData = () => {
@@ -23,6 +24,7 @@ export class PreviewStorage {
     let hasPermissionFn = sessionStorage.getItem(`--preview--hasPermissionFn--${this.fileId}-`)
     let executeEnv = sessionStorage.getItem(`--preview--executeEnv--${this.fileId}-`)
     let appConfig
+    let envList = []
 
 
 
@@ -34,6 +36,11 @@ export class PreviewStorage {
 
     try {
       appConfig = JSON.parse(sessionStorage.getItem(`--preview--appConfig--${this.fileId}-`))
+    } catch (ex) {
+      throw ex
+    }
+    try {
+      envList = JSON.parse(sessionStorage.getItem(`--preview--envList--${this.fileId}-`))
     } catch (ex) {
       throw ex
     }
@@ -51,7 +58,8 @@ export class PreviewStorage {
       comlibs: comlibs as any,
       hasPermissionFn,
       executeEnv,
-      appConfig
+      appConfig,
+      envList,
     }
   }
 }

@@ -87,6 +87,12 @@ export default function MyDesigner({ appData }) {
     latestComlibs: [],
     debugQuery: appData.fileContent?.content?.debugQuery,
     executeEnv: appData.fileContent?.content?.executeEnv || '',
+    // 应用没有envlist则为首次打开，此时使用默认的envList
+    envList: appData.fileContent?.content?.envList || appConfig?.publishEnvConfig?.envList?.map(item => ({
+      title: item.title,
+      name: item.name,
+      value: item.defaultApiPrePath
+    })) || [],
     debugMainProps: appData.fileContent?.content?.debugMainProps,
     hasPermissionFn: appData.fileContent?.content?.hasPermissionFn,
     debugHasPermissionFn: appData.fileContent?.content?.debugHasPermissionFn,
@@ -245,6 +251,7 @@ export default function MyDesigner({ appData }) {
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
     json.executeEnv = ctx.executeEnv
+    json.envList = ctx.envList
     json.debugMainProps = ctx.debugMainProps
     json.hasPermissionFn = ctx.hasPermissionFn
     json.debugHasPermissionFn = ctx.debugHasPermissionFn
@@ -279,6 +286,7 @@ export default function MyDesigner({ appData }) {
     previewStorage.savePreviewPageData({
       dumpJson: json,
       executeEnv: ctx.executeEnv,
+      envList: ctx.envList,
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
       hasPermissionFn: ctx.hasPermissionFn,
       appConfig: JSON.stringify(appConfig),
@@ -309,6 +317,7 @@ export default function MyDesigner({ appData }) {
           json.comlibs = ctx.comlibs
           json.debugQuery = ctx.debugQuery
           json.executeEnv = ctx.executeEnv
+          json.envList = ctx.envList
           json.debugMainProps = ctx.debugMainProps
           json.hasPermissionFn = ctx.hasPermissionFn
           json.debugHasPermissionFn = ctx.debugHasPermissionFn
@@ -330,6 +339,7 @@ export default function MyDesigner({ appData }) {
               publisherEmail: ctx.user.email,
               publisherName: ctx.user?.name,
               projectId: ctx.sdk.projectId,
+              envList: ctx.envList,
               // 非模块下的页面直接发布到项目空间下
               folderPath: '/app/pcpage',
               fileName: `${ctx.fileItem.id}.html`,
@@ -418,6 +428,7 @@ export default function MyDesigner({ appData }) {
       comlibs: ctx.comlibs,
       debugQuery: ctx.debugQuery,
       executeEnv: ctx.executeEnv,
+      envList: ctx.envList,
       debugMainProps: ctx.debugMainProps,
       hasPermissionFn: ctx.hasPermissionFn,
       debugHasPermissionFn: ctx.debugHasPermissionFn
@@ -494,7 +505,7 @@ export default function MyDesigner({ appData }) {
         )}
       </div>
       <PublishModal
-        envList={ctx?.appConfig?.publishEnvConfig?.envList || []}
+        envList={ctx.envList}
         visible={publishModalVisible}
         onOk={(publishConfig) => {
           publish(publishConfig)

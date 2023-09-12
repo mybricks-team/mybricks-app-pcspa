@@ -2,12 +2,14 @@ import ReactDOM from 'react-dom';
 import React from 'react'
 import { message } from 'antd'
 import { runJs } from './../../utils/runJs'
+import { shapeUrlByEnv } from './../../utils'
 
 const { render: renderUI } = window._mybricks_render_web
 
 const projectJson = '--projectJson--' //replace it
 const projectId = '--slot-project-id--' //replace it
 const executeEnv = '--executeEnv--' //replace it
+const envList = '--envList--' //replace it
 
 function decode(str) {
   try {
@@ -177,10 +179,19 @@ function Page({ props }) {
         if (plugin) {
           /** 兼容云组件，云组件会自带 script */
           const curConnector = connector.script
-              ? connector
-              : (projectJson.plugins[connector.connectorName] || []).find(con => con.id === connector.id);
+            ? connector
+            : (projectJson.plugins[connector.connectorName] || []).find(con => con.id === connector.id);
 
-          return curConnector ? plugin.call({ ...connector, ...curConnector, executeEnv }, params) : Promise.reject('找不到对应连接器 Script 执行脚本.');
+          return curConnector ? plugin.call({ ...connector, ...curConnector, executeEnv }, params, {
+            // 只在官方插件上做环境域名处理
+            before: connector.connectorName === '@mybricks/plugins/service'
+              ? options => {
+                return {
+                  ...options,
+                  url: shapeUrlByEnv(envList, executeEnv, options.url)
+                }
+              } : undefined
+          }) : Promise.reject('找不到对应连接器 Script 执行脚本.');
         } else {
           return Promise.reject('错误的连接器类型.');
         }
