@@ -158,6 +158,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
         user: ctx.user,
         file: ctx.fileItem,
         disabled: ctx.disabled,
+        needSavePreview: true,
         envMap,
         onInit: (versionApi) => {
           ctx.versionApi = versionApi
