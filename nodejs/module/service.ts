@@ -209,7 +209,7 @@ export default class PcPageService {
           noHash: true
         })
 
-        console.info("[publish] upload to static server ok");
+        console.info("[publish] upload to static server ok", publishMaterialInfo);
 
         if (publishMaterialInfo?.url?.startsWith('https')) {
           publishMaterialInfo.url = publishMaterialInfo.url.replace('https', 'http')
