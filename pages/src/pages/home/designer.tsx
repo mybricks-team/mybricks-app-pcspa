@@ -98,12 +98,12 @@ export default function MyDesigner({ appData }) {
     saveContent(content) {
       ctx.save({ content })
     },
-    save(
+    async save(
       param: { name?; shareType?; content?; icon?},
       skipMessage?: boolean
     ) {
       const { name, shareType, content, icon } = param
-      API.File.save({
+      await API.File.save({
         userId: ctx.user?.id,
         fileId: ctx.fileId,
         name,
@@ -251,21 +251,21 @@ export default function MyDesigner({ appData }) {
 
     json.projectId = ctx.sdk.projectId;
 
-    ctx.save({ name: ctx.fileItem.name, content: JSON.stringify(json) })
+    await ctx.save({ name: ctx.fileItem.name, content: JSON.stringify(json) })
 
     setBeforeunload(false)
 
-    API.App.getPreviewImage({ // Todo... name 中文乱码
+    await API.App.getPreviewImage({ // Todo... name 中文乱码
       element: designerRef.current?.geoView.canvasDom,
       // name: `${ctx.fileItem.name}.png`
-    }).then(res => {
+    }).then(async (res) => {
       const url = new URL(res)
 
       if (url.protocol === 'https:') {
         url.protocol = 'http:'
       }
 
-      ctx.save({ icon: url.href }, true)
+      await ctx.save({ icon: url.href }, true)
     }).catch((err) => {
       console.error(err)
     })
@@ -454,15 +454,13 @@ export default function MyDesigner({ appData }) {
                             onClick={() => setPublishModalVisible(true)}
                           >发布</Toolbar.Button>
                           <Toolbar.Tools
-                            onImport={(value) => {
+                            onImport={async (value) => {
                               try {
                                 const { content, pageConfig } = JSON.parse(value)
-                                Object.assign(ctx, pageConfig)
-                                designerRef.current.loadContent(content)
-                                setTimeout(async () => {
-                                  await save()
-                                  location.reload()
-                                }, 10);
+                                Object.assign(ctx, pageConfig??{})
+                                await designerRef.current.loadContent(content)
+                                await save()
+                                location.reload()
                               } catch (e) {
                                 message.error(e)
                                 console.error(e)
