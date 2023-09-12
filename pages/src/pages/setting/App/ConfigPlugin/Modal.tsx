@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { Modal, Form, Input, ModalProps, Select } from "antd";
+import { Modal, Form, Input, ModalProps, Select, Switch } from "antd";
 import { EnumPluginType, PluginType } from "./type";
 
 export const pluginTypeMap = {
@@ -87,6 +87,12 @@ export default ({
               value: item
             }))} />
         </Form.Item>
+        {/* <Form.Item
+          label='是否禁用'
+          name='disabled'
+        >
+          <Switch defaultChecked={plugin?.disabled} />
+        </Form.Item> */}
         <Form.Item
           label="插件地址"
           name='url'

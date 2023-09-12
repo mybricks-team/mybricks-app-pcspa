@@ -68,7 +68,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   return (
     <>
       {plugins.map((plugin, index) => {
-        const { title, name, url, runtimeUrl, description, updateTime, user, type = EnumPluginType } = plugin;
+        const { title, name, url, disabled, runtimeUrl, description, updateTime, user, type = EnumPluginType } = plugin;
         return <>
           <Descriptions
             title={title}
@@ -103,6 +103,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
           >
             <Descriptions.Item label="唯一标识">{name}</Descriptions.Item>
             <Descriptions.Item label="插件类型">{pluginTypeMap[String(type)]}</Descriptions.Item>
+            {/* <Descriptions.Item label="是否禁用">{disabled ? '已禁用' : '未禁用'}</Descriptions.Item> */}
             <Descriptions.Item label="资源地址">{url}</Descriptions.Item>
             <Descriptions.Item label="runtime地址">{runtimeUrl}</Descriptions.Item>
             <Descriptions.Item label="更新信息">{description}</Descriptions.Item>

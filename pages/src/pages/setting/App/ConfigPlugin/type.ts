@@ -7,6 +7,7 @@ export type PluginType = {
   title: string;
   url: string;
   type: EnumPluginType,
+  disabled: boolean,
   runtimeUrl: string;
   description?: string;
   updateTime: string;
