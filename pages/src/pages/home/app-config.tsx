@@ -401,7 +401,15 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                     }
                   );
                 } else {
-                  return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, connectorConfig);
+                  return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, {
+                    ...connectorConfig,
+                    before: options => {
+                      return {
+                        ...options,
+                        url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
+                      }
+                    }
+                  });
                 }
               }
             }
@@ -436,7 +444,15 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               }
             );
           } else {
-            return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, connectorConfig);
+            return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, {
+              ...connectorConfig,
+              before: options => {
+                return {
+                  ...options,
+                  url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
+                }
+              }
+            });
           }
         },
         // uploadFile(files) {
@@ -490,14 +506,14 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             }
 
             // 编辑权限配置为”无“时，不需要进行权限校验
-            if(permission?.type === 'none') {
+            if (permission?.type === 'none') {
               return true;
             }
 
             const code = permission?.register?.code || key;
 
             // 如果没有权限编码，不需要校验
-            if(code === undefined) {
+            if (code === undefined) {
               return true;
             }
 

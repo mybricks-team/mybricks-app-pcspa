@@ -9,7 +9,7 @@ const { render: renderUI } = window._mybricks_render_web
 const projectJson = '--projectJson--' //replace it
 const projectId = '--slot-project-id--' //replace it
 const executeEnv = '--executeEnv--' //replace it
-const envList = '--envList--' //replace it
+const envList = "--envList--" //replace it
 
 function decode(str) {
   try {

@@ -154,7 +154,7 @@ export default class PcPageService {
         .replace(`-- comlib-rt --`, comLibRtScript)
         .replace(`"--projectJson--"`, JSON.stringify(json))
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
-        .replace(`--envList--`, JSON.stringify(envList))
+        .replace(`"--envList--"`, JSON.stringify(envList))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
 
       let comboScriptText = '';

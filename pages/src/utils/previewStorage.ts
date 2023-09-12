@@ -15,7 +15,7 @@ export class PreviewStorage {
     sessionStorage.setItem(`--preview--hasPermissionFn--${this.fileId}-`, hasPermissionFn)
     sessionStorage.setItem(`--preview--executeEnv--${this.fileId}-`, executeEnv)
     sessionStorage.setItem(`--preview--appConfig--${this.fileId}-`, appConfig)
-    sessionStorage.setItem(`--preview--envList--${this.fileId}-`, envList)
+    sessionStorage.setItem(`--preview--envList--${this.fileId}-`, JSON.stringify(envList))
   }
 
   getPreviewPageData = () => {
