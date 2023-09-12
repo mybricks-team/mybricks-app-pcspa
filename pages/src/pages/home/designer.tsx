@@ -425,6 +425,9 @@ export default function MyDesigner({ appData }) {
     return json
   }, [JSON.stringify(ctx)])
 
+  // 只有预览时 search 会携带 version 字段
+  const isPreview = window.location.search.includes('version');
+
   return (
     <div className={`${css.view} fangzhou-theme`}>
       <Toolbar
@@ -434,42 +437,46 @@ export default function MyDesigner({ appData }) {
           onClick={handleSwitch2SaveVersion} />}
       >
         {RenderLocker}
-        <Toolbar.Save
-          disabled={!operable || isDebugMode}
-          loading={saveLoading}
-          onClick={() => {
-            save()
-          }}
-          dotTip={beforeunload}
-        />
-        <Toolbar.Button disabled={isDebugMode} onClick={preview}>预览</Toolbar.Button>
-        <Toolbar.Button
-          disabled={!operable || isDebugMode}
-          loading={publishLoading}
-          onClick={() => setPublishModalVisible(true)}
-        >发布</Toolbar.Button>
-        <Toolbar.Tools
-          onImport={(value) => {
-            try {
-              const { content, pageConfig } = JSON.parse(value)
-              Object.assign(ctx, pageConfig)
-              designerRef.current.loadContent(content)
-              setTimeout(async () => {
-                await save()
-                location.reload()
-              }, 10);
-            } catch (e) {
-              message.error(e)
-              console.error(e)
-            }
-          }}
-          getExportDumpJSON={() => {
-            return getDumpJson()
-          }}
-          getExportToJSON={() => {
-            return designerRef.current.toJSON()
-          }}
-        />
+        {
+          !isPreview &&  <>
+                          <Toolbar.Save
+                            disabled={!operable || isDebugMode}
+                            loading={saveLoading}
+                            onClick={() => {
+                              save()
+                            }}
+                            dotTip={beforeunload}
+                          />
+                          <Toolbar.Button disabled={isDebugMode} onClick={preview}>预览</Toolbar.Button>
+                          <Toolbar.Button
+                            disabled={!operable || isDebugMode}
+                            loading={publishLoading}
+                            onClick={() => setPublishModalVisible(true)}
+                          >发布</Toolbar.Button>
+                          <Toolbar.Tools
+                            onImport={(value) => {
+                              try {
+                                const { content, pageConfig } = JSON.parse(value)
+                                Object.assign(ctx, pageConfig)
+                                designerRef.current.loadContent(content)
+                                setTimeout(async () => {
+                                  await save()
+                                  location.reload()
+                                }, 10);
+                              } catch (e) {
+                                message.error(e)
+                                console.error(e)
+                              }
+                            }}
+                            getExportDumpJSON={() => {
+                              return getDumpJson()
+                            }}
+                            getExportToJSON={() => {
+                              return designerRef.current.toJSON()
+                            }}
+                          />
+                        </>
+        }
       </Toolbar>
       <div className={css.designer}>
         {SPADesigner && remotePlugins && latestComlibs && (
