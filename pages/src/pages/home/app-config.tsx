@@ -448,6 +448,11 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               return true;
             }
 
+            // 编辑权限配置为”无“时，不需要进行权限校验
+            if(permission?.type === 'none') {
+              return true;
+            }
+
             const code = permission?.register?.code || key;
 
             let result: boolean;
