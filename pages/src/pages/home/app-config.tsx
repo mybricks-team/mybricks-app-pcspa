@@ -383,7 +383,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               callDomainModel(domainModel, type, params) {
                 return callDomainHttp(domainModel, params, { action: type });
               },
-              callConnector(connector, params, connectorConfig) {
+              callConnector(connector, params, connectorConfig = {}) {
                 const plugin = designerRef.current?.getPlugin(connector.connectorName);
                 //调用连接器
                 if (!plugin) {
@@ -392,6 +392,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                     { script: connector.script, useProxy: true },
                     params,
                     {
+                      ...connectorConfig,
                       before: options => {
                         return {
                           ...options,
@@ -423,7 +424,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
         callDomainModel(domainModel, type, params) {
           return callDomainHttp(domainModel, params, { action: type });
         },
-        callConnector(connector, params, connectorConfig) {
+        callConnector(connector, params, connectorConfig = {}) {
           const plugin = designerRef.current?.getPlugin(connector.connectorName);
           if (!plugin) {
             /** 启动 Mock */
