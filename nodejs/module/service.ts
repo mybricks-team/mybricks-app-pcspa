@@ -118,10 +118,11 @@ export default class PcPageService {
       console.info("[publish] getLatestPub begin");
 
       const latestPub = (await API.File.getLatestPub({
-        fileId
+        fileId,
+        type: envType
       }))?.[0];
 
-      console.info("[publish] getLatestPub ok");
+      console.info("[publish] getLatestPub ok-", latestPub);
 
       const version = getNextVersion(latestPub?.version);
 
@@ -138,9 +139,10 @@ export default class PcPageService {
         }
       });
 
+      const comlibRtName = `${fileId}-${envType}-${version}.js`
       /** 需要聚合的组件资源 */
       if (comlibs.find(lib => lib?.defined)?.comAray?.length || comlibs.find(lib => lib.componentRuntimeMap)) {
-        comLibRtScript += `<script src="./${fileId}-${version}.js"></script>`;
+        comLibRtScript += `<script src="./${comlibRtName}"></script>`;
         needCombo = true;
       }
 
@@ -199,7 +201,7 @@ export default class PcPageService {
         needCombo && await API.Upload.staticServer({
           content: comboScriptText,
           folderPath: `${folderPath}/${envType || 'prod'}`,
-          fileName: `${fileId}-${version}.js`,
+          fileName: comlibRtName,
           noHash: true
         })
 
@@ -281,7 +283,7 @@ export default class PcPageService {
       content: {
         json: JSON.stringify(json),
         html: template,
-        js: needCombo ? [{ name: `${fileId}-${version}.js`, content: comboScriptText }] : [],
+        js: needCombo ? [{ name: `${fileId}-${envType}-${version}.js`, content: comboScriptText }] : [],
         permissions
       }
     }

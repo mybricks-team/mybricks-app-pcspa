@@ -22,7 +22,7 @@ module.exports = merge(common, {
     host: 'localhost',
     hot: true,
     client: {
-      logging: 'warn',
+      logging: 'info',
     },
     // open: `http://localhost:8001`,
     proxy: [
