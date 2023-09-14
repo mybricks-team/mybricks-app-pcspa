@@ -7,6 +7,7 @@ import API from "@mybricks/sdk-for-app/api";
 import { parse } from "url";
 import { Blob } from 'buffer'
 import { generateComLib } from "./generateComLib";
+import { transform } from './transform'
 const FormData = require("form-data");
 
 @Injectable()
@@ -152,7 +153,7 @@ export default class PcPageService {
         .replace(`-- plugin-runtime --`, pluginScript)
         .replace(`-- themes-style --`, themesStyleStr)
         .replace(`-- comlib-rt --`, comLibRtScript)
-        .replace(`"--projectJson--"`, JSON.stringify(json))
+        .replace(`"--projectJson--"`, JSON.stringify(transform(json)))
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
         .replace(`"--envList--"`, JSON.stringify(envList))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
