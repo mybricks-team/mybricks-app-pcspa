@@ -309,8 +309,9 @@ export default function MyDesigner({ appData }) {
         key: 'publish',
         content: '页面发布中',
         duration: 0,
-      })
-        ; return (async () => {
+      }); 
+      
+      return (async () => {
           /** 先保存 */
           const json = designerRef.current?.dump();
 
