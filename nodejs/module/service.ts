@@ -7,6 +7,7 @@ import API from "@mybricks/sdk-for-app/api";
 import { parse } from "url";
 import { Blob } from 'buffer'
 import { generateComLib } from "./generateComLib";
+import { load } from 'cheerio';
 const FormData = require("form-data");
 
 @Injectable()
@@ -158,6 +159,13 @@ export default class PcPageService {
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
         .replace(`"--envList--"`, JSON.stringify(envList))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
+
+      const needLocalization = await getCustomNeedLocalization();
+      // 若平台配置了需要本地化发布
+      if(needLocalization) {
+        // 将模板中所有公网资源本地化
+        template = await resourceLocalization(template, folderPath, envType);
+      }
 
       let comboScriptText = '';
       /** 生成 combo 组件库代码 */
@@ -415,6 +423,15 @@ const getCustomPublishApi = async () => {
   return publishApi;
 }
 
+/** 
+ * 获取平台设置的「是否本地化发布」
+ * TODO: 字段暂时未知，先用 “needLocalization” 顶着
+ */
+const getCustomNeedLocalization = async () => {
+  const { needLocalization } = await getAppConfig()
+  return !!needLocalization;
+}
+
 // -- plugin-runtime --
 const getCustomConnectorRuntime = (appConfig) => {
   const { plugins = [] } = appConfig
@@ -507,4 +524,54 @@ function getNextVersion(version, max = 100) {
   }
 
   return vAry.join(".");
+}
+
+/**
+ * 将 HTML 中的所有公网资源本地化
+ * @param template HTML 模板
+ */
+async function resourceLocalization(template: string, folderPath: string, envType: string){
+  const $ = load(template);
+  
+  // 所有的远程资源都在模板中写有，间接依赖的公网资源由依赖自身处理
+  const resourceSrcList = [...$("script").map((_, el) => $(el).attr('src'))]
+                  .concat([...$("link").map((_, el) => $(el).attr('href'))])
+                  // 筛选出所有公网资源地址
+                  .filter((url: string) => !!url && !url.startsWith('./'));
+
+  const promiseList = []
+  resourceSrcList.forEach(src=>{
+    promiseList.push(localization(src, folderPath, envType));
+  })
+
+  // 将远程资源本地化
+  const localSrcList = await Promise.all(promiseList);
+
+  // 把模板中的远程资源地址替换成本地化后的地址
+  resourceSrcList.forEach((src, index) => {
+    const localSrc = localSrcList[index];
+    template = template.replace(new RegExp(`${src}`,'g'),localSrc);
+  })
+
+  return template;
+}
+
+/**
+ * 远程资源本地化
+ * TODO: 获取资源的方式根据后续发难调整（内网环境可能需要将 url 映射为对应的 nginx 地址）
+ * @param url 资源地址
+ * @returns 本地化后的资源地址
+ */
+async function localization(url: string, folderPath: string, envType: string) {
+  const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000 });
+
+  // FIXME: 上传服务返回值未知，先用 any 顶着
+  const publishMaterialInfo = (await API.Upload.staticServer({
+    content,
+    folderPath: `${folderPath}/${envType || "prod"}`,
+    fileName: url.split("/").slice(-1)[0],
+    noHash: true,
+  })) as any;
+
+  return publishMaterialInfo.url;
 }
