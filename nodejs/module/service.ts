@@ -565,11 +565,13 @@ async function resourceLocalization(template: string, folderPath: string, envTyp
 async function localization(url: string, folderPath: string, envType: string) {
   const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000 });
 
+  const path = `${folderPath}/${envType || "prod"}/public/${url.split('//')[1]}`;
+
   // FIXME: 上传服务返回值未知，先用 any 顶着
   const publishMaterialInfo = (await API.Upload.staticServer({
     content,
-    folderPath: `${folderPath}/${envType || "prod"}`,
-    fileName: url.split("/").slice(-1)[0],
+    folderPath: path.split("/").slice(0, -1).join('/'),
+    fileName: path.split("/").slice(-1)[0],
     noHash: true,
   })) as any;
 
