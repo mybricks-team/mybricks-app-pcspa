@@ -558,7 +558,7 @@ async function resourceLocalization(template: string, folderPath: string, envTyp
 
 /**
  * 远程资源本地化
- * TODO: 获取资源的方式根据后续发难调整（内网环境可能需要将 url 映射为对应的 nginx 地址）
+ * TODO: 获取资源的方式根据后续方案调整（内网环境可能需要将 url 映射为对应的 nginx 地址）
  * @param url 资源地址
  * @returns 本地化后的资源地址
  */
