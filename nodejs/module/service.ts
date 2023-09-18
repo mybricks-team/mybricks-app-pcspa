@@ -109,7 +109,8 @@ export default class PcPageService {
       Reflect.deleteProperty(json, 'configuration')
 
       /** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
-      const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
+      // const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
+      const domainName = getRealDomain(req)
 
       console.info("[publish] domainName is:", domainName);
 
@@ -148,7 +149,13 @@ export default class PcPageService {
 
       const customConnectorRuntimeUrl = getCustomConnectorRuntime(appConfig)
       if (customConnectorRuntimeUrl) {
-        pluginScript += `<script src="${customConnectorRuntimeUrl}"></script>`;
+        let content = ''
+        try {
+          content = await axios.get(customConnectorRuntimeUrl).then(res => res.data)
+        } catch (e) {
+          console.error(`get customConnectorRuntime error`, e)
+        }
+        pluginScript += `<script>${content}</script>`;
       }
 
       template = template.replace(`--title--`, title)
