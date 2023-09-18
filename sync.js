@@ -17,7 +17,7 @@ if (!args[0] || !args[0].startsWith('--origin=')) {
 }
 const domain = args[0].replace('--origin=', '');
 const noServiceUpdate = args[1] && args[1].indexOf('--noServiceUpdate') > -1;
-
+const offlineUpdate = args[1] && args[1].indexOf('--offline') > -1;
 // /** 遍历文件 */
 function read (zip, files, dirPath) {
   files.forEach(function (fileName) {
@@ -36,8 +36,10 @@ function read (zip, files, dirPath) {
 const zipDirPath = path.join(__dirname);
 /** 过滤不打进zip包的文件名 */
 const filterFileName = [
+  '.github',
   '.DS_Store', 
-  'node_modules',
+  '.babelrc',
+  '.npmrc',
   '.npmignore', 
   '.eslintrc.js', 
   '.prettierrc', 
@@ -50,6 +52,10 @@ const filterFileName = [
   '.vscode',
   'sync.js'
 ];
+
+if(!offlineUpdate) {
+  filterFileName.push('node_modules')
+}
 const files = fs.readdirSync(zipDirPath).filter(filename => {
   return !filterFileName.includes(filename);
 });
@@ -86,16 +92,6 @@ zip.generateAsync({
   }));
   formData.append('file', content, `${packageJSON.name}.zip`);
 
-  // formData.append('type', 'app');
-  // formData.append('name', packageJSON.name);
-  // formData.append('namespace', packageJSON.name);
-  // formData.append('version', packageJSON.version);
-  // formData.append('icon', packageJSON.mybricks ? packageJSON.mybricks.icon : '');
-  // formData.append('description', packageJSON.mybricks ? (packageJSON.mybricks.description || packageJSON.description) : packageJSON.description);
-  // /** 暂时写死创建者 */
-  // formData.append('creatorName', Buffer.from('em91eW9uZ3NoZW5nQGt1YWlzaG91LmNvbQ==', 'base64').toString('utf-8'));
-  // formData.append('changeLog', '优化部分逻辑，修复若干 bug');
-  // formData.append('file', content, `${packageJSON.name}.zip`);
   // 发送请求
   axios
     .post(domain + '/central/api/channel/gateway', formData, {
