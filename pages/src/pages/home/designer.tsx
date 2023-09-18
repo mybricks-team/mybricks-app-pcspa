@@ -149,6 +149,9 @@ export default function MyDesigner({ appData }) {
   const [latestComlibs, setLatestComlibs] = useState<[]>()
   const [isDebugMode, setIsDebugMode] = useState(false)
 
+  // 只有预览时 search 会携带 version 字段
+  const isPreview = window.location.search.includes('version');
+
   useEffect(() => {
     API.Material.getLatestComponentLibrarys(comlibs.filter(lib => lib.id !== "_myself_").map(lib => lib.namespace)).then((res: any) => {
       const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))
@@ -236,6 +239,10 @@ export default function MyDesigner({ appData }) {
   }, [])
 
   const save = useCallback(async () => {
+    if(isPreview) {
+      message.warn('请回到编辑页面，再进行保存')
+      return
+    }
     if (!ctx.operable) {
       message.warn('请先点击右上角个人头像上锁获取页面编辑权限')
       return
@@ -277,7 +284,7 @@ export default function MyDesigner({ appData }) {
       console.error(err)
     })
 
-  }, [])
+  }, [isPreview])
 
   const preview = useCallback(() => {
     const json = designerRef.current?.toJSON()
@@ -435,9 +442,6 @@ export default function MyDesigner({ appData }) {
     }
     return json
   }, [JSON.stringify(ctx)])
-
-  // 只有预览时 search 会携带 version 字段
-  const isPreview = window.location.search.includes('version');
 
   return (
     <div className={`${css.view} fangzhou-theme`}>
