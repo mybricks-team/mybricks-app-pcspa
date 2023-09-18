@@ -7,6 +7,11 @@ const NeedTransformCom = [
   "mybricks.normal-pc.muilt-inputJs",
 ];
 
+const NeedTransformPlugin = [
+  "@mybricks/plugins/service",
+  "@manatee/service-interface"
+]
+
 const transformCodeByBabel = (
   code: string,
   tips?: string,
@@ -96,7 +101,7 @@ const transform = (json: Record<string, any>) => {
     "全局方法-权限校验"
   );
   Object.keys(json.plugins).forEach((pluginName) => {
-    if (pluginName === "@mybricks/plugins/service") {
+    if (NeedTransformPlugin.includes(pluginName)) {
       json.plugins[pluginName] = json.plugins[pluginName].map((service) => ({
         ...service,
         script: transformCodeByBabel(
