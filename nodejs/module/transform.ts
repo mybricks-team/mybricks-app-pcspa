@@ -1,4 +1,4 @@
-const Babel = require('@babel/standalone');
+const Babel = require("@babel/standalone");
 
 const NeedTransformCom = [
   "fangzhou.normal-pc.code.segment",
@@ -45,7 +45,7 @@ const transformCodeByBabel = (
       `(function() { var _RTFN_; \n`
     )}${res}${encodeURIComponent(`\n; return _RTFN_; })()`)}`;
   } catch (e) {
-    console.info(e)
+    console.info(e);
     if (tips) {
       throw new Error(`\n${tips}代码存在错误，请检查！！！`);
     }
@@ -69,17 +69,6 @@ const transformScene = (scene: Record<string, any>) => {
           `${tempObj[key].title}(${tempObj[key].id})`
         );
       }
-      if (namespace === "fangzhou.normal-pc.scratch") {
-        tempObj?.[key]?.model?.data?.fns?.forEach((fn) => {
-          if (fn?.script && typeof fn?.script === "string") {
-            fn.script = transformCodeByBabel(
-              fn.script,
-              `${tempObj[key].title}(${tempObj[key].id})-${fn.title}`,
-              true
-            );
-          }
-        });
-      }
     });
   }
   if (scene.coms) {
@@ -96,17 +85,6 @@ const transformScene = (scene: Record<string, any>) => {
           `JS计算编译失败`
         );
       }
-      if (namespace === "fangzhou.normal-pc.scratch") {
-        tempObj?.[key]?.model?.data?.fns?.forEach((fn) => {
-          if (fn?.script && typeof fn?.script === "string") {
-            fn.script = transformCodeByBabel(
-              fn.script,
-              `scratch编译失败-${fn.title}`,
-              true
-            );
-          }
-        });
-      }
     });
   }
   return scene;
@@ -119,13 +97,13 @@ const transform = (json: Record<string, any>) => {
   );
   Object.keys(json.plugins).forEach((pluginName) => {
     if (pluginName === "@mybricks/plugins/service") {
-      json.plugins[pluginName] = {
-        ...json.plugins[pluginName],
+      json.plugins[pluginName] = json.plugins[pluginName].map((service) => ({
+        ...service,
         script: transformCodeByBabel(
-          decodeURIComponent(json.plugins[pluginName].script),
+          decodeURIComponent(service.script),
           "连接器"
         ),
-      };
+      }));
     }
   });
   json.scene = json.scenes.map(transformScene);
