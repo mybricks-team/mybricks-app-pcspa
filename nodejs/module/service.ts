@@ -537,7 +537,7 @@ async function resourceLocalization(template: string, folderPath: string, envTyp
   const resourceSrcList = [...$("script").map((_, el) => $(el).attr('src'))]
                   .concat([...$("link").map((_, el) => $(el).attr('href'))])
                   // 筛选出所有公网资源地址
-                  .filter((url: string) => !!url && !url.startsWith('./'));
+                  .filter((url: string) => !!url && url.includes('//'));
 
   const promiseList = []
   resourceSrcList.forEach(src=>{
