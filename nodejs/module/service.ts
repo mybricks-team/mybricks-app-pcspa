@@ -201,8 +201,8 @@ export default class PcPageService {
         })
         if (!publishMaterialInfo?.url) {
           throw new Error(`发布集成接口出错：没有返回url`)
-        } else if (!publishMaterialInfo?.url?.startsWith('http')) {
-          throw new Error(`发布集成接口返回url格式不正确：${publishMaterialInfo?.url}`)
+        } else if (typeof publishMaterialInfo?.url !== 'string' || !publishMaterialInfo?.url?.startsWith('http')) {
+          throw new Error(`发布集成返回的url格式不正确 url：${publishMaterialInfo?.url}`)
         }
       } else {
         console.info("[publish] upload to static server");
