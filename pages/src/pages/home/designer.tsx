@@ -59,7 +59,7 @@ export default function MyDesigner({ appData }) {
     }
   }
 
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.20/index.min.js'
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.21/index.min.js'
 
 
   const appConfig = useMemo(() => {
@@ -87,12 +87,8 @@ export default function MyDesigner({ appData }) {
     latestComlibs: [],
     debugQuery: appData.fileContent?.content?.debugQuery,
     executeEnv: appData.fileContent?.content?.executeEnv || '',
-    // 应用没有envlist则为首次打开，此时使用默认的envList
-    envList: appData.fileContent?.content?.envList || appConfig?.publishEnvConfig?.envList?.map(item => ({
-      title: item.title,
-      name: item.name,
-      value: item.defaultApiPrePath
-    })) || [],
+    // 将新设置的环境附加到当前页面中，不能删除原有的环境
+    envList: getMergedEnvList(appData, appConfig),
     debugMainProps: appData.fileContent?.content?.debugMainProps,
     hasPermissionFn: appData.fileContent?.content?.hasPermissionFn,
     debugHasPermissionFn: appData.fileContent?.content?.debugHasPermissionFn,
@@ -148,6 +144,9 @@ export default function MyDesigner({ appData }) {
   const [publishModalVisible, setPublishModalVisible] = useState(false)
   const [latestComlibs, setLatestComlibs] = useState<[]>()
   const [isDebugMode, setIsDebugMode] = useState(false)
+
+  // 只有预览时 search 会携带 version 字段
+  const isPreview = window.location.search.includes('version');
 
   useEffect(() => {
     API.Material.getLatestComponentLibrarys(comlibs.filter(lib => lib.id !== "_myself_").map(lib => lib.namespace)).then((res: any) => {
@@ -236,6 +235,10 @@ export default function MyDesigner({ appData }) {
   }, [])
 
   const save = useCallback(async () => {
+    if(isPreview) {
+      message.warn('请回到编辑页面，再进行保存')
+      return
+    }
     if (!ctx.operable) {
       message.warn('请先点击右上角个人头像上锁获取页面编辑权限')
       return
@@ -277,7 +280,7 @@ export default function MyDesigner({ appData }) {
       console.error(err)
     })
 
-  }, [])
+  }, [isPreview])
 
   const preview = useCallback(() => {
     const json = designerRef.current?.toJSON()
@@ -436,9 +439,6 @@ export default function MyDesigner({ appData }) {
     return json
   }, [JSON.stringify(ctx)])
 
-  // 只有预览时 search 会携带 version 字段
-  const isPreview = window.location.search.includes('version');
-
   return (
     <div className={`${css.view} fangzhou-theme`}>
       <Toolbar
@@ -449,42 +449,42 @@ export default function MyDesigner({ appData }) {
       >
         {RenderLocker}
         {
-          !isPreview &&  <>
-                          <Toolbar.Save
-                            disabled={!operable || isDebugMode}
-                            loading={saveLoading}
-                            onClick={() => {
-                              save()
-                            }}
-                            dotTip={beforeunload}
-                          />
-                          <Toolbar.Button disabled={isDebugMode} onClick={preview}>预览</Toolbar.Button>
-                          <Toolbar.Button
-                            disabled={!operable || isDebugMode}
-                            loading={publishLoading}
-                            onClick={() => setPublishModalVisible(true)}
-                          >发布</Toolbar.Button>
-                          <Toolbar.Tools
-                            onImport={async (value) => {
-                              try {
-                                const { content, pageConfig } = JSON.parse(value)
-                                Object.assign(ctx, pageConfig??{})
-                                await designerRef.current.loadContent(content)
-                                await save()
-                                location.reload()
-                              } catch (e) {
-                                message.error(e)
-                                console.error(e)
-                              }
-                            }}
-                            getExportDumpJSON={() => {
-                              return getDumpJson()
-                            }}
-                            getExportToJSON={() => {
-                              return designerRef.current.toJSON()
-                            }}
-                          />
-                        </>
+          !isPreview && <>
+            <Toolbar.Save
+              disabled={!operable || isDebugMode}
+              loading={saveLoading}
+              onClick={() => {
+                save()
+              }}
+              dotTip={beforeunload}
+            />
+            <Toolbar.Button disabled={isDebugMode} onClick={preview}>预览</Toolbar.Button>
+            <Toolbar.Button
+              disabled={!operable || isDebugMode}
+              loading={publishLoading}
+              onClick={() => setPublishModalVisible(true)}
+            >发布</Toolbar.Button>
+            <Toolbar.Tools
+              onImport={async (value) => {
+                try {
+                  const { content, pageConfig } = JSON.parse(value)
+                  Object.assign(ctx, pageConfig ?? {})
+                  await designerRef.current.loadContent(content)
+                  await save()
+                  location.reload()
+                } catch (e) {
+                  message.error(e)
+                  console.error(e)
+                }
+              }}
+              getExportDumpJSON={() => {
+                return getDumpJson()
+              }}
+              getExportToJSON={() => {
+                return designerRef.current.toJSON()
+              }}
+            />
+          </>
         }
       </Toolbar>
       <div className={css.designer}>
@@ -590,4 +590,16 @@ const genLazyloadComs = async (comlibs, toJSON) => {
   }
 
   return curComLibs
+}
+
+const getMergedEnvList = (appData, appConfig) => {
+  const pageEnvlist = appData.fileContent?.content?.envList || []
+  const configEnvlist = appConfig?.publishEnvConfig?.envList?.map(item => ({
+    title: item.title,
+    name: item.name,
+    value: item.defaultApiPrePath
+  })) || []
+
+  const newEnvList = configEnvlist.filter(item => item.name && !pageEnvlist.find(env => env.name === item.name))
+  return [...pageEnvlist, ...newEnvList]
 }

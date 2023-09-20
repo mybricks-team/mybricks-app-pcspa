@@ -8,6 +8,7 @@ import { parse } from "url";
 import { Blob } from 'buffer'
 import { generateComLib } from "./generateComLib";
 import { load } from 'cheerio';
+import { transform } from './transform'
 const FormData = require("form-data");
 
 /** 本地化信息 */
@@ -155,14 +156,20 @@ export default class PcPageService {
 
       const customConnectorRuntimeUrl = getCustomConnectorRuntime(appConfig)
       if (customConnectorRuntimeUrl) {
-        pluginScript += `<script src="${customConnectorRuntimeUrl}"></script>`;
+        let content = ''
+        try {
+          content = await axios.get(customConnectorRuntimeUrl).then(res => res.data)
+        } catch (e) {
+          console.error(`get customConnectorRuntime error`, e)
+        }
+        pluginScript += `<script>${content}</script>`;
       }
 
       template = template.replace(`--title--`, title)
         .replace(`-- plugin-runtime --`, pluginScript)
         .replace(`-- themes-style --`, themesStyleStr)
         .replace(`-- comlib-rt --`, comLibRtScript)
-        .replace(`"--projectJson--"`, JSON.stringify(json))
+        .replace(`"--projectJson--"`, JSON.stringify(transform(json)))
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
         .replace(`"--envList--"`, JSON.stringify(envList))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
