@@ -1,14 +1,22 @@
 import { Injectable } from '@nestjs/common'
 
 import * as fs from "fs";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import * as path from "path";
 import API from "@mybricks/sdk-for-app/api";
 import { parse } from "url";
 import { Blob } from 'buffer'
 import { generateComLib } from "./generateComLib";
+import { load } from 'cheerio';
 import { transform } from './transform'
 const FormData = require("form-data");
+
+/** 本地化信息 */
+interface ILocalizationInfo {
+  path: string;
+  name: string;
+  content: string;
+}
 
 @Injectable()
 export default class PcPageService {
@@ -166,6 +174,20 @@ export default class PcPageService {
         .replace(`"--envList--"`, JSON.stringify(envList))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
 
+      let images: ILocalizationInfo[];
+      let globalDeps: ILocalizationInfo[];
+      
+      const needLocalization = await getCustomNeedLocalization();
+
+      // 若平台配置了需要本地化发布
+      if(needLocalization) {
+        // 将模板中所有公网资源本地化
+        const result = await resourceLocalization(template);
+        template = result.template;
+        globalDeps = result.globalDeps;
+        images = result.images;
+      }
+
       let comboScriptText = '';
       /** 生成 combo 组件库代码 */
       if (needCombo) {
@@ -183,6 +205,7 @@ export default class PcPageService {
       console.info("[publish] getCustomPublishApi=", customPublishApi);
 
       if (customPublishApi) {
+
         publishMaterialInfo = await this._customPublish({
           envType,
           fileId,
@@ -197,7 +220,9 @@ export default class PcPageService {
           template,
           needCombo,
           comboScriptText,
-          customPublishApi
+          customPublishApi,
+          images: images.map(({ content, name, path}) => ({ content, path: `${path}/${name}` })),
+          globalDeps: globalDeps.map(({ content, name, path}) => ({ content, path: `${path}/${name}` })),
         })
         if (!publishMaterialInfo?.url) {
           throw new Error(`发布集成接口出错：没有返回url`)
@@ -206,6 +231,26 @@ export default class PcPageService {
         }
       } else {
         console.info("[publish] upload to static server");
+
+        // 将所有的公共依赖上传到对应位置
+        globalDeps && await Promise.all(globalDeps.map(({content, path, name}) => {
+          return API.Upload.staticServer({
+            content,
+            folderPath: `${folderPath}/${envType || 'prod'}/${path}`,
+            fileName: name,
+            noHash: true,
+          })
+        }))
+
+        // 将所有的图片资源上传到对应位置
+        images && await Promise.all(images.map(({content, path, name}) => {
+          return API.Upload.staticServer({
+            content,
+            folderPath: `${folderPath}/${envType || 'prod'}/${path}`,
+            fileName: name,
+            noHash: true,
+          })
+        }))
 
         needCombo && await API.Upload.staticServer({
           content: comboScriptText,
@@ -263,7 +308,9 @@ export default class PcPageService {
       template,
       needCombo,
       comboScriptText,
-      customPublishApi
+      customPublishApi,
+      images,
+      globalDeps
     } = params
 
     let permissions = []
@@ -293,7 +340,9 @@ export default class PcPageService {
         json: JSON.stringify(json),
         html: template,
         js: needCombo ? [{ name: `${fileId}-${envType}-${version}.js`, content: comboScriptText }] : [],
-        permissions
+        permissions,
+        images,
+        globalDeps
       }
     }
 
@@ -427,6 +476,18 @@ const getCustomPublishApi = async () => {
   return publishApi;
 }
 
+/** 
+ * 获取平台设置的「是否本地化发布」
+ */
+const getCustomNeedLocalization = async () => {
+  const { publishLocalizeConfig } = await getAppConfig()
+  const { needLocalization } = publishLocalizeConfig || {};
+  if(!!needLocalization) {
+    console.log("此次发布为本地化发布");
+  }
+  return !!needLocalization;
+}
+
 // -- plugin-runtime --
 const getCustomConnectorRuntime = (appConfig, req) => {
   const { plugins = [] } = appConfig
@@ -519,4 +580,68 @@ function getNextVersion(version, max = 100) {
   }
 
   return vAry.join(".");
+}
+
+/**
+ * 将 HTML 中的所有公网资源本地化
+ * @param template HTML 模板
+ * @param folderPath 文件夹路径
+ * @param envType 环境
+ * @param customPublish 是否有集成发布接口
+ */
+async function resourceLocalization(template: string) {
+  const $ = load(template);
+  
+  // 所有的公网资源都在模板中写有，间接依赖的公网资源由依赖自身处理
+  const resourceURLs = [...$("script").map((_, el) => $(el).attr('src'))]
+                  .concat([...$("link").map((_, el) => $(el).attr('href'))])
+                  // 筛选出所有公网资源地址
+                  .filter((url: string) => !!url && url.includes('//'));
+
+  // 模板中所有的图片资源
+  const imageURLs = analysisAllUrl(template).filter(url => url.includes('/mfs/files/'));
+
+  // 获取所有本地化需要的信息
+  const globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfo(url, 'public/')));
+  const images = await Promise.all(imageURLs.map(url => getLocalizationInfo(url, 'images/', { responseType: 'arraybuffer' })))
+
+  // 把模板中的公网资源地址替换成本地化后的地址
+  resourceURLs.forEach((url, index) => {
+    const localUrl = `./${globalDeps[index].path}/${globalDeps[index].name}`;
+    template = template.replace(new RegExp(`${url}`,'g'), localUrl);
+  })
+
+  // 把模板中的图片资源地址替换成本地化后的地址
+  imageURLs.forEach((url, index) => {
+    const localUrl = `./${images[index].path}/${images[index].name}`;
+    template = template.replace(new RegExp(`${url}`,'g'), localUrl);
+  })
+
+  return { template, globalDeps, images };
+}
+
+/**
+ * 获取本地化相关信息
+ * @param url 资源地址
+ * @param pathPrefix 本地化后相对地址的前缀
+ * @returns 本地化相关信息
+ */
+async function getLocalizationInfo(url: string, pathPrefix: string, config?: AxiosRequestConfig<any>): Promise<ILocalizationInfo> {
+  const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000, ...config });
+  const path = `${pathPrefix}${url.split('//')[1].split('/').slice(0,-1).join('/')}`;
+  const name = url.split('/').slice(-1)[0];
+  return { 
+    path,
+    name,
+    content: content as string
+  }
+}
+
+/**
+ * 获取文本中所有 URL
+ * @param str 被处理的文本
+ * @returns 文本中的所有 URL
+ */
+function analysisAllUrl(str:string) {
+  return str.match(/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g);
 }
