@@ -59,7 +59,7 @@ export default function MyDesigner({ appData }) {
     }
   }
 
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.21/index.min.js'
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.22/index.min.js'
 
 
   const appConfig = useMemo(() => {
@@ -235,7 +235,7 @@ export default function MyDesigner({ appData }) {
   }, [])
 
   const save = useCallback(async () => {
-    if(isPreview) {
+    if (isPreview) {
       message.warn('请回到编辑页面，再进行保存')
       return
     }
