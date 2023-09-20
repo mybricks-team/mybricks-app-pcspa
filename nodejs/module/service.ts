@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import * as fs from "fs";
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import * as path from "path";
 import API from "@mybricks/sdk-for-app/api";
 import { parse } from "url";
@@ -239,7 +239,7 @@ export default class PcPageService {
           })
         }))
 
-        // 将所有的图片资源上传到对应位置 FIXME: 需要平台提供一个图片上传的能力
+        // 将所有的图片资源上传到对应位置
         images && await Promise.all(images.map(({content, path, name}) => {
           return API.Upload.staticServer({
             content,
@@ -473,10 +473,13 @@ const getCustomPublishApi = async () => {
 
 /** 
  * 获取平台设置的「是否本地化发布」
- * TODO: 字段暂时未知，先用 “needLocalization” 顶着
  */
 const getCustomNeedLocalization = async () => {
-  const { needLocalization } = await getAppConfig()
+  const { publishLocalizeConfig } = await getAppConfig()
+  const { needLocalization } = publishLocalizeConfig || {};
+  if(!!needLocalization) {
+    console.log("此次发布为本地化发布");
+  }
   return !!needLocalization;
 }
 
@@ -595,7 +598,7 @@ async function resourceLocalization(template: string) {
 
   // 获取所有本地化需要的信息
   const globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfo(url, 'public/')));
-  const images = await Promise.all(imageURLs.map(url => getLocalizationInfo(url, 'images/')))
+  const images = await Promise.all(imageURLs.map(url => getLocalizationInfo(url, 'images/', { responseType: 'arraybuffer' })))
 
   // 把模板中的公网资源地址替换成本地化后的地址
   resourceURLs.forEach((url, index) => {
@@ -618,8 +621,8 @@ async function resourceLocalization(template: string) {
  * @param pathPrefix 本地化后相对地址的前缀
  * @returns 本地化相关信息
  */
-async function getLocalizationInfo(url: string, pathPrefix: string): Promise<ILocalizationInfo> {
-  const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000 });
+async function getLocalizationInfo(url: string, pathPrefix: string, config?: AxiosRequestConfig<any>): Promise<ILocalizationInfo> {
+  const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000, ...config });
   const path = `${pathPrefix}${url.split('//')[1].split('/').slice(0,-1).join('/')}`;
   const name = url.split('/').slice(-1)[0];
   return { 

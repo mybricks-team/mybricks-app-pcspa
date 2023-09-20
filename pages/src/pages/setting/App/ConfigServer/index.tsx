@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import { TConfigProps } from '../useConfig';
 import UploadConfig from './UploadConfig'
 import PublishApi from './PublishApi'
+import PublishLocalize from './PublishLocalize';
 const { Meta } = Card;
 
 export default (props: TConfigProps) => {
@@ -37,5 +38,6 @@ export default (props: TConfigProps) => {
   return <>
     <UploadConfig {...props} />
     <PublishApi {...props} />
+    <PublishLocalize {...props} />
   </>
 }
