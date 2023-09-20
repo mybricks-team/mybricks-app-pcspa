@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react'
-import { Form, Card, Button } from 'antd'
+import { Form, Card, Button, Switch } from 'antd'
 import { _NAMESPACE_ } from "..";
 import dayjs from "dayjs";
 import { TConfigProps } from '../useConfig';
-import Switch from '@mybricks/sdk-for-app/ui/toolbar/tools/components/switch';
 const { Meta } = Card;
 
 const fieldName = `needLocalization`
@@ -14,7 +13,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   const publishLocalizeConfig = config?.publishLocalizeConfig || {};
   useEffect(() => {
     form.setFieldsValue(publishLocalizeConfig)
-  }, []);
+  }, [publishLocalizeConfig]);
 
   const onSubmit = (values) => {
     const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
