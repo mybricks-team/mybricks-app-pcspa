@@ -183,7 +183,6 @@ export default class PcPageService {
       console.info("[publish] getCustomPublishApi=", customPublishApi);
 
       if (customPublishApi) {
-
         publishMaterialInfo = await this._customPublish({
           envType,
           fileId,
@@ -200,7 +199,11 @@ export default class PcPageService {
           comboScriptText,
           customPublishApi
         })
-
+        if (!publishMaterialInfo?.url) {
+          throw new Error(`发布集成接口出错：没有返回url`)
+        } else if (!publishMaterialInfo?.url?.startsWith('http')) {
+          throw new Error(`发布集成接口返回url格式不正确：${publishMaterialInfo?.url}`)
+        }
       } else {
         console.info("[publish] upload to static server");
 
@@ -298,8 +301,10 @@ export default class PcPageService {
       headers: {
         'Content-Type': 'application/json'
       }
-    }).then(res => res.data);
-
+    }).then(res => res.data)
+      .catch(e => {
+        throw new Error(`发布集成接口出错: ${e.message}`)
+      });
     if (code !== 1) {
       throw new Error(`发布集成接口出错: ${message}`)
     }
