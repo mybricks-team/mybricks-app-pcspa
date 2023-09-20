@@ -154,7 +154,7 @@ export default class PcPageService {
         needCombo = true;
       }
 
-      const customConnectorRuntimeUrl = getCustomConnectorRuntime(appConfig)
+      const customConnectorRuntimeUrl = getCustomConnectorRuntime(appConfig, req)
       if (customConnectorRuntimeUrl) {
         let content = ''
         try {
@@ -197,7 +197,6 @@ export default class PcPageService {
       console.info("[publish] getCustomPublishApi=", customPublishApi);
 
       if (customPublishApi) {
-  
 
         publishMaterialInfo = await this._customPublish({
           envType,
@@ -217,7 +216,11 @@ export default class PcPageService {
           images: images.map(({ content, name, path}) => ({ content, path: `${path}/${name}` })),
           globalDeps: globalDeps?.map(({ content, name, path}) => ({ content, path: `${path}/${name}` })),
         })
-
+        if (!publishMaterialInfo?.url) {
+          throw new Error(`发布集成接口出错：没有返回url`)
+        } else if (typeof publishMaterialInfo?.url !== 'string' || !publishMaterialInfo?.url?.startsWith('http')) {
+          throw new Error(`发布集成返回的url格式不正确 url：${publishMaterialInfo?.url}`)
+        }
       } else {
         console.info("[publish] upload to static server");
 
@@ -339,8 +342,10 @@ export default class PcPageService {
       headers: {
         'Content-Type': 'application/json'
       }
-    }).then(res => res.data);
-
+    }).then(res => res.data)
+      .catch(e => {
+        throw new Error(`发布集成接口出错: ${e.message}`)
+      });
     if (code !== 1) {
       throw new Error(`发布集成接口出错: ${message}`)
     }
@@ -476,17 +481,17 @@ const getCustomNeedLocalization = async () => {
 }
 
 // -- plugin-runtime --
-const getCustomConnectorRuntime = (appConfig) => {
+const getCustomConnectorRuntime = (appConfig, req) => {
   const { plugins = [] } = appConfig
   const connectorPlugin = plugins.find(item => item?.type === 'connector')
   if (!connectorPlugin) {
     return ''
   }
-  if (!connectorPlugin.runtimeUrl) {
+  if (!connectorPlugin.runtimeUrl || typeof connectorPlugin.runtimeUrl !== 'string') {
     console.error(`插件【${connectorPlugin}】没有设置runtime地址`)
     return ''
   }
-  return connectorPlugin.runtimeUrl
+  return connectorPlugin.runtimeUrl.startsWith('/') ? `${getRealDomain(req)}/${connectorPlugin.runtimeUrl}` : connectorPlugin.runtimeUrl
 }
 
 const uploadStatic = async (
