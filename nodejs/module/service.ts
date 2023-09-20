@@ -146,7 +146,7 @@ export default class PcPageService {
         needCombo = true;
       }
 
-      const customConnectorRuntimeUrl = getCustomConnectorRuntime(appConfig)
+      const customConnectorRuntimeUrl = getCustomConnectorRuntime(appConfig, req)
       if (customConnectorRuntimeUrl) {
         let content = ''
         try {
@@ -428,17 +428,17 @@ const getCustomPublishApi = async () => {
 }
 
 // -- plugin-runtime --
-const getCustomConnectorRuntime = (appConfig) => {
+const getCustomConnectorRuntime = (appConfig, req) => {
   const { plugins = [] } = appConfig
   const connectorPlugin = plugins.find(item => item?.type === 'connector')
   if (!connectorPlugin) {
     return ''
   }
-  if (!connectorPlugin.runtimeUrl) {
+  if (!connectorPlugin.runtimeUrl || typeof connectorPlugin.runtimeUrl !== 'string') {
     console.error(`插件【${connectorPlugin}】没有设置runtime地址`)
     return ''
   }
-  return connectorPlugin.runtimeUrl
+  return connectorPlugin.runtimeUrl.startsWith('/') ? `${getRealDomain(req)}/${connectorPlugin.runtimeUrl}` : connectorPlugin.runtimeUrl
 }
 
 const uploadStatic = async (
