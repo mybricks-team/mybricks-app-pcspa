@@ -174,19 +174,11 @@ export default class PcPageService {
         .replace(`"--envList--"`, JSON.stringify(envList))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
 
-      let images: ILocalizationInfo[];
-      let globalDeps: ILocalizationInfo[];
-      
       const needLocalization = await getCustomNeedLocalization();
 
-      // 若平台配置了需要本地化发布
-      if(needLocalization) {
-        // 将模板中所有公网资源本地化
-        const result = await resourceLocalization(template);
-        template = result.template;
-        globalDeps = result.globalDeps;
-        images = result.images;
-      }
+      // 将模板中所有公网资源本地化
+      const { globalDeps, images, template: _template } = await resourceLocalization(template, needLocalization);
+      template = _template
 
       let comboScriptText = '';
       /** 生成 combo 组件库代码 */
@@ -223,7 +215,7 @@ export default class PcPageService {
           comboScriptText,
           customPublishApi,
           images: images.map(({ content, name, path}) => ({ content, path: `${path}/${name}` })),
-          globalDeps: globalDeps.map(({ content, name, path}) => ({ content, path: `${path}/${name}` })),
+          globalDeps: globalDeps?.map(({ content, name, path}) => ({ content, path: `${path}/${name}` })),
         })
 
       } else {
@@ -578,13 +570,11 @@ function getNextVersion(version, max = 100) {
 }
 
 /**
- * 将 HTML 中的所有公网资源本地化
+ * 将 HTML 中的公网资源本地化
  * @param template HTML 模板
- * @param folderPath 文件夹路径
- * @param envType 环境
- * @param customPublish 是否有集成发布接口
+ * @param needLocalization CDN 资源是否需要本地化
  */
-async function resourceLocalization(template: string) {
+async function resourceLocalization(template: string, needLocalization: boolean) {
   const $ = load(template);
   
   // 所有的公网资源都在模板中写有，间接依赖的公网资源由依赖自身处理
@@ -596,16 +586,18 @@ async function resourceLocalization(template: string) {
   // 模板中所有的图片资源
   const imageURLs = analysisAllUrl(template).filter(url => url.includes('/mfs/files/'));
 
-  // 获取所有本地化需要的信息
-  const globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfo(url, 'public/')));
+  let globalDeps: ILocalizationInfo[] = null;
+  if(needLocalization) {
+    // 获取所有本地化需要的信息
+    globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfo(url, 'public/')));
+    // 把模板中的 CDN 地址替换成本地化后的地址
+    resourceURLs.forEach((url, index) => {
+      const localUrl = `./${globalDeps[index].path}/${globalDeps[index].name}`;
+      template = template.replace(new RegExp(`${url}`,'g'), localUrl);
+    })
+  }
+
   const images = await Promise.all(imageURLs.map(url => getLocalizationInfo(url, 'images/', { responseType: 'arraybuffer' })))
-
-  // 把模板中的公网资源地址替换成本地化后的地址
-  resourceURLs.forEach((url, index) => {
-    const localUrl = `./${globalDeps[index].path}/${globalDeps[index].name}`;
-    template = template.replace(new RegExp(`${url}`,'g'), localUrl);
-  })
-
   // 把模板中的图片资源地址替换成本地化后的地址
   imageURLs.forEach((url, index) => {
     const localUrl = `./${images[index].path}/${images[index].name}`;
