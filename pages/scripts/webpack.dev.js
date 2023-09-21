@@ -6,6 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const WebpackBar = require('webpackbar')
 const fs = require('fs')
 const pkg = require('../../package.json')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 // const webpack = require('webpack')
 
 module.exports = merge(common, {
@@ -72,5 +73,10 @@ module.exports = merge(common, {
       template: path.resolve(__dirname, '../templates/groupSetting.html'),
       chunks: ['groupSetting'],
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: path.resolve(__dirname, '../templates/public'), to: "public" },
+      ],
+    })
   ]
 })

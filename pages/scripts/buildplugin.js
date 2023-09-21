@@ -19,7 +19,19 @@ module.exports = class BuildPlugin {
 
       ['global.css', 'theme.css'].forEach((filename) => {
         fs.copyFileSync(path.resolve(templateCssDirPath, filename), path.resolve(assetsCssDirPath, filename))
-      })
+      });
+
+      const templatePublicDirPath = path.resolve(rootPath, './templates/public');
+      const assetsPublicDirPath = path.resolve(outputPath, './public');
+
+      if (!fs.existsSync(assetsPublicDirPath)) {
+        console.log('不存在public文件夹')
+        fs.mkdirSync(assetsPublicDirPath)
+      }
+
+      ['1690446345009.react.18.0.0.production.min.js'].forEach((filename) => {
+        fs.copyFileSync(path.resolve(templatePublicDirPath, filename), path.resolve(assetsPublicDirPath, filename))
+      });
     });
   }
 };
