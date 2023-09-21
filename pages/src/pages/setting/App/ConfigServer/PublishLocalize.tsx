@@ -26,7 +26,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
     <Form form={form} style={{ marginTop: 12 }}>
       <Form.Item
         name={fieldName}
-        label="发布本地化"
+        label="本地部署"
         tooltip="发布产物不会依赖公网资源"
         valuePropName="checked"
       >
