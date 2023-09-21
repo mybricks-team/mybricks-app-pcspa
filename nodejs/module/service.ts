@@ -620,7 +620,7 @@ async function resourceLocalization(template: string, needLocalization: boolean)
  */
 async function getLocalizationInfo(url: string, pathPrefix: string, config?: AxiosRequestConfig<any>): Promise<ILocalizationInfo> {
   const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000, ...config });
-  const path = `${pathPrefix}${url.split('//')[1].split('/').slice(0,-1).join('/')}`;
+  const path = `${pathPrefix}${url.split('//')[1].split('/').slice(1,-1).join('/')}`;
   const name = url.split('/').slice(-1)[0];
   return { 
     path,
