@@ -50,7 +50,8 @@ const filterFileName = [
   '.idea',
   '.git',
   '.vscode',
-  'sync.js'
+  'sync.js',
+  'sync_offline.js',
 ];
 
 if(!offlineUpdate) {
