@@ -142,6 +142,17 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
   }, {})
   envMap[USE_CUSTOM_HOST] = CUSTOM_HOST_TITLE
 
+  const debugEnvList = envList.length > 0 ? [...envList, customEnv].map(item => ({
+    value: item.name,
+    label: item.title
+  })) : [{
+    label: '默认',
+    value: '__DEFAULT_ENV__',
+  }, {
+    label: customEnv.title,
+    value: customEnv.name,
+  }]
+
   return {
     shortcuts: {
       'ctrl+s': [save],
@@ -241,15 +252,9 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               {
                 title: '调试环境',
                 type: 'select',
-                ifVisible({ data }) {
-                  return envList.length > 0;
-                },
                 description: '选择调试时采用的环境配置，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
                 options: {
-                  options: [...envList, customEnv].map(item => ({
-                    value: item.name,
-                    label: item.title
-                  })),
+                  options: debugEnvList,
                   placeholder: '请选择调试环境'
                 },
                 value: {
@@ -281,8 +286,10 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                     return ctx.MYBRICKS_HOST
                   },
                   set(info, value) {
-                    if (!value?.default) {
+                    if (typeof value?.default === 'undefined') {
                       message.error('必须包含变量名为default的域名')
+                    } else if (!value?.default) {
+                      message.error('default域名不能为空')
                     } else if (Object.values(value).some(item => !item)) {
                       message.error('域名不能为空')
                     } else {
