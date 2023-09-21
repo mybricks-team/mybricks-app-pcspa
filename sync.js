@@ -46,7 +46,7 @@ const filterFileName = [
   'package-lock.json',
   'yarn.lock',
   'pages',
-  'mybricks-pc-page.zip',
+  'mybricks-app-pcspa.zip',
   '.idea',
   '.git',
   '.vscode',
