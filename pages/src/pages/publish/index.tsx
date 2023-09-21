@@ -240,7 +240,11 @@ function Page({ props }) {
 }
 
 function render(props) {
-
+  const { container } = props;
+  const root = (container || document).querySelector('#mybricks-page-root')
+  /** publish template style */
+  root.style.width = '100%';
+  root.style.height = '100%';
   ReactDOM.render(
     React.createElement(
       antd.ConfigProvider,
@@ -249,7 +253,7 @@ function render(props) {
       },
       React.createElement(Page, { props })
     ),
-    document.querySelector('#mybricks-page-root')
+    root
   )
   return Promise.resolve()
 }
