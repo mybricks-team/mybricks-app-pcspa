@@ -184,7 +184,7 @@ function Page({ props }) {
             message.error(`没有设置window.MYBRICKS_HOST变量`)
             return
           } else if (!MYBRICKS_HOST.default) {
-            message.error(`没有设置window.MYBRICKS_HOS.default`)
+            message.error(`没有设置window.MYBRICKS_HOST.default`)
             return
           }
         }
