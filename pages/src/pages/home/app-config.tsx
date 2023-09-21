@@ -117,11 +117,17 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
   }
 }
 
+export const USE_CUSTOM_HOST = '__USE_CUSTOM_HOST__'
+const CUSTOM_HOST_TITLE = `自定义域名`
+const customEnv = {
+  title: '自定义域名',
+  name: USE_CUSTOM_HOST,
+}
+
 export default function (ctx, save, designerRef, remotePlugins = []) {
 
   let curToJSON;
   const envList = ctx.envList
-
   try {
     curToJSON = designerRef?.current?.toJSON();
   } catch (e) {
@@ -134,6 +140,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
     res[item.name] = item.title
     return res
   }, {})
+  envMap[USE_CUSTOM_HOST] = CUSTOM_HOST_TITLE
 
   return {
     shortcuts: {
@@ -239,7 +246,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 },
                 description: '选择调试时采用的环境配置，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
                 options: {
-                  options: envList.map(item => ({
+                  options: [...envList, customEnv].map(item => ({
                     value: item.name,
                     label: item.title
                   })),
@@ -255,10 +262,40 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 }
               },
               {
+                title: '自定义域名',
+                description: '设置多个变量和对应的域名地址',
+                type: 'map',
+                ifVisible(info) {
+                  return ctx.executeEnv === USE_CUSTOM_HOST
+                },
+                options: {
+                  allowEmptyString: false
+                },
+                value: {
+                  get(info) {
+                    if (!ctx.MYBRICKS_HOST) {
+                      ctx.MYBRICKS_HOST = {}
+                    } else if (!("default" in ctx.MYBRICKS_HOST)) {
+                      ctx.MYBRICKS_HOST.default = ''
+                    }
+                    return ctx.MYBRICKS_HOST
+                  },
+                  set(info, value) {
+                    if (!value?.default) {
+                      message.error('必须包含变量名为default的域名')
+                    } else if (Object.values(value).some(item => !item)) {
+                      message.error('域名不能为空')
+                    } else {
+                      ctx.MYBRICKS_HOST = value
+                    }
+                  }
+                },
+              },
+              {
                 title: '环境信息设置',
                 description: '可以在应用配置处修改使用的环境',
                 ifVisible({ data }) {
-                  return envList.length > 0;
+                  return envList.length > 0 && ctx.executeEnv !== USE_CUSTOM_HOST;
                 },
                 type: 'array',
                 options: {
@@ -378,40 +415,6 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 ...(opts?.env || {}),
                 edit: false,
                 runtime: true
-              },
-              /** 调用领域模型 */
-              callDomainModel(domainModel, type, params) {
-                return callDomainHttp(domainModel, params, { action: type });
-              },
-              callConnector(connector, params, connectorConfig = {}) {
-                const plugin = designerRef.current?.getPlugin(connector.connectorName);
-                //调用连接器
-                if (!plugin) {
-                  //服务接口类型
-                  return callConnectorHttp(
-                    { script: connector.script, useProxy: true },
-                    params,
-                    {
-                      ...connectorConfig,
-                      before: options => {
-                        return {
-                          ...options,
-                          url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
-                        }
-                      }
-                    }
-                  );
-                } else {
-                  return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, {
-                    ...connectorConfig,
-                    before: options => {
-                      return {
-                        ...options,
-                        url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
-                      }
-                    }
-                  });
-                }
               }
             }
           )
@@ -426,39 +429,44 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
         },
         callConnector(connector, params, connectorConfig = {}) {
           const plugin = designerRef.current?.getPlugin(connector.connectorName);
+          if (ctx.executeEnv === USE_CUSTOM_HOST && !ctx.MYBRICKS_HOST.default) {
+            throw new Error(`自定义域名必须设置default域名`)
+          }
+          const newParams = ctx.executeEnv === USE_CUSTOM_HOST ? {
+            ...params,
+            MYBRICKS_HOST: { ...ctx.MYBRICKS_HOST },
+          } : params
           if (!plugin) {
             /** 启动 Mock */
             if (connectorConfig?.openMock) {
               return connectorHttpMock({ ...connector, outputSchema: connectorConfig.mockSchema });
             }
+
             //服务接口类型
             return callConnectorHttp(
               { ...connector, script: connector.script, useProxy: true },
-              params,
+              newParams,
               {
                 before: options => {
                   return {
                     ...options,
-                    url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
+                    url: shapeUrlByEnv(envList, ctx.executeEnv, options.url, ctx.MYBRICKS_HOST)
                   }
                 }
               }
             );
           } else {
-            return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, {
+            return plugin.callConnector({ ...connector }, newParams, {
               ...connectorConfig,
               before: options => {
                 return {
                   ...options,
-                  url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
+                  url: shapeUrlByEnv(envList, ctx.executeEnv, options.url, ctx.MYBRICKS_HOST)
                 }
               }
             });
           }
         },
-        // uploadFile(files) {
-        //   return uploadApi(files)
-        // },
         vars: {
           get getExecuteEnv() {
             return () => ctx.executeEnv

@@ -13,10 +13,10 @@ import { message } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
-// import { getManateeUserInfo } from '../../utils'
-import { fetchPlugins, getManateeUserInfo, removeBadChar } from '../../utils'
+import { fetchPlugins, removeBadChar } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
+import { unionBy } from 'lodash'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
 import PublishModal from './components/PublishModal'
 
@@ -59,8 +59,7 @@ export default function MyDesigner({ appData }) {
     }
   }
 
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.23/index.min.js'
-
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.24/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
@@ -87,6 +86,7 @@ export default function MyDesigner({ appData }) {
     latestComlibs: [],
     debugQuery: appData.fileContent?.content?.debugQuery,
     executeEnv: appData.fileContent?.content?.executeEnv || '',
+    MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
     // 将新设置的环境附加到当前页面中，不能删除原有的环境
     envList: getMergedEnvList(appData, appConfig),
     debugMainProps: appData.fileContent?.content?.debugMainProps,
@@ -254,6 +254,7 @@ export default function MyDesigner({ appData }) {
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
     json.executeEnv = ctx.executeEnv
+    json.MYBRICKS_HOST = ctx.MYBRICKS_HOST
     json.envList = ctx.envList
     json.debugMainProps = ctx.debugMainProps
     json.hasPermissionFn = ctx.hasPermissionFn
@@ -289,6 +290,7 @@ export default function MyDesigner({ appData }) {
     previewStorage.savePreviewPageData({
       dumpJson: json,
       executeEnv: ctx.executeEnv,
+      MYBRICKS_HOST: ctx.MYBRICKS_HOST,
       envList: ctx.envList,
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
       hasPermissionFn: ctx.hasPermissionFn,
@@ -320,6 +322,7 @@ export default function MyDesigner({ appData }) {
           json.comlibs = ctx.comlibs
           json.debugQuery = ctx.debugQuery
           json.executeEnv = ctx.executeEnv
+          json.MYBRICKS_HOST = ctx.MYBRICKS_HOST
           json.envList = ctx.envList
           json.debugMainProps = ctx.debugMainProps
           json.hasPermissionFn = ctx.hasPermissionFn
@@ -431,6 +434,7 @@ export default function MyDesigner({ appData }) {
       comlibs: ctx.comlibs,
       debugQuery: ctx.debugQuery,
       executeEnv: ctx.executeEnv,
+      MYBRICKS_HOST: ctx.MYBRICKS_HOST,
       envList: ctx.envList,
       debugMainProps: ctx.debugMainProps,
       hasPermissionFn: ctx.hasPermissionFn,
@@ -488,11 +492,11 @@ export default function MyDesigner({ appData }) {
         }
       </Toolbar>
       <div className={css.designer}>
-        {SPADesigner && remotePlugins && latestComlibs && (
+        {SPADesigner && remotePlugins && latestComlibs && window?.mybricks?.createObservable && (
           <>
             <SPADesigner
               ref={designerRef}
-              config={config(Object.assign(ctx, { latestComlibs }), save, designerRef, remotePlugins)}
+              config={config(window?.mybricks?.createObservable(Object.assign(ctx, { latestComlibs })), save, designerRef, remotePlugins)}
               onEdit={onEdit}
               onMessage={onMessage}
               onDebug={onDebug}
@@ -593,13 +597,14 @@ const genLazyloadComs = async (comlibs, toJSON) => {
 }
 
 const getMergedEnvList = (appData, appConfig) => {
+  // 页面已有的环境信息
   const pageEnvlist = appData.fileContent?.content?.envList || []
+  // 全局配置的环境信息
   const configEnvlist = appConfig?.publishEnvConfig?.envList?.map(item => ({
     title: item.title,
     name: item.name,
     value: item.defaultApiPrePath
   })) || []
 
-  const newEnvList = configEnvlist.filter(item => item.name && !pageEnvlist.find(env => env.name === item.name))
-  return [...pageEnvlist, ...newEnvList]
+  return unionBy([...pageEnvlist, ...configEnvlist], 'name')
 }

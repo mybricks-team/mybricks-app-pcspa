@@ -4,6 +4,7 @@ import React from "react"
 import ReactDOM from "react-dom"
 import { message } from 'antd'
 import { PluginType } from '@/pages/setting/ConfigPlugin/type'
+import { USE_CUSTOM_HOST } from '@/pages/home/app-config'
 
 export function getApiUrl(uri) {
   return uri
@@ -258,8 +259,17 @@ export const removeBadChar = (content: string) => {
   return content.replace(/\\t/g, '')
 }
 
-export const shapeUrlByEnv = (envList, env, url) => {
+export const combineHostAndPath = (host, path) => {
+  const _host = host.replace(/\/$/, '')
+  const _path = path.replace(/^\//, '')
+  return _host + '/' + _path
+}
+
+export const shapeUrlByEnv = (envList, env, url, mybricksHost) => {
   if (!envList || !env || /^(https?|ws)/.test(url)) return url
+  if (env === USE_CUSTOM_HOST) {
+    return combineHostAndPath(mybricksHost.default, url)
+  }
   const data = (envList || []).find(item => item.name === env)
   if (!data || !data.value) return url
   return data.value + url

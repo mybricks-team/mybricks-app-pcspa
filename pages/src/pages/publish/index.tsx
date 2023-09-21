@@ -3,6 +3,7 @@ import React from 'react'
 import { message } from 'antd'
 import { runJs } from './../../utils/runJs'
 import { shapeUrlByEnv } from './../../utils'
+import { USE_CUSTOM_HOST } from '../home/app-config';
 
 const { render: renderUI } = window._mybricks_render_web
 
@@ -175,20 +176,36 @@ function Page({ props }) {
       },
       callConnector(connector, params) {
         const plugin = window[connector.connectorName] || window['@mybricks/plugins/service'];
-
+        //@ts-ignore
+        const MYBRICKS_HOST = window?.MYBRICKS_HOST
+        //@ts-ignore
+        if (executeEnv === USE_CUSTOM_HOST) {
+          if (typeof MYBRICKS_HOST === 'undefined') {
+            message.error(`没有设置window.MYBRICKS_HOST变量`)
+            return
+          } else if (!MYBRICKS_HOST.default) {
+            message.error(`没有设置window.MYBRICKS_HOS.default`)
+            return
+          }
+        }
+        //@ts-ignore
+        const newParams = executeEnv === USE_CUSTOM_HOST ? {
+          ...params,
+          MYBRICKS_HOST: { ...MYBRICKS_HOST },
+        } : params
         if (plugin) {
           /** 兼容云组件，云组件会自带 script */
           const curConnector = connector.script
             ? connector
             : (projectJson.plugins[connector.connectorName] || []).find(con => con.id === connector.id);
 
-          return curConnector ? plugin.call({ ...connector, ...curConnector, executeEnv }, params, {
+          return curConnector ? plugin.call({ ...connector, ...curConnector }, newParams, {
             // 只在官方插件上做环境域名处理
             before: connector.connectorName === '@mybricks/plugins/service'
               ? options => {
                 return {
                   ...options,
-                  url: shapeUrlByEnv(envList, executeEnv, options.url)
+                  url: shapeUrlByEnv(envList, executeEnv, options.url, MYBRICKS_HOST)
                 }
               } : undefined
           }) : Promise.reject('找不到对应连接器 Script 执行脚本.');
