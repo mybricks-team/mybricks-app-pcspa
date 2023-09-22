@@ -12,13 +12,13 @@ import moment from 'moment'
 import { message } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
-import config from './app-config'
+import config, { USE_CUSTOM_HOST } from './app-config'
 import { fetchPlugins, removeBadChar } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { unionBy } from 'lodash'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
-import PublishModal from './components/PublishModal'
+import PublishModal, { EnumMode } from './components/PublishModal'
 
 import css from './app.less'
 
@@ -75,60 +75,70 @@ export default function MyDesigner({ appData }) {
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || '';
 
-  const [ctx, setCtx] = useState({
-    sdk: appData,
-    user: appData.user,
-    fileId: appData.fileId,
-    fileItem: appData.fileContent || {},
-    setting: appData.config || {},
-    hasMaterialApp: appData.hasMaterialApp,
-    comlibs,
-    latestComlibs: [],
-    debugQuery: appData.fileContent?.content?.debugQuery,
-    executeEnv: appData.fileContent?.content?.executeEnv || '',
-    MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
-    // 将新设置的环境附加到当前页面中，不能删除原有的环境
-    envList: getMergedEnvList(appData, appConfig),
-    debugMainProps: appData.fileContent?.content?.debugMainProps,
-    hasPermissionFn: appData.fileContent?.content?.hasPermissionFn,
-    debugHasPermissionFn: appData.fileContent?.content?.debugHasPermissionFn,
-    versionApi: null,
-    appConfig,
-    uploadService,
-    operable: false,
-    isDebugMode: false,
-    saveContent(content) {
-      ctx.save({ content })
-    },
-    async save(
-      param: { name?; shareType?; content?; icon?},
-      skipMessage?: boolean
-    ) {
-      const { name, shareType, content, icon } = param
-      await API.File.save({
-        userId: ctx.user?.id,
-        fileId: ctx.fileId,
-        name,
-        shareType,
-        content: removeBadChar(content),
-        icon,
-      }).then(() => {
-        !skipMessage && message.success(`保存完成`);
-        if (content) {
-          setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
+  const [ctx, setCtx] = useState(() => {
+    const envList = getMergedEnvList(appData, appConfig)
+    const executeEnv = appData.fileContent?.content?.executeEnv || ''
+    const debugMode = executeEnv === USE_CUSTOM_HOST
+      ? EnumMode.CUSTOM
+      : envList.length > 0
+        ? EnumMode.ENV
+        : EnumMode.DEFAULT
+    return {
+      sdk: appData,
+      user: appData.user,
+      fileId: appData.fileId,
+      fileItem: appData.fileContent || {},
+      setting: appData.config || {},
+      hasMaterialApp: appData.hasMaterialApp,
+      comlibs,
+      latestComlibs: [],
+      debugQuery: appData.fileContent?.content?.debugQuery,
+      executeEnv,
+      envList,
+      debugMode,
+      MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
+      // 将新设置的环境附加到当前页面中，不能删除原有的环境
+      debugMainProps: appData.fileContent?.content?.debugMainProps,
+      hasPermissionFn: appData.fileContent?.content?.hasPermissionFn,
+      debugHasPermissionFn: appData.fileContent?.content?.debugHasPermissionFn,
+      versionApi: null,
+      appConfig,
+      uploadService,
+      operable: false,
+      isDebugMode: false,
+      saveContent(content) {
+        ctx.save({ content })
+      },
+      async save(
+        param: { name?; shareType?; content?; icon?},
+        skipMessage?: boolean
+      ) {
+        const { name, shareType, content, icon } = param
+        await API.File.save({
+          userId: ctx.user?.id,
+          fileId: ctx.fileId,
+          name,
+          shareType,
+          content: removeBadChar(content),
+          icon,
+        }).then(() => {
+          !skipMessage && message.success(`保存完成`);
+          if (content) {
+            setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
+          }
+        }).catch(e => {
+          !skipMessage && message.error(`保存失败：${e.message}`);
+          if (content) {
+            setSaveTip('保存失败')
+          }
+        }).finally(() => {
+          setSaveLoading(false)
+        })
+      },
+      setName(name) {
+        if (ctx.fileItem.name !== name) {
+          ctx.fileItem.name = name
         }
-      }).catch(e => {
-        !skipMessage && message.error(`保存失败：${e.message}`);
-        if (content) {
-          setSaveTip('保存失败')
-        }
-      }).finally(() => {
-        setSaveLoading(false)
-      })
-    },
-    setName(name) {
-      if (ctx.fileItem.name !== name) {
-        ctx.fileItem.name = name
       }
     }
   })

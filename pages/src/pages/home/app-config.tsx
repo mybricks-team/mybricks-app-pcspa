@@ -16,6 +16,7 @@ import { runJs } from '../../utils/runJs'
 
 import axios from 'axios';
 import { shapeUrlByEnv } from '../../utils';
+import { EnumMode } from './components/PublishModal';
 
 const defaultPermissionComments = `/**
 *
@@ -119,9 +120,15 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
 
 export const USE_CUSTOM_HOST = '__USE_CUSTOM_HOST__'
 const CUSTOM_HOST_TITLE = `自定义域名`
-const customEnv = {
-  title: '自定义域名',
-  name: USE_CUSTOM_HOST,
+
+const getExecuteEnvByMode = (debugMode, ctx, envList) => {
+  if (debugMode === EnumMode.DEFAULT) {
+    ctx.executeEnv = ''
+  } else if (debugMode === EnumMode.ENV && (!ctx.executeEnv || !envList.find(item => item.name === ctx.executeEnv))) {
+    ctx.executeEnv = envList[0].name
+  } else if (debugMode === EnumMode.CUSTOM) {
+    ctx.executeEnv = USE_CUSTOM_HOST
+  }
 }
 
 export default function (ctx, save, designerRef, remotePlugins = []) {
@@ -136,22 +143,30 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
   }
 
   // 获得环境信息映射表
-  const envMap = (envList).reduce((res, item) => {
+  const envMap = ([...envList, { name: USE_CUSTOM_HOST, title: CUSTOM_HOST_TITLE }]).reduce((res, item) => {
     res[item.name] = item.title
     return res
   }, {})
-  envMap[USE_CUSTOM_HOST] = CUSTOM_HOST_TITLE
 
-  const debugEnvList = envList.length > 0 ? [...envList, customEnv].map(item => ({
-    value: item.name,
-    label: item.title
-  })) : [{
-    label: '默认',
-    value: '__DEFAULT_ENV__',
-  }, {
-    label: customEnv.title,
-    value: customEnv.name,
-  }]
+
+  ctx.debugMode = ctx.executeEnv === USE_CUSTOM_HOST
+    ? EnumMode.CUSTOM
+    : envList.length > 0
+      ? EnumMode.ENV
+      : EnumMode.DEFAULT
+
+
+  getExecuteEnvByMode(ctx.debugMode, ctx, envList)
+
+  const debugModeOptions = envList.length > 0
+    ? [
+      { label: '选择环境', value: EnumMode.ENV },
+      { label: '自定义域名', value: EnumMode.CUSTOM }
+    ]
+    : [
+      { label: '默认', value: EnumMode.DEFAULT },
+      { label: '自定义域名', value: EnumMode.CUSTOM }
+    ]
 
   return {
     shortcuts: {
@@ -250,11 +265,31 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             title: '调试',
             items: [
               {
+                title: '调试模式',
+                type: 'Radio',
+                options: debugModeOptions,
+                value: {
+                  get() {
+                    return ctx.debugMode
+                  },
+                  set(_, value) {
+                    getExecuteEnvByMode(value, ctx, envList)
+                    ctx.debugMode = value
+                  }
+                }
+              },
+              {
                 title: '调试环境',
                 type: 'select',
                 description: '选择调试时采用的环境配置，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
+                ifVisible({ data }) {
+                  return ctx.debugMode === EnumMode.ENV;
+                },
                 options: {
-                  options: debugEnvList,
+                  options: envList.map(item => ({
+                    value: item.name,
+                    label: item.title
+                  })),
                   placeholder: '请选择调试环境'
                 },
                 value: {
@@ -271,7 +306,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 description: '设置多个变量和对应的域名地址',
                 type: 'map',
                 ifVisible(info) {
-                  return ctx.executeEnv === USE_CUSTOM_HOST
+                  return ctx.debugMode === EnumMode.CUSTOM
                 },
                 options: {
                   allowEmptyString: false
@@ -281,7 +316,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                     if (!ctx.MYBRICKS_HOST) {
                       ctx.MYBRICKS_HOST = {}
                     } else if (!("default" in ctx.MYBRICKS_HOST)) {
-                      ctx.MYBRICKS_HOST.default = ''
+                      ctx.MYBRICKS_HOST.default = 'https://your-domain-name.com'
                     }
                     return ctx.MYBRICKS_HOST
                   },
@@ -302,7 +337,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 title: '环境信息设置',
                 description: '可以在应用配置处修改使用的环境',
                 ifVisible({ data }) {
-                  return envList.length > 0 && ctx.executeEnv !== USE_CUSTOM_HOST;
+                  return ctx.debugMode === EnumMode.ENV;
                 },
                 type: 'array',
                 options: {
