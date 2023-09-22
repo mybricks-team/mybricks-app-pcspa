@@ -133,7 +133,6 @@ const getExecuteEnvByMode = (debugMode, ctx, envList) => {
 
 export default function (ctx, save, designerRef, remotePlugins = []) {
   const envList = ctx.envList
-
   // 获得环境信息映射表
   const envMap = ([...envList, { name: USE_CUSTOM_HOST, title: CUSTOM_HOST_TITLE }]).reduce((res, item) => {
     res[item.name] = item.title
