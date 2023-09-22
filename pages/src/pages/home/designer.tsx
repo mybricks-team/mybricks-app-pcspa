@@ -12,13 +12,13 @@ import moment from 'moment'
 import { message } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
-import config from './app-config'
-// import { getManateeUserInfo } from '../../utils'
-import { fetchPlugins, getManateeUserInfo, removeBadChar } from '../../utils'
+import config, { USE_CUSTOM_HOST } from './app-config'
+import { fetchPlugins, removeBadChar } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
+import { unionBy } from 'lodash'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
-import PublishModal from './components/PublishModal'
+import PublishModal, { EnumMode } from './components/PublishModal'
 
 import css from './app.less'
 
@@ -59,8 +59,7 @@ export default function MyDesigner({ appData }) {
     }
   }
 
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.21/index.min.js'
-
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.24/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
@@ -76,59 +75,70 @@ export default function MyDesigner({ appData }) {
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || '';
 
-  const [ctx, setCtx] = useState({
-    sdk: appData,
-    user: appData.user,
-    fileId: appData.fileId,
-    fileItem: appData.fileContent || {},
-    setting: appData.config || {},
-    hasMaterialApp: appData.hasMaterialApp,
-    comlibs,
-    latestComlibs: [],
-    debugQuery: appData.fileContent?.content?.debugQuery,
-    executeEnv: appData.fileContent?.content?.executeEnv || '',
-    // 将新设置的环境附加到当前页面中，不能删除原有的环境
-    envList: getMergedEnvList(appData, appConfig),
-    debugMainProps: appData.fileContent?.content?.debugMainProps,
-    hasPermissionFn: appData.fileContent?.content?.hasPermissionFn,
-    debugHasPermissionFn: appData.fileContent?.content?.debugHasPermissionFn,
-    versionApi: null,
-    appConfig,
-    uploadService,
-    operable: false,
-    isDebugMode: false,
-    saveContent(content) {
-      ctx.save({ content })
-    },
-    async save(
-      param: { name?; shareType?; content?; icon?},
-      skipMessage?: boolean
-    ) {
-      const { name, shareType, content, icon } = param
-      await API.File.save({
-        userId: ctx.user?.id,
-        fileId: ctx.fileId,
-        name,
-        shareType,
-        content: removeBadChar(content),
-        icon,
-      }).then(() => {
-        !skipMessage && message.success(`保存完成`);
-        if (content) {
-          setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
+  const [ctx, setCtx] = useState(() => {
+    const envList = getMergedEnvList(appData, appConfig)
+    const executeEnv = appData.fileContent?.content?.executeEnv || ''
+    const debugMode = executeEnv === USE_CUSTOM_HOST
+      ? EnumMode.CUSTOM
+      : envList.length > 0
+        ? EnumMode.ENV
+        : EnumMode.DEFAULT
+    return {
+      sdk: appData,
+      user: appData.user,
+      fileId: appData.fileId,
+      fileItem: appData.fileContent || {},
+      setting: appData.config || {},
+      hasMaterialApp: appData.hasMaterialApp,
+      comlibs,
+      latestComlibs: [],
+      debugQuery: appData.fileContent?.content?.debugQuery,
+      executeEnv,
+      envList,
+      debugMode,
+      MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
+      // 将新设置的环境附加到当前页面中，不能删除原有的环境
+      debugMainProps: appData.fileContent?.content?.debugMainProps,
+      hasPermissionFn: appData.fileContent?.content?.hasPermissionFn,
+      debugHasPermissionFn: appData.fileContent?.content?.debugHasPermissionFn,
+      versionApi: null,
+      appConfig,
+      uploadService,
+      operable: false,
+      isDebugMode: false,
+      saveContent(content) {
+        ctx.save({ content })
+      },
+      async save(
+        param: { name?; shareType?; content?; icon?},
+        skipMessage?: boolean
+      ) {
+        const { name, shareType, content, icon } = param
+        await API.File.save({
+          userId: ctx.user?.id,
+          fileId: ctx.fileId,
+          name,
+          shareType,
+          content: removeBadChar(content),
+          icon,
+        }).then(() => {
+          !skipMessage && message.success(`保存完成`);
+          if (content) {
+            setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
+          }
+        }).catch(e => {
+          !skipMessage && message.error(`保存失败：${e.message}`);
+          if (content) {
+            setSaveTip('保存失败')
+          }
+        }).finally(() => {
+          setSaveLoading(false)
+        })
+      },
+      setName(name) {
+        if (ctx.fileItem.name !== name) {
+          ctx.fileItem.name = name
         }
-      }).catch(e => {
-        !skipMessage && message.error(`保存失败：${e.message}`);
-        if (content) {
-          setSaveTip('保存失败')
-        }
-      }).finally(() => {
-        setSaveLoading(false)
-      })
-    },
-    setName(name) {
-      if (ctx.fileItem.name !== name) {
-        ctx.fileItem.name = name
       }
     }
   })
@@ -235,7 +245,7 @@ export default function MyDesigner({ appData }) {
   }, [])
 
   const save = useCallback(async () => {
-    if(isPreview) {
+    if (isPreview) {
       message.warn('请回到编辑页面，再进行保存')
       return
     }
@@ -254,6 +264,7 @@ export default function MyDesigner({ appData }) {
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
     json.executeEnv = ctx.executeEnv
+    json.MYBRICKS_HOST = ctx.MYBRICKS_HOST
     json.envList = ctx.envList
     json.debugMainProps = ctx.debugMainProps
     json.hasPermissionFn = ctx.hasPermissionFn
@@ -289,6 +300,7 @@ export default function MyDesigner({ appData }) {
     previewStorage.savePreviewPageData({
       dumpJson: json,
       executeEnv: ctx.executeEnv,
+      MYBRICKS_HOST: ctx.MYBRICKS_HOST,
       envList: ctx.envList,
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
       hasPermissionFn: ctx.hasPermissionFn,
@@ -320,6 +332,7 @@ export default function MyDesigner({ appData }) {
           json.comlibs = ctx.comlibs
           json.debugQuery = ctx.debugQuery
           json.executeEnv = ctx.executeEnv
+          json.MYBRICKS_HOST = ctx.MYBRICKS_HOST
           json.envList = ctx.envList
           json.debugMainProps = ctx.debugMainProps
           json.hasPermissionFn = ctx.hasPermissionFn
@@ -431,6 +444,7 @@ export default function MyDesigner({ appData }) {
       comlibs: ctx.comlibs,
       debugQuery: ctx.debugQuery,
       executeEnv: ctx.executeEnv,
+      MYBRICKS_HOST: ctx.MYBRICKS_HOST,
       envList: ctx.envList,
       debugMainProps: ctx.debugMainProps,
       hasPermissionFn: ctx.hasPermissionFn,
@@ -488,11 +502,11 @@ export default function MyDesigner({ appData }) {
         }
       </Toolbar>
       <div className={css.designer}>
-        {SPADesigner && remotePlugins && latestComlibs && (
+        {SPADesigner && remotePlugins && latestComlibs && window?.mybricks?.createObservable && (
           <>
             <SPADesigner
               ref={designerRef}
-              config={config(Object.assign(ctx, { latestComlibs }), save, designerRef, remotePlugins)}
+              config={config(window?.mybricks?.createObservable(Object.assign(ctx, { latestComlibs })), save, designerRef, remotePlugins)}
               onEdit={onEdit}
               onMessage={onMessage}
               onDebug={onDebug}
@@ -593,13 +607,14 @@ const genLazyloadComs = async (comlibs, toJSON) => {
 }
 
 const getMergedEnvList = (appData, appConfig) => {
+  // 页面已有的环境信息
   const pageEnvlist = appData.fileContent?.content?.envList || []
+  // 全局配置的环境信息
   const configEnvlist = appConfig?.publishEnvConfig?.envList?.map(item => ({
     title: item.title,
     name: item.name,
     value: item.defaultApiPrePath
   })) || []
 
-  const newEnvList = configEnvlist.filter(item => item.name && !pageEnvlist.find(env => env.name === item.name))
-  return [...pageEnvlist, ...newEnvList]
+  return unionBy([...pageEnvlist, ...configEnvlist], 'name')
 }
