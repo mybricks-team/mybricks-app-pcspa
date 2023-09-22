@@ -132,15 +132,7 @@ const getExecuteEnvByMode = (debugMode, ctx, envList) => {
 }
 
 export default function (ctx, save, designerRef, remotePlugins = []) {
-
-  let curToJSON;
   const envList = ctx.envList
-  try {
-    curToJSON = designerRef?.current?.toJSON();
-  } catch (e) {
-    message.error("获取 toJSON 数据失败，请刷新重试！")
-    console.error("获取 toJSON 数据失败，请刷新重试！", e);
-  }
 
   // 获得环境信息映射表
   const envMap = ([...envList, { name: USE_CUSTOM_HOST, title: CUSTOM_HOST_TITLE }]).reduce((res, item) => {
