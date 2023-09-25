@@ -443,9 +443,9 @@ export default function MyDesigner({ appData }) {
     json.pageConfig = {
       comlibs: ctx.comlibs,
       debugQuery: ctx.debugQuery,
-      executeEnv: ctx.executeEnv,
-      MYBRICKS_HOST: ctx.MYBRICKS_HOST,
-      envList: ctx.envList,
+      // executeEnv: ctx.executeEnv,
+      // MYBRICKS_HOST: ctx.MYBRICKS_HOST,
+      // envList: ctx.envList,
       debugMainProps: ctx.debugMainProps,
       hasPermissionFn: ctx.hasPermissionFn,
       debugHasPermissionFn: ctx.debugHasPermissionFn

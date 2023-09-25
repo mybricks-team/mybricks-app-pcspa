@@ -258,21 +258,22 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               {
                 title: '调试模式',
                 type: 'Radio',
+                description: '选择配置接口前缀域名的方式',
                 options: debugModeOptions,
                 value: {
                   get() {
                     return ctx.debugMode
                   },
                   set(_, value) {
-                    getExecuteEnvByMode(value, ctx, envList)
                     ctx.debugMode = value
+                    getExecuteEnvByMode(value, ctx, envList)
                   }
                 }
               },
               {
                 title: '调试环境',
                 type: 'select',
-                description: '选择调试时采用的环境配置，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
+                description: '所选环境对应的域名将拼接到接口地址前，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
                 ifVisible({ data }) {
                   return ctx.debugMode === EnumMode.ENV;
                 },
@@ -294,7 +295,7 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
               },
               {
                 title: '自定义域名',
-                description: '设置多个变量和对应的域名地址',
+                description: '自定义各个接口的域名，在接口中以{MYBRICKS_HOST.变量}的形式进行引用，发布后的页面需要主动在window.MYBRICKS_HOST对象上设置域名信息',
                 type: 'map',
                 ifVisible(info) {
                   return ctx.debugMode === EnumMode.CUSTOM
