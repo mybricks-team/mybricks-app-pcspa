@@ -1,13 +1,13 @@
 {
   "name": "mybricks-app-pcspa",
-  "version": "1.1.31",
+  "version": "1.1.35",
   "description": "中后台类PC页面搭建",
   "scripts": {
     "watch:be-local": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://localhost:3100 node nodejs/index.js'",
     "watch:be": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=https://my.mybricks.world node nodejs/index.js'",
     "watch:testweb": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://testweb.manateeai.com node nodejs/index.js'",
     "build:fe": "cd pages && npm run build",
-    "publishToNpm:offline": "npm run build:fe && node sync.js --origin=https://my.mybricks.world --offline",
+    "publishToNpm:offline": "cd pages && npm run build:offline && cd ../ && node sync_offline.js",
     "publishToNpm:serviceUpdate": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world",
     "publishToNpm": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world --noServiceUpdate",
     "publishToNpm:beta": "npm run build:fe && npm publish --tag beta --registry=https://registry.npmjs.org --access=public && node sync.js --origin=https://my.mybricks.world"

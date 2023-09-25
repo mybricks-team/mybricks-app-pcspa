@@ -16,6 +16,7 @@ import { runJs } from '../../utils/runJs'
 
 import axios from 'axios';
 import { shapeUrlByEnv } from '../../utils';
+import { EnumMode } from './components/PublishModal';
 
 const defaultPermissionComments = `/**
 *
@@ -117,23 +118,46 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
   }
 }
 
-export default function (ctx, save, designerRef, remotePlugins = []) {
+export const USE_CUSTOM_HOST = '__USE_CUSTOM_HOST__'
+const CUSTOM_HOST_TITLE = `自定义域名`
 
-  let curToJSON;
-  const envList = ctx.envList
-
-  try {
-    curToJSON = designerRef?.current?.toJSON();
-  } catch (e) {
-    message.error("获取 toJSON 数据失败，请刷新重试！")
-    console.error("获取 toJSON 数据失败，请刷新重试！", e);
+const getExecuteEnvByMode = (debugMode, ctx, envList) => {
+  if (debugMode === EnumMode.DEFAULT) {
+    ctx.executeEnv = ''
+  } else if (debugMode === EnumMode.ENV && (!ctx.executeEnv || !envList.find(item => item.name === ctx.executeEnv))) {
+    ctx.executeEnv = envList[0].name
+  } else if (debugMode === EnumMode.CUSTOM) {
+    ctx.executeEnv = USE_CUSTOM_HOST
   }
+}
 
+export default function (ctx, save, designerRef, remotePlugins = []) {
+  const envList = ctx.envList
   // 获得环境信息映射表
-  const envMap = (envList).reduce((res, item) => {
+  const envMap = ([...envList, { name: USE_CUSTOM_HOST, title: CUSTOM_HOST_TITLE }]).reduce((res, item) => {
     res[item.name] = item.title
     return res
   }, {})
+
+
+  ctx.debugMode = ctx.executeEnv === USE_CUSTOM_HOST
+    ? EnumMode.CUSTOM
+    : envList.length > 0
+      ? EnumMode.ENV
+      : EnumMode.DEFAULT
+
+
+  getExecuteEnvByMode(ctx.debugMode, ctx, envList)
+
+  const debugModeOptions = envList.length > 0
+    ? [
+      { label: '选择环境', value: EnumMode.ENV },
+      { label: '自定义域名', value: EnumMode.CUSTOM }
+    ]
+    : [
+      { label: '默认', value: EnumMode.DEFAULT },
+      { label: '自定义域名', value: EnumMode.CUSTOM }
+    ]
 
   return {
     shortcuts: {
@@ -232,12 +256,26 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             title: '调试',
             items: [
               {
+                title: '调试模式',
+                type: 'Radio',
+                options: debugModeOptions,
+                value: {
+                  get() {
+                    return ctx.debugMode
+                  },
+                  set(_, value) {
+                    getExecuteEnvByMode(value, ctx, envList)
+                    ctx.debugMode = value
+                  }
+                }
+              },
+              {
                 title: '调试环境',
                 type: 'select',
-                ifVisible({ data }) {
-                  return envList.length > 0;
-                },
                 description: '选择调试时采用的环境配置，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
+                ifVisible({ data }) {
+                  return ctx.debugMode === EnumMode.ENV;
+                },
                 options: {
                   options: envList.map(item => ({
                     value: item.name,
@@ -255,10 +293,42 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 }
               },
               {
+                title: '自定义域名',
+                description: '设置多个变量和对应的域名地址',
+                type: 'map',
+                ifVisible(info) {
+                  return ctx.debugMode === EnumMode.CUSTOM
+                },
+                options: {
+                  allowEmptyString: false
+                },
+                value: {
+                  get(info) {
+                    if (!ctx.MYBRICKS_HOST) {
+                      ctx.MYBRICKS_HOST = {}
+                    } else if (!("default" in ctx.MYBRICKS_HOST)) {
+                      ctx.MYBRICKS_HOST.default = 'https://your-domain-name.com'
+                    }
+                    return ctx.MYBRICKS_HOST
+                  },
+                  set(info, value) {
+                    if (typeof value?.default === 'undefined') {
+                      message.error('必须包含变量名为default的域名')
+                    } else if (!value?.default) {
+                      message.error('default域名不能为空')
+                    } else if (Object.values(value).some(item => !item)) {
+                      message.error('域名不能为空')
+                    } else {
+                      ctx.MYBRICKS_HOST = value
+                    }
+                  }
+                },
+              },
+              {
                 title: '环境信息设置',
                 description: '可以在应用配置处修改使用的环境',
                 ifVisible({ data }) {
-                  return envList.length > 0;
+                  return ctx.debugMode === EnumMode.ENV;
                 },
                 type: 'array',
                 options: {
@@ -378,40 +448,6 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
                 ...(opts?.env || {}),
                 edit: false,
                 runtime: true
-              },
-              /** 调用领域模型 */
-              callDomainModel(domainModel, type, params) {
-                return callDomainHttp(domainModel, params, { action: type });
-              },
-              callConnector(connector, params, connectorConfig = {}) {
-                const plugin = designerRef.current?.getPlugin(connector.connectorName);
-                //调用连接器
-                if (!plugin) {
-                  //服务接口类型
-                  return callConnectorHttp(
-                    { script: connector.script, useProxy: true },
-                    params,
-                    {
-                      ...connectorConfig,
-                      before: options => {
-                        return {
-                          ...options,
-                          url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
-                        }
-                      }
-                    }
-                  );
-                } else {
-                  return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, {
-                    ...connectorConfig,
-                    before: options => {
-                      return {
-                        ...options,
-                        url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
-                      }
-                    }
-                  });
-                }
               }
             }
           )
@@ -426,39 +462,44 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
         },
         callConnector(connector, params, connectorConfig = {}) {
           const plugin = designerRef.current?.getPlugin(connector.connectorName);
+          if (ctx.executeEnv === USE_CUSTOM_HOST && !ctx.MYBRICKS_HOST.default) {
+            throw new Error(`自定义域名必须设置default域名`)
+          }
+          const newParams = ctx.executeEnv === USE_CUSTOM_HOST ? {
+            ...params,
+            MYBRICKS_HOST: { ...ctx.MYBRICKS_HOST },
+          } : params
           if (!plugin) {
             /** 启动 Mock */
             if (connectorConfig?.openMock) {
               return connectorHttpMock({ ...connector, outputSchema: connectorConfig.mockSchema });
             }
+
             //服务接口类型
             return callConnectorHttp(
               { ...connector, script: connector.script, useProxy: true },
-              params,
+              newParams,
               {
                 before: options => {
                   return {
                     ...options,
-                    url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
+                    url: shapeUrlByEnv(envList, ctx.executeEnv, options.url, ctx.MYBRICKS_HOST)
                   }
                 }
               }
             );
           } else {
-            return plugin.callConnector({ ...connector, executeEnv: ctx.executeEnv }, params, {
+            return plugin.callConnector({ ...connector }, newParams, {
               ...connectorConfig,
               before: options => {
                 return {
                   ...options,
-                  url: shapeUrlByEnv(envList, ctx.executeEnv, options.url)
+                  url: shapeUrlByEnv(envList, ctx.executeEnv, options.url, ctx.MYBRICKS_HOST)
                 }
               }
             });
           }
         },
-        // uploadFile(files) {
-        //   return uploadApi(files)
-        // },
         vars: {
           get getExecuteEnv() {
             return () => ctx.executeEnv

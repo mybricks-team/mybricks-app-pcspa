@@ -1,6 +1,13 @@
-import React, { useEffect, useMemo } from "react";
-import { Modal, Select, Form, Input, ModalProps } from "antd";
+import React, { useEffect, useMemo, useState } from "react";
+import { Modal, Select, Form, Radio, ModalProps } from "antd";
 import TextArea from "antd/lib/input/TextArea";
+import { USE_CUSTOM_HOST } from "../app-config";
+
+export enum EnumMode {
+  DEFAULT,
+  ENV,
+  CUSTOM
+}
 
 export default ({
   visible,
@@ -8,13 +15,21 @@ export default ({
   onCancel,
   envList
 }: ModalProps & { envList: Array<any> }) => {
-
+  const [mode, setMode] = useState(envList.length > 0 ? EnumMode.ENV : EnumMode.DEFAULT)
   const [form] = Form.useForm();
+
   const _onOk = () => {
     form
       .validateFields()
       .then((values) => {
-        onOk(values);
+        let { mode, envType, commitInfo } = values
+        if (mode === EnumMode.CUSTOM) {
+          envType = USE_CUSTOM_HOST
+        }
+        onOk({
+          envType,
+          commitInfo
+        });
       })
       .catch((error) => {
         console.log(error);
@@ -27,6 +42,8 @@ export default ({
       label: item.title
     }))
   }, [envList])
+
+  const hasEnv = envOptions.length > 0
 
   useEffect(() => {
     if (visible) {
@@ -48,7 +65,17 @@ export default ({
       zIndex={1001}
     >
       <Form form={form} labelCol={{ span: 5 }} wrapperCol={{ span: 19 }}>
-        {envOptions.length > 0 && <Form.Item
+        <Form.Item
+          label="发布模式"
+          name="mode"
+          required
+        >
+          <Radio.Group defaultValue={mode} onChange={e => setMode(e.target.value)}>
+            {hasEnv ? <Radio value={EnumMode.ENV}>选择环境</Radio> : <Radio value={EnumMode.DEFAULT}>默认</Radio>}
+            <Radio value={EnumMode.CUSTOM}>自定义域名</Radio>
+          </Radio.Group>
+        </Form.Item>
+        {mode === EnumMode.ENV && <Form.Item
           label="发布环境"
           name="envType"
           required
