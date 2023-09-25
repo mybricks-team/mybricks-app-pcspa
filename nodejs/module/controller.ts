@@ -8,8 +8,8 @@ import {
   UseInterceptors
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-
 import Service from './service'
+import { Logger } from '@mybricks/rocker-commons'
 
 @Controller('api/pcpage')
 export default class PcPageController {
@@ -31,14 +31,19 @@ export default class PcPageController {
       return { code: 0, message: '参数 json、userId、fileId 不能为空' };
     }
     try {
+      Logger.info("[publish] 调用发布接口");
+
       const result = await this.service.publish(req, { json, userId, fileId, envType, commitInfo });
 
+      Logger.info("[publish] 发布成功！");
       return {
         code: 1,
         data: result,
         message: '发布完成'
       }
     } catch (error) {
+
+      Logger.error("[publish] 发布失败: ", error);
       return {
         code: -1,
         message: error.message || '发布失败'
