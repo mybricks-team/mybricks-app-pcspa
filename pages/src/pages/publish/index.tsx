@@ -2,8 +2,25 @@ import ReactDOM from 'react-dom';
 import React from 'react'
 import { message } from 'antd'
 import { runJs } from './../../utils/runJs'
-import { shapeUrlByEnv } from './../../utils'
-import { USE_CUSTOM_HOST } from '../home/app-config';
+
+
+const USE_CUSTOM_HOST = '__USE_CUSTOM_HOST__'
+
+const combineHostAndPath = (host, path) => {
+  const _host = host.replace(/\/$/, '')
+  const _path = path.replace(/^\//, '')
+  return _host + '/' + _path
+}
+
+const shapeUrlByEnv = (envList, env, url, mybricksHost) => {
+  if (!envList || !env || /^(https?|ws)/.test(url)) return url
+  if (env === USE_CUSTOM_HOST) {
+    return combineHostAndPath(mybricksHost.default, url)
+  }
+  const data = (envList || []).find(item => item.name === env)
+  if (!data || !data.value) return url
+  return data.value + url
+}
 
 const { render: renderUI } = window._mybricks_render_web
 
