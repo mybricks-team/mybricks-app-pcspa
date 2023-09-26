@@ -208,7 +208,7 @@ export default class PcPageService {
 
       const customPublishApi = await getCustomPublishApi()
 
-      Logger.info("[publish] getCustomPublishApi=", customPublishApi);
+      Logger.info(`[publish] getCustomPublishApi=`, customPublishApi);
 
       if (customPublishApi) {
         Logger.info("[publish] 有配置发布集成接口，尝试向发布集成接口推送数据...");
@@ -235,7 +235,7 @@ export default class PcPageService {
         }
         catch (e) {
           Logger.error("[publish] 推送数据失败: ", e);
-          throw new Error('推送数据失败！');
+          throw e;
         }
 
         Logger.info("[publish] 推送数据成功！");
@@ -359,11 +359,11 @@ export default class PcPageService {
     let permissions = []
 
     if (json?.permissions) {
-      json?.permissions.forEach(item => {
+      json?.permissions?.forEach(item => {
         permissions.push({
-          code: item.register.code,
-          title: item.register.title,
-          remark: item.register.remark,
+          code: item?.register?.code,
+          title: item?.register?.title,
+          remark: item?.register?.remark,
         })
       })
     }
@@ -395,10 +395,12 @@ export default class PcPageService {
       }
     }).then(res => res.data)
       .catch(e => {
-        throw new Error(`发布集成接口出错: ${e.message}`)
+        Logger.error(`发布集成接口出错: ${e.message}`);
+        throw new Error(`发布集成接口出错: ${e.message}`);
       });
     if (code !== 1) {
-      throw new Error(`发布集成接口出错: ${message}`)
+        Logger.error(`发布集成接口出错: ${message}`);
+        throw new Error(`发布集成接口出错: ${message}`)
     }
 
     return data
