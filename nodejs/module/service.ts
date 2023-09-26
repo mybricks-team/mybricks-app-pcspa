@@ -45,6 +45,7 @@ export default class PcPageService {
       'mybricks.core-comlib.type-change',
       'mybricks.core-comlib.connector',
       'mybricks.core-comlib.frame-input',
+      'mybricks.core-comlib.frame-output',
       'mybricks.core-comlib.scenes'
     ];
     const deps = json.scenes
@@ -188,7 +189,7 @@ export default class PcPageService {
         template = _template;
         Logger.info("[publish] 公网资源本地化成功！")
       }
-      catch(e) {
+      catch (e) {
         Logger.error("[publish] 公网资源本地化失败: ", e);
         throw new Error('公网资源本地化失败！');
       }
@@ -228,8 +229,8 @@ export default class PcPageService {
             needCombo,
             comboScriptText,
             customPublishApi,
-            images: images.map(({ content, name, path}) => ({ content, path: `${path}/${name}` })),
-            globalDeps: globalDeps?.map(({ content, name, path}) => ({ content, path: `${path}/${name}` })),
+            images: images.map(({ content, name, path }) => ({ content, path: `${path}/${name}` })),
+            globalDeps: globalDeps?.map(({ content, name, path }) => ({ content, path: `${path}/${name}` })),
           })
         }
         catch (e) {
@@ -251,12 +252,12 @@ export default class PcPageService {
 
       } else {
         Logger.info("[publish] 未配置发布集成接口，尝试向静态服务推送数据...");
-        
+
         try {
-          if(globalDeps) {
+          if (globalDeps) {
             Logger.info("[publish] 正在尝试上传公共依赖...");
             // 将所有的公共依赖上传到对应位置
-            await Promise.all(globalDeps.map(({content, path, name}) => {
+            await Promise.all(globalDeps.map(({ content, path, name }) => {
               return API.Upload.staticServer({
                 content,
                 folderPath: `${folderPath}/${envType || 'prod'}/${path}`,
@@ -266,11 +267,11 @@ export default class PcPageService {
             }))
             Logger.info("[publish] 公共依赖上传成功！");
           }
-          
-          if(images) {
+
+          if (images) {
             Logger.info("[publish] 正在尝试上传图片资源...");
             // 将所有的图片资源上传到对应位置
-            await Promise.all(images.map(({content, path, name}) => {
+            await Promise.all(images.map(({ content, path, name }) => {
               return API.Upload.staticServer({
                 content,
                 folderPath: `${folderPath}/${envType || 'prod'}/${path}`,
@@ -281,7 +282,7 @@ export default class PcPageService {
             Logger.info("[publish] 图片资源上传成功！");
           }
 
-          if(needCombo) {
+          if (needCombo) {
             Logger.info("[publish] 正在尝试上传 needCombo...");
             await API.Upload.staticServer({
               content: comboScriptText,
@@ -291,7 +292,7 @@ export default class PcPageService {
             })
             Logger.info("[publish] needCombo 上传成功！");
           }
-          
+
 
           Logger.info("[publish] 正在尝试上传 template...");
           publishMaterialInfo = await API.Upload.staticServer({
@@ -307,7 +308,7 @@ export default class PcPageService {
           }
 
           Logger.info("[publish] 向静态服务推送数据成功！", publishMaterialInfo);
-        } 
+        }
         catch (e) {
           Logger.error("[publish] 向静态服务推送数据失败！");
           throw new Error("向静态服务推送数据失败！");
@@ -524,7 +525,7 @@ const getCustomPublishApi = async () => {
 const getCustomNeedLocalization = async () => {
   const { publishLocalizeConfig } = await getAppConfig()
   const { needLocalization } = publishLocalizeConfig || {};
-  if(!!needLocalization) {
+  if (!!needLocalization) {
     Logger.info("[publish] 此次发布为本地化发布");
   }
   return !!needLocalization;
@@ -631,24 +632,24 @@ function getNextVersion(version, max = 100) {
  */
 async function resourceLocalization(template: string, needLocalization: boolean) {
   const $ = load(template);
-  
+
   // 所有的公网资源都在模板中写有，间接依赖的公网资源由依赖自身处理
   const resourceURLs = [...$("script").map((_, el) => $(el).attr('src'))]
-                  .concat([...$("link").map((_, el) => $(el).attr('href'))])
-                  // 筛选出所有公网资源地址
-                  .filter((url: string) => !!url && url.includes('//'));
+    .concat([...$("link").map((_, el) => $(el).attr('href'))])
+    // 筛选出所有公网资源地址
+    .filter((url: string) => !!url && url.includes('//'));
 
   // 模板中所有的图片资源
   const imageURLs = analysisAllUrl(template).filter(url => url.includes('/mfs/files/'));
 
   let globalDeps: ILocalizationInfo[] = null;
-  if(needLocalization) {
+  if (needLocalization) {
     // 获取所有本地化需要的信息
     globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfo(url, 'public/')));
     // 把模板中的 CDN 地址替换成本地化后的地址
     resourceURLs.forEach((url, index) => {
       const localUrl = `./${globalDeps[index].path}/${globalDeps[index].name}`;
-      template = template.replace(new RegExp(`${url}`,'g'), localUrl);
+      template = template.replace(new RegExp(`${url}`, 'g'), localUrl);
     })
   }
 
@@ -656,7 +657,7 @@ async function resourceLocalization(template: string, needLocalization: boolean)
   // 把模板中的图片资源地址替换成本地化后的地址
   imageURLs.forEach((url, index) => {
     const localUrl = `./${images[index].path}/${images[index].name}`;
-    template = template.replace(new RegExp(`${url}`,'g'), localUrl);
+    template = template.replace(new RegExp(`${url}`, 'g'), localUrl);
   })
 
   return { template, globalDeps, images };
@@ -670,9 +671,9 @@ async function resourceLocalization(template: string, needLocalization: boolean)
  */
 async function getLocalizationInfo(url: string, pathPrefix: string, config?: AxiosRequestConfig<any>): Promise<ILocalizationInfo> {
   const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000, ...config });
-  const path = `${pathPrefix}${url.split('//')[1].split('/').slice(1,-1).join('/')}`;
+  const path = `${pathPrefix}${url.split('//')[1].split('/').slice(1, -1).join('/')}`;
   const name = url.split('/').slice(-1)[0];
-  return { 
+  return {
     path,
     name,
     content: content as string
@@ -684,6 +685,6 @@ async function getLocalizationInfo(url: string, pathPrefix: string, config?: Axi
  * @param str 被处理的文本
  * @returns 文本中的所有 URL
  */
-function analysisAllUrl(str:string) {
+function analysisAllUrl(str: string) {
   return str.match(/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g);
 }

@@ -557,6 +557,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     'mybricks.core-comlib.type-change',
     'mybricks.core-comlib.connector',
     'mybricks.core-comlib.frame-input',
+    'mybricks.core-comlib.frame-output',
     'mybricks.core-comlib.scenes'
   ];
   const deps = toJSON.scenes
