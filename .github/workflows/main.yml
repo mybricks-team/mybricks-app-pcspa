@@ -18,7 +18,7 @@ jobs:
         id: check_commit
         run: echo "COMMIT_MESSAGE=$(git log -1 --pretty=format:'%B')" >> $GITHUB_ENV
       - name: save token
-        id: save token
+        id: save_token
         run: echo "NPM_TOKEN=${{ secrets.NPM_TOKEN }}" >> $GITHUB_ENV
 
       - name: Run CI based on commit message
