@@ -58,10 +58,10 @@
   "dependencies": {
     "@mybricks/plugin-connector-domain": "0.0.48",
     "@mybricks/plugin-connector-http": "1.1.62",
-    "@mybricks/plugin-theme": "0.0.35",
+    "@mybricks/plugin-theme": "^0.0.36",
     "@mybricks/plugin-tools": "1.0.17",
     "@mybricks/render-web": "1.1.93",
-    "@mybricks/sdk-for-app": "^0.1.91",
+    "@mybricks/sdk-for-app": "^0.1.93",
     "antd": "^4.23.6",
     "classnames": "^2.3.1",
     "compare-versions": "^6.0.0",
