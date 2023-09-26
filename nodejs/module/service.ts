@@ -10,6 +10,7 @@ import { generateComLib } from "./generateComLib";
 import { load } from 'cheerio';
 import { transform } from './transform'
 const FormData = require("form-data");
+import { Logger } from '@mybricks/rocker-commons'
 
 /** 本地化信息 */
 interface ILocalizationInfo {
@@ -44,6 +45,7 @@ export default class PcPageService {
       'mybricks.core-comlib.type-change',
       'mybricks.core-comlib.connector',
       'mybricks.core-comlib.frame-input',
+      'mybricks.core-comlib.frame-output',
       'mybricks.core-comlib.scenes'
     ];
     const deps = json.scenes
@@ -119,18 +121,18 @@ export default class PcPageService {
       /** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
       const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
 
-      console.info("[publish] domainName is:", domainName);
+      Logger.info("[publish] domainName is:", domainName);
 
       const themesStyleStr = this._genThemesStyleStr(json)
 
-      console.info("[publish] getLatestPub begin");
+      Logger.info("[publish] getLatestPub begin");
 
       const latestPub = (await API.File.getLatestPub({
         fileId,
         type: envType
       }))?.[0];
 
-      console.info("[publish] getLatestPub ok-", latestPub);
+      Logger.info("[publish] getLatestPub ok-", latestPub);
 
       const version = getNextVersion(latestPub?.version);
 
@@ -160,7 +162,7 @@ export default class PcPageService {
         try {
           content = await axios.get(customConnectorRuntimeUrl).then(res => res.data)
         } catch (e) {
-          console.error(`get customConnectorRuntime error`, e)
+          Logger.error(`[publish] get customConnectorRuntime error`, e)
         }
         pluginScript += `<script>${content}</script>`;
       }
@@ -176,9 +178,21 @@ export default class PcPageService {
 
       const needLocalization = await getCustomNeedLocalization();
 
-      // 将模板中所有公网资源本地化
-      const { globalDeps, images, template: _template } = await resourceLocalization(template, needLocalization);
-      template = _template
+      let globalDeps: ILocalizationInfo[];
+      let images: ILocalizationInfo[];
+      try {
+        Logger.info("[publish] 正在尝试公网资源本地化...")
+        // 将模板中所有公网资源本地化
+        const { globalDeps: _globalDeps, images: _images, template: _template } = await resourceLocalization(template, needLocalization);
+        globalDeps = _globalDeps;
+        images = _images;
+        template = _template;
+        Logger.info("[publish] 公网资源本地化成功！")
+      }
+      catch (e) {
+        Logger.error("[publish] 公网资源本地化失败: ", e);
+        throw new Error('公网资源本地化失败！');
+      }
 
       let comboScriptText = '';
       /** 生成 combo 组件库代码 */
@@ -194,78 +208,115 @@ export default class PcPageService {
 
       const customPublishApi = await getCustomPublishApi()
 
-      console.info("[publish] getCustomPublishApi=", customPublishApi);
+      Logger.info("[publish] getCustomPublishApi=", customPublishApi);
 
       if (customPublishApi) {
+        Logger.info("[publish] 有配置发布集成接口，尝试向发布集成接口推送数据...");
 
-        publishMaterialInfo = await this._customPublish({
-          envType,
-          fileId,
-          title,
-          publisherEmail,
-          publisherName,
-          version,
-          commitInfo,
-          groupId,
-          groupName,
-          json,
-          template,
-          needCombo,
-          comboScriptText,
-          customPublishApi,
-          images: images.map(({ content, name, path}) => ({ content, path: `${path}/${name}` })),
-          globalDeps: globalDeps?.map(({ content, name, path}) => ({ content, path: `${path}/${name}` })),
-        })
+        try {
+          publishMaterialInfo = await this._customPublish({
+            envType,
+            fileId,
+            title,
+            publisherEmail,
+            publisherName,
+            version,
+            commitInfo,
+            groupId,
+            groupName,
+            json,
+            template,
+            needCombo,
+            comboScriptText,
+            customPublishApi,
+            images: images.map(({ content, name, path }) => ({ content, path: `${path}/${name}` })),
+            globalDeps: globalDeps?.map(({ content, name, path }) => ({ content, path: `${path}/${name}` })),
+          })
+        }
+        catch (e) {
+          Logger.error("[publish] 推送数据失败: ", e);
+          throw new Error('推送数据失败！');
+        }
+
+        Logger.info("[publish] 推送数据成功！");
+
         if (!publishMaterialInfo?.url) {
-          throw new Error(`发布集成接口出错：没有返回url`)
+          const errStr = `[publish] 发布集成接口出错：没有返回url`;
+          Logger.error(errStr);
+          throw new Error(errStr)
         } else if (typeof publishMaterialInfo?.url !== 'string' || !publishMaterialInfo?.url?.startsWith('http')) {
-          throw new Error(`发布集成返回的url格式不正确 url：${publishMaterialInfo?.url}`)
+          const errStr = `[publish] 发布集成返回的url格式不正确 url：${publishMaterialInfo?.url}`;
+          Logger.error(errStr);
+          throw new Error(errStr)
         }
+
       } else {
-        console.info("[publish] upload to static server");
+        Logger.info("[publish] 未配置发布集成接口，尝试向静态服务推送数据...");
 
-        // 将所有的公共依赖上传到对应位置
-        globalDeps && await Promise.all(globalDeps.map(({content, path, name}) => {
-          return API.Upload.staticServer({
-            content,
-            folderPath: `${folderPath}/${envType || 'prod'}/${path}`,
-            fileName: name,
-            noHash: true,
+        try {
+          if (globalDeps) {
+            Logger.info("[publish] 正在尝试上传公共依赖...");
+            // 将所有的公共依赖上传到对应位置
+            await Promise.all(globalDeps.map(({ content, path, name }) => {
+              return API.Upload.staticServer({
+                content,
+                folderPath: `${folderPath}/${envType || 'prod'}/${path}`,
+                fileName: name,
+                noHash: true,
+              })
+            }))
+            Logger.info("[publish] 公共依赖上传成功！");
+          }
+
+          if (images) {
+            Logger.info("[publish] 正在尝试上传图片资源...");
+            // 将所有的图片资源上传到对应位置
+            await Promise.all(images.map(({ content, path, name }) => {
+              return API.Upload.staticServer({
+                content,
+                folderPath: `${folderPath}/${envType || 'prod'}/${path}`,
+                fileName: name,
+                noHash: true,
+              })
+            }))
+            Logger.info("[publish] 图片资源上传成功！");
+          }
+
+          if (needCombo) {
+            Logger.info("[publish] 正在尝试上传 needCombo...");
+            await API.Upload.staticServer({
+              content: comboScriptText,
+              folderPath: `${folderPath}/${envType || 'prod'}`,
+              fileName: comlibRtName,
+              noHash: true
+            })
+            Logger.info("[publish] needCombo 上传成功！");
+          }
+
+
+          Logger.info("[publish] 正在尝试上传 template...");
+          publishMaterialInfo = await API.Upload.staticServer({
+            content: template,
+            folderPath: `${folderPath}/${envType || 'prod'}`,
+            fileName,
+            noHash: true
           })
-        }))
+          Logger.info("[publish] template 上传成功！");
 
-        // 将所有的图片资源上传到对应位置
-        images && await Promise.all(images.map(({content, path, name}) => {
-          return API.Upload.staticServer({
-            content,
-            folderPath: `${folderPath}/${envType || 'prod'}/${path}`,
-            fileName: name,
-            noHash: true,
-          })
-        }))
+          if (publishMaterialInfo?.url?.startsWith('https')) {
+            publishMaterialInfo.url = publishMaterialInfo.url.replace('https', 'http')
+          }
 
-        needCombo && await API.Upload.staticServer({
-          content: comboScriptText,
-          folderPath: `${folderPath}/${envType || 'prod'}`,
-          fileName: comlibRtName,
-          noHash: true
-        })
-
-        publishMaterialInfo = await API.Upload.staticServer({
-          content: template,
-          folderPath: `${folderPath}/${envType || 'prod'}`,
-          fileName,
-          noHash: true
-        })
-
-        console.info("[publish] upload to static server ok", publishMaterialInfo);
-
-        if (publishMaterialInfo?.url?.startsWith('https')) {
-          publishMaterialInfo.url = publishMaterialInfo.url.replace('https', 'http')
+          Logger.info("[publish] 向静态服务推送数据成功！", publishMaterialInfo);
         }
+        catch (e) {
+          Logger.error("[publish] 向静态服务推送数据失败！");
+          throw new Error("向静态服务推送数据失败！");
+        }
+
       }
 
-      console.info("[publish] API.File.publish: begin ");
+      Logger.info("[publish] API.File.publish: begin ");
 
       const result = await API.File.publish({
         userId,
@@ -276,11 +327,11 @@ export default class PcPageService {
         type: envType,
       });
 
-      console.info("[publish] API.File.publish: ok ");
+      Logger.info("[publish] API.File.publish: ok ");
 
       return result
     } catch (e) {
-      console.error("pcpage publish error", e);
+      Logger.error("[publish] pcpage publish error", e);
       throw e
     }
   }
@@ -420,7 +471,7 @@ export default class PcPageService {
   // 				.replace('--domain-service-path--', domainServicePath)
   // 		};
   // 	} catch (e) {
-  // 		console.log('pcpage publish error', e)
+  // 		Logger.log('pcpage publish error', e)
   // 		error = e
   // 	}
 
@@ -442,7 +493,7 @@ const getAppConfig = async ({ groupId } = {} as any) => {
   try {
     config = typeof originConfig === 'string' ? JSON.parse(originConfig) : originConfig
   } catch (e) {
-    console.error("getAppConfig error", e);
+    Logger.error("[publish] getAppConfig error", e);
   }
   return config
 };
@@ -463,7 +514,7 @@ const getCustomPublishApi = async () => {
   const { publishApiConfig = {} } = await getAppConfig()
   const { publishApi } = publishApiConfig
   if (!publishApi) {
-    console.warn(`未配置发布集成接口`)
+    Logger.warn(`[publish] 未配置发布集成接口`)
   }
   return publishApi;
 }
@@ -474,8 +525,8 @@ const getCustomPublishApi = async () => {
 const getCustomNeedLocalization = async () => {
   const { publishLocalizeConfig } = await getAppConfig()
   const { needLocalization } = publishLocalizeConfig || {};
-  if(!!needLocalization) {
-    console.log("此次发布为本地化发布");
+  if (!!needLocalization) {
+    Logger.info("[publish] 此次发布为本地化发布");
   }
   return !!needLocalization;
 }
@@ -488,7 +539,7 @@ const getCustomConnectorRuntime = (appConfig, req) => {
     return ''
   }
   if (!connectorPlugin.runtimeUrl || typeof connectorPlugin.runtimeUrl !== 'string') {
-    console.error(`插件【${connectorPlugin}】没有设置runtime地址`)
+    Logger.error(`[publish] 插件【${connectorPlugin}】没有设置runtime地址`)
     return ''
   }
   return connectorPlugin.runtimeUrl.startsWith('/') ? `${getRealDomain(req)}/${connectorPlugin.runtimeUrl}` : connectorPlugin.runtimeUrl
@@ -581,24 +632,24 @@ function getNextVersion(version, max = 100) {
  */
 async function resourceLocalization(template: string, needLocalization: boolean) {
   const $ = load(template);
-  
+
   // 所有的公网资源都在模板中写有，间接依赖的公网资源由依赖自身处理
   const resourceURLs = [...$("script").map((_, el) => $(el).attr('src'))]
-                  .concat([...$("link").map((_, el) => $(el).attr('href'))])
-                  // 筛选出所有公网资源地址
-                  .filter((url: string) => !!url && url.includes('//'));
+    .concat([...$("link").map((_, el) => $(el).attr('href'))])
+    // 筛选出所有公网资源地址
+    .filter((url: string) => !!url && url.includes('//'));
 
   // 模板中所有的图片资源
   const imageURLs = analysisAllUrl(template).filter(url => url.includes('/mfs/files/'));
 
   let globalDeps: ILocalizationInfo[] = null;
-  if(needLocalization) {
+  if (needLocalization) {
     // 获取所有本地化需要的信息
     globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfo(url, 'public/')));
     // 把模板中的 CDN 地址替换成本地化后的地址
     resourceURLs.forEach((url, index) => {
       const localUrl = `./${globalDeps[index].path}/${globalDeps[index].name}`;
-      template = template.replace(new RegExp(`${url}`,'g'), localUrl);
+      template = template.replace(new RegExp(`${url}`, 'g'), localUrl);
     })
   }
 
@@ -606,7 +657,7 @@ async function resourceLocalization(template: string, needLocalization: boolean)
   // 把模板中的图片资源地址替换成本地化后的地址
   imageURLs.forEach((url, index) => {
     const localUrl = `./${images[index].path}/${images[index].name}`;
-    template = template.replace(new RegExp(`${url}`,'g'), localUrl);
+    template = template.replace(new RegExp(`${url}`, 'g'), localUrl);
   })
 
   return { template, globalDeps, images };
@@ -620,9 +671,9 @@ async function resourceLocalization(template: string, needLocalization: boolean)
  */
 async function getLocalizationInfo(url: string, pathPrefix: string, config?: AxiosRequestConfig<any>): Promise<ILocalizationInfo> {
   const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000, ...config });
-  const path = `${pathPrefix}${url.split('//')[1].split('/').slice(1,-1).join('/')}`;
+  const path = `${pathPrefix}${url.split('//')[1].split('/').slice(1, -1).join('/')}`;
   const name = url.split('/').slice(-1)[0];
-  return { 
+  return {
     path,
     name,
     content: content as string
@@ -634,6 +685,6 @@ async function getLocalizationInfo(url: string, pathPrefix: string, config?: Axi
  * @param str 被处理的文本
  * @returns 文本中的所有 URL
  */
-function analysisAllUrl(str:string) {
+function analysisAllUrl(str: string) {
   return str.match(/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g);
 }

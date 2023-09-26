@@ -22,7 +22,7 @@ export default ({
     form
       .validateFields()
       .then((values) => {
-        let { mode, envType, commitInfo } = values
+        let { envType, commitInfo } = values
         if (mode === EnumMode.CUSTOM) {
           envType = USE_CUSTOM_HOST
         }

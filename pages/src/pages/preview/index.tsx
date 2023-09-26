@@ -6,11 +6,11 @@ import { ComlibRtUrl, ChartsRtUrl, BasicRtUrl, PC_NORMAL_COM_LIB, CHARS_COM_LIB,
 import { getQueryString, shapeUrlByEnv } from './../../utils'
 import { runJs } from './../../utils/runJs'
 import { PreviewStorage } from './../../utils/previewStorage'
-import { USE_CUSTOM_HOST } from '../home/app-config';
+
 const { render: renderUI } = (window as any)._mybricks_render_web
 
 const fileId = getQueryString('fileId')
-
+const USE_CUSTOM_HOST = '__USE_CUSTOM_HOST__'
 const previewStorage = new PreviewStorage({ fileId })
 
 let { dumpJson, comlibs, hasPermissionFn, executeEnv, appConfig, envList, MYBRICKS_HOST } = previewStorage.getPreviewPageData()
