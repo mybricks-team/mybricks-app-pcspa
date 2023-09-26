@@ -229,7 +229,7 @@ export default class PcPageService {
             needCombo,
             comboScriptText,
             customPublishApi,
-            images: images.map(({ content, name, path }) => ({ content, path: `${path}/${name}` })),
+            images: images.map(({ content, name, path }) => ({ content, path: `/${path}/${name}` })),
             globalDeps: globalDeps?.map(({ content, name, path }) => ({ content, path: `${path}/${name}` })),
           })
         }
@@ -268,19 +268,19 @@ export default class PcPageService {
             Logger.info("[publish] 公共依赖上传成功！");
           }
 
-          if (images) {
-            Logger.info("[publish] 正在尝试上传图片资源...");
-            // 将所有的图片资源上传到对应位置
-            await Promise.all(images.map(({ content, path, name }) => {
-              return API.Upload.staticServer({
-                content,
-                folderPath: `${folderPath}/${envType || 'prod'}/${path}`,
-                fileName: name,
-                noHash: true,
-              })
-            }))
-            Logger.info("[publish] 图片资源上传成功！");
-          }
+          // if (images) {
+          //   Logger.info("[publish] 正在尝试上传图片资源...");
+          //   // 将所有的图片资源上传到对应位置
+          //   await Promise.all(images.map(({ content, path, name }) => {
+          //     return API.Upload.staticServer({
+          //       content,
+          //       folderPath: path,
+          //       fileName: name,
+          //       noHash: true,
+          //     })
+          //   }))
+          //   Logger.info("[publish] 图片资源上传成功！");
+          // }
 
           if (needCombo) {
             Logger.info("[publish] 正在尝试上传 needCombo...");
@@ -641,11 +641,11 @@ async function resourceLocalization(template: string, needLocalization: boolean)
 
   // 模板中所有的图片资源
   const imageURLs = analysisAllUrl(template).filter(url => url.includes('/mfs/files/'));
-
+  
   let globalDeps: ILocalizationInfo[] = null;
   if (needLocalization) {
-    // 获取所有本地化需要的信息
-    globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfo(url, 'public/')));
+    // 获取所有本地化需要除了图片以外的信息，这些信息目前存储在相对位置
+    globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfo(url, `public/${url.split('//')[1].split('/').slice(1, -1).join('/')}`)));
     // 把模板中的 CDN 地址替换成本地化后的地址
     resourceURLs.forEach((url, index) => {
       const localUrl = `./${globalDeps[index].path}/${globalDeps[index].name}`;
@@ -653,10 +653,11 @@ async function resourceLocalization(template: string, needLocalization: boolean)
     })
   }
 
-  const images = await Promise.all(imageURLs.map(url => getLocalizationInfo(url, 'images/', { responseType: 'arraybuffer' })))
+  // 图片放在固定位置，方便配置 nginx
+  const images = await Promise.all(imageURLs.map(url => getLocalizationInfo(url, `/mfs/files/${url.split('/mfs/files/')[1].split('/').slice(0, -1).join('/')}`, { responseType: 'arraybuffer' })))
   // 把模板中的图片资源地址替换成本地化后的地址
   imageURLs.forEach((url, index) => {
-    const localUrl = `./${images[index].path}/${images[index].name}`;
+    const localUrl = `${images[index].path}/${images[index].name}`;
     template = template.replace(new RegExp(`${url}`, 'g'), localUrl);
   })
 
@@ -669,9 +670,8 @@ async function resourceLocalization(template: string, needLocalization: boolean)
  * @param pathPrefix 本地化后相对地址的前缀
  * @returns 本地化相关信息
  */
-async function getLocalizationInfo(url: string, pathPrefix: string, config?: AxiosRequestConfig<any>): Promise<ILocalizationInfo> {
+async function getLocalizationInfo(url: string, path:string, config?: AxiosRequestConfig<any>): Promise<ILocalizationInfo> {
   const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000, ...config });
-  const path = `${pathPrefix}${url.split('//')[1].split('/').slice(1, -1).join('/')}`;
   const name = url.split('/').slice(-1)[0];
   return {
     path,
