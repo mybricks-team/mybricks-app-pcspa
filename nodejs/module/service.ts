@@ -229,7 +229,7 @@ export default class PcPageService {
             needCombo,
             comboScriptText,
             customPublishApi,
-            images: images.map(({ content, name, path }) => ({ content, path: `/${path}/${name}` })),
+            images: images.map(({ content, name, path }) => ({ content, path: `${path}/${name}` })),
             globalDeps: globalDeps?.map(({ content, name, path }) => ({ content, path: `${path}/${name}` })),
           })
         }
@@ -654,10 +654,10 @@ async function resourceLocalization(template: string, needLocalization: boolean)
   }
 
   // 图片放在固定位置，方便配置 nginx
-  const images = await Promise.all(imageURLs.map(url => getLocalizationInfo(url, `/mfs/files/${url.split('/mfs/files/')[1].split('/').slice(0, -1).join('/')}`, { responseType: 'arraybuffer' })))
+  const images = await Promise.all(imageURLs.map(url => getLocalizationInfo(url, `mfs/files/${url.split('/mfs/files/')[1].split('/').slice(0, -1).join('/')}`, { responseType: 'arraybuffer' })))
   // 把模板中的图片资源地址替换成本地化后的地址
   imageURLs.forEach((url, index) => {
-    const localUrl = `${images[index].path}/${images[index].name}`;
+    const localUrl = `/${images[index].path}/${images[index].name}`;
     template = template.replace(new RegExp(`${url}`, 'g'), localUrl);
   })
 
