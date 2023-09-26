@@ -121,7 +121,7 @@ export default class PcPageService {
       /** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
       const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
 
-      Logger.info("[publish] domainName is:", domainName);
+      Logger.info(`[publish] domainName is: ${domainName}`);
 
       const themesStyleStr = this._genThemesStyleStr(json)
 
@@ -132,7 +132,7 @@ export default class PcPageService {
         type: envType
       }))?.[0];
 
-      Logger.info("[publish] getLatestPub ok-", latestPub);
+      Logger.info(`[publish] getLatestPub ok- ${JSON.stringify(latestPub, null, 2)}`);
 
       const version = getNextVersion(latestPub?.version);
 
@@ -208,7 +208,7 @@ export default class PcPageService {
 
       const customPublishApi = await getCustomPublishApi()
 
-      Logger.info(`[publish] getCustomPublishApi=`, customPublishApi);
+      Logger.info(`[publish] getCustomPublishApi = ${customPublishApi}`);
 
       if (customPublishApi) {
         Logger.info("[publish] 有配置发布集成接口，尝试向发布集成接口推送数据...");
@@ -307,7 +307,7 @@ export default class PcPageService {
             publishMaterialInfo.url = publishMaterialInfo.url.replace('https', 'http')
           }
 
-          Logger.info("[publish] 向静态服务推送数据成功！", publishMaterialInfo);
+          Logger.info(`[publish] 向静态服务推送数据成功！ ${JSON.stringify(publishMaterialInfo, null, 2)}`);
         }
         catch (e) {
           Logger.error("[publish] 向静态服务推送数据失败！");
@@ -359,11 +359,11 @@ export default class PcPageService {
     let permissions = []
 
     if (json?.permissions) {
-      json?.permissions?.forEach(item => {
+      json?.permissions.forEach(item => {
         permissions.push({
-          code: item?.register?.code,
-          title: item?.register?.title,
-          remark: item?.register?.remark,
+          code: item.register.code,
+          title: item.register.title,
+          remark: item.register.remark,
         })
       })
     }
@@ -395,8 +395,8 @@ export default class PcPageService {
       }
     }).then(res => res.data)
       .catch(e => {
-        Logger.error(`发布集成接口出错: ${e.message}`);
-        throw new Error(`发布集成接口出错: ${e.message}`);
+        Logger.error(`发布集成接口出错: ${e.message}`, e);
+        throw new Error(`发布集成接口出错: ${e.message}`)
       });
     if (code !== 1) {
         Logger.error(`发布集成接口出错: ${message}`);
