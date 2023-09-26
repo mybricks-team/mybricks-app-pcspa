@@ -132,7 +132,7 @@ export default class PcPageService {
         type: envType
       }))?.[0];
 
-      Logger.info(`[publish] getLatestPub ok- ${JSON.stringify(latestPub, null, 2)}`);
+      Logger.info(`[publish] getLatestPub ok`);
 
       const version = getNextVersion(latestPub?.version);
 
