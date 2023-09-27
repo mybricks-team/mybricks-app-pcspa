@@ -26,12 +26,12 @@ jobs:
       - name: Run CI based on commit message
         run: |
           npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
-          if [ ${{ github.ref }} == 'refs/heads/ci-service-up' ]; then
+          if [ ${{ github.ref }} == 'refs/heads/ci-service' ]; then
             echo "编译带服务器更新的app"
             npm run publishToNpm:serviceUpdate
-          elif [ ${{ github.ref }} == 'refs/heads/ci-no-service-up' ]; then
+          elif [ ${{ github.ref }} == 'refs/heads/ci-no-service' ]; then
             echo "编译不带服务器更新的app"
             npm run publishToNpm
           else
-            echo "没有发现CI打包的命令"
+            echo "没有触发打包，请检测分支"
           fi
