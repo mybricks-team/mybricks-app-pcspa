@@ -2,12 +2,12 @@ name: build and publish mybricks-pcspa
 on:
   push:
     branches:
-      - ci-service-up
-      - ci-no-service-up
+      - ci-service
+      - ci-no-service
   pull_request:
     branches:
-      - ci-service-up
-      - ci-no-service-up
+      - ci-service
+      - ci-no-service
 
 jobs:
   build:
