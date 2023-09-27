@@ -263,6 +263,7 @@ export default class PcPageService {
                 folderPath: `${folderPath}/${envType || 'prod'}/${path}`,
                 fileName: name,
                 noHash: true,
+                domainName
               })
             }))
             Logger.info("[publish] 公共依赖上传成功！");
@@ -288,7 +289,8 @@ export default class PcPageService {
               content: comboScriptText,
               folderPath: `${folderPath}/${envType || 'prod'}`,
               fileName: comlibRtName,
-              noHash: true
+              noHash: true,
+              domainName
             })
             Logger.info("[publish] needCombo 上传成功！");
           }
@@ -299,7 +301,8 @@ export default class PcPageService {
             content: template,
             folderPath: `${folderPath}/${envType || 'prod'}`,
             fileName,
-            noHash: true
+            noHash: true,
+            domainName
           })
           Logger.info("[publish] template 上传成功！");
 
