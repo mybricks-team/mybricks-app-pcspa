@@ -8,8 +8,8 @@
     "watch:testweb": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://testweb.manateeai.com node nodejs/index.js'",
     "build:fe": "cd pages && npm run build",
     "publishToNpm:offline": "cd pages && npm run build:offline && cd ../ && node sync_offline.js",
-    "publishToNpm:serviceUpdate": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world",
-    "publishToNpm": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world --noServiceUpdate",
+    "publishToNpm:serviceUpdate": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && npm install && node sync.js --origin=https://my.mybricks.world",
+    "publishToNpm": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && npm install && node sync.js --origin=https://my.mybricks.world --noServiceUpdate",
     "publishToNpm:beta": "npm run build:fe && npm publish --tag beta --registry=https://registry.npmjs.org --access=public && node sync.js --origin=https://my.mybricks.world"
   },
   "keywords": [
