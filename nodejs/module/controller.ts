@@ -32,10 +32,12 @@ export default class PcPageController {
     }
     try {
       Logger.info("[publish] 调用发布接口");
+      const startTime = Date.now();
 
       const result = await this.service.publish(req, { json, userId, fileId, envType, commitInfo });
 
       Logger.info("[publish] 发布成功！");
+      Logger.info(`[publish] 发布时长：${String((Date.now() - startTime) / 1000)}s`);
       return {
         code: 1,
         data: result,

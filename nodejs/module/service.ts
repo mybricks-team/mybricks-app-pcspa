@@ -121,7 +121,7 @@ export default class PcPageService {
       /** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
       const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
 
-      Logger.info("[publish] domainName is:", domainName);
+      Logger.info(`[publish] domainName is: ${domainName}`);
 
       const themesStyleStr = this._genThemesStyleStr(json)
 
@@ -132,7 +132,7 @@ export default class PcPageService {
         type: envType
       }))?.[0];
 
-      Logger.info("[publish] getLatestPub ok-", latestPub);
+      Logger.info(`[publish] getLatestPub ok`);
 
       const version = getNextVersion(latestPub?.version);
 
@@ -181,17 +181,17 @@ export default class PcPageService {
       let globalDeps: ILocalizationInfo[];
       let images: ILocalizationInfo[];
       try {
-        Logger.info("[publish] 正在尝试公网资源本地化...")
-        // 将模板中所有公网资源本地化
+        Logger.info("[publish] 正在尝试资源本地化...")
+        // 将模板中所有资源本地化
         const { globalDeps: _globalDeps, images: _images, template: _template } = await resourceLocalization(template, needLocalization);
         globalDeps = _globalDeps;
         images = _images;
         template = _template;
-        Logger.info("[publish] 公网资源本地化成功！")
+        Logger.info("[publish] 资源本地化成功！")
       }
       catch (e) {
-        Logger.error("[publish] 公网资源本地化失败: ", e);
-        throw new Error('公网资源本地化失败！');
+        Logger.error("[publish] 资源本地化失败: ", e);
+        throw new Error('资源本地化失败！');
       }
 
       let comboScriptText = '';
@@ -208,7 +208,7 @@ export default class PcPageService {
 
       const customPublishApi = await getCustomPublishApi()
 
-      Logger.info("[publish] getCustomPublishApi=", customPublishApi);
+      Logger.info(`[publish] getCustomPublishApi = ${customPublishApi}`);
 
       if (customPublishApi) {
         Logger.info("[publish] 有配置发布集成接口，尝试向发布集成接口推送数据...");
@@ -235,7 +235,7 @@ export default class PcPageService {
         }
         catch (e) {
           Logger.error("[publish] 推送数据失败: ", e);
-          throw new Error('推送数据失败！');
+          throw e;
         }
 
         Logger.info("[publish] 推送数据成功！");
@@ -307,7 +307,7 @@ export default class PcPageService {
             publishMaterialInfo.url = publishMaterialInfo.url.replace('https', 'http')
           }
 
-          Logger.info("[publish] 向静态服务推送数据成功！", publishMaterialInfo);
+          Logger.info(`[publish] 向静态服务推送数据成功！ ${JSON.stringify(publishMaterialInfo, null, 2)}`);
         }
         catch (e) {
           Logger.error("[publish] 向静态服务推送数据失败！");
@@ -395,10 +395,12 @@ export default class PcPageService {
       }
     }).then(res => res.data)
       .catch(e => {
+        Logger.error(`[publish] 发布集成接口出错: ${e.message}`, e);
         throw new Error(`发布集成接口出错: ${e.message}`)
       });
     if (code !== 1) {
-      throw new Error(`发布集成接口出错: ${message}`)
+        Logger.error(`[publish] 发布集成接口出错: ${message}`);
+        throw new Error(`发布集成接口出错: ${message}`)
     }
 
     return data
@@ -640,7 +642,7 @@ async function resourceLocalization(template: string, needLocalization: boolean)
     .filter((url: string) => !!url && url.includes('//'));
 
   // 模板中所有的图片资源
-  const imageURLs = analysisAllUrl(template).filter(url => url.includes('/mfs/files/'));
+  const imageURLs = [...new Set(analysisAllUrl(template).filter(url => url.includes('/mfs/files/')))];
   
   let globalDeps: ILocalizationInfo[] = null;
   if (needLocalization) {
@@ -654,14 +656,28 @@ async function resourceLocalization(template: string, needLocalization: boolean)
   }
 
   // 图片放在固定位置，方便配置 nginx
-  const images = await Promise.all(imageURLs.map(url => getLocalizationInfo(url, `/mfs/files/${url.split('/mfs/files/')[1].split('/').slice(0, -1).join('/')}`, { responseType: 'arraybuffer' })))
+  let images = await Promise.all(
+    imageURLs.map(
+      (url) =>
+        getLocalizationInfo(
+          url,
+          `mfs/files/${url
+            .split("/mfs/files/")[1]
+            .split("/")
+            .slice(0, -1)
+            .join("/")}`,
+          { responseType: "arraybuffer", withoutError: true }
+        )
+    )
+  );
+
   // 把模板中的图片资源地址替换成本地化后的地址
   imageURLs.forEach((url, index) => {
-    const localUrl = `${images[index].path}/${images[index].name}`;
+    const localUrl = images[index] ? `/${images[index].path}/${images[index].name}` : '';
     template = template.replace(new RegExp(`${url}`, 'g'), localUrl);
   })
 
-  return { template, globalDeps, images };
+  return { template, globalDeps, images: images.filter(img => !!img) };
 }
 
 /**
@@ -670,13 +686,16 @@ async function resourceLocalization(template: string, needLocalization: boolean)
  * @param pathPrefix 本地化后相对地址的前缀
  * @returns 本地化相关信息
  */
-async function getLocalizationInfo(url: string, path:string, config?: AxiosRequestConfig<any>): Promise<ILocalizationInfo> {
-  const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000, ...config });
-  const name = url.split('/').slice(-1)[0];
-  return {
-    path,
-    name,
-    content: content as string
+async function getLocalizationInfo(url: string, path:string, config?: AxiosRequestConfig<any> & { withoutError: boolean }): Promise<ILocalizationInfo> {
+  const { withoutError, ...axiosConfig } = config || {}
+  try {
+    const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000, ...axiosConfig });
+    const name = url.split('/').slice(-1)[0];
+    return { path, name, content }
+  } catch (e) {
+    Logger.error(`[publish] 获取资源失败: ${url}`, e);
+    if(withoutError) return undefined;
+    else throw e;
   }
 }
 
