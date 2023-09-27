@@ -59,7 +59,7 @@ export default function MyDesigner({ appData }) {
     }
   }
 
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.25/index.min.js'
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.27/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
