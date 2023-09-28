@@ -492,12 +492,13 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
           } else {
             return plugin.callConnector({ ...connector }, newParams, {
               ...connectorConfig,
-              before: options => {
-                return {
-                  ...options,
-                  url: shapeUrlByEnv(envList, ctx.executeEnv, options.url, ctx.MYBRICKS_HOST)
-                }
-              }
+              before: connector.connectorName === '@mybricks/plugins/service'
+                ? options => {
+                  return {
+                    ...options,
+                    url: shapeUrlByEnv(envList, ctx.executeEnv, options.url, ctx.MYBRICKS_HOST)
+                  }
+                } : null
             });
           }
         },
