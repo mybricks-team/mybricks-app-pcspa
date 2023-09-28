@@ -21,24 +21,24 @@ export const PC_COMMON_MAP = {
 export const PC_NORMAL_COM_LIB = {
   id: "7632",
   namespace: 'mybricks.normal-pc',
-  editJs: "https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
-  rtJs: "https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
+  editJs: "./public/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
+  rtJs: "./public/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
   version: '1.2.19'
 }
 
 export const CHARS_COM_LIB = {
   id: "5952",
   namespace: 'mybricks.normal-pc-chart',
-  editJs: 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/5952_1.0.1/2023-07-25_22-02-32/edit.js',
-  rtJs: 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/5952_1.0.1/2023-07-25_22-02-32/rt.js',
+  editJs: './public/comlibs/5952_1.0.1/2023-07-25_22-02-32/edit.js',
+  rtJs: './public/comlibs/5952_1.0.1/2023-07-25_22-02-32/rt.js',
   version: '1.0.1'
 }
 
 export const BASIC_COM_LIB = {
   id: "7182",
   namespace: 'mybricks.basic-comlib',
-  editJs: 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7182_1.0.29/2023-07-25_22-04-55/edit.js',
-  rtJs: 'https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7182_1.0.29/2023-07-25_22-04-55/rt.js',
+  editJs: './public/comlibs/7182_1.0.29/2023-07-25_22-04-55/edit.js',
+  rtJs: './public/comlibs/7182_1.0.29/2023-07-25_22-04-55/rt.js',
   version: '1.0.29'
 }
 
