@@ -11,6 +11,7 @@ import { load } from 'cheerio';
 import { transform } from './transform'
 const FormData = require("form-data");
 import { Logger } from '@mybricks/rocker-commons'
+import * as PublishTemplateConstants from './constants/publish-template-constants'
 
 /** 本地化信息 */
 interface ILocalizationInfo {
@@ -176,6 +177,7 @@ export default class PcPageService {
         .replace(`"--envList--"`, JSON.stringify(envList))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
 
+      /** 是否本地化发布 */
       const needLocalization = await getCustomNeedLocalization();
 
       let globalDeps: ILocalizationInfo[];
@@ -639,22 +641,35 @@ async function resourceLocalization(template: string, needLocalization: boolean)
   const $ = load(template);
 
   // 所有的公网资源都在模板中写有，间接依赖的公网资源由依赖自身处理
-  const resourceURLs = [...$("script").map((_, el) => $(el).attr('src'))]
+  const flags = [...$("script").map((_, el) => $(el).attr('src'))]
     .concat([...$("link").map((_, el) => $(el).attr('href'))])
     // 筛选出所有公网资源地址
-    .filter((url: string) => !!url && url.includes('//'));
+    .filter((url: string) => !!url && ( url.includes('--%') ))
+
+  const resourceURLs = flags.map((url) => {
+    const key = url.match(/--% (\w+?) --/)[1];
+    if(!PublishTemplateConstants[key]?.APPRelativeAddress) {
+      Logger.error(`[publish] 找不到模板标志位 ${key} 对应的资源地址`);
+      return "";
+    }
+    if(needLocalization) {
+      return PublishTemplateConstants[key].APPRelativeAddress;
+    } else {
+      return PublishTemplateConstants[key].CDN;
+    }
+  });
 
   // 模板中所有的图片资源
   const imageURLs = [...new Set(analysisAllUrl(template).filter(url => url.includes('/mfs/files/')))];
-  
+
   let globalDeps: ILocalizationInfo[] = null;
   if (needLocalization) {
     // 获取所有本地化需要除了图片以外的信息，这些信息目前存储在相对位置
-    globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfo(url, `public/${url.split('//')[1].split('/').slice(1, -1).join('/')}`)));
+    globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfoByLocal(url, url)));
     // 把模板中的 CDN 地址替换成本地化后的地址
-    resourceURLs.forEach((url, index) => {
+    flags.forEach((flag, index) => {
       const localUrl = `./${globalDeps[index].path}/${globalDeps[index].name}`;
-      template = template.replace(new RegExp(`${url}`, 'g'), localUrl);
+      template = template.replace(new RegExp(`${flag}`, 'g'), localUrl);
     })
   }
 
@@ -662,7 +677,7 @@ async function resourceLocalization(template: string, needLocalization: boolean)
   let images = await Promise.all(
     imageURLs.map(
       (url) =>
-        getLocalizationInfo(
+      getLocalizationInfoByNetwork(
           url,
           `mfs/files/${url
             .split("/mfs/files/")[1]
@@ -689,12 +704,26 @@ async function resourceLocalization(template: string, needLocalization: boolean)
  * @param pathPrefix 本地化后相对地址的前缀
  * @returns 本地化相关信息
  */
-async function getLocalizationInfo(url: string, path:string, config?: AxiosRequestConfig<any> & { withoutError: boolean }): Promise<ILocalizationInfo> {
-  const { withoutError, ...axiosConfig } = config || {}
+async function getLocalizationInfoByNetwork(url: string, path: string, config?: AxiosRequestConfig<any> & { withoutError: boolean }): Promise<ILocalizationInfo> {
+  const { withoutError, ...axiosConfig } = config || {};
   try {
     const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000, ...axiosConfig });
     const name = url.split('/').slice(-1)[0];
     return { path, name, content }
+  } catch (e) {
+    Logger.error(`[publish] 获取资源失败: ${url}`, e);
+    if(withoutError) return undefined;
+    else throw e;
+  }
+}
+
+async function getLocalizationInfoByLocal(url: string, _path: string, config?: { withoutError: boolean }) {
+  const { withoutError } = config || {};
+  try {
+    const publishFilePath = path.resolve(__dirname, `./${url}`);
+    const content = fs.readFileSync(publishFilePath, 'utf8');
+    const name = url.split('/').slice(-1)[0];
+    return { path: _path, name, content }
   } catch (e) {
     Logger.error(`[publish] 获取资源失败: ${url}`, e);
     if(withoutError) return undefined;
