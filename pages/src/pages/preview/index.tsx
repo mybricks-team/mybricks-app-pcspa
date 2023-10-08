@@ -218,10 +218,14 @@ function Page({ props, hasPermissionFn }) {
           async callConnector(connector, params) {
             await promiseCustomConnector
             const plugin = window[connector.connectorName] || window['@mybricks/plugins/service'];
-            const newParams = executeEnv === USE_CUSTOM_HOST ? {
-              ...params,
-              MYBRICKS_HOST: { ...MYBRICKS_HOST },
-            } : params
+            let newParams = params;
+            if (executeEnv === USE_CUSTOM_HOST) {
+              if (params instanceof FormData) {
+                newParams.append('MYBRICKS_HOST', JSON.stringify(MYBRICKS_HOST));
+              } else {
+                newParams = { ...params, MYBRICKS_HOST: { ...MYBRICKS_HOST } };
+              }
+            }
             if (plugin) {
               const curConnector = connector.script
                 ? connector

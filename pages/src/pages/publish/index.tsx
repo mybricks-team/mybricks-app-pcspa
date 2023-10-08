@@ -205,11 +205,15 @@ function Page({ props }) {
             return
           }
         }
+        let newParams = params;
         //@ts-ignore
-        const newParams = executeEnv === USE_CUSTOM_HOST ? {
-          ...params,
-          MYBRICKS_HOST: { ...MYBRICKS_HOST },
-        } : params
+        if (executeEnv === USE_CUSTOM_HOST) {
+          if (params instanceof FormData) {
+            newParams.append('MYBRICKS_HOST', JSON.stringify(MYBRICKS_HOST));
+          } else {
+            newParams = { ...params, MYBRICKS_HOST: { ...MYBRICKS_HOST } };
+          }
+        }
         if (plugin) {
           /** 兼容云组件，云组件会自带 script */
           const curConnector = connector.script

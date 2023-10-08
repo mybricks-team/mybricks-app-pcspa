@@ -548,10 +548,14 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
           if (ctx.executeEnv === USE_CUSTOM_HOST && !ctx.MYBRICKS_HOST.default) {
             throw new Error(`自定义域名必须设置default域名`)
           }
-          const newParams = ctx.executeEnv === USE_CUSTOM_HOST ? {
-            ...params,
-            MYBRICKS_HOST: { ...ctx.MYBRICKS_HOST },
-          } : params
+          let newParams = params;
+          if (ctx.executeEnv === USE_CUSTOM_HOST) {
+            if (params instanceof FormData) {
+              newParams.append('MYBRICKS_HOST', JSON.stringify(ctx.MYBRICKS_HOST));
+            } else {
+              newParams = { ...params, MYBRICKS_HOST: { ...ctx.MYBRICKS_HOST } };
+            }
+          }
           if (!plugin) {
             /** 启动 Mock */
             if (connectorConfig?.openMock) {

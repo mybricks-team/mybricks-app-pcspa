@@ -2,10 +2,12 @@ name: build and publish mybricks-pcspa
 on:
   push:
     branches:
-      - ci
+      - ci-service
+      - ci-no-service
   pull_request:
     branches:
-      - ci
+      - ci-service
+      - ci-no-service
 
 jobs:
   build:
@@ -17,18 +19,19 @@ jobs:
       - name: Check commit message
         id: check_commit
         run: echo "COMMIT_MESSAGE=$(git log -1 --pretty=format:'%B')" >> $GITHUB_ENV
+      - name: save-token
+        id: save_token
+        run: echo "NPM_TOKEN=${{ secrets.NPM_TOKEN }}" >> $GITHUB_ENV
 
       - name: Run CI based on commit message
-        env: # Or as an environment variable
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
-          if [[ $COMMIT_MESSAGE == *"ci serviceUpdate"* ]]; then
+          if [ ${{ github.ref }} == 'refs/heads/ci-service' ]; then
             echo "编译带服务器更新的app"
             npm run publishToNpm:serviceUpdate
-          elif [[ $COMMIT_MESSAGE == *"ci"* ]]; then
+          elif [ ${{ github.ref }} == 'refs/heads/ci-no-service' ]; then
             echo "编译不带服务器更新的app"
             npm run publishToNpm
           else
-            echo "没有发现CI打包的命令"
+            echo "没有触发打包，请检测分支"
           fi
