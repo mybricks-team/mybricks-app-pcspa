@@ -306,7 +306,7 @@ export default class PcPageService {
             noHash: true,
             domainName
           })
-          Logger.info("[publish] template 上传成功！");
+          Logger.info(`[publish] template 上传成功！地址：${publishMaterialInfo.url}`);
 
           if (publishMaterialInfo?.url?.startsWith('https')) {
             publishMaterialInfo.url = publishMaterialInfo.url.replace('https', 'http')
