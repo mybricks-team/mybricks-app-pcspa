@@ -741,5 +741,5 @@ async function getLocalizationInfoByLocal(url: string, _path: string, config?: {
  * @returns 文本中的所有 URL
  */
 function analysisAllUrl(str: string) {
-  return str.match(/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g);
+  return str.match(/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g) || [];
 }
