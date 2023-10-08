@@ -659,9 +659,6 @@ async function resourceLocalization(template: string, needLocalization: boolean)
     }
   });
 
-  // 模板中所有的图片资源
-  const imageURLs = [...new Set(analysisAllUrl(template).filter(url => url.includes('/mfs/files/')))];
-
   let globalDeps: ILocalizationInfo[] = null;
   if (needLocalization) {
     // 获取所有本地化需要除了图片以外的信息，这些信息目前存储在相对位置
@@ -671,7 +668,14 @@ async function resourceLocalization(template: string, needLocalization: boolean)
       const localUrl = `./${globalDeps[index].path}/${globalDeps[index].name}`;
       template = template.replace(new RegExp(`${flag}`, 'g'), localUrl);
     })
+  } else {
+    flags.forEach((flag, index) => {
+      template = template.replace(new RegExp(`${flag}`, 'g'), resourceURLs[index]);
+    })
   }
+
+  // 模板中所有的图片资源
+  const imageURLs = [...new Set(analysisAllUrl(template).filter(url => url.includes('/mfs/files/')))];
 
   // 图片放在固定位置，方便配置 nginx
   let images = await Promise.all(
