@@ -1,13 +1,13 @@
 {
   "name": "mybricks-app-pcspa",
-  "version": "1.1.46",
+  "version": "1.1.47",
   "description": "中后台类PC页面搭建",
   "scripts": {
     "watch:be-local": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://localhost:3100 node nodejs/index.js'",
     "watch:be": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=https://my.mybricks.world node nodejs/index.js'",
     "watch:testweb": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://testweb.manateeai.com node nodejs/index.js'",
     "build:fe": "cd pages && npm run build",
-    "publishToNpm:offline": "cd pages && npm run build:offline && cd ../ && node sync_offline.js",
+    "publishToNpm:offline": "npm i && cd pages && npm run build:offline && cd ../ && node sync_offline.js",
     "publishToNpm:serviceUpdate": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world",
     "publishToNpm": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world --noServiceUpdate",
     "publishToNpm:beta": "npm run build:fe && npm publish --tag beta --registry=https://registry.npmjs.org --access=public && node sync.js --origin=https://my.mybricks.world"
@@ -27,7 +27,7 @@
   "dependencies": {
     "@babel/standalone": "^7.22.17",
     "@mybricks/rocker-dao": "^0.0.6",
-    "@mybricks/sdk-for-app": "^0.1.85",
+    "@mybricks/sdk-for-app": "^0.1.96",
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
@@ -51,7 +51,7 @@
   },
   "mybricks": {
     "extName": "pc-page",
-    "icon": "https://assets.mybricks.world/icon/pcpage.svg",
+    "icon": "data:image/svg+xml;base64,PHN2ZyBjbGFzc05hbWU9Imljb24iIHZpZXdCb3g9IjAgMCAxMDI0IDEwMjQiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwLWlkPSIzOTc1NiIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSI+PHBhdGggZD0iTTg2MS41IDE2Ni41SDIyMC42Yy0yOS41IDAtNTMuNCAyMy45LTUzLjQgNTMuNHY0MjcuMmMwIDI5LjUgMjMuOSA1My40IDUzLjQgNTMuNGgyNjd2ODAuMUgzNTQuMWMtMTQuNyAwLTI2LjcgMTItMjYuNyAyNi43VjgzNGg0MjcuMnYtMjYuN2MwLTE0LjctMTItMjYuNy0yNi43LTI2LjdINTk0LjV2LTgwLjFoMjY3YzI5LjUgMCA1My40LTIzLjkgNTMuNC01My40VjIxOS45YzAtMjkuNS0yMy45LTUzLjQtNTMuNC01My40ek01NjcuNyA2NDcuMWMtMC42IDE0LjctMTMgMjYuMi0yNy44IDI1LjYtMTMuOS0wLjYtMjUuMS0xMS43LTI1LjYtMjUuNi0wLjYtMTQuNyAxMC45LTI3LjIgMjUuNy0yNy43IDE0LjctMC42IDI3LjIgMTAuOSAyNy43IDI1LjcgMC4xIDAuNiAwLjEgMS4zIDAgMnogbTI5My44LTUzLjRIMjIwLjZWMjE5LjloNjQwLjh2MzczLjh6IiBmaWxsPSIjMjYzM0QyIiBwLWlkPSIzOTc1NyI+PC9wYXRoPjxwYXRoIGQ9Ik0zMzkuNyA1MjFjMS44IDAgMy42LTAuNyA1LTIuMWwxODAtMTgwYzIuOC0yLjggMi44LTcuMyAwLTEwLTIuOC0yLjgtNy4zLTIuOC0xMCAwbC0xODAgMTgwYy0yLjggMi44LTIuOCA3LjMgMCAxMCAxLjQgMS40IDMuMiAyLjEgNSAyLjF6TTU2OSA0OTMuNWMxLjggMCAzLjYtMC43IDUtMi4xbDE1Mi41LTE1Mi41YzIuOC0yLjggMi44LTcuMyAwLTEwLTIuOC0yLjgtNy4zLTIuOC0xMCAwTDU2NCA0ODEuNGMtMi44IDIuOC0yLjggNy4zIDAgMTAgMS40IDEuNCAzLjIgMi4xIDUgMi4xeiIgZmlsbD0iIzI2MzNEMiIgcC1pZD0iMzk3NTgiPjwvcGF0aD48L3N2Zz4=",
     "title": "PC页面",
     "setting": "setting.html",
     "groupSetting": "groupSetting.html"

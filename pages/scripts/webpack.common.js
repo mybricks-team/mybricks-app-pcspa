@@ -1,5 +1,6 @@
 const path = require('path')
 const webpack = require('webpack')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 module.exports = {
   entry: {
     ['index']: path.resolve(__dirname, '../src/pages/home/index.tsx'),
@@ -20,6 +21,11 @@ module.exports = {
       APP_VERSION: JSON.stringify(require('../../package.json').version),
       RENDERWEB_VERSION: JSON.stringify(require('../node_modules/@mybricks/render-web/package.json').version),
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: path.resolve(__dirname, '../templates/public'), to: "public" },
+      ],
+    })
   ],
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],

@@ -71,6 +71,6 @@ module.exports = merge(common, {
       filename: 'groupSetting.html',
       template: path.resolve(__dirname, '../templates/groupSetting.html'),
       chunks: ['groupSetting'],
-    }),
+    })
   ]
 })

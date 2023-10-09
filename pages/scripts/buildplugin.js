@@ -19,7 +19,7 @@ module.exports = class BuildPlugin {
 
       ['global.css', 'theme.css'].forEach((filename) => {
         fs.copyFileSync(path.resolve(templateCssDirPath, filename), path.resolve(assetsCssDirPath, filename))
-      })
+      });
     });
   }
 };
