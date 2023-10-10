@@ -4,7 +4,7 @@ import React from "react"
 import ReactDOM from "react-dom"
 import { message } from 'antd'
 import { PluginType } from '@/pages/setting/ConfigPlugin/type'
-import { USE_CUSTOM_HOST } from '@/pages/home/app-config'
+import { USE_CUSTOM_HOST } from '@/pages/home/constants'
 
 export function getApiUrl(uri) {
   return uri

@@ -17,6 +17,7 @@ import { runJs } from '../../utils/runJs'
 import axios from 'axios';
 import { shapeUrlByEnv } from '../../utils';
 import { EnumMode } from './components/PublishModal';
+import { USE_CUSTOM_HOST } from './constants';
 
 const defaultPermissionComments = `/**
 *
@@ -118,7 +119,6 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
   }
 }
 
-export const USE_CUSTOM_HOST = '__USE_CUSTOM_HOST__'
 const CUSTOM_HOST_TITLE = `自定义域名`
 
 const getExecuteEnvByMode = (debugMode, ctx, envList) => {

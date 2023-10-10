@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Modal, Select, Form, Radio, ModalProps } from "antd";
 import TextArea from "antd/lib/input/TextArea";
-import { USE_CUSTOM_HOST } from "../app-config";
+import { USE_CUSTOM_HOST } from "../constants";
 
 export enum EnumMode {
   DEFAULT,

@@ -12,7 +12,7 @@ import moment from 'moment'
 import { message } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
-import config, { USE_CUSTOM_HOST } from './app-config'
+import config from './app-config'
 import { fetchPlugins, removeBadChar } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
@@ -21,6 +21,7 @@ import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from 
 import PublishModal, { EnumMode } from './components/PublishModal'
 
 import css from './app.less'
+import { USE_CUSTOM_HOST } from './constants'
 
 // const DefaultUploadService = '/biz/uploadExternalFileLocal'
 
