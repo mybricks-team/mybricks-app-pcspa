@@ -60,6 +60,7 @@ export const comLibAdderFunc = ctx => (targetComlib) => {
         combo: true,
 	      title: '选择组件库',
         type: 'com_lib',
+        scene: "PC"
       },
       onSuccess: async ({ materials }: { materials: MaterialComlib[] }) => {
         /** 物料中心传过来的ID是物料中心ID，需要修改成组件本身的fileid */
