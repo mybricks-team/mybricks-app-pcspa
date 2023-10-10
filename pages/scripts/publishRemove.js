@@ -34,8 +34,9 @@ fs.rename(sourceFilePath + '/publish.html', targetFilePath + '/publish.html', (e
 });
 
 
-removeDir(targetPublicFilePath);
-
+if(fs.existsSync(targetPublicFilePath)) { // 删除 template 目录
+  removeDir(targetPublicFilePath);
+}
 // 复制目录
 fs.cp(sourceFilePath + '/public', targetPublicFilePath, { recursive: true }, (err) => {
   if (err) {
