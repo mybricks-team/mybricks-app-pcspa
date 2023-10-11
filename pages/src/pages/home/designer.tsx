@@ -60,7 +60,7 @@ export default function MyDesigner({ appData }) {
     }
   }
 
-  const designer = './public/designer-spa/1.3.30/index.min.js'
+  const designer = './public/designer-spa/1.3.31/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
