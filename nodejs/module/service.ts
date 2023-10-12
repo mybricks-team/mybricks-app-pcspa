@@ -640,7 +640,7 @@ function getNextVersion(version, max = 100) {
 async function resourceLocalization(template: string, needLocalization: boolean) {
 
   const localPublicInfos = LocalPublic['react'].map(info => {
-    if(needLocalization) {
+    if(!needLocalization) {
       info.path = info.CDN;
     }
     return info;
