@@ -4,6 +4,8 @@
   "description": "mybricks PC页面",
   "scripts": {
     "dev": "webpack serve --config ./scripts/webpack.dev.js",
+    "dev:react": "webpack serve --config ./packages/react/scripts/webpack.dev.js",
+    "dev:vue2": "webpack serve --config ./packages/vue2/scripts/webpack.dev.js",
     "build": "npm install && webpack --config ./scripts/webpack.prod.js && node ./scripts/publishRemove.js",
     "build:offline": "npm install && webpack --config ./scripts/webpack.offline.js && node ./scripts/publishRemove.js",
     "build-test": "webpack --config ./scripts/webpack.prod.js && node ./scripts/publishRemove.js"
@@ -26,6 +28,7 @@
     "@effortlessmotion/html-webpack-inline-source-plugin": "^1.0.3",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
     "@types/lodash": "^4.14.182",
+    "@types/react": "^18.2.28",
     "@types/react-dom": "^18.0.6",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",

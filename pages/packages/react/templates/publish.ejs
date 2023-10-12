@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <meta name="viewport" content="user-scalable=no,viewport-fit=cover"> -->
+    <meta name="referrer" content="no-referrer" />
+    <meta http-equiv="Access-Control-Allow-Origin" content="*" />
+   
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <link rel="stylesheet" href="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/antd.variable.min.css" />
+    <% } else { %>
+      <link rel="stylesheet" href="public/antd/antd@4.21.6.min.css" />
+    <% } %>
+
+    <title>--title--</title>
+
+    <!-- react about -->
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690446345009.react.18.0.0.production.min.js"></script>
+    <% } else { %>
+      <script src="public/react@18.0.0.production.min.js"></script>
+    <% } %>
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443341846.umd_react-dom.production.min.js"></script>
+    <% } else { %>
+      <script src="public/react-dom@18.0.0.production.min.js"></script>
+    <% } %>
+
+    <!-- antd -->
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444184854.4.21.6_antd.min.js"></script>
+    <% } else { %>
+      <script src="public/antd/antd@4.21.6.min.js"></script>
+    <% } %>
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <script src="//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>
+    <% } else { %>
+      <script src="public/antd/locale/zh_CN.js"></script>
+    <% } %>
+
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444248634.ant-design-icons_4.7.0_min.js"></script>
+    <% } else { %>
+      <script src="public/ant-design-icons@4.7.0.min.js"></script>
+    <% } %>
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444283932.ant-design_charts@1.2.14.min.js"></script>
+    <% } else { %>
+      <script src="public/ant-design-charts@1.2.14.min.js"></script>
+    <% } %>
+
+    <!-- moment -->
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443543399.2.29.4_moment.min.js"></script>
+    <% } else { %>
+      <script src="public/moment/moment@2.29.4.min.js"></script>
+    <% } %>
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443577599.2.29.4_locale_zh-cn.min.js"></script>
+    <% } else { %>
+      <script src="public/moment/locale/zh-cn.min.js"></script>
+    <% } %>
+
+    <!-- http-connector -->
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <script src="//f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.1.67/index.js"></script>
+    <% } else { %>
+      <script src="public/plugin-http-connector/1.1.67/index.js"></script>
+    <% } %>
+
+    <!-- domain-connector -->
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <script src="//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690445635042.mybricks_plugin-connector-domain@0.0.44.js"></script>
+    <% } else { %>
+      <script src="public/mybricks-plugin-connector-domain@0.0.44.min.js"></script>
+    <% } %>
+
+    <!-- render-web -->
+    <% if (htmlWebpackPlugin.options.target == 'cdn') { %>
+      <script src="//f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.1.95/index.min.js"></script>
+    <% } else { %>
+      <script src="public/render-web/1.1.95/index.min.js"></script>
+    <% } %>
+
+    -- plugin-runtime -- -- themes-style --
+  </head>
+
+  <body>
+    <div id="mybricks-page-root"></div>
+    -- comlib-rt --
+  </body>
+</html>
