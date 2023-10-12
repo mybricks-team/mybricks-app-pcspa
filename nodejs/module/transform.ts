@@ -111,7 +111,7 @@ const transform = (json: Record<string, any>) => {
       }));
     }
   });
-  json.scene = json.scenes.map(transformScene);
+  json.scenes = json.scenes.map(transformScene);
   return json;
 };
 
