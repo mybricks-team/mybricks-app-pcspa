@@ -10,8 +10,8 @@ import { generateComLib } from "./generateComLib";
 import { load } from 'cheerio';
 import { transform } from './transform'
 const FormData = require("form-data");
-import { Logger } from '@mybricks/rocker-commons'
-import * as PublishTemplateConstants from './constants/publish-template-constants'
+import { Logger } from '@mybricks/rocker-commons';
+import LocalPublic from './local-public';
 
 /** 本地化信息 */
 interface ILocalizationInfo {
@@ -638,40 +638,32 @@ function getNextVersion(version, max = 100) {
  * @param needLocalization CDN 资源是否需要本地化
  */
 async function resourceLocalization(template: string, needLocalization: boolean) {
-  const $ = load(template);
 
-  // 所有的公网资源都在模板中写有，间接依赖的公网资源由依赖自身处理
-  const flags = [...$("script").map((_, el) => $(el).attr('src'))]
-    .concat([...$("link").map((_, el) => $(el).attr('href'))])
-    // 筛选出所有公网资源地址
-    .filter((url: string) => !!url && ( url.includes('--%') ))
-
-  const resourceURLs = flags.map((url) => {
-    const key = url.match(/--% (\w+?) --/)[1];
-    if(!PublishTemplateConstants[key]?.APPRelativeAddress) {
-      Logger.error(`[publish] 找不到模板标志位 ${key} 对应的资源地址`);
-      return "";
-    }
+  const localPublicInfos = LocalPublic['react'].map(info => {
     if(needLocalization) {
-      return PublishTemplateConstants[key].APPRelativeAddress;
-    } else {
-      return PublishTemplateConstants[key].CDN;
+      info.path = info.CDN;
     }
+    return info;
   });
+
+  const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
+    switch(cur.tag) {
+      case "link":
+        pre += `<link rel="stylesheet" href="${cur.path}" />`
+        break;
+      case "script":
+        pre += `<script src="${cur.path}"></script>`
+        break;
+    }
+    return pre;
+  }, "")
+
+  template = template.replace("-- public --", publicHtmlStr);
 
   let globalDeps: ILocalizationInfo[] = null;
   if (needLocalization) {
     // 获取所有本地化需要除了图片以外的信息，这些信息目前存储在相对位置
-    globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfoByLocal(url, url)));
-    // 把模板中的 CDN 地址替换成本地化后的地址
-    flags.forEach((flag, index) => {
-      const localUrl = `./${globalDeps[index].path}/${globalDeps[index].name}`;
-      template = template.replace(new RegExp(`${flag}`, 'g'), localUrl);
-    })
-  } else {
-    flags.forEach((flag, index) => {
-      template = template.replace(new RegExp(`${flag}`, 'g'), resourceURLs[index]);
-    })
+    globalDeps = await Promise.all(localPublicInfos.map(info => getLocalizationInfoByLocal(info.path, info.path)));
   }
 
   // 模板中所有的图片资源
