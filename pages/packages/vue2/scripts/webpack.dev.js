@@ -6,7 +6,8 @@ const WebpackBar = require('webpackbar')
 const fs = require('fs')
 const pkg = require(path.join(__dirname, '../../../../package.json'))
 
-const appInfo = pkg.appConfig.react
+const appInfo = pkg.appConfig.vue2;
+
 module.exports = merge(common, {
   mode: 'development',
   devtool: 'inline-source-map',
@@ -17,13 +18,12 @@ module.exports = merge(common, {
     static: {
       directory: path.join(__dirname, '../templates'),
     },
-    port: 9001,
+    port: 9003,
     host: 'localhost',
     hot: true,
     client: {
       logging: 'info',
     },
-    // open: `http://localhost:8001`,
     proxy: [
       {
         context: ['/api/pcpage/publish', '/api/pcpage/upload'],

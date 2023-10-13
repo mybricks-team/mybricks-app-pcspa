@@ -1,6 +1,7 @@
 import { PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '@/constants'
 import { getQueryString, requireScript } from '@/utils'
 import { PreviewStorage } from '@/utils/previewStorage'
+import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
 import renderUI from './renderUI'
 
 const React = window.React;
@@ -60,7 +61,13 @@ function render(props) {
                     {
                         locale: antd.locale['zh_CN'].default,
                     },
-                    renderUI({ ...props, renderType: 'react' })
+                    renderUI({
+                        ...props, renderType: 'react', env: {
+                            callDomainModel(domainModel, type, params) {
+                                return callDomainHttp(domainModel, params, { action: type } as any);
+                            }
+                        }
+                    })
                 ),
                 (container ?? document).querySelector('#root')
             )

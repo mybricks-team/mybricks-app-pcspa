@@ -55,5 +55,13 @@
     "title": "PC页面",
     "setting": "setting.html",
     "groupSetting": "groupSetting.html"
+  },
+  "appConfig": {
+    "react": {
+      "name": "mybricks-app-pcspa"
+    },
+    "vue2": {
+      "name": "mybricks-app-pcspa-vue2"
+    }
   }
 }

@@ -1,4 +1,5 @@
 const { merge } = require('webpack-merge')
+const fs = require('fs')
 const path = require('path')
 const common = require('./webpack.common')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
@@ -6,6 +7,11 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const WebpackBar = require('webpackbar')
 const HtmlWebpackInlineSourcePlugin = require('@effortlessmotion/html-webpack-inline-source-plugin')
+const pkg = require(path.join(__dirname, '../../../../package.json'))
+
+const appInfo = pkg.appConfig.react
+
+const isOffline = process.argv[4] === 'offline'
 
 module.exports = merge(common, {
   mode: 'production',
@@ -29,6 +35,12 @@ module.exports = merge(common, {
       filename: 'index.html',
       template: path.resolve(__dirname, '../templates/index.html'),
       chunks: ['index'],
+
+      templateContent: isOffline ? ({ htmlWebpackPlugin }) => {
+        let content = fs.readFileSync(path.resolve(__dirname, '../templates/index.html'), 'utf-8')
+        content = content.replace('<!-- _APP_CONFIG_ -->', `<script>const _APP_CONFIG_ = {namespace: '${appInfo.name}'}</script>`)
+        return content
+      } : false
     }),
     new HtmlWebpackPlugin({
       filename: 'preview.html',

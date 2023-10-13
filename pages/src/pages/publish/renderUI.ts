@@ -2,11 +2,11 @@ import { getComs, shapeUrlByEnv, parseQuery, getRenderWeb } from '@/utils'
 import { runJs } from '@/utils/runJs'
 
 const USE_CUSTOM_HOST = '__USE_CUSTOM_HOST__'
-
-const projectJson = '--projectJson--' //replace it
-const projectId = '--slot-project-id--' //replace it
-const executeEnv = '--executeEnv--' //replace it
-const envList = "--envList--" //replace it
+/** template */
+const projectJson = '--projectJson--'
+const projectId = '--slot-project-id--'
+const executeEnv = '--executeEnv--'
+const envList = "--envList--"
 
 const root = ({ renderType, ...props }) => {
     const renderUI = getRenderWeb(renderType)

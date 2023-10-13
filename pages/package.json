@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "mybricks PC页面",
   "scripts": {
-    "dev": "webpack serve --config ./scripts/webpack.dev.js",
     "dev:react": "webpack serve --config ./packages/react/scripts/webpack.dev.js",
     "dev:vue2": "webpack serve --config ./packages/vue2/scripts/webpack.dev.js",
-    "build": "npm install && webpack --config ./scripts/webpack.prod.js && node ./scripts/publishRemove.js",
-    "build:offline": "npm install && webpack --config ./scripts/webpack.offline.js && node ./scripts/publishRemove.js",
-    "build-test": "webpack --config ./scripts/webpack.prod.js && node ./scripts/publishRemove.js"
+    "build:react": "webpack --config ./packages/react/scripts/webpack.prod.js",
+    "build:react-offline": "webpack --config ./packages/react/scripts/webpack.prod.js offline",
+    "build:vue2": "webpack --config ./packages/vue2/scripts/webpack.prod.js",
+    "build:vue2-offline": "webpack --config ./packages/vue2/scripts/webpack.prod.js offline"
   },
   "keywords": [
     "mybricks",

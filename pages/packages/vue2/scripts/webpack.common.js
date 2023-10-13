@@ -3,14 +3,14 @@ const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const pkg = require(path.join(__dirname, '../../../../package.json'))
 
-const appInfo = pkg.appConfig.react
+const appInfo = pkg.appConfig.vue2;
 module.exports = {
   entry: {
     ['index']: path.resolve(__dirname, '../../../src/pages/home/index.tsx'),
-    ['preview']: path.resolve(__dirname, '../../../src/pages/preview/react-entry.ts'),
+    ['preview']: path.resolve(__dirname, '../../../src/pages/preview/vue2-entry.ts'),
     ['setting']: path.resolve(__dirname, '../../../src/pages/setting/globalSettingIndex.tsx'),
     ['groupSetting']: path.resolve(__dirname, '../../../src/pages/setting/groupSettingIndex.tsx'),
-    ['publish']: path.resolve(__dirname, '../../../src/pages/publish/react-entry.ts'),
+    ['publish']: path.resolve(__dirname, '../../../src/pages/publish/vue2-entry.ts'),
   },
   output: {
     // 打包文件根目录
@@ -35,10 +35,7 @@ module.exports = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        {
-          from: path.join(__dirname, '../templates/public'),
-          to: path.join(__dirname, '../../../../nodejs/module/public')
-        },
+        { from: path.join(__dirname, '../templates/public'), to: path.join(__dirname, '../../../../nodejs/module') }
       ],
       options: {
         concurrency: 100,

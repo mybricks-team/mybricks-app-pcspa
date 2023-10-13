@@ -1,4 +1,3 @@
-import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
 import { getComs, getQueryString, shapeUrlByEnv, parseQuery, getRenderWeb } from '@/utils'
 import { runJs } from '@/utils/runJs'
 import { connectorLoader } from '@/utils/connectorLoader'
@@ -10,13 +9,14 @@ const USE_CUSTOM_HOST = '__USE_CUSTOM_HOST__'
 const previewStorage = new PreviewStorage({ fileId })
 const { dumpJson, hasPermissionFn, executeEnv, appConfig, envList, MYBRICKS_HOST } = previewStorage.getPreviewPageData();
 
-const root = ({ renderType, ...props }) => {
+const root = ({ renderType, env, ...props }) => {
     const renderUI = getRenderWeb(renderType)
     if (!renderUI) {
         throw Error(`找不到${renderType}渲染器`)
     }
     return renderUI(dumpJson, {
         env: {
+            ...env,
             renderCom(json, opts, coms) {
                 return renderUI(
                     json,
@@ -35,10 +35,6 @@ const root = ({ renderType, ...props }) => {
             i18n(title) {
                 //多语言
                 return title
-            },
-            /** 调用领域模型 */
-            callDomainModel(domainModel, type, params) {
-                return callDomainHttp(domainModel, params, { action: type } as any);
             },
             async callConnector(connector, params) {
                 await connectorLoader(appConfig)
