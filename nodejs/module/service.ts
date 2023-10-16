@@ -12,6 +12,7 @@ import { transform } from './transform'
 const FormData = require("form-data");
 import { Logger } from '@mybricks/rocker-commons';
 import LocalPublic from './local-public';
+import { APPType } from './types'
 
 /** 本地化信息 */
 interface ILocalizationInfo {
@@ -23,7 +24,7 @@ interface ILocalizationInfo {
 @Injectable()
 export default class PcPageService {
 
-  async _generateComLibRT(comlibs, json, { domainName, fileId, noThrowError }) {
+  async _generateComLibRT(comlibs, json, { domainName, fileId, noThrowError, app_type }) {
     /**
        * TODO:
        * 1.目前应用里配置的edit.js 一定有 rt.js
@@ -93,7 +94,7 @@ export default class PcPageService {
       }
     }
 
-    return generateComLib(comLibContents.filter(lib => !!lib.componentRuntimeMap), deps, { comLibId: fileId, noThrowError });
+    return generateComLib(comLibContents.filter(lib => !!lib.componentRuntimeMap), deps, { comLibId: fileId, noThrowError, appType: app_type});
   }
 
   async publish(req, { json, userId, fileId, envType, commitInfo }) {
@@ -135,17 +136,17 @@ export default class PcPageService {
 
       Logger.info(`[publish] getLatestPub ok`);
 
-      let app_type;
+      let app_type = APPType.React;
       try {
         const APP_TYPE_COMMIT = Array.from(template.match(/<!--(.*?)-->/g)).find(matcher => matcher.includes('_APP_TYPE_'));
-        if (APP_TYPE_COMMIT.includes('react')) {
-          app_type = 'react'
+        if (APP_TYPE_COMMIT.includes(APPType.React)) {
+          app_type = APPType.React
         }
-        if (APP_TYPE_COMMIT.includes('vue2')) {
-          app_type = 'vue2'
+        if (APP_TYPE_COMMIT.includes(APPType.Vue2)) {
+          app_type = APPType.Vue2
         }
       } catch (error) {
-        app_type = 'react'
+        Logger.error('template need appType')
       }
 
       const version = getNextVersion(latestPub?.version);
@@ -215,7 +216,8 @@ export default class PcPageService {
         comboScriptText = await this._generateComLibRT(comlibs, json, {
           domainName,
           fileId,
-          noThrowError: hasOldComLib
+          noThrowError: hasOldComLib,
+          app_type
         });
       }
 
