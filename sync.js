@@ -46,7 +46,7 @@ const filterFileName = [
   'package-lock.json',
   'yarn.lock',
   'pages',
-  'mybricks-app-pcspa.zip',
+  'mybricks-app-pcspa',
   '.idea',
   '.git',
   '.vscode',
@@ -58,7 +58,7 @@ if(!offlineUpdate) {
   filterFileName.push('node_modules')
 }
 const files = fs.readdirSync(zipDirPath).filter(filename => {
-  return !filterFileName.includes(filename);
+  return filterFileName.indexOf(filename) === -1;
 });
 
 read(rootDir, files, zipDirPath);
