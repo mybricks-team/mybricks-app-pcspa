@@ -187,7 +187,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       return new Promise((resolve, reject) => {
         const content = appData.fileContent?.content || {}
 
-        const _content = JSON.parse(JSON.stringify(content))
+        // 避免修改原始数据
+        const _content = { ...content }
         delete _content.comlibs
 
         resolve(_content)

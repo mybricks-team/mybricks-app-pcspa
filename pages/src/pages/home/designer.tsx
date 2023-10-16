@@ -28,7 +28,14 @@ import { USE_CUSTOM_HOST } from './constants'
 // 兜底物料
 export const defaultComlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
 
-export default function MyDesigner({ appData }) {
+export default function MyDesigner({ appData: originAppData }) {
+
+  const appData = useMemo(() => {
+    let data = { ...originAppData }
+    // 防止触发originAppData.fileContent的getter计算
+    data.fileContent = { ...data.fileContent }
+    return data
+  }, [ originAppData ])
   const coms = []
   if (appData?.defaultComlibs?.length) {
     appData?.defaultComlibs.forEach(lib => {
