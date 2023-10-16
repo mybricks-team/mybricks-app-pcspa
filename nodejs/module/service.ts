@@ -271,20 +271,6 @@ export default class PcPageService {
             Logger.info("[publish] 公共依赖上传成功！");
           }
 
-          // if (images) {
-          //   Logger.info("[publish] 正在尝试上传图片资源...");
-          //   // 将所有的图片资源上传到对应位置
-          //   await Promise.all(images.map(({ content, path, name }) => {
-          //     return API.Upload.staticServer({
-          //       content,
-          //       folderPath: path,
-          //       fileName: name,
-          //       noHash: true,
-          //     })
-          //   }))
-          //   Logger.info("[publish] 图片资源上传成功！");
-          // }
-
           if (needCombo) {
             Logger.info("[publish] 正在尝试上传 needCombo...");
             await API.Upload.staticServer({
@@ -662,7 +648,7 @@ async function resourceLocalization(template: string, needLocalization: boolean)
   let globalDeps: ILocalizationInfo[] = null;
   if (needLocalization) {
     // 获取所有本地化需要除了图片以外的信息，这些信息目前存储在相对位置
-    globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfoByLocal(url, url)));
+    globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfoByLocal(url, url.split('/').slice(0, -1).join('/'))));
     // 把模板中的 CDN 地址替换成本地化后的地址
     flags.forEach((flag, index) => {
       const localUrl = `./${globalDeps[index].path}/${globalDeps[index].name}`;
@@ -740,6 +726,6 @@ async function getLocalizationInfoByLocal(url: string, _path: string, config?: {
  * @param str 被处理的文本
  * @returns 文本中的所有 URL
  */
-function analysisAllUrl(str: string) {
+function analysisAllUrl(str: string): string[] {
   return str.match(/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g) || [];
 }
