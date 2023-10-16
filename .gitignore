@@ -43,7 +43,7 @@ package-lock.json
 node_modules
 
 assets
-mybricks-app-pcspa.zip
+*.zip
 
 // 发布模版
 nodejs/module/template
