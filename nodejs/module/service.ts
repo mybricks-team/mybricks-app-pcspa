@@ -286,20 +286,6 @@ export default class PcPageService {
             Logger.info("[publish] 公共依赖上传成功！");
           }
 
-          // if (images) {
-          //   Logger.info("[publish] 正在尝试上传图片资源...");
-          //   // 将所有的图片资源上传到对应位置
-          //   await Promise.all(images.map(({ content, path, name }) => {
-          //     return API.Upload.staticServer({
-          //       content,
-          //       folderPath: path,
-          //       fileName: name,
-          //       noHash: true,
-          //     })
-          //   }))
-          //   Logger.info("[publish] 图片资源上传成功！");
-          // }
-
           if (needCombo) {
             Logger.info("[publish] 正在尝试上传 needCombo...");
             await API.Upload.staticServer({
@@ -747,6 +733,6 @@ async function getLocalizationInfoByLocal(url: string, _path: string, config?: {
  * @param str 被处理的文本
  * @returns 文本中的所有 URL
  */
-function analysisAllUrl(str: string) {
+function analysisAllUrl(str: string): string[] {
   return str.match(/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g) || [];
 }

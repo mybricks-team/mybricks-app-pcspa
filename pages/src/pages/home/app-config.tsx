@@ -131,7 +131,7 @@ const getExecuteEnvByMode = (debugMode, ctx, envList) => {
   }
 }
 
-export default function (ctx, save, designerRef, remotePlugins = []) {
+export default function (ctx, appData, save, designerRef, remotePlugins = []) {
   const envList = ctx.envList
   // 获得环境信息映射表
   const envMap = ([...envList, { name: USE_CUSTOM_HOST, title: CUSTOM_HOST_TITLE }]).reduce((res, item) => {
@@ -166,10 +166,10 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
     plugins: [
       servicePlugin(),
       ...remotePlugins,
-      useTheme({ sdk: ctx.sdk }),
+      useTheme({ sdk: appData }),
       versionPlugin({
         user: ctx.user,
-        file: ctx.fileItem,
+        file: appData.fileContent || {},
         disabled: ctx.disabled,
         needSavePreview: true,
         envMap,
@@ -185,9 +185,10 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
     pageContentLoader() {
       //加载页面内容
       return new Promise((resolve, reject) => {
-        const content = ctx.fileItem?.content || {}
+        const content = appData.fileContent?.content || {}
 
-        const _content = JSON.parse(JSON.stringify(content))
+        // 避免修改原始数据
+        const _content = { ...content }
         delete _content.comlibs
 
         resolve(_content)
@@ -222,10 +223,12 @@ export default function (ctx, save, designerRef, remotePlugins = []) {
             //options: {readOnly: true},
             value: {
               get: (context) => {
-                return ctx.fileItem.name
+                return ctx.fileName
               },
               set: (context, v: any) => {
-                ctx.setName(v)
+                if(v !== ctx.fileName) {
+                  ctx.fileName = v
+                }
               },
             },
           },

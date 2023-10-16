@@ -46,7 +46,6 @@ const filterFileName = [
   'package-lock.json',
   'yarn.lock',
   'pages',
-  'mybricks-app-pcspa.zip',
   '.idea',
   '.git',
   '.vscode',
@@ -58,9 +57,8 @@ if(!offlineUpdate) {
   filterFileName.push('node_modules')
 }
 const files = fs.readdirSync(zipDirPath).filter(filename => {
-  return !filterFileName.includes(filename);
+  return filterFileName.indexOf(filename) === -1 && filename.indexOf('.zip') === -1;
 });
-
 read(rootDir, files, zipDirPath);
 
 zip.generateAsync({
@@ -92,6 +90,7 @@ zip.generateAsync({
     createTime: Date.now(),
   }));
   formData.append('file', content, `${packageJSON.name}.zip`);
+  fs.writeFileSync('./test.zip', content, 'utf-8')
 
   // 发送请求
   axios
