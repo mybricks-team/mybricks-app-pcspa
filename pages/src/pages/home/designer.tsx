@@ -85,10 +85,13 @@ export default function MyDesigner({ appData }) {
         ? EnumMode.ENV
         : EnumMode.DEFAULT
     return {
-      sdk: appData,
+      sdk: {
+        projectId: appData.projectId,
+        openUrl: appData.openUrl
+      },
       user: appData.user,
+      fileName: appData.fileContent?.name,
       fileId: appData.fileId,
-      fileItem: appData.fileContent || {},
       setting: appData.config || {},
       hasMaterialApp: appData.hasMaterialApp,
       comlibs,
@@ -135,11 +138,6 @@ export default function MyDesigner({ appData }) {
         }).finally(() => {
           setSaveLoading(false)
         })
-      },
-      setName(name) {
-        if (ctx.fileItem.name !== name) {
-          ctx.fileItem.name = name
-        }
       }
     }
   })
@@ -273,13 +271,12 @@ export default function MyDesigner({ appData }) {
 
     json.projectId = ctx.sdk.projectId;
 
-    await ctx.save({ name: ctx.fileItem.name, content: JSON.stringify(json) })
+    await ctx.save({ name: ctx.fileName, content: JSON.stringify(json) })
 
     setBeforeunload(false)
 
     await API.App.getPreviewImage({ // Todo... name 中文乱码
       element: designerRef.current?.geoView.canvasDom,
-      // name: `${ctx.fileItem.name}.png`
     }).then(async (res) => {
       const url = new URL(res)
 
@@ -340,7 +337,7 @@ export default function MyDesigner({ appData }) {
           json.debugHasPermissionFn = ctx.debugHasPermissionFn
           json.projectId = ctx.sdk.projectId;
 
-          await ctx.save({ content: JSON.stringify(json), name: ctx.fileItem.name }, true);
+          await ctx.save({ content: JSON.stringify(json), name: ctx.fileName }, true);
           setBeforeunload(false);
 
           const curToJSON = designerRef?.current?.toJSON();
@@ -352,14 +349,14 @@ export default function MyDesigner({ appData }) {
             configuration: {
               // scripts: encodeURIComponent(scripts),
               comlibs: curComLibs,
-              title: ctx.fileItem.name,
+              title: ctx.fileName,
               publisherEmail: ctx.user.email,
               publisherName: ctx.user?.name,
               projectId: ctx.sdk.projectId,
               envList: ctx.envList,
               // 非模块下的页面直接发布到项目空间下
               folderPath: '/app/pcpage',
-              fileName: `${ctx.fileItem.id}.html`,
+              fileName: `${appData.fileContent.id}.html`,
               groupName: appData?.hierarchy?.groupName || '',
               groupId: appData?.hierarchy?.groupId || 0,
               appConfig,
@@ -457,7 +454,7 @@ export default function MyDesigner({ appData }) {
   return (
     <div className={`${css.view} fangzhou-theme`}>
       <Toolbar
-        title={ctx.fileItem?.name}
+        title={ctx.fileName}
         updateInfo={<Toolbar.LastUpdate
           content={saveTip}
           onClick={handleSwitch2SaveVersion} />}
@@ -507,7 +504,7 @@ export default function MyDesigner({ appData }) {
           <>
             <SPADesigner
               ref={designerRef}
-              config={config(window?.mybricks?.createObservable(Object.assign(ctx, { latestComlibs })), save, designerRef, remotePlugins)}
+              config={config(window?.mybricks?.createObservable(Object.assign(ctx, { latestComlibs })), appData, save, designerRef, remotePlugins)}
               onEdit={onEdit}
               onMessage={onMessage}
               onDebug={onDebug}
