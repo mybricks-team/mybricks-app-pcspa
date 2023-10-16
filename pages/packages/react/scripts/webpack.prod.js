@@ -62,7 +62,7 @@ module.exports = merge(common, {
       template: path.resolve(__dirname, '../templates/publish.html'),
       inlineSource: '.(js)$',
       inject: 'body',
-      removeComments: false,
+      minify: false,
       chunks: ['publish'],
     }),
     new HtmlWebpackInlineSourcePlugin()

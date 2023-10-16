@@ -61,5 +61,41 @@ export default {
       CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.1.95/index.min.js",
     },
   ],
-  vue: [],
+  vue2: [
+    {
+      tag: 'script',
+      path: 'public/vue/2.7.14/vue.min.js',
+      CDN: 'https://f2.beckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/vue/2.7.14/vue.min.js'
+    },
+    {
+      tag: 'link',
+      path: 'public/elementUI/element@2.15.14.css',
+      CDN: 'https://unpkg.com/element-ui/lib/theme-chalk/index.css'
+    },
+    {
+      tag: 'script',
+      path: 'public/elementUI/element-ui@2.15.14.min.js',
+      CDN: 'https://unpkg.com/element-ui/lib/index.js'
+    },
+    {
+      tag: 'script',
+      path: 'public/render-web-vue2/render-web-vue2@0.0.1.min.js',
+      CDN: '//f2.eckwai.com/kos/nlav12333/mybricks/render-web-vue2/0.0.1/index.umd.js'
+    },
+    {
+      tag: 'script',
+      path: 'public/plugin-http-connector/1.1.67/index.js',
+      CDN: '//f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.1.67/index.js'
+    },
+    {
+      tag: "script",
+      path: "public/moment/moment@2.29.4.min.js",
+      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443543399.2.29.4_moment.min.js",
+    },
+    {
+      tag: "script",
+      path: "public/moment/locale/zh-cn.min.js",
+      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443577599.2.29.4_locale_zh-cn.min.js",
+    },
+  ],
 };

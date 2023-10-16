@@ -34,14 +34,6 @@ module.exports = {
         concurrency: 100,
       },
     }),
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: path.join(__dirname, '../templates/public'), to: path.join(__dirname, '../../../../nodejs/module') }
-      ],
-      options: {
-        concurrency: 100,
-      },
-    })
   ],
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],

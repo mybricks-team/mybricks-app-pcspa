@@ -99,7 +99,7 @@ export default class PcPageService {
   async publish(req, { json, userId, fileId, envType, commitInfo }) {
     try {
 
-      const publishFilePath = path.resolve(__dirname, './template')
+      const publishFilePath = path.resolve(__dirname, '../../assets')
 
       let template = fs.readFileSync(publishFilePath + '/publish.html', 'utf8')
 
@@ -134,6 +134,19 @@ export default class PcPageService {
       }))?.[0];
 
       Logger.info(`[publish] getLatestPub ok`);
+
+      let app_type;
+      try {
+        const APP_TYPE_COMMIT = Array.from(template.match(/<!--(.*?)-->/g)).find(matcher => matcher.includes('_APP_TYPE_'));
+        if (APP_TYPE_COMMIT.includes('react')) {
+          app_type = 'react'
+        }
+        if (APP_TYPE_COMMIT.includes('vue2')) {
+          app_type = 'vue2'
+        }
+      } catch (error) {
+        app_type = 'react'
+      }
 
       const version = getNextVersion(latestPub?.version);
 
@@ -185,7 +198,7 @@ export default class PcPageService {
       try {
         Logger.info("[publish] 正在尝试资源本地化...")
         // 将模板中所有资源本地化
-        const { globalDeps: _globalDeps, images: _images, template: _template } = await resourceLocalization(template, needLocalization);
+        const { globalDeps: _globalDeps, images: _images, template: _template } = await resourceLocalization(template, needLocalization, app_type);
         globalDeps = _globalDeps;
         images = _images;
         template = _template;
@@ -637,10 +650,10 @@ function getNextVersion(version, max = 100) {
  * @param template HTML 模板
  * @param needLocalization CDN 资源是否需要本地化
  */
-async function resourceLocalization(template: string, needLocalization: boolean) {
+async function resourceLocalization(template: string, needLocalization: boolean, type = 'react') {
 
-  const localPublicInfos = LocalPublic['react'].map(info => {
-    if(!needLocalization) {
+  const localPublicInfos = LocalPublic[type].map(info => {
+    if (!needLocalization) {
       info.path = info.CDN;
     }
     return info;
@@ -663,7 +676,7 @@ async function resourceLocalization(template: string, needLocalization: boolean)
   let globalDeps: ILocalizationInfo[] = null;
   if (needLocalization) {
     // 获取所有本地化需要除了图片以外的信息，这些信息目前存储在相对位置
-    globalDeps = await Promise.all(localPublicInfos.map(info => getLocalizationInfoByLocal(info.path, info.path)));
+    globalDeps = await Promise.all(localPublicInfos.map(info => getLocalizationInfoByLocal(info.path, info.path.split('/').slice(0, -1).join('/'))));
   }
 
   // 模板中所有的图片资源
@@ -716,7 +729,7 @@ async function getLocalizationInfoByNetwork(url: string, path: string, config?: 
 async function getLocalizationInfoByLocal(url: string, _path: string, config?: { withoutError: boolean }) {
   const { withoutError } = config || {};
   try {
-    const publishFilePath = path.resolve(__dirname, `./${url}`);
+    const publishFilePath = path.resolve(__dirname, `../../assets/${url}`);
     const content = fs.readFileSync(publishFilePath, 'utf8');
     const name = url.split('/').slice(-1)[0];
     return { path: _path, name, content }

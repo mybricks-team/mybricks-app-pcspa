@@ -9,7 +9,7 @@ const render = (props) => {
     root.style.width = '100%';
     root.style.height = '100%';
     vueApp = new Vue({
-        render: (h) => h(renderUI({ ...props, renderType: 'vue3' })),
+        render: (h) => h(renderUI({ ...props, renderType: 'vue2' })),
     }).$mount(root)
 }
 
