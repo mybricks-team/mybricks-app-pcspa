@@ -44,7 +44,7 @@ const filterFileName = [
 ];
 
 const files = fs.readdirSync(zipDirPath).filter(filename => {
-  return filterFileName.indexOf(filename) === -1;
+  return filterFileName.includes(filename) === -1 && filename.indexOf('.zip') === -1;
 });
 
 read(rootDir, files, zipDirPath);
