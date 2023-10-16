@@ -356,7 +356,7 @@ export default function MyDesigner({ appData }) {
               envList: ctx.envList,
               // 非模块下的页面直接发布到项目空间下
               folderPath: '/app/pcpage',
-              fileName: `${appData.fileContent.id}.html`,
+              fileName: `${ctx.fileId}.html`,
               groupName: appData?.hierarchy?.groupName || '',
               groupId: appData?.hierarchy?.groupId || 0,
               appConfig,
