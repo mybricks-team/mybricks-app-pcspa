@@ -26,7 +26,8 @@ import { USE_CUSTOM_HOST } from './constants'
 // const DefaultUploadService = '/biz/uploadExternalFileLocal'
 
 // 兜底物料
-export const defaultComlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
+export const defaultComlibs = APP_TYPE === 'react' ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : []
+
 
 export default function MyDesigner({ appData }) {
   const coms = []
@@ -160,10 +161,15 @@ export default function MyDesigner({ appData }) {
   const isPreview = window.location.search.includes('version');
 
   useEffect(() => {
-    API.Material.getLatestComponentLibrarys(comlibs.filter(lib => lib.id !== "_myself_").map(lib => lib.namespace)).then((res: any) => {
-      const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))
-      setLatestComlibs(latestComlibs)
-    })
+    const needSearchComlibs = comlibs.filter(lib => lib.id !== "_myself_");
+    if(!!needSearchComlibs?.length){
+      API.Material.getLatestComponentLibrarys(needSearchComlibs.map(lib => lib.namespace)).then((res: any) => {
+        const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))
+        setLatestComlibs(latestComlibs)
+      })
+    }else {
+      setLatestComlibs([]);
+    }
   }, [JSON.stringify(comlibs.map(lib => lib.namespace))])
 
   useEffect(() => {
