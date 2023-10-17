@@ -50,7 +50,7 @@ const publishVue2AppOnline = () => {
 
 };
 
-const fixAppInfo = () => {
+const fixPkg = () => {
   return new Promise((resolve) => {
     const json = { ...pkgJson };
     json.name = json.appConfig.vue2.name;
@@ -69,9 +69,9 @@ const execChain = (fns) => {
 }
 
 if (isOffline) {
-  execChain([publishReactAppOffline, fixAppInfo, publishVue2AppOffline, resetPkg])
+  execChain([publishReactAppOffline, fixPkg, publishVue2AppOffline, resetPkg])
 } else {
-  execChain([publishReactAppOnline, fixAppInfo, publishVue2AppOnline, resetPkg])
+  execChain([publishReactAppOnline, fixPkg, publishVue2AppOnline, resetPkg])
 }
 
 
