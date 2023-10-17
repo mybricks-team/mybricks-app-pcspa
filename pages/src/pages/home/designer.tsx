@@ -69,7 +69,6 @@ export default function MyDesigner({ appData: originAppData }) {
   }
 
   const designer = './public/designer-spa/1.3.31/index.min.js'
-  console.log(`designer JD==> `,designer);
 
   const appConfig = useMemo(() => {
     let config = null

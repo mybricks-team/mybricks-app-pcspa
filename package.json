@@ -42,6 +42,7 @@
   "devDependencies": {
     "@types/node": "^20.4.0",
     "jszip": "^3.10.1",
+    "shelljs": "^0.8.5",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.3"
   },
@@ -55,5 +56,13 @@
     "title": "PC页面",
     "setting": "setting.html",
     "groupSetting": "groupSetting.html"
+  },
+  "appConfig": {
+    "react": {
+      "name": "mybricks-app-pcspa"
+    },
+    "vue2": {
+      "name": "mybricks-app-pcspa-vue2"
+    }
   }
 }
