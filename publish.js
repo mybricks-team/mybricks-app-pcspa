@@ -13,7 +13,6 @@ const publishReactAppOffline = () => {
       shelljs.exec(syncCommand, resolve);
     });
   })
-
 };
 
 const publishVue2AppOffline = () => {
