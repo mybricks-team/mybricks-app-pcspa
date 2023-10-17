@@ -734,7 +734,7 @@ async function getLocalizationInfoByNetwork(url: string, path: string, config?: 
 async function getLocalizationInfoByLocal(url: string, _path: string, config?: { withoutError: boolean }) {
   const { withoutError } = config || {};
   try {
-    const publishFilePath = path.resolve(__dirname, `./${url}`);
+    const publishFilePath = path.resolve(__dirname, `../../assets/${url}`);
     const content = fs.readFileSync(publishFilePath, 'utf8');
     const name = url.split('/').slice(-1)[0];
     return { path: _path, name, content }

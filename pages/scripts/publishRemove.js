@@ -34,47 +34,47 @@ fs.rename(sourceFilePath + '/publish.html', targetFilePath + '/publish.html', (e
 });
 
 
-if(fs.existsSync(targetPublicFilePath)) { // 删除 template 目录
-  removeDir(targetPublicFilePath);
-}
+// if(fs.existsSync(targetPublicFilePath)) { // 删除 template 目录
+//   removeDir(targetPublicFilePath);
+// }
 
-// 复制目录
-copyDirSync(sourceFilePath + '/public', targetPublicFilePath);
+// // 复制目录
+// copyDirSync(sourceFilePath + '/public', targetPublicFilePath);
 
 
-/**
- * 复制文件夹到目标文件夹
- * @param {string} src 源目录
- * @param {string} dest 目标目录
- * @param {function} callback 回调
- */
-function copyDirSync (src, dest) {
-  const copy = (copySrc, copyDest) => {
-    const list = fs.readdirSync(copySrc);
+// /**
+//  * 复制文件夹到目标文件夹
+//  * @param {string} src 源目录
+//  * @param {string} dest 目标目录
+//  * @param {function} callback 回调
+//  */
+// function copyDirSync (src, dest) {
+//   const copy = (copySrc, copyDest) => {
+//     const list = fs.readdirSync(copySrc);
 
-    list.forEach((item) => {
-      const ss = path.resolve(copySrc, item);
-      const stat = fs.statSync(ss);
+//     list.forEach((item) => {
+//       const ss = path.resolve(copySrc, item);
+//       const stat = fs.statSync(ss);
 
-      const curSrc = path.resolve(copySrc, item);
-      const curDest = path.resolve(copyDest, item);
+//       const curSrc = path.resolve(copySrc, item);
+//       const curDest = path.resolve(copyDest, item);
 
-      if (stat.isFile()) {
-        // 文件，直接复制
-        fs.createReadStream(curSrc).pipe(fs.createWriteStream(curDest));
-      } else if (stat.isDirectory()) {
-        // 目录，进行递归
-        fs.mkdirSync(curDest, { recursive: true });
-        copy(curSrc, curDest);
-      }
-    });
-  };
+//       if (stat.isFile()) {
+//         // 文件，直接复制
+//         fs.createReadStream(curSrc).pipe(fs.createWriteStream(curDest));
+//       } else if (stat.isDirectory()) {
+//         // 目录，进行递归
+//         fs.mkdirSync(curDest, { recursive: true });
+//         copy(curSrc, curDest);
+//       }
+//     });
+//   };
  
-  try { fs.accessSync(dest); } 
-  catch(e) {
-    // 若目标目录不存在，则创建
-    fs.mkdirSync(dest, { recursive: true });
-  }
+//   try { fs.accessSync(dest); } 
+//   catch(e) {
+//     // 若目标目录不存在，则创建
+//     fs.mkdirSync(dest, { recursive: true });
+//   }
 
-  copy(src, dest);
-};
+//   copy(src, dest);
+// };
