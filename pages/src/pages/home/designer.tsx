@@ -26,7 +26,7 @@ import { USE_CUSTOM_HOST } from './constants'
 // const DefaultUploadService = '/biz/uploadExternalFileLocal'
 
 // 兜底物料
-export const defaultComlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
+export const localizationDefaultComlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
 
 export default function MyDesigner({ appData: originAppData }) {
 
@@ -40,7 +40,7 @@ export default function MyDesigner({ appData: originAppData }) {
   if (appData?.defaultComlibs?.length) {
     appData?.defaultComlibs.forEach(lib => {
       const { namespace, content, version } = lib;
-      const com = defaultComlibs.find(lib => lib.namespace === namespace)
+      const com = localizationDefaultComlibs.find(lib => lib.namespace === namespace)
       const { editJs, rtJs, coms: componentComs } = JSON.parse(content)
       if (com) {
         coms.push({ id: com.id, namespace, version, editJs, rtJs, coms: componentComs })
@@ -49,7 +49,7 @@ export default function MyDesigner({ appData: originAppData }) {
       }
     })
   } else {
-    coms.push(...defaultComlibs)
+    coms.push(...localizationDefaultComlibs) 
   }
 
   let comlibs = [];
