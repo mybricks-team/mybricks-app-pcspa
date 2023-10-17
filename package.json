@@ -12,7 +12,8 @@
     "publishToNpm": "npm run build:fe && npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world --noServiceUpdate",
     "publishToNpm:beta": "npm run build:fe && npm publish --tag beta --registry=https://registry.npmjs.org --access=public && node sync.js --origin=https://my.mybricks.world",
     "publish:offline": "node ./publish.js offline",
-    "publish:online": "node ./publish.js"
+    "publish:online": "node ./publish.js",
+    "updateLocalPublic": "ts-node update_local_public"
   },
   "keywords": [
     "mybricks",
