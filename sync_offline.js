@@ -3,9 +3,12 @@ const path = require('path');
 const JSZip = require('jszip');
 const packageJSON = require('./package.json');
 
+const type = process.argv[2]
+const pkgName = packageJSON.appConfig[type].name
+
 const zip = new JSZip();
 /** 根目录 */
-const rootDir = zip.folder(packageJSON.name);
+const rootDir = zip.folder(pkgName);
 // /** 遍历文件 */
 function read (zip, files, dirPath) {
   files.forEach(function (fileName) {
@@ -56,6 +59,6 @@ zip.generateAsync({
     level: 9
   }
 }).then((content) => {
-  fs.writeFileSync(path.join(__dirname, `./${packageJSON.name}-${Date.now()}.zip`), content, 'utf-8');
-  console.log(`离线包打包完成，请将 ${packageJSON.name}.zip 拖拽到平台进行离线安装`);
+  fs.writeFileSync(path.join(__dirname, `./${pkgName}-${Date.now()}.zip`), content, 'utf-8');
+  console.log(`离线包打包完成，请将 ${pkgName}.zip 拖拽到平台进行离线安装`);
 });
