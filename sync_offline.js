@@ -43,6 +43,7 @@ const filterFileName = [
   '.vscode',
   'sync.js',
   'sync_offline.js',
+  'publish.js',
   '.github',
 ];
 
