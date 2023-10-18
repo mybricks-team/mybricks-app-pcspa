@@ -710,6 +710,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       scenes: {
         adder: [
           {
+            type: 'normal',
+            title: '页面',
+          },
+          {
             type: 'popup',
             title: '对话框',
             template: {
