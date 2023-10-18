@@ -1,4 +1,5 @@
 // TODO: 将此文件迁移到根目录
+// 升级版本的时候直接用 shift + command + F 全局搜索替换
 export default {
   react: [
     {
@@ -100,6 +101,7 @@ export default {
     },
   ],
 
+  // 应用需要但发布页面不直接需要的依赖
   others: {
     react: [
       // 引擎相关资源
