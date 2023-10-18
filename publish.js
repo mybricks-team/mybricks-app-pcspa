@@ -34,7 +34,6 @@ const publishReactAppOnline = () => {
       shelljs.exec(syncCommand, resolve);
     });
   })
-
 };
 
 const publishVue2AppOnline = () => {
@@ -46,7 +45,6 @@ const publishVue2AppOnline = () => {
       shelljs.exec(syncCommand, resolve);
     });
   })
-
 };
 
 const fixPkg = () => {
