@@ -11,7 +11,7 @@ const pkg = require(path.join(__dirname, '../../../../package.json'))
 
 const appInfo = pkg.appConfig.react;
 module.exports = (env) => merge(common, (function () {
-  const isOffline = env.app.type === 'offline';
+  const isOffline = env && env.app?.type === 'offline';
   return {
     mode: 'production',
     optimization: {
