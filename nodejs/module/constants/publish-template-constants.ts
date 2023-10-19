@@ -59,6 +59,6 @@ export const AntdCSSPkg = {
   };
   
   export const RenderWebPkg = {
-    CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.1.98/index.min.js",
-    APPRelativeAddress: "public/render-web/1.1.98/index.min.js",
+    CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.2.0/index.min.js",
+    APPRelativeAddress: "public/render-web/1.2.0/index.min.js",
   };
