@@ -565,10 +565,16 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     'mybricks.core-comlib.frame-output',
     'mybricks.core-comlib.scenes'
   ];
-  const deps = toJSON.scenes
-    .reduce((pre, scene) => [...pre, ...scene.deps], [])
-    .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
-    .filter((item) => !ignoreNamespaces.includes(item.namespace));
+  const deps = [
+    ...toJSON.scenes
+      .reduce((pre, scene) => [...pre, ...scene.deps], [])
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+    ...(toJSON.global?.fxFrames || [])
+      .reduce((pre, fx) => [...pre, ...fx.deps], [])
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace))
+  ];
 
   if (deps.length) {
     const willFetchComLibs = curComLibs.filter(lib => !lib?.defined && lib.coms);
