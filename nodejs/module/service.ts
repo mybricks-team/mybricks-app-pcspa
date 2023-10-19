@@ -49,9 +49,14 @@ export default class PcPageService {
       'mybricks.core-comlib.frame-output',
       'mybricks.core-comlib.scenes'
     ];
-    const deps = json.scenes
-      .reduce((pre, scene) => [...pre, ...scene.deps], [])
-      .filter((item) => !ignoreNamespaces.includes(item.namespace));
+    const deps = [
+      ...json.scenes
+        .reduce((pre, scene) => [...pre, ...scene.deps], [])
+        .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+      ...(json.global?.fxFrames || [])
+        .reduce((pre, fx) => [...pre, ...fx.deps], [])
+        .filter((item) => !ignoreNamespaces.includes(item.namespace))
+    ];
     const selfComponents = deps.filter((item) => mySelfComMap[`${item.namespace}@${item.version}`]);
     const comLibContents = [...comlibs];
 
