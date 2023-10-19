@@ -125,7 +125,7 @@ export default function MyDesigner({ appData: originAppData }) {
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
-        await API.File.save({
+        await appData.save({
           userId: ctx.user?.id,
           fileId: ctx.fileId,
           name,
@@ -425,6 +425,7 @@ export default function MyDesigner({ appData: originAppData }) {
           setOperable(status === 1)
           ctx.operable = status === 1
         }}
+        compareVersion = {true}
       />
     )
   }, [])
