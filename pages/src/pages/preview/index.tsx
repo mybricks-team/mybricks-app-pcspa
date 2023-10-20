@@ -232,13 +232,12 @@ function Page({ props, hasPermissionFn }) {
                 : (dumpJson.plugins[connector.connectorName] || []).find(con => con.id === connector.id);
               return curConnector ? plugin.call({ ...connector, ...curConnector, useProxy: true }, newParams, {
                 // 只在官方插件上做环境域名处理
-                before: connector.connectorName === '@mybricks/plugins/service'
-                  ? options => {
-                    return {
-                      ...options,
-                      url: shapeUrlByEnv(envList, executeEnv, options.url, MYBRICKS_HOST)
-                    }
-                  } : undefined
+                before: options => {
+                  return {
+                    ...options,
+                    url: shapeUrlByEnv(envList, executeEnv, options.url, MYBRICKS_HOST)
+                  }
+                }
               }) : Promise.reject('找不到对应连接器 Script 执行脚本.');
             } else {
               return Promise.reject('错误的连接器类型.');
