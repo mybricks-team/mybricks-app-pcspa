@@ -467,7 +467,7 @@ export default function MyDesigner({ appData: originAppData }) {
           content={saveTip}
           onClick={handleSwitch2SaveVersion} />}
       >
-        {RenderLocker}
+        {!isPreview && RenderLocker}
         {
           !isPreview && <>
             <Toolbar.Save
