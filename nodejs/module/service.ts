@@ -741,7 +741,7 @@ async function getLocalizationInfoByNetwork(url: string, path: string, config?: 
     const name = url.split('/').slice(-1)[0];
     return { path, name, content }
   } catch (e) {
-    Logger.error(`[publish] 获取资源失败: ${url}`, e);
+    Logger.error(`[publish] 获取资源失败(by network): ${url}`, e);
     if(withoutError) return undefined;
     else throw e;
   }
@@ -755,7 +755,7 @@ async function getLocalizationInfoByLocal(url: string, _path: string, config?: {
     const name = url.split('/').slice(-1)[0];
     return { path: _path, name, content }
   } catch (e) {
-    Logger.error(`[publish] 获取资源失败: ${url}`, e);
+    Logger.error(`[publish] 获取资源失败(by local): ${url}`, e);
     if(withoutError) return undefined;
     else throw e;
   }
