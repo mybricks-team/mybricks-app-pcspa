@@ -50,9 +50,14 @@ export default class PcPageService {
       'mybricks.core-comlib.frame-output',
       'mybricks.core-comlib.scenes'
     ];
-    const deps = json.scenes
-      .reduce((pre, scene) => [...pre, ...scene.deps], [])
-      .filter((item) => !ignoreNamespaces.includes(item.namespace));
+    const deps = [
+      ...json.scenes
+        .reduce((pre, scene) => [...pre, ...scene.deps], [])
+        .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+      ...(json.global?.fxFrames || [])
+        .reduce((pre, fx) => [...pre, ...fx.deps], [])
+        .filter((item) => !ignoreNamespaces.includes(item.namespace))
+    ];
     const selfComponents = deps.filter((item) => mySelfComMap[`${item.namespace}@${item.version}`]);
     const comLibContents = [...comlibs];
 
@@ -194,13 +199,37 @@ export default class PcPageService {
       /** 是否本地化发布 */
       const needLocalization = await getCustomNeedLocalization();
 
-      let globalDeps: ILocalizationInfo[];
+      /** 所有要本地化的公共依赖 */
+      let globalDeps: ILocalizationInfo[] = [];
+      /** 所有要本地化的图片 */
       let images: ILocalizationInfo[];
+
+      try {
+        Logger.info("[publish] 正在尝试组件库本地化...");
+        // 由于老数据无法判断是否是需要本地化的组件库，所以无法按需加载
+        const localizationComLibInfoList: ILocalizationInfo[] = await Promise.all(
+          [
+            "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
+            "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
+            "public/comlibs/5952_1.0.1/2023-07-25_22-02-32/edit.js",
+            "public/comlibs/5952_1.0.1/2023-07-25_22-02-32/rt.js",
+            "public/comlibs/7182_1.0.29/2023-07-25_22-04-55/edit.js",
+            "public/comlibs/7182_1.0.29/2023-07-25_22-04-55/rt.js"
+          ].map((url) =>
+            getLocalizationInfoByLocal(url, url.split("/").slice(0, -1).join("/"))
+          )
+        );
+        globalDeps = globalDeps.concat(localizationComLibInfoList);
+      } catch (e) {
+        Logger.error("[publish] 组件库本地化失败！");
+        throw e;
+      }
+
       try {
         Logger.info("[publish] 正在尝试资源本地化...")
         // 将模板中所有资源本地化
         const { globalDeps: _globalDeps, images: _images, template: _template } = await resourceLocalization(template, needLocalization, app_type);
-        globalDeps = _globalDeps;
+        globalDeps = globalDeps.concat(_globalDeps || []);
         images = _images;
         template = _template;
         Logger.info("[publish] 资源本地化成功！")

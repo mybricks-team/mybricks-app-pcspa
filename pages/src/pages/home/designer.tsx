@@ -23,11 +23,8 @@ import PublishModal, { EnumMode } from './components/PublishModal'
 import css from './app.less'
 import { USE_CUSTOM_HOST } from './constants'
 
-// const DefaultUploadService = '/biz/uploadExternalFileLocal'
-
 // 兜底物料
-export const defaultComlibs = APP_TYPE === 'react' ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : []
-
+export const localizationDefaultComlibs = APP_TYPE === 'react' ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : []
 
 export default function MyDesigner({ appData: originAppData }) {
 
@@ -41,7 +38,7 @@ export default function MyDesigner({ appData: originAppData }) {
   if (appData?.defaultComlibs?.length) {
     appData?.defaultComlibs.forEach(lib => {
       const { namespace, content, version } = lib;
-      const com = defaultComlibs.find(lib => lib.namespace === namespace)
+      const com = localizationDefaultComlibs.find(lib => lib.namespace === namespace)
       const { editJs, rtJs, coms: componentComs } = JSON.parse(content)
       if (com) {
         coms.push({ id: com.id, namespace, version, editJs, rtJs, coms: componentComs })
@@ -50,7 +47,7 @@ export default function MyDesigner({ appData: originAppData }) {
       }
     })
   } else {
-    coms.push(...defaultComlibs)
+    coms.push(...localizationDefaultComlibs) 
   }
 
   let comlibs = [];
@@ -68,7 +65,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }
 
-  const designer = './public/designer-spa/1.3.31/index.min.js'
+  const designer = './public/designer-spa/1.3.40/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
@@ -126,7 +123,7 @@ export default function MyDesigner({ appData: originAppData }) {
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
-        await API.File.save({
+        await appData.save({
           userId: ctx.user?.id,
           fileId: ctx.fileId,
           name,
@@ -431,6 +428,7 @@ export default function MyDesigner({ appData: originAppData }) {
           setOperable(status === 1)
           ctx.operable = status === 1
         }}
+        compareVersion = {true}
       />
     )
   }, [])
@@ -472,7 +470,7 @@ export default function MyDesigner({ appData: originAppData }) {
           content={saveTip}
           onClick={handleSwitch2SaveVersion} />}
       >
-        {RenderLocker}
+        {!isPreview && RenderLocker}
         {
           !isPreview && <>
             <Toolbar.Save
@@ -571,10 +569,16 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     'mybricks.core-comlib.frame-output',
     'mybricks.core-comlib.scenes'
   ];
-  const deps = toJSON.scenes
-    .reduce((pre, scene) => [...pre, ...scene.deps], [])
-    .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
-    .filter((item) => !ignoreNamespaces.includes(item.namespace));
+  const deps = [
+    ...toJSON.scenes
+      .reduce((pre, scene) => [...pre, ...scene.deps], [])
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+    ...(toJSON.global?.fxFrames || [])
+      .reduce((pre, fx) => [...pre, ...fx.deps], [])
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace))
+  ];
 
   if (deps.length) {
     const willFetchComLibs = curComLibs.filter(lib => !lib?.defined && lib.coms);

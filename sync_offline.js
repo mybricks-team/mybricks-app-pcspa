@@ -60,6 +60,6 @@ zip.generateAsync({
     level: 9
   }
 }).then((content) => {
-  fs.writeFileSync(path.join(__dirname, `./${pkgName}-${Date.now()}.zip`), content, 'utf-8');
-  console.log(`离线包打包完成，请将 ${pkgName}.zip 拖拽到平台进行离线安装`);
+  fs.writeFileSync(path.join(__dirname, `./${packageJSON.name}-${Date.now()}.zip`), content, 'utf-8');
+  console.log(`离线包打包完成，请将 ${packageJSON.name}.zip 拖拽到平台进行离线安装`);
 });

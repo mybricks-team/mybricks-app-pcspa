@@ -228,7 +228,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 return ctx.fileName
               },
               set: (context, v: any) => {
-                if (v !== ctx.fileName) {
+                if(v !== ctx.fileName) {
                   ctx.fileName = v
                 }
               },
@@ -711,6 +711,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     geoView: {
       scenes: isReact ? {
         adder: [
+          {
+            type: 'normal',
+            title: '页面',
+          },
           {
             type: 'popup',
             title: '对话框',
