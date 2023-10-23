@@ -129,6 +129,10 @@ export default {
         path: "public/designer-spa/1.3.41/828.index.min.js",
         CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.41/828.index.min.js",
       },
+      {
+        path: "public/designer-spa/1.3.41/554.index.min.js",
+        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.41/554.index.min.js",
+      },
       // 兜底组件库
       {
         path: "public/comlibs/5952_1.0.1/2023-07-25_22-02-32/edit.js",
