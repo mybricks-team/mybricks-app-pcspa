@@ -156,7 +156,7 @@ export default {
       },
       // 其他
       {
-        path: "public/1690444304807.0.18.1_axios.min.js",
+        path: "public/axios@0.18.1.min.js",
         CDN: "https://w1.eckwai.com/kos/nlav12333/mybricks/axios0.18.1.min.js",
       }
     ],

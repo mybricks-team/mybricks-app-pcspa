@@ -746,8 +746,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       } : null,
       theme: {
         css: [
-          './public/antd/antd.variable.min.css',
-          !isReact ? './public/elementUI/element@2.15.14.css' : null
+          'public/antd/antd@4.21.6.min.css',
+          ...(
+            !isReact ? ['./public/elementUI/element@2.15.14.css'] : []
+          )
         ],
       },
     }
