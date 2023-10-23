@@ -51,7 +51,7 @@ export default class PcPageService {
       'mybricks.core-comlib.scenes'
     ];
     const deps = [
-      ...json.scenes
+      ...(json.scenes || [])
         .reduce((pre, scene) => [...pre, ...scene.deps], [])
         .filter((item) => !ignoreNamespaces.includes(item.namespace)),
       ...(json.global?.fxFrames || [])
@@ -187,6 +187,8 @@ export default class PcPageService {
         pluginScript += `<script>${content}</script>`;
       }
 
+      Logger.info("[publish] 开始模板替换");
+
       template = template.replace(`--title--`, title)
         .replace(`-- plugin-runtime --`, pluginScript)
         .replace(`-- themes-style --`, themesStyleStr)
@@ -195,6 +197,8 @@ export default class PcPageService {
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
         .replace(`"--envList--"`, JSON.stringify(envList))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
+
+      Logger.info("[publish] 模板替换完成");
 
       /** 是否本地化发布 */
       const needLocalization = await getCustomNeedLocalization();

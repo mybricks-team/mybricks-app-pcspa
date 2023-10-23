@@ -570,7 +570,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     'mybricks.core-comlib.scenes'
   ];
   const deps = [
-    ...toJSON.scenes
+    ...(toJSON.scenes || [])
       .reduce((pre, scene) => [...pre, ...scene.deps], [])
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),

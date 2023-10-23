@@ -1,3 +1,4 @@
+import { Logger } from '@mybricks/rocker-commons';
 const Babel = require("@babel/standalone");
 
 const NeedTransformCom = [
@@ -96,6 +97,8 @@ const transformScene = (scene: Record<string, any>) => {
 };
 
 const transform = (json: Record<string, any>) => {
+  Logger.info("[publish] transform start");
+
   json.hasPermissionFn = transformCodeByBabel(
     decodeURIComponent(json.hasPermissionFn),
     "全局方法-权限校验"
@@ -111,7 +114,10 @@ const transform = (json: Record<string, any>) => {
       }));
     }
   });
-  json.scenes = json.scenes.map(transformScene);
+  json.scenes = (json.scenes || []).map(transformScene);
+  
+  Logger.info("[publish] transform finish");
+
   return json;
 };
 
