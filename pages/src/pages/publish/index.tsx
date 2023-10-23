@@ -1,4 +1,5 @@
-import ReactDOM from 'react-dom';
+// import ReactDOM from 'react-dom';
+import ReactDOM from "react-dom/client";
 import React from 'react'
 import { message } from 'antd'
 import { runJs } from './../../utils/runJs'
@@ -276,22 +277,35 @@ function Page({ props }) {
   })
 }
 
+let reactRoot
+
 function render(props) {
   const { container } = props;
   const root = (container || document).querySelector('#mybricks-page-root')
   /** publish template style */
   root.style.width = '100%';
   root.style.height = '100%';
-  ReactDOM.render(
-    React.createElement(
-      antd.ConfigProvider,
-      {
-        locale: antd.locale['zh_CN'].default,
-      },
-      React.createElement(Page, { props })
-    ),
-    root
-  )
+  // ReactDOM.render(
+  //   React.createElement(
+  //     antd.ConfigProvider,
+  //     {
+  //       locale: antd.locale['zh_CN'].default,
+  //     },
+  //     React.createElement(Page, { props })
+  //   ),
+  //   root
+  // )
+
+  reactRoot = ReactDOM.createRoot(root);
+
+  reactRoot.render(React.createElement(
+    antd.ConfigProvider,
+    {
+      locale: antd.locale['zh_CN'].default,
+    },
+    React.createElement(Page, { props })
+  ))
+
   return Promise.resolve()
 }
 
@@ -335,8 +349,9 @@ export async function mount(props) {
 
 export async function unmount(props) {
   const { container } = props
-  ReactDOM &&
-    ReactDOM.unmountComponentAtNode(
-      (container || document).querySelector('#mybricks-page-root')
-    )
+  reactRoot && reactRoot.unmount()
+  // ReactDOM &&
+  //   ReactDOM.unmountComponentAtNode(
+  //     (container || document).querySelector('#mybricks-page-root')
+  //   )
 }

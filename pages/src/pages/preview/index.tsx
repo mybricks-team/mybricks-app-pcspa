@@ -1,4 +1,5 @@
-import ReactDOM from 'react-dom';
+// import ReactDOM from 'react-dom';
+import ReactDOM from "react-dom/client";
 import { ConfigProvider, message } from 'antd'
 import zhCN from 'antd/es/locale/zh_CN';
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
@@ -117,13 +118,18 @@ const getComs = () => {
 
 //----------------------------------------------------------------------------
 
+let reactRoot
 
 function render(props) {
   const { container } = props;
   if (comlibs && Array.isArray(comlibs)) {
     Promise.all(comlibs.map((t) => requireScript(t))).then(() => {
       // render(<Page />, document.querySelector('#root'))
-      ReactDOM.render(<Page props={props} hasPermissionFn={hasPermissionFn} />, container ? container.querySelector('#root') : document.querySelector('#root'));
+      // ReactDOM.render(<Page props={props} hasPermissionFn={hasPermissionFn} />, container ? container.querySelector('#root') : document.querySelector('#root'));
+
+      reactRoot = ReactDOM.createRoot(container ? container.querySelector('#root') : document.querySelector('#root'));
+
+      reactRoot.render(<Page props={props} hasPermissionFn={hasPermissionFn} />);
     })
   }
 
@@ -145,7 +151,9 @@ export async function mount(props) {
 export async function unmount(props) {
   const { container } = props;
 
-  ReactDOM.unmountComponentAtNode(container ? container.querySelector('#root') : document.querySelector('#root'));
+  // ReactDOM.unmountComponentAtNode(container ? container.querySelector('#root') : document.querySelector('#root'));
+
+  reactRoot.unmount()
 }
 
 // if (comlibs && Array.isArray(comlibs)) {
