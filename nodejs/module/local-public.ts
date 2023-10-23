@@ -154,6 +154,11 @@ export default {
         path: "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
         CDN: "https://f1.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
       },
+      // 其他
+      {
+        path: "public/1690444304807.0.18.1_axios.min.js",
+        CDN: "https://w1.eckwai.com/kos/nlav12333/mybricks/axios0.18.1.min.js",
+      }
     ],
     vue2: [
       // 引擎相关资源
