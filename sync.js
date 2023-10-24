@@ -5,19 +5,25 @@ const axios = require('axios');
 const FormData = require('form-data');
 const packageJSON = require('./package.json');
 
-const zip = new JSZip();
-/** 根目录 */
-const rootDir = zip.folder(packageJSON.name);
 const args = process.argv.slice(2);
-
-if (!args[0] || !args[0].startsWith('--origin=')) {
+const originArg = args.find(arg => arg.startsWith('--origin='))
+if(!originArg) {
   console.log('发布应用失败，未配置发布源。');
   console.log('请按 node sync.js --origin=[域名] 规则配置，如：node sync.js --origin=https://my.mybricks.world');
   process.exit();
 }
-const domain = args[0].replace('--origin=', '');
-const noServiceUpdate = args[1] && args[1].indexOf('--noServiceUpdate') > -1;
-const offlineUpdate = args[1] && args[1].indexOf('--offline') > -1;
+const domain = originArg.replace('--origin=', '');
+const appTypeArg = args.find(arg => arg.startsWith('--appType='))
+const appType = appTypeArg.replace('--appType=', '')
+
+const noServiceUpdate = !!args.find(arg => arg==='--noServiceUpdate');
+const offlineUpdate = !!args.find(arg => arg==='--offline');
+
+const appName = packageJSON.appConfig[appType].name
+
+const zip = new JSZip();
+/** 根目录 */
+const rootDir = zip.folder(appName);
 // /** 遍历文件 */
 function read (zip, files, dirPath) {
   files.forEach(function (fileName) {
@@ -70,17 +76,17 @@ zip.generateAsync({
 }).then((content) => {
   console.log('应用打包压缩完成，开始发布应用...');
 
-  // fs.writeFileSync(path.join(__dirname, `./${packageJSON.name}.zip`), content, 'utf-8');
+  // fs.writeFileSync(path.join(__dirname, `./${appName}.zip`), content, 'utf-8');
   const formData = new FormData();
   formData.append('action', 'app_publishVersion');
   formData.append('userId', Buffer.from('em91eW9uZ3NoZW5nQGt1YWlzaG91LmNvbQ==', 'base64').toString('utf-8'));
   formData.append('payload', JSON.stringify({
-    name: (packageJSON.mybricks ? packageJSON.mybricks.title : '') || packageJSON.name,
+    name: (packageJSON.mybricks ? packageJSON.mybricks.title : '') || appName,
     version: packageJSON.version,
-    namespace: packageJSON.name,
+    namespace: appName,
     type: 'app',
     installInfo: JSON.stringify({
-      path: `/asset/app/${packageJSON.name}/${packageJSON.version}/${packageJSON.name}.zip`,
+      path: `/asset/app/${appName}/${packageJSON.version}/${appName}.zip`,
       changeLog: '优化部分逻辑，修复若干 bug',
       noServiceUpdate: noServiceUpdate
     }),

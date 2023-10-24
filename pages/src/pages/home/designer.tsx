@@ -23,10 +23,8 @@ import PublishModal, { EnumMode } from './components/PublishModal'
 import css from './app.less'
 import { USE_CUSTOM_HOST } from './constants'
 
-// const DefaultUploadService = '/biz/uploadExternalFileLocal'
-
 // 兜底物料
-export const localizationDefaultComlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
+export const localizationDefaultComlibs = APP_TYPE === 'react' ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : []
 
 export default function MyDesigner({ appData: originAppData }) {
 
@@ -165,10 +163,15 @@ export default function MyDesigner({ appData: originAppData }) {
   const isPreview = window.location.search.includes('version');
 
   useEffect(() => {
-    API.Material.getLatestComponentLibrarys(comlibs.filter(lib => lib.id !== "_myself_").map(lib => lib.namespace)).then((res: any) => {
-      const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))
-      setLatestComlibs(latestComlibs)
-    })
+    const needSearchComlibs = comlibs.filter(lib => lib.id !== "_myself_");
+    if(!!needSearchComlibs?.length){
+      API.Material.getLatestComponentLibrarys(needSearchComlibs.map(lib => lib.namespace)).then((res: any) => {
+        const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))
+        setLatestComlibs(latestComlibs)
+      })
+    }else {
+      setLatestComlibs([]);
+    }
   }, [JSON.stringify(comlibs.map(lib => lib.namespace))])
 
   useEffect(() => {
@@ -567,7 +570,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     'mybricks.core-comlib.scenes'
   ];
   const deps = [
-    ...toJSON.scenes
+    ...(toJSON.scenes || [])
       .reduce((pre, scene) => [...pre, ...scene.deps], [])
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),

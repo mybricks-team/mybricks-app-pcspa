@@ -3,9 +3,12 @@ const path = require('path');
 const JSZip = require('jszip');
 const packageJSON = require('./package.json');
 
+const type = process.argv[2]
+const pkgName = packageJSON.appConfig[type].name
+
 const zip = new JSZip();
 /** 根目录 */
-const rootDir = zip.folder(packageJSON.name);
+const rootDir = zip.folder(pkgName);
 // /** 遍历文件 */
 function read (zip, files, dirPath) {
   files.forEach(function (fileName) {
@@ -40,6 +43,7 @@ const filterFileName = [
   '.vscode',
   'sync.js',
   'sync_offline.js',
+  'publish.js',
   '.github',
 ];
 

@@ -10,8 +10,9 @@ import { generateComLib } from "./generateComLib";
 import { load } from 'cheerio';
 import { transform } from './transform'
 const FormData = require("form-data");
-import { Logger } from '@mybricks/rocker-commons'
-import * as PublishTemplateConstants from './constants/publish-template-constants'
+import { Logger } from '@mybricks/rocker-commons';
+import LocalPublic from './local-public';
+import { APPType } from './types'
 
 /** 本地化信息 */
 interface ILocalizationInfo {
@@ -23,7 +24,7 @@ interface ILocalizationInfo {
 @Injectable()
 export default class PcPageService {
 
-  async _generateComLibRT(comlibs, json, { domainName, fileId, noThrowError }) {
+  async _generateComLibRT(comlibs, json, { domainName, fileId, noThrowError, app_type }) {
     /**
        * TODO:
        * 1.目前应用里配置的edit.js 一定有 rt.js
@@ -50,7 +51,7 @@ export default class PcPageService {
       'mybricks.core-comlib.scenes'
     ];
     const deps = [
-      ...json.scenes
+      ...(json.scenes || [])
         .reduce((pre, scene) => [...pre, ...scene.deps], [])
         .filter((item) => !ignoreNamespaces.includes(item.namespace)),
       ...(json.global?.fxFrames || [])
@@ -98,13 +99,13 @@ export default class PcPageService {
       }
     }
 
-    return generateComLib(comLibContents.filter(lib => !!lib.componentRuntimeMap), deps, { comLibId: fileId, noThrowError });
+    return generateComLib(comLibContents.filter(lib => !!lib.componentRuntimeMap), deps, { comLibId: fileId, noThrowError, appType: app_type});
   }
 
   async publish(req, { json, userId, fileId, envType, commitInfo }) {
     try {
 
-      const publishFilePath = path.resolve(__dirname, './template')
+      const publishFilePath = path.resolve(__dirname, '../../assets')
 
       let template = fs.readFileSync(publishFilePath + '/publish.html', 'utf8')
 
@@ -140,6 +141,19 @@ export default class PcPageService {
 
       Logger.info(`[publish] getLatestPub ok`);
 
+      let app_type = APPType.React;
+      try {
+        const APP_TYPE_COMMIT = Array.from(template.match(/<!--(.*?)-->/g)).find(matcher => matcher.includes('_APP_TYPE_'));
+        if (APP_TYPE_COMMIT.includes(APPType.React)) {
+          app_type = APPType.React
+        }
+        if (APP_TYPE_COMMIT.includes(APPType.Vue2)) {
+          app_type = APPType.Vue2
+        }
+      } catch (error) {
+        Logger.error('template need appType')
+      }
+
       const version = getNextVersion(latestPub?.version);
 
       let comLibRtScript = '';
@@ -173,6 +187,8 @@ export default class PcPageService {
         pluginScript += `<script>${content}</script>`;
       }
 
+      Logger.info("[publish] 开始模板替换");
+
       template = template.replace(`--title--`, title)
         .replace(`-- plugin-runtime --`, pluginScript)
         .replace(`-- themes-style --`, themesStyleStr)
@@ -181,6 +197,8 @@ export default class PcPageService {
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
         .replace(`"--envList--"`, JSON.stringify(envList))
         .replace(`"--slot-project-id--"`, projectId ? projectId : JSON.stringify(null));
+
+      Logger.info("[publish] 模板替换完成");
 
       /** 是否本地化发布 */
       const needLocalization = await getCustomNeedLocalization();
@@ -214,7 +232,7 @@ export default class PcPageService {
       try {
         Logger.info("[publish] 正在尝试资源本地化...")
         // 将模板中所有资源本地化
-        const { globalDeps: _globalDeps, images: _images, template: _template } = await resourceLocalization(template, needLocalization);
+        const { globalDeps: _globalDeps, images: _images, template: _template } = await resourceLocalization(template, needLocalization, app_type);
         globalDeps = globalDeps.concat(_globalDeps || []);
         images = _images;
         template = _template;
@@ -231,7 +249,8 @@ export default class PcPageService {
         comboScriptText = await this._generateComLibRT(comlibs, json, {
           domainName,
           fileId,
-          noThrowError: hasOldComLib
+          noThrowError: hasOldComLib,
+          app_type
         });
       }
 
@@ -652,41 +671,33 @@ function getNextVersion(version, max = 100) {
  * @param template HTML 模板
  * @param needLocalization CDN 资源是否需要本地化
  */
-async function resourceLocalization(template: string, needLocalization: boolean) {
-  const $ = load(template);
+async function resourceLocalization(template: string, needLocalization: boolean, type = 'react') {
 
-  // 所有的公网资源都在模板中写有，间接依赖的公网资源由依赖自身处理
-  const flags = [...$("script").map((_, el) => $(el).attr('src'))]
-    .concat([...$("link").map((_, el) => $(el).attr('href'))])
-    // 筛选出所有公网资源地址
-    .filter((url: string) => !!url && ( url.includes('--%') ))
-
-  const resourceURLs = flags.map((url) => {
-    const key = url.match(/--% (\w+?) --/)[1];
-    if(!PublishTemplateConstants[key]?.APPRelativeAddress) {
-      Logger.error(`[publish] 找不到模板标志位 ${key} 对应的资源地址`);
-      return "";
+  const localPublicInfos = LocalPublic[type].map(info => {
+    if (!needLocalization) {
+      info.path = info.CDN;
     }
-    if(needLocalization) {
-      return PublishTemplateConstants[key].APPRelativeAddress;
-    } else {
-      return PublishTemplateConstants[key].CDN;
-    }
+    return info;
   });
+
+  const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
+    switch(cur.tag) {
+      case "link":
+        pre += `<link rel="stylesheet" href="${cur.path}" />`
+        break;
+      case "script":
+        pre += `<script src="${cur.path}"></script>`
+        break;
+    }
+    return pre;
+  }, "")
+
+  template = template.replace("-- public --", publicHtmlStr);
 
   let globalDeps: ILocalizationInfo[] = null;
   if (needLocalization) {
     // 获取所有本地化需要除了图片以外的信息，这些信息目前存储在相对位置
-    globalDeps = await Promise.all(resourceURLs.map(url => getLocalizationInfoByLocal(url, url.split('/').slice(0, -1).join('/'))));
-    // 把模板中的 CDN 地址替换成本地化后的地址
-    flags.forEach((flag, index) => {
-      const localUrl = `./${globalDeps[index].path}/${globalDeps[index].name}`;
-      template = template.replace(new RegExp(`${flag}`, 'g'), localUrl);
-    })
-  } else {
-    flags.forEach((flag, index) => {
-      template = template.replace(new RegExp(`${flag}`, 'g'), resourceURLs[index]);
-    })
+    globalDeps = await Promise.all(localPublicInfos.map(info => getLocalizationInfoByLocal(info.path, info.path.split('/').slice(0, -1).join('/'))));
   }
 
   // 模板中所有的图片资源
@@ -730,7 +741,7 @@ async function getLocalizationInfoByNetwork(url: string, path: string, config?: 
     const name = url.split('/').slice(-1)[0];
     return { path, name, content }
   } catch (e) {
-    Logger.error(`[publish] 获取资源失败: ${url}`, e);
+    Logger.error(`[publish] 获取资源失败(by network): ${url}`, e);
     if(withoutError) return undefined;
     else throw e;
   }
@@ -744,7 +755,7 @@ async function getLocalizationInfoByLocal(url: string, _path: string, config?: {
     const name = url.split('/').slice(-1)[0];
     return { path: _path, name, content }
   } catch (e) {
-    Logger.error(`[publish] 获取资源失败: ${url}`, e);
+    Logger.error(`[publish] 获取资源失败(by local): ${url}`, e);
     if(withoutError) return undefined;
     else throw e;
   }

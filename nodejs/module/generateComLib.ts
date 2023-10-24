@@ -1,5 +1,6 @@
-export const generateComLib = (allComLibs: any[], allComponents: any[], options: { comLibId: number; noThrowError: boolean }) => {
-	const { comLibId, noThrowError } = options;
+import { APPType } from './types'
+export const generateComLib = (allComLibs: any[], allComponents: any[], options: { comLibId: number; noThrowError: boolean, appType: APPType }) => {
+	const { comLibId, noThrowError, appType = APPType.React } = options;
 	let script = '';
 
 	allComponents.forEach(component => {
@@ -28,10 +29,33 @@ export const generateComLib = (allComLibs: any[], allComponents: any[], options:
 			}
 		}
 
+		let componentRuntime = ''
+		switch (true) {
+			case appType === APPType.React: {
+				componentRuntime = curComponent.runtime;
+				break
+			}
+
+			case appType === APPType.Vue2: {
+				componentRuntime = curComponent['runtime.vue'] ?? curComponent.runtime;
+				break
+			}
+
+			case appType === APPType.Vue3: {
+				componentRuntime = curComponent['runtime.vue'] ?? curComponent.runtime;
+				break
+			}
+		
+			default: {
+				componentRuntime = curComponent.runtime;
+				break
+			}
+		}
+
 		script += lib.defined ? `
-			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version}', runtime: ${decodeURIComponent(curComponent.runtime)} });
+			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version}', runtime: ${decodeURIComponent(componentRuntime)} });
 		` : `
-			eval(${JSON.stringify(decodeURIComponent(curComponent.runtime))});
+			eval(${JSON.stringify(decodeURIComponent(componentRuntime))});
 			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version}', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
 			if(Reflect.has(window, 'fangzhouComDef')) Reflect.deleteProperty(window, 'fangzhouComDef');
 			if(Reflect.has(window, 'MybricksComDef')) Reflect.deleteProperty(window, 'MybricksComDef');

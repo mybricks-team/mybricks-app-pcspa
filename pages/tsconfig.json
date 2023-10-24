@@ -25,6 +25,7 @@
     },
     "allowSyntheticDefaultImports": true
   },
+  "compileOnSave": true,
   "include": [
     "./src/**/*"
   ],

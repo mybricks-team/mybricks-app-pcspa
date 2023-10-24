@@ -12,22 +12,10 @@ export const initMaterials = async (ctx: Record<string, any>) => {
     if(myselfLib && hasMaterialApp) {
         await getComlibsByNamespaceAndVersion(myselfLib?.comAray)
     }
+    if(!libs.length) return [];
     const { styles } =  await myRequire(libs.map(lib => lib?.editJs??lib), (error) => {
         Promise.reject(error)
     })
-    // await Promise.all(
-    //     libs.map(lib => requireScript(lib?.editJs??lib))
-    // ).then((res) => {
-    //     //insert namespace, replace id
-    //     res.forEach(({styles}, index) => {
-    //         window[ComLib_Edit][index+1] = {
-    //             ...window[ComLib_Edit][index+1],
-    //             id: libs[index].id,
-    //             namespace: libs[index].namespace,
-    //             _styleAry: styles
-    //         }
-    //     })
-    // })
 
     /**
      * insert styles

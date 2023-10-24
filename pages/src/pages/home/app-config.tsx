@@ -121,6 +121,8 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
 
 const CUSTOM_HOST_TITLE = `自定义域名`
 
+const isReact = APP_TYPE === 'react';
+
 const getExecuteEnvByMode = (debugMode, ctx, envList) => {
   if (debugMode === EnumMode.DEFAULT) {
     ctx.executeEnv = ''
@@ -707,7 +709,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       ],
     },
     geoView: {
-      scenes: {
+      scenes: isReact ? {
         adder: [
           {
             type: 'normal',
@@ -741,10 +743,13 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             }
           }
         ]
-      },
+      } : null,
       theme: {
         css: [
-          './public/antd-4.21.6/antd.variable.min.css'
+          'public/antd/antd@4.21.6.min.css',
+          ...(
+            !isReact ? ['./public/elementUI/element@2.15.14.css'] : []
+          )
         ],
       },
     }
