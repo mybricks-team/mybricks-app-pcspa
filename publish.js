@@ -29,7 +29,7 @@ const publishReactAppOnline = () => {
   return new Promise((resolve) => {
     const buildCommand = `cd pages && npm run build:react`;
     shelljs.exec(buildCommand, () => {
-      const syncCommand = `npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world react ${noServiceUpdate ? "--noServiceUpdate" : ""
+      const syncCommand = `npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world --appType=react ${noServiceUpdate ? "--noServiceUpdate" : ""
         }`;
       shelljs.exec(syncCommand, resolve);
     });
@@ -40,7 +40,7 @@ const publishVue2AppOnline = () => {
   return new Promise((resolve) => {
     const buildCommand = `cd pages && npm run build:vue2`;
     shelljs.exec(buildCommand, () => {
-      const syncCommand = `npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world vue2 ${noServiceUpdate ? "--noServiceUpdate" : ""
+      const syncCommand = `npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world --appType=vue2 ${noServiceUpdate ? "--noServiceUpdate" : ""
         }`;
       shelljs.exec(syncCommand, resolve);
     });
@@ -66,9 +66,19 @@ const execChain = (fns) => {
 }
 
 if (isOffline) {
-  execChain([publishReactAppOffline, fixPkg, publishVue2AppOffline, resetPkg])
+  execChain([
+    publishReactAppOffline, 
+    // fixPkg, 
+    // publishVue2AppOffline, 
+    // resetPkg
+  ])
 } else {
-  execChain([publishReactAppOnline, fixPkg, publishVue2AppOnline, resetPkg])
+  execChain([
+    publishReactAppOnline, 
+    // fixPkg, 
+    // publishVue2AppOnline, 
+    // resetPkg
+  ])
 }
 
 
