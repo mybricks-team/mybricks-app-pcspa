@@ -50,27 +50,44 @@ function cssVariable(dumpJson) {
 
 cssVariable(dumpJson)
 
+let reactRoot
 
 function render(props) {
     const { container } = props;
     if (comlibs && Array.isArray(comlibs)) {
         Promise.all(comlibs.map((t) => requireScript(t))).then(() => {
-            ReactDOM.render(
-                React.createElement(
-                    antd.ConfigProvider,
-                    {
-                        locale: antd.locale['zh_CN'].default,
-                    },
-                    renderUI({
-                        ...props, renderType: 'react', env: {
-                            callDomainModel(domainModel, type, params) {
-                                return callDomainHttp(domainModel, params, { action: type } as any);
-                            }
+            // ReactDOM.render(
+            //     React.createElement(
+            //         antd.ConfigProvider,
+            //         {
+            //             locale: antd.locale['zh_CN'].default,
+            //         },
+            //         renderUI({
+            //             ...props, renderType: 'react', env: {
+            //                 callDomainModel(domainModel, type, params) {
+            //                     return callDomainHttp(domainModel, params, { action: type } as any);
+            //                 }
+            //             }
+            //         })
+            //     ),
+            //     (container ?? document).querySelector('#root')
+            // )
+
+            reactRoot = ReactDOM.createRoot((container ?? document).querySelector('#root'));
+
+            reactRoot.render(React.createElement(
+                antd.ConfigProvider,
+                {
+                    locale: antd.locale['zh_CN'].default,
+                },
+                renderUI({
+                    ...props, renderType: 'react', env: {
+                        callDomainModel(domainModel, type, params) {
+                            return callDomainHttp(domainModel, params, { action: type } as any);
                         }
-                    })
-                ),
-                (container ?? document).querySelector('#root')
-            )
+                    }
+                })
+            ));
         })
     }
 }
@@ -89,5 +106,6 @@ export async function mount(props) {
 
 export async function unmount(props) {
     const { container } = props;
-    ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#root'));
+    // ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#root'));
+    reactRoot.unmount();
 }
