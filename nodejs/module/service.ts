@@ -157,7 +157,6 @@ export default class PcPageService {
       const version = getNextVersion(latestPub?.version);
 
       let comLibRtScript = '';
-      let pluginScript = '';
       let needCombo = false;
       let hasOldComLib = false;
 
@@ -176,21 +175,9 @@ export default class PcPageService {
         needCombo = true;
       }
 
-      const customConnectorRuntimeUrl = getCustomConnectorRuntime(appConfig, req)
-      if (customConnectorRuntimeUrl) {
-        let content = ''
-        try {
-          content = await axios.get(customConnectorRuntimeUrl).then(res => res.data)
-        } catch (e) {
-          Logger.error(`[publish] get customConnectorRuntime error`, e)
-        }
-        pluginScript += `<script>${content}</script>`;
-      }
-
       Logger.info("[publish] 开始模板替换");
 
       template = template.replace(`--title--`, title)
-        .replace(`-- plugin-runtime --`, pluginScript)
         .replace(`-- themes-style --`, themesStyleStr)
         .replace(`-- comlib-rt --`, comLibRtScript)
         .replace(`"--projectJson--"`, JSON.stringify(transform(json)))
@@ -225,7 +212,23 @@ export default class PcPageService {
         );
         globalDeps = globalDeps.concat(localizationComLibInfoList);
       } catch (e) {
-        Logger.error("[publish] 组件库本地化失败！");
+        Logger.error(`[publish] 组件库本地化失败！ ${JSON.stringify(e)}`);
+        throw e;
+      }
+
+      try {
+        Logger.info("[publish] 正在尝试 plugin-runtime 本地化...");
+        const customConnectorRuntimeUrl = getCustomConnectorRuntime(appConfig, req);
+        console.log(`customConnectorRuntimeUrl JD==> `,customConnectorRuntimeUrl);
+        if (customConnectorRuntimeUrl) {
+          const info = await getLocalizationInfoByNetwork(customConnectorRuntimeUrl, 'public/plugins');
+          globalDeps = globalDeps.concat(info)
+          template = template.replace("-- plugin-runtime --", `<script src="${info.path}/${info.name}" ></script>`);
+        } else {
+          template = template.replace("-- plugin-runtime --", '');
+        }
+      } catch (e) {
+        Logger.error(`[publish] plugin-runtime 本地化失败: ${JSON.stringify(e)}`);
         throw e;
       }
 
@@ -239,7 +242,7 @@ export default class PcPageService {
         Logger.info("[publish] 资源本地化成功！")
       }
       catch (e) {
-        Logger.error("[publish] 资源本地化失败: ", e);
+        Logger.error(`[publish] 资源本地化失败: ${JSON.stringify(e)}`);
         throw new Error('资源本地化失败！');
       }
 
