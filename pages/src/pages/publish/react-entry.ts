@@ -4,6 +4,8 @@ const React = window.React;
 const ReactDOM = window.ReactDOM;
 const antd = window.antd;
 
+let reactRoot
+
 const render = (props) => {
     const { container } = props;
   const root = (container || document).querySelector('#mybricks-page-root')
@@ -17,16 +19,25 @@ const render = (props) => {
       },
     })
   }
-  ReactDOM.render(
-    React.createElement(
-      antd.ConfigProvider,
-      {
-        locale: antd.locale['zh_CN'].default,
-      },
-      renderUI({...props, renderType: 'react'})
-    ),
-    root
-  )
+  // ReactDOM.render(
+  //   React.createElement(
+  //     antd.ConfigProvider,
+  //     {
+  //       locale: antd.locale['zh_CN'].default,
+  //     },
+  //     renderUI({...props, renderType: 'react'})
+  //   ),
+  //   root
+  // )
+  reactRoot = ReactDOM.createRoot(root);
+
+  reactRoot.render(React.createElement(
+    antd.ConfigProvider,
+    {
+      locale: antd.locale['zh_CN'].default,
+    },
+    renderUI({...props, renderType: 'react'})
+  ));
 }
 
 if (!window.__POWERED_BY_QIANKUN__) {
@@ -43,5 +54,6 @@ export async function mount(props) {
 
 export async function unmount(props) {
     const { container } = props;
-    ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#mybricks-page-root'));
+    // ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#mybricks-page-root'));
+    reactRoot.unmount()
 }
