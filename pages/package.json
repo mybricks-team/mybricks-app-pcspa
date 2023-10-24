@@ -62,7 +62,7 @@
   "dependencies": {
     "@mybricks/plugin-connector-domain": "0.0.51",
     "@mybricks/plugin-connector-http": "1.1.69",
-    "@mybricks/plugin-theme": "^0.0.36-beta5",
+    "@mybricks/plugin-theme": "0.0.37",
     "@mybricks/plugin-tools": "1.0.17",
     "@mybricks/render-web": "1.2.0",
     "@mybricks/sdk-for-app": "^0.1.96",
@@ -73,8 +73,8 @@
     "html-to-image": "^1.10.8",
     "lodash": "^4.17.21",
     "mybricks-plugin-version": "0.0.11",
-    "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "publishConfig": {
     "access": "public",
