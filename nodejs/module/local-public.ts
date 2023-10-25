@@ -3,6 +3,16 @@
 export default {
   react: [
     {
+      tag: "script",
+      path: "public/moment/moment@2.29.4.min.js",
+      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443543399.2.29.4_moment.min.js",
+    },
+    {
+      tag: "script",
+      path: "public/moment/locale/zh-cn.min.js",
+      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443577599.2.29.4_locale_zh-cn.min.js",
+    },
+    {
       tag: "link",
       path: "public/antd/antd@4.21.6.min.css",
       CDN: "//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/antd.variable.min.css",
@@ -36,16 +46,6 @@ export default {
       tag: "script",
       path: "public/ant-design-charts@1.2.14.min.js",
       CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444283932.ant-design_charts@1.2.14.min.js",
-    },
-    {
-      tag: "script",
-      path: "public/moment/moment@2.29.4.min.js",
-      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443543399.2.29.4_moment.min.js",
-    },
-    {
-      tag: "script",
-      path: "public/moment/locale/zh-cn.min.js",
-      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443577599.2.29.4_locale_zh-cn.min.js",
     },
     {
       tag: "script",
