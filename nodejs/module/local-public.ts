@@ -59,8 +59,8 @@ export default {
     },
     {
       tag: "script",
-      path: "public/render-web/1.2.2/index.min.js",
-      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.2.2/index.min.js",
+      path: "public/render-web/1.2.3/index.min.js",
+      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.2.3/index.min.js",
     },
   ],
   vue2: [
@@ -110,28 +110,32 @@ export default {
         CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/index.min.js",
       },
       {
+        path: "public/designer-spa/1.3.44/828.index.min.js",
+        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/828.index.min.js",
+      },
+      {
+        path: "public/designer-spa/1.3.44/635.index.min.js",
+        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/635.index.min.js",
+      },
+      {
         path: "public/designer-spa/1.3.44/74.index.min.js",
         CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/74.index.min.js",
       },
       {
-        path: "public/designer-spa/1.3.44/9.index.min.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/9.index.min.js",
+        path: "public/designer-spa/1.3.44/239.index.min.js",
+        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/239.index.min.js",
+      },
+      {
+        path: "public/designer-spa/1.3.44/554.index.min.js",
+        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/554.index.min.js",
       },
       {
         path: "public/designer-spa/1.3.44/452.index.min.js",
         CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/452.index.min.js",
       },
       {
-        path: "public/designer-spa/1.3.44/394.index.min.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/394.index.min.js",
-      },
-      {
-        path: "public/designer-spa/1.3.44/828.index.min.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/828.index.min.js",
-      },
-      {
-        path: "public/designer-spa/1.3.44/554.index.min.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/554.index.min.js",
+        path: "public/designer-spa/1.3.44/9.index.min.js",
+        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.44/9.index.min.js",
       },
       // 兜底组件库
       {

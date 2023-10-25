@@ -64,7 +64,7 @@
     "@mybricks/plugin-connector-http": "1.1.70",
     "@mybricks/plugin-theme": "0.0.37",
     "@mybricks/plugin-tools": "1.0.17",
-    "@mybricks/render-web": "1.2.2",
+    "@mybricks/render-web": "1.2.3",
     "@mybricks/sdk-for-app": "^0.1.98",
     "antd": "^4.23.6",
     "classnames": "^2.3.1",
