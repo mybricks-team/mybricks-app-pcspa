@@ -274,8 +274,9 @@ export default class PcPageService {
         comlibRtName,
         fileName,
         userId
-      });
+      }, true);
 
+      // TODO: 待优化，直接保存 JSON 太大了，想办法拆一下
       /** 保存回滚数据 */
       saveRollbackData(fileId, version, envType, {
         envType,
@@ -386,7 +387,7 @@ const uploadStatic = async (
 /**
  * 推送发布内容到目标机器
  */
-async function publishPush(params) {
+export async function publishPush(params, needPublishFile: boolean) {
   const {
     envType,
     fileId,
@@ -510,20 +511,22 @@ async function publishPush(params) {
     }
   }
 
-  Logger.info("[publish] API.File.publish: begin ");
+  if(needPublishFile) {
+    Logger.info("[publish] API.File.publish: begin ");
 
-  const result = await API.File.publish({
-    userId,
-    fileId,
-    extName: "pc-page",
-    commitInfo,
-    content: JSON.stringify({ ...publishMaterialInfo, json }),
-    type: envType,
-  });
+    const result = await API.File.publish({
+      userId,
+      fileId,
+      extName: "pc-page",
+      commitInfo,
+      content: JSON.stringify({ ...publishMaterialInfo, json }),
+      type: envType,
+    });
+  
+    Logger.info("[publish] API.File.publish: ok ");
 
-  Logger.info("[publish] API.File.publish: ok ");
-
-  return result;
+    return result;
+  }
 }
 
 /**
