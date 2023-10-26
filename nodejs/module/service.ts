@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
-
 import * as fs from "fs";
-import axios, { AxiosRequestConfig } from "axios";
+import axios from "axios";
 import * as path from "path";
 import API from "@mybricks/sdk-for-app/api";
 import { parse } from "url";
@@ -12,13 +11,10 @@ const FormData = require("form-data");
 import { Logger } from '@mybricks/rocker-commons';
 import LocalPublic from './local-public';
 import { APPType } from './types'
-
-/** 本地化信息 */
-interface ILocalizationInfo {
-  path: string;
-  name: string;
-  content: string;
-}
+import { analysisAllUrl, getNextVersion, getRealDomain } from './tools/analysis';
+import { getCustomConnectorRuntime, getCustomNeedLocalization, getCustomPublishApi, getUploadService } from './tools/get-app-config';
+import { ILocalizationInfo } from './interface';
+import { getLocalizationInfoByLocal, getLocalizationInfoByNetwork } from './tools/localization';
 
 @Injectable()
 export default class PcPageService {
@@ -86,7 +82,7 @@ export default class PcPageService {
           defined: true,
           componentRuntimeMap: {}
         });
-        finalComponents.forEach((finalComponent) => {
+        finalComponents.forEach((finalComponent: any) => {
           const { version, namespace, runtime } = finalComponent;
 
           if (version && namespace && runtime) {
@@ -525,69 +521,6 @@ export default class PcPageService {
 
 }
 
-// 不传groupId表示获取的是全局配置
-const getAppConfig = async ({ groupId } = {} as any) => {
-  const _NAMESPACE_ = "mybricks-app-pcspa";
-  const options = !!groupId ? { type: 'group', id: groupId } : {}
-  const res = await API.Setting.getSetting([_NAMESPACE_], options);
-
-  let config = {} as any
-  const originConfig = res[_NAMESPACE_]?.config || {}
-  try {
-    config = typeof originConfig === 'string' ? JSON.parse(originConfig) : originConfig
-  } catch (e) {
-    Logger.error("[publish] getAppConfig error", e);
-  }
-  return config
-};
-
-// 使用平台设置的上传接口，不使用协作组的
-const getUploadService = async () => {
-  const { uploadServer = {} } = await getAppConfig()
-  const { uploadService } = uploadServer
-  if (!uploadService) {
-    throw Error("无上传服务，请先配置应用上传服务");
-  }
-  return uploadService;
-};
-
-
-// 使用平台设置的集成接口，不使用协作组的
-const getCustomPublishApi = async () => {
-  const { publishApiConfig = {} } = await getAppConfig()
-  const { publishApi } = publishApiConfig
-  if (!publishApi) {
-    Logger.warn(`[publish] 未配置发布集成接口`)
-  }
-  return publishApi;
-}
-
-/** 
- * 获取平台设置的「是否本地化发布」
- */
-const getCustomNeedLocalization = async () => {
-  const { publishLocalizeConfig } = await getAppConfig()
-  const { needLocalization } = publishLocalizeConfig || {};
-  if (!!needLocalization) {
-    Logger.info("[publish] 此次发布为本地化发布");
-  }
-  return !!needLocalization;
-}
-
-// -- plugin-runtime --
-const getCustomConnectorRuntime = (appConfig, req) => {
-  const { plugins = [] } = appConfig
-  const connectorPlugin = plugins.find(item => item?.type === 'connector')
-  if (!connectorPlugin) {
-    return ''
-  }
-  if (!connectorPlugin.runtimeUrl || typeof connectorPlugin.runtimeUrl !== 'string') {
-    Logger.error(`[publish] 插件【${connectorPlugin}】没有设置runtime地址`)
-    return ''
-  }
-  return connectorPlugin.runtimeUrl.startsWith('/') ? `${getRealDomain(req)}/${connectorPlugin.runtimeUrl}` : connectorPlugin.runtimeUrl
-}
-
 const uploadStatic = async (
   content: string,
   groupId: string,
@@ -616,57 +549,6 @@ const uploadStatic = async (
   const domain = `${protocol}//${host}`;
   return { url: `${domain}${url}` };
 };
-
-function getRealHostName(requestHeaders) {
-  let hostName = requestHeaders.host
-  if (requestHeaders['x-forwarded-host']) {
-    hostName = requestHeaders['x-forwarded-host']
-  } else if (requestHeaders['x-host']) {
-    hostName = requestHeaders['x-host'].replace(':443', '')
-  }
-  return hostName
-}
-
-/** 有问题找zouyongsheng */
-function getRealDomain(request) {
-  let hostName = getRealHostName(request.headers);
-  const { origin } = request.headers
-  if (origin) return origin
-  // let protocol = request.headers['x-scheme'] ? 'https' : 'http'
-  /** TODO: 暂时写死 https */
-  // let protocol = 'https';
-  let protocol = request.headers?.['connection'].toLowerCase() === 'upgrade' ? 'https' : 'http'
-  let domain = `${protocol}:\/\/${hostName}`
-  return domain
-}
-
-function getNextVersion(version, max = 100) {
-  if (!version) return "1.0.0";
-  const vAry = version.split(".");
-  let carry = false;
-  const isMaster = vAry.length === 3;
-  if (!isMaster) {
-    max = -1;
-  }
-
-  for (let i = vAry.length - 1; i >= 0; i--) {
-    const res = Number(vAry[i]) + 1;
-    if (i === 0) {
-      vAry[i] = res;
-    } else {
-      if (res === max) {
-        vAry[i] = 0;
-        carry = true;
-      } else {
-        vAry[i] = res;
-        carry = false;
-      }
-    }
-    if (!carry) break;
-  }
-
-  return vAry.join(".");
-}
 
 /**
  * 将 HTML 中的公网资源本地化
@@ -728,46 +610,4 @@ async function resourceLocalization(template: string, needLocalization: boolean,
   })
 
   return { template, globalDeps, images: images.filter(img => !!img) };
-}
-
-/**
- * 获取本地化相关信息
- * @param url 资源地址
- * @param pathPrefix 本地化后相对地址的前缀
- * @returns 本地化相关信息
- */
-async function getLocalizationInfoByNetwork(url: string, path: string, config?: AxiosRequestConfig<any> & { withoutError: boolean }): Promise<ILocalizationInfo> {
-  const { withoutError, ...axiosConfig } = config || {};
-  try {
-    const { data: content } = await axios({ method: "get", url, timeout: 30 * 1000, ...axiosConfig });
-    const name = url.split('/').slice(-1)[0];
-    return { path, name, content }
-  } catch (e) {
-    Logger.error(`[publish] 获取资源失败(by network): ${url}`, e);
-    if(withoutError) return undefined;
-    else throw e;
-  }
-}
-
-async function getLocalizationInfoByLocal(url: string, _path: string, config?: { withoutError: boolean }) {
-  const { withoutError } = config || {};
-  try {
-    const publishFilePath = path.resolve(__dirname, `../../assets/${url}`);
-    const content = fs.readFileSync(publishFilePath, 'utf8');
-    const name = url.split('/').slice(-1)[0];
-    return { path: _path, name, content }
-  } catch (e) {
-    Logger.error(`[publish] 获取资源失败(by local): ${url}`, e);
-    if(withoutError) return undefined;
-    else throw e;
-  }
-}
-
-/**
- * 获取文本中所有 URL
- * @param str 被处理的文本
- * @returns 文本中的所有 URL
- */
-function analysisAllUrl(str: string): string[] {
-  return str.match(/(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g) || [];
 }
