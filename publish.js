@@ -4,6 +4,9 @@ const fs = require("fs");
 const args = process.argv.slice(2);
 const isOffline = !!args.find((a) => a === "offline");
 const noServiceUpdate = !!args.find((a) => a === "--noServiceUpdate");
+const origin =
+  args.find((a) => a.startsWith("--origin=")) ??
+  "--origin=https://my.mybricks.world";
 
 const publishReactAppOffline = () => {
   return new Promise((resolve) => {
@@ -12,7 +15,7 @@ const publishReactAppOffline = () => {
       const syncCommand = `node sync_offline.js react`;
       shelljs.exec(syncCommand, resolve);
     });
-  })
+  });
 };
 
 const publishVue2AppOffline = () => {
@@ -22,29 +25,31 @@ const publishVue2AppOffline = () => {
       const syncCommand = `node sync_offline.js vue2`;
       shelljs.exec(syncCommand, resolve);
     });
-  })
+  });
 };
 
 const publishReactAppOnline = () => {
   return new Promise((resolve) => {
     const buildCommand = `cd pages && npm run build:react`;
     shelljs.exec(buildCommand, () => {
-      const syncCommand = `npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world --appType=react ${noServiceUpdate ? "--noServiceUpdate" : ""
-        }`;
+      const syncCommand = `npm publish --registry=https://registry.npmjs.org && node sync.js ${origin} --appType=react ${
+        noServiceUpdate ? "--noServiceUpdate" : ""
+      }`;
       shelljs.exec(syncCommand, resolve);
     });
-  })
+  });
 };
 
 const publishVue2AppOnline = () => {
   return new Promise((resolve) => {
     const buildCommand = `cd pages && npm run build:vue2`;
     shelljs.exec(buildCommand, () => {
-      const syncCommand = `npm publish --registry=https://registry.npmjs.org && node sync.js --origin=https://my.mybricks.world --appType=vue2 ${noServiceUpdate ? "--noServiceUpdate" : ""
-        }`;
+      const syncCommand = `npm publish --registry=https://registry.npmjs.org && node sync.js ${origin} --appType=vue2 ${
+        noServiceUpdate ? "--noServiceUpdate" : ""
+      }`;
       shelljs.exec(syncCommand, resolve);
     });
-  })
+  });
 };
 
 const fixPkg = () => {
@@ -53,8 +58,8 @@ const fixPkg = () => {
     json.name = json.appConfig.vue2.name;
     json.mybricks = { ...json.mybricks, ...json.appConfig.vue2.mybricks };
     fs.writeFileSync("./package.json", JSON.stringify(json, null, 2));
-    resolve()
-  })
+    resolve();
+  });
 };
 
 const resetPkg = () => {
@@ -62,23 +67,21 @@ const resetPkg = () => {
 };
 
 const execChain = (fns) => {
-  fns.reduce((chain, fn) => chain.then(fn), Promise.resolve())
-}
+  fns.reduce((chain, fn) => chain.then(fn), Promise.resolve());
+};
 
 if (isOffline) {
   execChain([
-    publishReactAppOffline, 
-    // fixPkg, 
-    // publishVue2AppOffline, 
+    publishReactAppOffline,
+    // fixPkg,
+    // publishVue2AppOffline,
     // resetPkg
-  ])
+  ]);
 } else {
   execChain([
-    publishReactAppOnline, 
-    // fixPkg, 
-    // publishVue2AppOnline, 
+    publishReactAppOnline,
+    // fixPkg,
+    // publishVue2AppOnline,
     // resetPkg
-  ])
+  ]);
 }
-
-

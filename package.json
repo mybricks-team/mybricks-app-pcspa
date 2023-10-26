@@ -10,8 +10,8 @@
     "build:react": "cd pages && npm run build:react",
     "build:vue2": "cd pages && npm run build:vue2",
     "publish:offline": "node ./publish.js offline",
-    "publish:online": "node ./publish.js --noServiceUpdate",
-    "publish:online:serviceUpdate": "node ./publish.js",
+    "publish:online": "node ./publish.js --noServiceUpdate --origin=https://my.mybricks.world",
+    "publish:online:serviceUpdate": "node ./publish.js --origin=https://my.mybricks.world",
     "updateLocalPublic": "ts-node update_local_public"
   },
   "keywords": [
