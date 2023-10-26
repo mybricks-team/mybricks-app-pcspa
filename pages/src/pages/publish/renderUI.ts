@@ -126,7 +126,6 @@ const root = ({ renderType, ...props }) => {
 
           return curConnector
             ? plugin.call({ ...connector, ...curConnector }, newParams, {
-                // 只在官方插件上做环境域名处理
                 before: (options) => {
                   return {
                     ...options,

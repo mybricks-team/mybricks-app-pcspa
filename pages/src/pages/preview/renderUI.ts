@@ -73,7 +73,6 @@ const root = ({ renderType, env, ...props }) => {
                 { ...connector, ...curConnector, useProxy: true },
                 newParams,
                 {
-                  // 只在官方插件上做环境域名处理
                   before: (options) => {
                     return {
                       ...options,

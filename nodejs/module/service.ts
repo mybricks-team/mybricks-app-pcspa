@@ -7,7 +7,6 @@ import API from "@mybricks/sdk-for-app/api";
 import { parse } from "url";
 import { Blob } from 'buffer'
 import { generateComLib } from "./generateComLib";
-import { load } from 'cheerio';
 import { transform } from './transform'
 const FormData = require("form-data");
 import { Logger } from '@mybricks/rocker-commons';
