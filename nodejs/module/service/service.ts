@@ -100,7 +100,7 @@ export default class PcPageService {
   async publish(req, { json, userId, fileId, envType, commitInfo }) {
     try {
 
-      const publishFilePath = path.resolve(__dirname, '../../assets')
+      const publishFilePath = path.resolve(__dirname, '../../../assets')
 
       let template = fs.readFileSync(publishFilePath + '/publish.html', 'utf8')
 
@@ -525,7 +525,6 @@ const uploadStatic = async (
  * @param needLocalization CDN 资源是否需要本地化
  */
 async function resourceLocalization(template: string, needLocalization: boolean, type = 'react') {
-
   const localPublicInfos = LocalPublic[type].map(info => {
     if (!needLocalization) {
       info.path = info.CDN;

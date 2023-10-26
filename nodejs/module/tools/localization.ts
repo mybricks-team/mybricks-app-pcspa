@@ -25,6 +25,7 @@ export async function getLocalizationInfoByNetwork(
       ...axiosConfig,
     });
     const name = url.split("/").slice(-1)[0];
+    Logger.info(`[publish] 获取资源成功(by network): ${url}`);
     return { path, name, content };
   } catch (e) {
     Logger.error(`[publish] 获取资源失败(by network): ${url}`, e);
@@ -43,9 +44,12 @@ export async function getLocalizationInfoByLocal(
     const publishFilePath = path.resolve(__dirname, `../../../assets/${url}`);
     const content = fs.readFileSync(publishFilePath, "utf8");
     const name = url.split("/").slice(-1)[0];
+    Logger.info(`[publish] 获取资源成功(by local): ${url}`);
     return { path: _path, name, content };
   } catch (e) {
-    Logger.error(`[publish] 获取资源失败(by local): ${url}`, e);
+    Logger.error(
+      `[publish] 获取资源失败(by local): ${url} ${JSON.stringify(e, null, 2)}`
+    );
     if (withoutError) return undefined;
     else throw e;
   }
