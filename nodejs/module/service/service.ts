@@ -5,16 +5,16 @@ import * as path from "path";
 import API from "@mybricks/sdk-for-app/api";
 import { parse } from "url";
 import { Blob } from 'buffer'
-import { generateComLib } from "./generateComLib";
-import { transform } from './transform'
+import { generateComLib } from "../generateComLib";
+import { transform } from '../transform'
 const FormData = require("form-data");
 import { Logger } from '@mybricks/rocker-commons';
 import LocalPublic from './local-public';
-import { APPType } from './types'
-import { analysisAllUrl, getNextVersion, getRealDomain } from './tools/analysis';
-import { getCustomConnectorRuntime, getCustomNeedLocalization, getCustomPublishApi, getUploadService } from './tools/get-app-config';
-import { ILocalizationInfo } from './interface';
-import { getLocalizationInfoByLocal, getLocalizationInfoByNetwork } from './tools/localization';
+import { APPType } from '../types'
+import { analysisAllUrl, getNextVersion, getRealDomain } from '../tools/analysis';
+import { getCustomConnectorRuntime, getCustomNeedLocalization, getCustomPublishApi, getUploadService } from '../tools/get-app-config';
+import { ILocalizationInfo } from '../interface';
+import { getLocalizationInfoByLocal, getLocalizationInfoByNetwork } from '../tools/localization';
 
 @Injectable()
 export default class PcPageService {
@@ -487,37 +487,6 @@ export default class PcPageService {
       }
     });
   }
-  // 专供模块安装时使用
-  // async generateHTML(req, {json, fileId}) {
-  // 	const domainServicePath = '/runtime/api/domain/service/run';
-  // 	let error = ''
-
-  // 	try {
-  // 		let template = fs.readFileSync(path.resolve(__dirname, './template.html'), 'utf8')
-  // 		const { title, comlibs, projectId, fileName, folderPath } = json.configuration
-  // 		Reflect.deleteProperty(json, 'configuration')
-
-  // 		/** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
-  // 		const domainName = process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : getRealDomain(req)
-
-  // 		return {
-  // 			code: 1,
-  // 			data: template
-  // 				.replace(`--RENDER_WEB--`, 'https://f2.eckwai.com/kos/nlav12333/mybricks/render-web/index.min.1.1.46.js')
-  // 				.replace(`<!-- comlib-rt -->`, await this._generateComLibRT(comlibs, json, {domainName}))
-  // 				.replace(`--title--`, title)
-  // 				.replace(`'--projectJson--'`, JSON.stringify(json))
-  // 				.replace('--domain-service-path--', domainServicePath)
-  // 		};
-  // 	} catch (e) {
-  // 		Logger.log('pcpage publish error', e)
-  // 		error = e
-  // 	}
-
-  // 	if (error) {
-  // 		return { code: 0, error };
-  // 	}
-  // }
 
 }
 

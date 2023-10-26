@@ -8,7 +8,7 @@ import {
   UseInterceptors
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-import Service from './service'
+import Service from './service/service'
 import { Logger } from '@mybricks/rocker-commons'
 
 @Controller('api/pcpage')
