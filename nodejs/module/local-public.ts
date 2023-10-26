@@ -65,14 +65,14 @@ export default {
   ],
   vue2: [
     {
-      tag: "script",
-      path: "public/vue/2.7.14/vue.min.js",
-      CDN: "https://f2.beckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/vue/2.7.14/vue.min.js",
-    },
-    {
       tag: "link",
       path: "public/elementUI/element@2.15.14.css",
       CDN: "https://unpkg.com/element-ui/lib/theme-chalk/index.css",
+    },
+    {
+      tag: "script",
+      path: "public/vue/2.7.14/vue.min.js",
+      CDN: "https://f2.beckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/vue/2.7.14/vue.min.js",
     },
     {
       tag: "script",
