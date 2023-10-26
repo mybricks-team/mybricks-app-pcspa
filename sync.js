@@ -95,7 +95,7 @@ zip.generateAsync({
     description: packageJSON.mybricks ? (packageJSON.mybricks.description || packageJSON.description) : packageJSON.description,
     createTime: Date.now(),
   }));
-  formData.append('file', content, `${packageJSON.name}.zip`);
+  formData.append('file', content, `${appName}.zip`);
   fs.writeFileSync('./test.zip', content, 'utf-8')
 
   // 发送请求
