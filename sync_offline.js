@@ -45,6 +45,7 @@ const filterFileName = [
   'sync_offline.js',
   'publish.js',
   '.github',
+  "update_local_public.js"
 ];
 
 const files = fs.readdirSync(zipDirPath).filter(filename => {

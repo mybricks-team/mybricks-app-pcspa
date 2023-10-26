@@ -527,7 +527,7 @@ export default class PcPageService {
 
 // 不传groupId表示获取的是全局配置
 const getAppConfig = async ({ groupId } = {} as any) => {
-  const _NAMESPACE_ = "mybricks-app-pcspa";
+  const _NAMESPACE_ = APP_NAME;
   const options = !!groupId ? { type: 'group', id: groupId } : {}
   const res = await API.Setting.getSetting([_NAMESPACE_], options);
 

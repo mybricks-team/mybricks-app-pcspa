@@ -57,6 +57,8 @@ const filterFileName = [
   '.vscode',
   'sync.js',
   'sync_offline.js',
+  "publish.js",
+  "update_local_public.js"
 ];
 
 if(!offlineUpdate) {
