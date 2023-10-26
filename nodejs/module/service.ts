@@ -152,6 +152,9 @@ export default class PcPageService {
       } catch (error) {
         Logger.error('template need appType')
       }
+      Logger.info(`[publish] app_type: ${app_type}`)
+
+      Logger.info(template)
 
       const version = getNextVersion(latestPub?.version);
 
