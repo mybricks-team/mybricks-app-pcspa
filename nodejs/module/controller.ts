@@ -8,17 +8,13 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import Service from "./service/service";
-import RollbackService from "./service/rollback-service";
+import Service from "./service";
 import { Logger } from "@mybricks/rocker-commons";
 
 @Controller("api/pcpage")
 export default class PcPageController {
   @Inject(Service)
   service: Service;
-
-  @Inject(RollbackService)
-  rollbackService: RollbackService;
 
   @Post("/publish")
   async publish(
@@ -76,7 +72,7 @@ export default class PcPageController {
       Logger.info(`[rollback] 调用回滚接口`);
 
       const startTime = Date.now();
-      const result = await this.rollbackService.rollback(req, assetUrl);
+      const result = await this.service.rollback(req, assetUrl);
 
       Logger.info("[rollback] 回滚成功！");
       Logger.info(
