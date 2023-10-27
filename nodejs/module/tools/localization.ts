@@ -26,7 +26,7 @@ export async function getLocalizationInfoByNetwork(
     });
     const name = url.split("/").slice(-1)[0];
     Logger.info(`[publish] 获取资源成功(by network): ${url}`);
-    return { path, name, content };
+    return { path, name, content, from: { type: 'byNetwork', url } };
   } catch (e) {
     Logger.error(`[publish] 获取资源失败(by network): ${url}`, e);
     if (withoutError) return undefined;
@@ -38,14 +38,14 @@ export async function getLocalizationInfoByLocal(
   url: string,
   _path: string,
   config?: { withoutError: boolean }
-) {
+): Promise<ILocalizationInfo> {
   const { withoutError } = config || {};
   try {
     const publishFilePath = path.resolve(__dirname, `../../../assets/${url}`);
     const content = fs.readFileSync(publishFilePath, "utf8");
     const name = url.split("/").slice(-1)[0];
     Logger.info(`[publish] 获取资源成功(by local): ${url}`);
-    return { path: _path, name, content };
+    return { path: _path, name, content, from: { type: 'byLocal', url } };
   } catch (e) {
     Logger.error(
       `[publish] 获取资源失败(by local): ${url} ${JSON.stringify(e, null, 2)}`
