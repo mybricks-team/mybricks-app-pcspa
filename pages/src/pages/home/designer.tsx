@@ -35,7 +35,7 @@ export default function MyDesigner({ appData: originAppData }) {
     // 防止触发originAppData.fileContent的getter计算
     data.fileContent = { ...data.fileContent }
     return data
-  }, [ originAppData ])
+  }, [originAppData])
   const coms = []
   if (appData?.defaultComlibs?.length) {
     appData?.defaultComlibs.forEach(lib => {
@@ -49,7 +49,7 @@ export default function MyDesigner({ appData: originAppData }) {
       }
     })
   } else {
-    coms.push(...localizationDefaultComlibs) 
+    coms.push(...localizationDefaultComlibs)
   }
 
   let comlibs = [];
@@ -67,7 +67,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }
 
-  const designer = './public/designer-spa/1.3.45/index.min.js'
+  const designer = './public/designer-spa/1.3.46/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
@@ -167,12 +167,12 @@ export default function MyDesigner({ appData: originAppData }) {
 
   useEffect(() => {
     const needSearchComlibs = comlibs.filter(lib => lib.id !== "_myself_");
-    if(!!needSearchComlibs?.length){
+    if (!!needSearchComlibs?.length) {
       API.Material.getLatestComponentLibrarys(needSearchComlibs.map(lib => lib.namespace)).then((res: any) => {
         const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))
         setLatestComlibs(latestComlibs)
       })
-    }else {
+    } else {
       setLatestComlibs([]);
     }
   }, [JSON.stringify(comlibs.map(lib => lib.namespace))])
@@ -437,7 +437,7 @@ export default function MyDesigner({ appData: originAppData }) {
           setOperable(status === 1)
           ctx.operable = status === 1
         }}
-        compareVersion = {true}
+        compareVersion={true}
       />
     )
   }, [])
