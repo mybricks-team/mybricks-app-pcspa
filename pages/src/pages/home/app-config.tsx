@@ -180,10 +180,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         onInit: (versionApi) => {
           ctx.versionApi = versionApi
         },
-        onRevert: async (param: { pubAssetSubUrl: string }) => {
+        onRevert: async (param: { pubAssetFilePath: string }) => {
           try {
             const finish = message.loading('正在回滚...');
-            const res: { code: number, message: string } = await fAxios.post('/api/pcpage/rollback', { assetUrl: param.pubAssetSubUrl });
+            const res: { code: number, message: string } = await fAxios.post('/api/pcpage/rollback', { filePath: param.pubAssetFilePath });
             finish();
 
             if(res.code === 1) {

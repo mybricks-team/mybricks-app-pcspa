@@ -1,11 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import fs from "fs";
 import { Logger } from "@mybricks/rocker-commons";
-import axios from "axios";
 import { decompressZipToJsonObject } from "../tools/zip";
-import { publishPush } from "./publish";
 import { getRealDomain } from "../tools/analysis";
+import { publishPush } from "./publish/push";
 
-export async function rollback(req: any, zipUrl: string) {
+export async function rollback(req: any, filePath: string) {
   // TODO: 回滚重试机制
   // TODO: 优化压缩包体积
 
@@ -18,10 +17,7 @@ export async function rollback(req: any, zipUrl: string) {
     Logger.info(`[publish] domainName is: ${domainName}`);
     Logger.info(`[rollback] 正在下载回滚数据 zip 包...`);
 
-    const response = await axios.get(`${domainName}/${zipUrl}`, {
-      responseType: "arraybuffer",
-    });
-    const zipContent = response.data;
+    const zipContent = fs.readFileSync(filePath);
 
     Logger.info(`[rollback] 回滚数据 zip 包下载完成！`);
     Logger.info(`[rollback] 正在进行解压...`);
