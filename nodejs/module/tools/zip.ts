@@ -1,5 +1,5 @@
-import JSZip from "jszip";
 import { Logger } from "@mybricks/rocker-commons";
+const JSZip = require('jszip');
 
 /**
  *  将 JavaScript 对象压缩成 ZIP 文件
