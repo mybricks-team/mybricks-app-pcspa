@@ -18,6 +18,7 @@ import axios from 'axios';
 import { shapeUrlByEnv } from '../../utils';
 import { EnumMode } from './components/PublishModal';
 import { USE_CUSTOM_HOST } from './constants';
+import { fAxios } from '@/services/http';
 
 const defaultPermissionComments = `/**
 *
@@ -174,10 +175,26 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         file: appData.fileContent || {},
         disabled: ctx.disabled,
         needSavePreview: true,
+        needPublishRevert: true,
         envMap,
         onInit: (versionApi) => {
           ctx.versionApi = versionApi
         },
+        onRevert: async (param: { pubAssetSubUrl: string }) => {
+          try {
+            const finish = message.loading('正在回滚...');
+            const res: { code: number, message: string } = await fAxios.post('/api/pcpage/rollback', { assetUrl: param.pubAssetSubUrl });
+            finish();
+
+            if(res.code === 1) {
+              message.success(res.message);
+            } else {
+              message.error(res.message);
+            }
+          } catch(e) {
+            message.error("回滚接口调用失败！");
+          }
+        }
       }),
     ],
     ...(ctx.hasMaterialApp ? {

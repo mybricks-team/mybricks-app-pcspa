@@ -1,4 +1,4 @@
-import { APPType } from "./types";
+import { APPType } from "../types";
 import { Logger } from "@mybricks/rocker-commons";
 export const getAppTypeFromTemplate = (template: string) => {
   let app_type = APPType.React;

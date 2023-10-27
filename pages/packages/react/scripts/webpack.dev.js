@@ -26,7 +26,7 @@ module.exports = merge(common, {
     // open: `http://localhost:8001`,
     proxy: [
       {
-        context: ['/api/pcpage/publish', '/api/pcpage/upload'],
+        context: ['/api/pcpage/publish', '/api/pcpage/upload', '/api/pcpage/rollback'],
         // target: 'https://my.mybricks.world',
         target: 'http://localhost:9002',
         secure: false,
