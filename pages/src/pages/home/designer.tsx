@@ -496,28 +496,30 @@ export default function MyDesigner({ appData: originAppData }) {
               loading={publishLoading}
               onClick={() => setPublishModalVisible(true)}
             >发布</Toolbar.Button>
-            <Toolbar.Tools
-              onImport={async (value) => {
-                try {
-                  const { content, pageConfig } = JSON.parse(value)
-                  Object.assign(ctx, pageConfig ?? {})
-                  await designerRef.current.loadContent(content)
-                  await save()
-                  location.reload()
-                } catch (e) {
-                  message.error(e)
-                  console.error(e)
-                }
-              }}
-              getExportDumpJSON={() => {
-                return getDumpJson()
-              }}
-              getExportToJSON={() => {
-                return designerRef.current.toJSON()
-              }}
-            />
           </>
         }
+        <div className={`${isPreview ? css.toolbarWrapperPreview : ""}`}>
+          <Toolbar.Tools
+            onImport={async (value) => {
+              try {
+                const { content, pageConfig } = JSON.parse(value)
+                Object.assign(ctx, pageConfig ?? {})
+                await designerRef.current.loadContent(content)
+                await save()
+                location.reload()
+              } catch (e) {
+                message.error(e)
+                console.error(e)
+              }
+            }}
+            getExportDumpJSON={() => {
+              return getDumpJson()
+            }}
+            getExportToJSON={() => {
+              return designerRef.current.toJSON()
+            }}
+          />
+        </div>
       </Toolbar>
       <div className={css.designer}>
         {SPADesigner && remotePlugins && latestComlibs && window?.mybricks?.createObservable && (
