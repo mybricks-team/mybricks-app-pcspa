@@ -1,4 +1,4 @@
-import fs from "fs";
+import * as fs from "fs";
 import { Logger } from "@mybricks/rocker-commons";
 import { decompressZipToJsonObject } from "../tools/zip";
 import { getRealDomain } from "../tools/analysis";
