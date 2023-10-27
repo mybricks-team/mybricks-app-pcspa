@@ -11,7 +11,10 @@ import { transform } from './transform'
 const FormData = require("form-data");
 import { Logger } from '@mybricks/rocker-commons';
 import LocalPublic from './local-public';
-import { APPType } from './types'
+import { getAppTypeFromTemplate } from './common'
+const pkg = require('../../package.json')
+
+let app_type;
 
 /** 本地化信息 */
 interface ILocalizationInfo {
@@ -98,7 +101,7 @@ export default class PcPageService {
       }
     }
 
-    return generateComLib(comLibContents.filter(lib => !!lib.componentRuntimeMap), deps, { comLibId: fileId, noThrowError, appType: app_type});
+    return generateComLib(comLibContents.filter(lib => !!lib.componentRuntimeMap), deps, { comLibId: fileId, noThrowError, appType: app_type });
   }
 
   async publish(req, { json, userId, fileId, envType, commitInfo }) {
@@ -108,6 +111,9 @@ export default class PcPageService {
 
       let template = fs.readFileSync(publishFilePath + '/publish.html', 'utf8')
 
+      app_type = getAppTypeFromTemplate(template);
+      Logger.info(`[publish] app_type: ${app_type}`)
+      Logger.info(template)
       const {
         title,
         comlibs,
@@ -139,22 +145,6 @@ export default class PcPageService {
       }))?.[0];
 
       Logger.info(`[publish] getLatestPub ok`);
-
-      let app_type = APPType.React;
-      try {
-        const APP_TYPE_COMMIT = Array.from(template.match(/<!--(.*?)-->/g)).find(matcher => matcher.includes('_APP_TYPE_'));
-        if (APP_TYPE_COMMIT.includes(APPType.React)) {
-          app_type = APPType.React
-        }
-        if (APP_TYPE_COMMIT.includes(APPType.Vue2)) {
-          app_type = APPType.Vue2
-        }
-      } catch (error) {
-        Logger.error('template need appType')
-      }
-      Logger.info(`[publish] app_type: ${app_type}`)
-
-      Logger.info(template)
 
       const version = getNextVersion(latestPub?.version);
 
@@ -221,7 +211,7 @@ export default class PcPageService {
       try {
         Logger.info("[publish] 正在尝试 plugin-runtime 本地化...");
         const customConnectorRuntimeUrl = getCustomConnectorRuntime(appConfig, req);
-        console.log(`customConnectorRuntimeUrl JD==> `,customConnectorRuntimeUrl);
+        console.log(`customConnectorRuntimeUrl JD==> `, customConnectorRuntimeUrl);
         if (customConnectorRuntimeUrl) {
           const info = await getLocalizationInfoByNetwork(customConnectorRuntimeUrl, 'public/plugins');
           globalDeps = globalDeps.concat(info)
@@ -443,8 +433,8 @@ export default class PcPageService {
         throw new Error(`发布集成接口出错: ${e.message}`)
       });
     if (code !== 1) {
-        Logger.error(`[publish] 发布集成接口出错: ${message}`);
-        throw new Error(`发布集成接口出错: ${message}`)
+      Logger.error(`[publish] 发布集成接口出错: ${message}`);
+      throw new Error(`发布集成接口出错: ${message}`)
     }
 
     return data
@@ -530,7 +520,7 @@ export default class PcPageService {
 
 // 不传groupId表示获取的是全局配置
 const getAppConfig = async ({ groupId } = {} as any) => {
-  const _NAMESPACE_ = APP_NAME;
+  const _NAMESPACE_ = pkg.appConfig[app_type].name ?? pkg.name;
   const options = !!groupId ? { type: 'group', id: groupId } : {}
   const res = await API.Setting.getSetting([_NAMESPACE_], options);
 
@@ -686,7 +676,7 @@ async function resourceLocalization(template: string, needLocalization: boolean,
   });
 
   const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
-    switch(cur.tag) {
+    switch (cur.tag) {
       case "link":
         pre += `<link rel="stylesheet" href="${cur.path}" />`
         break;
@@ -712,7 +702,7 @@ async function resourceLocalization(template: string, needLocalization: boolean,
   let images = await Promise.all(
     imageURLs.map(
       (url) =>
-      getLocalizationInfoByNetwork(
+        getLocalizationInfoByNetwork(
           url,
           `mfs/files/${url
             .split("/mfs/files/")[1]
@@ -747,7 +737,7 @@ async function getLocalizationInfoByNetwork(url: string, path: string, config?: 
     return { path, name, content }
   } catch (e) {
     Logger.error(`[publish] 获取资源失败(by network): ${url}`, e);
-    if(withoutError) return undefined;
+    if (withoutError) return undefined;
     else throw e;
   }
 }
@@ -761,7 +751,7 @@ async function getLocalizationInfoByLocal(url: string, _path: string, config?: {
     return { path: _path, name, content }
   } catch (e) {
     Logger.error(`[publish] 获取资源失败(by local): ${url}`, e);
-    if(withoutError) return undefined;
+    if (withoutError) return undefined;
     else throw e;
   }
 }
