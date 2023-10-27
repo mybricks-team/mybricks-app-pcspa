@@ -26,6 +26,8 @@ import { USE_CUSTOM_HOST } from './constants'
 // 兜底物料
 export const localizationDefaultComlibs = APP_TYPE === 'react' ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : []
 
+const msgSaveKey = 'save'
+
 export default function MyDesigner({ appData: originAppData }) {
 
   const appData = useMemo(() => {
@@ -123,6 +125,7 @@ export default function MyDesigner({ appData: originAppData }) {
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
+
         await appData.save({
           userId: ctx.user?.id,
           fileId: ctx.fileId,
@@ -131,12 +134,12 @@ export default function MyDesigner({ appData: originAppData }) {
           content: removeBadChar(content),
           icon,
         }).then(() => {
-          !skipMessage && message.success(`保存完成`);
+          !skipMessage && message.success({ content: `保存完成`, key: msgSaveKey });
           if (content) {
             setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
           }
         }).catch(e => {
-          !skipMessage && message.error(`保存失败：${e.message}`);
+          !skipMessage && message.error({ content: `保存失败：${e.message}`, key: msgSaveKey });
           if (content) {
             setSaveTip('保存失败')
           }
@@ -268,6 +271,12 @@ export default function MyDesigner({ appData: originAppData }) {
     }
 
     setSaveLoading(true)
+
+    message.loading({
+      key: msgSaveKey,
+      content: '保存中..',
+      duration: 0,
+    })
     //保存
     const json = designerRef.current?.dump()
     json.comlibs = ctx.comlibs
@@ -330,7 +339,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
       const close = message.loading({
         key: 'publish',
-        content: '页面发布中',
+        content: '发布中...',
         duration: 0,
       })
         ; return (async () => {
