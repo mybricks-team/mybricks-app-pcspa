@@ -5,7 +5,7 @@ import ConfigServer from './ConfigServer'
 import ConfigEnv from './ConfigEnv'
 import useConfig from './useConfig'
 import ConfigPlugin from './ConfigPlugin'
-export const _NAMESPACE_ = 'mybricks-app-pcspa'
+export const _NAMESPACE_ = APP_NAME
 import style from './app.less'
 import { Collapse, Spin } from 'antd'
 

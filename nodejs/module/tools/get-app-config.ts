@@ -1,10 +1,17 @@
 import { Logger } from "@mybricks/rocker-commons";
 import API from "@mybricks/sdk-for-app/api";
 import { getRealDomain } from "./analysis";
+import { getAppTypeFromTemplate } from "./common";
+import path from "path";
+import fs from 'fs';
+const pkg = require('../../package.json')
 
 // 不传groupId表示获取的是全局配置
 export const getAppConfig = async ({ groupId } = {} as any) => {
-  const _NAMESPACE_ = "mybricks-app-pcspa";
+  const template = fs.readFileSync(path.resolve(__dirname, '../../../../assets') + '/publish.html', 'utf8')
+  const app_type = getAppTypeFromTemplate(template);
+  const _NAMESPACE_ = pkg.appConfig[app_type].name ?? pkg.name;
+  
   const options = !!groupId ? { type: "group", id: groupId } : {};
   const res = await API.Setting.getSetting([_NAMESPACE_], options);
 

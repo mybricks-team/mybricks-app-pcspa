@@ -16,6 +16,10 @@ import { getCustomConnectorRuntime, getCustomNeedLocalization, getCustomPublishA
 import { ILocalizationInfo } from '../interface';
 import { getLocalizationInfoByLocal, getLocalizationInfoByNetwork } from '../tools/localization';
 import { compressJsonObjectToZip } from '../tools/zip';
+import { getAppTypeFromTemplate } from '../tools/common';
+const pkg = require('../../package.json')
+
+let app_type;
 
 @Injectable()
 export default class PcPageService {
@@ -95,7 +99,7 @@ export default class PcPageService {
       }
     }
 
-    return generateComLib(comLibContents.filter(lib => !!lib.componentRuntimeMap), deps, { comLibId: fileId, noThrowError, appType: app_type});
+    return generateComLib(comLibContents.filter(lib => !!lib.componentRuntimeMap), deps, { comLibId: fileId, noThrowError, appType: app_type });
   }
 
   async publish(req, { json, userId, fileId, envType, commitInfo }) {
@@ -105,6 +109,9 @@ export default class PcPageService {
 
       let template = fs.readFileSync(publishFilePath + '/publish.html', 'utf8')
 
+      app_type = getAppTypeFromTemplate(template);
+      Logger.info(`[publish] app_type: ${app_type}`)
+      Logger.info(template)
       const {
         title,
         comlibs,
@@ -136,19 +143,6 @@ export default class PcPageService {
       }))?.[0];
 
       Logger.info(`[publish] getLatestPub ok`);
-
-      let app_type = APPType.React;
-      try {
-        const APP_TYPE_COMMIT = Array.from(template.match(/<!--(.*?)-->/g)).find(matcher => matcher.includes('_APP_TYPE_'));
-        if (APP_TYPE_COMMIT.includes(APPType.React)) {
-          app_type = APPType.React
-        }
-        if (APP_TYPE_COMMIT.includes(APPType.Vue2)) {
-          app_type = APPType.Vue2
-        }
-      } catch (error) {
-        Logger.error('template need appType')
-      }
 
       const version = getNextVersion(latestPub?.version);
 
@@ -352,37 +346,7 @@ export default class PcPageService {
       }
     });
   }
-
 }
-
-const uploadStatic = async (
-  content: string,
-  groupId: string,
-  manateeUserInfo: { token: string; session: string }
-): Promise<{ url: string }> => {
-  // @ts-ignore
-  const blob = new Blob([content], { type: "text/html" });
-  const uploadService = await getUploadService();
-  // const uploadService = "http://dev.manateeai.com/biz/uploadExternalFileLocal";
-  const formData = new FormData();
-  formData.append("file", blob);
-  const { url } = await axios<any, { url: string }>({
-    url: uploadService,
-    method: "post",
-    data: formData,
-    headers: {
-      "Content-Type": "multipart/form-data",
-      ...manateeUserInfo,
-      token: "b373dbe105f94c5308a38290afab97d8",
-      session: "d79136092b16fea8b2aa0e9189139021",
-    },
-  });
-  const { host, protocol } = parse(
-    uploadService
-  );
-  const domain = `${protocol}//${host}`;
-  return { url: `${domain}${url}` };
-};
 
 /**
  * 推送发布内容到目标机器
@@ -651,7 +615,7 @@ async function resourceLocalization(template: string, needLocalization: boolean,
   });
 
   const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
-    switch(cur.tag) {
+    switch (cur.tag) {
       case "link":
         pre += `<link rel="stylesheet" href="${cur.path}" />`
         break;
@@ -677,7 +641,7 @@ async function resourceLocalization(template: string, needLocalization: boolean,
   let images = await Promise.all(
     imageURLs.map(
       (url) =>
-      getLocalizationInfoByNetwork(
+        getLocalizationInfoByNetwork(
           url,
           `mfs/files/${url
             .split("/mfs/files/")[1]
