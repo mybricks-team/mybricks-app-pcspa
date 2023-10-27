@@ -17,7 +17,6 @@ import { ILocalizationInfo } from '../interface';
 import { getLocalizationInfoByLocal, getLocalizationInfoByNetwork } from '../tools/localization';
 import { compressJsonObjectToZip } from '../tools/zip';
 import { getAppTypeFromTemplate } from '../tools/common';
-const pkg = require('../../package.json')
 
 let app_type;
 
@@ -297,7 +296,7 @@ export default class PcPageService {
 
       return result
     } catch (e) {
-      Logger.error("[publish] pcpage publish error", e);
+      Logger.error(`[publish] pcpage publish error ${e?.message || JSON.stringify(e, null, 2)}`);
       throw e
     }
   }

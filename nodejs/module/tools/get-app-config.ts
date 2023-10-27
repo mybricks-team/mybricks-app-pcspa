@@ -4,11 +4,11 @@ import { getRealDomain } from "./analysis";
 import { getAppTypeFromTemplate } from "./common";
 import path from "path";
 import fs from 'fs';
-const pkg = require('../../package.json')
+const pkg = require('../../../package.json')
 
 // 不传groupId表示获取的是全局配置
 export const getAppConfig = async ({ groupId } = {} as any) => {
-  const template = fs.readFileSync(path.resolve(__dirname, '../../../../assets') + '/publish.html', 'utf8')
+  const template = fs.readFileSync(path.resolve(__dirname, '../../../assets') + '/publish.html', 'utf8')
   const app_type = getAppTypeFromTemplate(template);
   const _NAMESPACE_ = pkg.appConfig[app_type].name ?? pkg.name;
   
