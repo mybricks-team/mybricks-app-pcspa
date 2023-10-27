@@ -8,7 +8,8 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import Service from "./service";
+// 别把 /index 删了，平台有脏数据
+import Service from "./service/index";
 import { Logger } from "@mybricks/rocker-commons";
 
 @Controller("api/pcpage")
@@ -85,7 +86,11 @@ export default class PcPageController {
         message: "回滚完成",
       };
     } catch (error) {
-      Logger.error(`[rollback] 回滚失败: ${error?.message || JSON.stringify(error, null, 2)}`);
+      Logger.error(
+        `[rollback] 回滚失败: ${
+          error?.message || JSON.stringify(error, null, 2)
+        }`
+      );
       return {
         code: -1,
         message: error?.message || "回滚失败",
