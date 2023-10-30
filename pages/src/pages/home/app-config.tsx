@@ -182,7 +182,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         },
         onRevert: async (param: { pubAssetFilePath: string }) => {
           try {
-            const finish = message.loading('正在回滚...');
+            const finish = message.loading('正在回滚...', 0);
             const res: { code: number, message: string } = await fAxios.post('/api/pcpage/rollback', { filePath: param.pubAssetFilePath });
             finish();
 

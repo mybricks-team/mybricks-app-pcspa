@@ -2,8 +2,8 @@ import { Logger } from "@mybricks/rocker-commons";
 import { AxiosRequestConfig } from "axios";
 import { ILocalizationInfo } from "../interface";
 import axios from "axios";
-import path from "path";
-import fs from "fs";
+import * as path from "path";
+import * as fs from "fs";
 
 /**
  * 获取本地化相关信息

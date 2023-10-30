@@ -2,8 +2,8 @@ import { Logger } from "@mybricks/rocker-commons";
 import API from "@mybricks/sdk-for-app/api";
 import { getRealDomain } from "./analysis";
 import { getAppTypeFromTemplate } from "./common";
-import path from "path";
-import fs from 'fs';
+import * as path from "path";
+import * as fs from 'fs';
 const pkg = require('../../../package.json')
 
 // 不传groupId表示获取的是全局配置
