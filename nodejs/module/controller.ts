@@ -13,8 +13,8 @@ import Service from "./service/index";
 import { Logger } from "@mybricks/rocker-commons";
 
 import Decorator from '@mybricks/sdk-for-app/decorator'
-import fs from 'fs'
-import path from 'path'
+import * as fs from 'fs'
+import * as path from 'path'
 import { getAppTypeFromTemplate } from './tools/common'
 const pkg = require('../../package.json')
 const template = fs.readFileSync(path.resolve(__dirname, '../../assets') + '/publish.html', 'utf8')
