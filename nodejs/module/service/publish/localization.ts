@@ -117,6 +117,10 @@ async function resourceLocalization(
 
   template = template.replace("-- public --", publicHtmlStr);
 
+  Logger.info(`[template] 发布模版 ${template}`)
+
+  Logger.info(`[localPublicInfos] 发布资源 ${localPublicInfos}`)
+
   let globalDeps: ILocalizationInfo[] = null;
   if (needLocalization) {
     // 获取所有本地化需要除了图片以外的信息，这些信息目前存储在相对位置

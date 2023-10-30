@@ -3,6 +3,7 @@ import { getQueryString, requireScript } from '@/utils'
 import { PreviewStorage } from '@/utils/previewStorage'
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
 import renderUI from './renderUI'
+import '@/reset.less'
 
 const React = window.React;
 const ReactDOM = window.ReactDOM;
