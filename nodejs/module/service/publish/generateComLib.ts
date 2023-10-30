@@ -137,6 +137,7 @@ export async function generateComLibRT(
     "mybricks.core-comlib.frame-input",
     "mybricks.core-comlib.frame-output",
     "mybricks.core-comlib.scenes",
+    "mybricks.core-comlib.defined-com",
   ];
   const deps = [
     ...(json.scenes || [])
