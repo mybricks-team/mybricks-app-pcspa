@@ -97,10 +97,11 @@ async function resourceLocalization(
   type = "react"
 ) {
   const localPublicInfos = LocalPublic[type].map((info) => {
+    const res = { ...info };
     if (!needLocalization) {
-      info.path = info.CDN;
+      res.path = res.CDN;
     }
-    return info;
+    return res;
   });
 
   const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
