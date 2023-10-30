@@ -1,6 +1,7 @@
 import { getQueryString, requireScript } from '@/utils'
 import { PreviewStorage } from '@/utils/previewStorage';
 import renderUI from './renderUI';
+import '@/reset.less'
 const fileId = getQueryString('fileId')
 const previewStorage = new PreviewStorage({ fileId })
 

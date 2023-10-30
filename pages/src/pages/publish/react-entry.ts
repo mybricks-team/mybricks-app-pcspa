@@ -1,4 +1,5 @@
 import renderUI from './renderUI'
+import '@/reset.less'
 
 const React = window.React;
 const ReactDOM = window.ReactDOM;

@@ -1,4 +1,5 @@
 import renderUI from './renderUI'
+import '@/reset.less'
 
 const Vue = window.Vue;
 let vueApp;
