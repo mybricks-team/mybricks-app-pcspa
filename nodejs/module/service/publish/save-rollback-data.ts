@@ -9,8 +9,14 @@ export async function saveRollbackData(
   fileId: number,
   version: string,
   type: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
+  retry: number = 0
 ) {
+
+  if (retry !== 0) {
+    Logger.info(`[publish] 第${retry}次重试保存回滚数据...`);
+  }
+
   try {
     Logger.info("[publish] 正在保存回滚数据...");
 
@@ -33,6 +39,8 @@ export async function saveRollbackData(
 
     Logger.info("[publish] 保存回滚数据成功！");
   } catch (e) {
-    Logger.error(`[publish] 保存回滚数据失败！ ${JSON.stringify(e, null, 2)}`);
+    Logger.error(`[publish] 保存回滚数据失败！ ${e?.message || JSON.stringify(e, null, 2)}`);
+    if (retry >= 3) return;
+    await saveRollbackData(fileId, version, type, data, retry + 1);
   }
 }
