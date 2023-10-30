@@ -100,7 +100,7 @@ export async function publish(
       needCombo
     );
 
-    /** 推送数据 */
+    /** 推送数据 TODO: 待优化，目前推送的 JSON 太大了，想办法拆一下 */
     const result = await publishPush(
       {
         envType,
@@ -127,7 +127,6 @@ export async function publish(
       true
     );
 
-    // TODO: 待优化，直接保存 JSON 太大了，想办法拆一下
     /** 保存回滚数据 */
     saveRollbackData(fileId, version, envType, {
       envType,
