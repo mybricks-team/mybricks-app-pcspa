@@ -208,7 +208,35 @@ async function customPublish(params) {
     });
   }
 
-  const dataForCustom = await compressObjectToGzip({
+  // const dataForCustom = await compressObjectToGzip({
+  //   env: envType,
+  //   productId: fileId,
+  //   productName: title,
+  //   publisherEmail,
+  //   publisherName: publisherName || "",
+  //   version: !!nowVersion ? nowVersion : version,
+  //   commitInfo,
+  //   type: "pc-page",
+  //   groupId,
+  //   groupName,
+  //   content: {
+  //     json: JSON.stringify(json),
+  //     html: template,
+  //     js: needCombo
+  //       ? [
+  //           {
+  //             name: `${fileId}-${envType}-${version}.js`,
+  //             content: comboScriptText,
+  //           },
+  //         ]
+  //       : [],
+  //     permissions,
+  //     images,
+  //     globalDeps,
+  //   },
+  // });
+
+  const dataForCustom = {
     env: envType,
     productId: fileId,
     productName: title,
@@ -234,14 +262,14 @@ async function customPublish(params) {
       images,
       globalDeps,
     },
-  });
+  };
 
   Logger.info(`[publish] nowVersion = ${nowVersion} dataVersion = ${version}`);
 
   const { code, message, data } = await axios
     .post(customPublishApi, dataForCustom, {
       headers: {
-        "Content-Encoding": "gzip", // 指定数据编码为gzip
+        // "Content-Encoding": "gzip", // 指定数据编码为gzip
         "Content-Type": "application/json", // 指定数据类型为JSON
       },
     })
