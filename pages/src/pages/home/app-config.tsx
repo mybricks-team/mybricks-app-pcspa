@@ -189,10 +189,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             if(res.code === 1) {
               message.success(res.message);
             } else {
-              message.error(res.message);
+              message.error("回滚失败！");
             }
           } catch(e) {
-            message.error("回滚接口调用失败！");
+            message.error("回滚失败！");
           }
         }
       }),
