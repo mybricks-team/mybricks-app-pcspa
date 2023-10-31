@@ -13,7 +13,7 @@ export default class PcPageService {
     return await upload(req, { file }, { groupId });
   }
 
-  async rollback(req: any, filePath: string) {
-    return await rollback(req, filePath);
+  async rollback(req: any, filePath: string, nowVersion: string) {
+    return await rollback(req, filePath, nowVersion);
   }
 }

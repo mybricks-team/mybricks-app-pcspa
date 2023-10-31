@@ -124,6 +124,7 @@ export async function publish(
         fileName,
         userId,
       },
+      version,
       true
     );
 

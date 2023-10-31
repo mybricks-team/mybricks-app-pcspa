@@ -11,16 +11,20 @@ import { FileInterceptor } from "@nestjs/platform-express";
 // 别把 /index 删了，平台有脏数据
 import Service from "./service/index";
 import { Logger } from "@mybricks/rocker-commons";
-
-import Decorator from '@mybricks/sdk-for-app/decorator'
-import * as fs from 'fs'
-import * as path from 'path'
-import { getAppTypeFromTemplate } from './tools/common'
-const pkg = require('../../package.json')
-const template = fs.readFileSync(path.resolve(__dirname, '../../assets') + '/publish.html', 'utf8')
+import Decorator from "@mybricks/sdk-for-app/decorator";
+import * as fs from "fs";
+import * as path from "path";
+import { getAppTypeFromTemplate } from "./tools/common";
+const pkg = require("../../package.json");
+const template = fs.readFileSync(
+  path.resolve(__dirname, "../../assets") + "/publish.html",
+  "utf8"
+);
 const app_type = getAppTypeFromTemplate(template);
 
-@Decorator.Controller("api/pcpage", { namespace: pkg.appConfig[app_type].name ?? pkg.name })
+@Decorator.Controller("api/pcpage", {
+  namespace: pkg.appConfig[app_type].name ?? pkg.name,
+})
 export default class PcPageController {
   @Inject(Service)
   service: Service;
@@ -76,12 +80,16 @@ export default class PcPageController {
   }
 
   @Post("/rollback")
-  async rollback(@Body("filePath") filePath: string, @Req() req: any) {
+  async rollback(
+    @Body("filePath") filePath: string,
+    @Body("nowVersion") nowVersion: string,
+    @Req() req: any
+  ) {
     try {
       Logger.info(`[rollback] 调用回滚接口`);
 
       const startTime = Date.now();
-      const result = await this.service.rollback(req, filePath);
+      const result = await this.service.rollback(req, filePath, nowVersion);
 
       Logger.info("[rollback] 回滚成功！");
       Logger.info(

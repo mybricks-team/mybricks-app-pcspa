@@ -4,7 +4,12 @@ import { decompressZipToJsonObject } from "../tools/zip";
 import { getRealDomain } from "../tools/analysis";
 import { publishPush } from "./publish/push";
 
-export async function rollback(req: any, filePath: string, retry: number = 0) {
+export async function rollback(
+  req: any,
+  filePath: string,
+  nowVersion: string,
+  retry: number = 0
+) {
   // TODO: 回滚重试机制
   // TODO: 优化压缩包体积，可以和发布集成推送数据大小优化一起，不用单独优化
 
@@ -31,12 +36,12 @@ export async function rollback(req: any, filePath: string, retry: number = 0) {
     Logger.info(`[rollback] 解压完成！`);
     Logger.info(`[rollback] 正在进行发布...`);
 
-    await publishPush(params, false);
+    await publishPush(params, nowVersion, false);
 
     Logger.info(`[rollback] 发布完成`);
   } catch (e) {
     Logger.error(`回滚失败！ ${e?.message || JSON.stringify(e, null, 2)}`);
     if (retry >= 3) throw e;
-    await rollback(req, filePath, retry + 1);
+    await rollback(req, filePath, nowVersion, retry + 1);
   }
 }
