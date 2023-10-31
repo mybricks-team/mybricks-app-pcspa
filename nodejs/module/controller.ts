@@ -114,6 +114,15 @@ export default class PcPageController {
     }
   }
 
+  // @Post("/testPublish")
+  // async testPublish(
+  //   @Body("version") version: string,
+  //   @Body("content") content: any
+  // ) {
+  //   Logger.info(`content.js[0].name JD==> ${content.js[0].name}`,);
+  //   Logger.info(`version JD==> ${version}`, );
+  // }
+
   // @Post('/generateHTML')
   // async generateHTML(
   //   @Body('userId') userId: string,
