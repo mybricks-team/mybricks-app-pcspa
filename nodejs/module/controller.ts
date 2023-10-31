@@ -86,13 +86,19 @@ export default class PcPageController {
   async rollback(
     @Body("filePath") filePath: string,
     @Body("nowVersion") nowVersion: string,
+    @Body("type") type: string,
+    @Body("fileId") fileId: number,
     @Req() req: any
   ) {
     try {
       Logger.info(`[rollback] 调用回滚接口`);
 
       const startTime = Date.now();
-      const result = await this.service.rollback(req, filePath, nowVersion);
+      const result = await this.service.rollback(req, filePath, {
+        nowVersion,
+        type,
+        fileId,
+      });
 
       Logger.info("[rollback] 回滚成功！");
       Logger.info(

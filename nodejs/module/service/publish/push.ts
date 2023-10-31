@@ -2,6 +2,7 @@ import { Logger } from "@mybricks/rocker-commons";
 import { getCustomPublishApi } from "../../tools/get-app-config";
 import API from "@mybricks/sdk-for-app/api";
 import axios from "axios";
+import { compressObjectToGzip } from "../../tools/zip";
 
 /**
  * 推送发布内容到目标机器
@@ -207,6 +208,34 @@ async function customPublish(params) {
     });
   }
 
+  // const dataForCustom = await compressObjectToGzip({
+  //   env: envType,
+  //   productId: fileId,
+  //   productName: title,
+  //   publisherEmail,
+  //   publisherName: publisherName || "",
+  //   version: !!nowVersion ? nowVersion : version,
+  //   commitInfo,
+  //   type: "pc-page",
+  //   groupId,
+  //   groupName,
+  //   content: {
+  //     json: JSON.stringify(json),
+  //     html: template,
+  //     js: needCombo
+  //       ? [
+  //           {
+  //             name: `${fileId}-${envType}-${version}.js`,
+  //             content: comboScriptText,
+  //           },
+  //         ]
+  //       : [],
+  //     permissions,
+  //     images,
+  //     globalDeps,
+  //   },
+  // });
+
   const dataForCustom = {
     env: envType,
     productId: fileId,
@@ -240,7 +269,8 @@ async function customPublish(params) {
   const { code, message, data } = await axios
     .post(customPublishApi, dataForCustom, {
       headers: {
-        "Content-Type": "application/json",
+        // "Content-Encoding": "gzip", // 指定数据编码为gzip
+        "Content-Type": "application/json", // 指定数据类型为JSON
       },
     })
     .then((res) => res.data)

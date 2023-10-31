@@ -1,10 +1,13 @@
 import { Logger } from "@mybricks/rocker-commons";
-const JSZip = require('jszip');
+const JSZip = require("jszip");
+const zlib = require("zlib");
 
 /**
  *  将 JavaScript 对象压缩成 ZIP 文件
  */
-export async function compressJsonObjectToZip(jsonObject: Record<string, unknown>) {
+export async function compressJsonObjectToZip(
+  jsonObject: Record<string, unknown>
+) {
   try {
     const zipContent = JSON.stringify(jsonObject);
     const zip = new JSZip();
@@ -32,4 +35,48 @@ export async function decompressZipToJsonObject(zipContent) {
     Logger.error("文件解压失败！");
     throw e;
   }
+}
+
+/**
+ *  将 JavaScript 对象压缩成 GZIP 文件
+ */
+export function compressObjectToGzip(
+  inputObject: Record<string, unknown>
+): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    try {
+      const inputJSON = JSON.stringify(inputObject);
+      zlib.gzip(inputJSON, (err, compressedData) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(compressedData);
+        }
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+/**
+ * 解压 GZIP 文件回 JavaScript 对象
+ */
+export function decompressGzipToObject(
+  compressedData: Buffer
+): Promise<Record<string, unknown>> {
+  return new Promise((resolve, reject) => {
+    zlib.gunzip(compressedData, (err, decompressedJSON) => {
+      if (err) {
+        reject(err);
+      } else {
+        try {
+          const objectData = JSON.parse(decompressedJSON.toString());
+          resolve(objectData);
+        } catch (err) {
+          reject(err);
+        }
+      }
+    });
+  });
 }

@@ -1,21 +1,21 @@
 import * as fs from "fs";
 import { Logger } from "@mybricks/rocker-commons";
-import { decompressZipToJsonObject } from "../tools/zip";
+import { decompressGzipToObject } from "../tools/zip";
 import { getRealDomain } from "../tools/analysis";
 import { publishPush } from "./publish/push";
+import { saveRollbackData } from "./publish/save-rollback-data";
 
 export async function rollback(
   req: any,
   filePath: string,
-  nowVersion: string,
+  rollbackDataParams: { nowVersion: string; fileId: number; type: string },
   retry: number = 0
 ) {
-  // TODO: 回滚重试机制
-  // TODO: 优化压缩包体积，可以和发布集成推送数据大小优化一起，不用单独优化
-
   if (retry !== 0) {
     Logger.info(`[rollback] 第${retry}次重试回滚...`);
   }
+
+  let zipContent: Buffer;
 
   try {
     const domainName =
@@ -26,22 +26,30 @@ export async function rollback(
     Logger.info(`[rollback] domainName is: ${domainName}`);
     Logger.info(`[rollback] 正在读取回滚数据 zip 包...`);
 
-    const zipContent = fs.readFileSync(filePath);
+    zipContent = fs.readFileSync(filePath);
 
     Logger.info(`[rollback] 回滚数据 zip 包读取完成！`);
     Logger.info(`[rollback] 正在进行解压...`);
 
-    const params = await decompressZipToJsonObject(zipContent);
+    const params = await decompressGzipToObject(zipContent);
 
     Logger.info(`[rollback] 解压完成！`);
     Logger.info(`[rollback] 正在进行发布...`);
 
-    await publishPush(params, nowVersion, false);
+    await publishPush(params, rollbackDataParams.nowVersion, false);
 
     Logger.info(`[rollback] 发布完成`);
   } catch (e) {
     Logger.error(`回滚失败！ ${e?.message || JSON.stringify(e, null, 2)}`);
     if (retry >= 3) throw e;
-    await rollback(req, filePath, nowVersion, retry + 1);
+    await rollback(req, filePath, rollbackDataParams, retry + 1);
   }
+
+  /** 保存回滚数据 */
+  saveRollbackData(
+    rollbackDataParams.fileId,
+    rollbackDataParams.nowVersion,
+    rollbackDataParams.type,
+    zipContent
+  );
 }
