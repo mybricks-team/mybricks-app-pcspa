@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import { Logger } from "@mybricks/rocker-commons";
-import { decompressZipToJsonObject } from "../tools/zip";
+import { decompressGzipToObject } from "../tools/zip";
 import { getRealDomain } from "../tools/analysis";
 import { publishPush } from "./publish/push";
 
@@ -31,7 +31,7 @@ export async function rollback(
     Logger.info(`[rollback] 回滚数据 zip 包读取完成！`);
     Logger.info(`[rollback] 正在进行解压...`);
 
-    const params = await decompressZipToJsonObject(zipContent);
+    const params = await decompressGzipToObject(zipContent);
 
     Logger.info(`[rollback] 解压完成！`);
     Logger.info(`[rollback] 正在进行发布...`);
