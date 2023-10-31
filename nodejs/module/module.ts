@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
-
-import Service from './service'
+// 别把 /index 删了，平台有脏数据
+import Service from './service/index'
 import Controller from './controller'
 
 @Module({
