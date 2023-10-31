@@ -26,8 +26,11 @@ const app_type = getAppTypeFromTemplate(template);
   namespace: pkg.appConfig[app_type].name ?? pkg.name,
 })
 export default class PcPageController {
-  @Inject(Service)
   service: Service;
+
+  constructor() {
+    this.service = new Service();
+  }
 
   @Post("/publish")
   async publish(
