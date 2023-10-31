@@ -6,7 +6,11 @@ import axios from "axios";
 /**
  * 推送发布内容到目标机器
  */
-export async function publishPush(params, needPublishFile: boolean) {
+export async function publishPush(
+  params,
+  nowVersion?: string,
+  needPublishFile?: boolean
+) {
   const {
     envType,
     fileId,
@@ -47,6 +51,7 @@ export async function publishPush(params, needPublishFile: boolean) {
         publisherEmail,
         publisherName,
         version,
+        nowVersion,
         commitInfo,
         groupId,
         groupName,
@@ -177,6 +182,7 @@ async function customPublish(params) {
     publisherEmail,
     publisherName,
     version,
+    nowVersion,
     commitInfo,
     groupId,
     groupName,
@@ -207,7 +213,7 @@ async function customPublish(params) {
     productName: title,
     publisherEmail,
     publisherName: publisherName || "",
-    version,
+    version: !!nowVersion ? nowVersion : version,
     commitInfo,
     type: "pc-page",
     groupId,
@@ -228,6 +234,8 @@ async function customPublish(params) {
       globalDeps,
     },
   };
+
+  Logger.info(`[publish] nowVersion = ${nowVersion} dataVersion = ${version}`);
 
   const { code, message, data } = await axios
     .post(customPublishApi, dataForCustom, {
