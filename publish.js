@@ -73,15 +73,15 @@ const execChain = (fns) => {
 if (isOffline) {
   execChain([
     publishReactAppOffline,
-    // fixPkg,
-    // publishVue2AppOffline,
-    // resetPkg
+    fixPkg,
+    publishVue2AppOffline,
+    resetPkg
   ]);
 } else {
   execChain([
     publishReactAppOnline,
-    // fixPkg,
-    // publishVue2AppOnline,
-    // resetPkg
+    fixPkg,
+    publishVue2AppOnline,
+    resetPkg
   ]);
 }
