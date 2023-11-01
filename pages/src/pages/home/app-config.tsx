@@ -9,7 +9,7 @@ import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-co
 import versionPlugin from 'mybricks-plugin-version'
 import { use as useTheme } from '@mybricks/plugin-theme';
 
-import { render as renderUI } from '@mybricks/render-web';
+// import { render as renderUI } from '@mybricks/render-web';
 import comlibLoaderFunc from './configs/comlibLoader'
 import { comLibAdderFunc } from './configs/comLibAdder'
 import { runJs } from '../../utils/runJs'
@@ -543,21 +543,21 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     },
     com: {
       env: {
-        renderCom(json, opts, coms) {
-          return renderUI(
-            json,
-            {
-              comDefs: { ...getComs(), ...coms },
-              // observable: window['rxui'].observable,
-              ...(opts || {}),
-              env: {
-                ...(opts?.env || {}),
-                edit: false,
-                runtime: true
-              }
-            }
-          )
-        },
+        // renderCom(json, opts, coms) {
+        //   return renderUI(
+        //     json,
+        //     {
+        //       comDefs: { ...getComs(), ...coms },
+        //       // observable: window['rxui'].observable,
+        //       ...(opts || {}),
+        //       env: {
+        //         ...(opts?.env || {}),
+        //         edit: false,
+        //         runtime: true
+        //       }
+        //     }
+        //   )
+        // },
         i18n(title) {
           //多语言
           return title

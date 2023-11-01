@@ -67,7 +67,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }
 
-  const designer = './public/designer-spa/1.3.46/index.min.js'
+  const designer = './public/designer-spa/1.3.47/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
@@ -328,7 +328,7 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [appConfig])
 
   const publish = useCallback(
-    (publishConfig) => {
+    async (publishConfig) => {
       if (publishingRef.current) {
         return
       }
@@ -581,6 +581,13 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     'mybricks.core-comlib.scenes',
     'mybricks.core-comlib.defined-com',
   ];
+
+  let definedComsDeps = []
+
+  Object.keys(toJSON.definedComs).forEach(key => {
+    definedComsDeps = [...definedComsDeps, ...toJSON.definedComs[key].json.deps]
+  })
+
   const deps = [
     ...(toJSON.scenes || [])
       .reduce((pre, scene) => [...pre, ...scene.deps], [])
@@ -589,7 +596,10 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     ...(toJSON.global?.fxFrames || [])
       .reduce((pre, fx) => [...pre, ...fx.deps], [])
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
-      .filter((item) => !ignoreNamespaces.includes(item.namespace))
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+    ...definedComsDeps
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ];
 
   if (deps.length) {

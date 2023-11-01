@@ -139,6 +139,13 @@ export async function generateComLibRT(
     "mybricks.core-comlib.scenes",
     "mybricks.core-comlib.defined-com",
   ];
+
+  let definedComsDeps = []
+
+  Object.keys(json.definedComs).forEach(key => {
+    definedComsDeps = [...definedComsDeps, ...json.definedComs[key].json.deps]
+  })
+
   const deps = [
     ...(json.scenes || [])
       .reduce((pre, scene) => [...pre, ...scene.deps], [])
@@ -146,7 +153,11 @@ export async function generateComLibRT(
     ...(json.global?.fxFrames || [])
       .reduce((pre, fx) => [...pre, ...fx.deps], [])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+    ...definedComsDeps
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ];
+  
   const selfComponents = deps.filter(
     (item) => mySelfComMap[`${item.namespace}@${item.version}`]
   );
