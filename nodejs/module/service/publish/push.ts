@@ -41,6 +41,9 @@ export async function publishPush(
 
   Logger.info(`[publish] getCustomPublishApi = ${customPublishApi}`);
 
+  const startPublishTime = Date.now();
+  Logger.info("[publish] 开始推送数据...");
+
   if (customPublishApi) {
     Logger.info("[publish] 有配置发布集成接口，尝试向发布集成接口推送数据...");
 
@@ -154,6 +157,10 @@ export async function publishPush(
     }
   }
 
+  Logger.info(
+    `[publish] 推送数据完成，耗时：${(Date.now() - startPublishTime) / 1000}s`
+  );
+
   if (needPublishFile) {
     Logger.info("[publish] API.File.publish: begin ");
 
@@ -208,35 +215,7 @@ async function customPublish(params) {
     });
   }
 
-  // const dataForCustom = await compressObjectToGzip({
-  //   env: envType,
-  //   productId: fileId,
-  //   productName: title,
-  //   publisherEmail,
-  //   publisherName: publisherName || "",
-  //   version: !!nowVersion ? nowVersion : version,
-  //   commitInfo,
-  //   type: "pc-page",
-  //   groupId,
-  //   groupName,
-  //   content: {
-  //     json: JSON.stringify(json),
-  //     html: template,
-  //     js: needCombo
-  //       ? [
-  //           {
-  //             name: `${fileId}-${envType}-${version}.js`,
-  //             content: comboScriptText,
-  //           },
-  //         ]
-  //       : [],
-  //     permissions,
-  //     images,
-  //     globalDeps,
-  //   },
-  // });
-
-  const dataForCustom = {
+  const dataForCustom = await compressObjectToGzip({
     env: envType,
     productId: fileId,
     productName: title,
@@ -262,14 +241,14 @@ async function customPublish(params) {
       images,
       globalDeps,
     },
-  };
+  });
 
   Logger.info(`[publish] nowVersion = ${nowVersion} dataVersion = ${version}`);
 
   const { code, message, data } = await axios
     .post(customPublishApi, dataForCustom, {
       headers: {
-        // "Content-Encoding": "gzip", // 指定数据编码为gzip
+        "Content-Encoding": "gzip", // 指定数据编码为gzip
         "Content-Type": "application/json", // 指定数据类型为JSON
       },
     })
