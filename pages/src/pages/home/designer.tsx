@@ -580,7 +580,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     'mybricks.core-comlib.frame-output',
     'mybricks.core-comlib.scenes',
     'mybricks.core-comlib.defined-com',
-    'mybricks.core-comlib.module'
+    'mybricks.core-comlib.module',
   ];
 
   let definedComsDeps = []

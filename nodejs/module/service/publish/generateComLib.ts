@@ -138,23 +138,27 @@ export async function generateComLibRT(
     "mybricks.core-comlib.frame-output",
     "mybricks.core-comlib.scenes",
     "mybricks.core-comlib.defined-com",
+    "mybricks.core-comlib.module",
   ];
 
-  let definedComsDeps = []
-  let modulesDeps = []
+  let definedComsDeps = [];
+  let modulesDeps = [];
 
-  if (json.definedComs){
-    Object.keys(json.definedComs).forEach(key => {
-      definedComsDeps = [...definedComsDeps, ...json.definedComs[key].json.deps]
-    })
+  if (json.definedComs) {
+    Object.keys(json.definedComs).forEach((key) => {
+      definedComsDeps = [
+        ...definedComsDeps,
+        ...json.definedComs[key].json.deps,
+      ];
+    });
   }
 
   if (json.modules) {
-    Object.keys(json.modules).forEach(key => {
-      modulesDeps = [...modulesDeps, ...json.modules[key].json.deps]
-    })
+    Object.keys(json.modules).forEach((key) => {
+      modulesDeps = [...modulesDeps, ...json.modules[key].json.deps];
+    });
   }
-  
+
   let deps = [
     ...(json.scenes || [])
       .reduce((pre, scene) => [...pre, ...scene.deps], [])
@@ -171,13 +175,15 @@ export async function generateComLibRT(
   ];
 
   deps = deps.reduce((accumulator, current) => {
-    const existingObject = accumulator.find(obj => obj.namespace === current.namespace);
+    const existingObject = accumulator.find(
+      (obj) => obj.namespace === current.namespace
+    );
     if (!existingObject) {
       accumulator.push(current);
     }
     return accumulator;
   }, []);
-  
+
   const selfComponents = deps.filter(
     (item) => mySelfComMap[`${item.namespace}@${item.version}`]
   );
