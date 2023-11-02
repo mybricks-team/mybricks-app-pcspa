@@ -4,7 +4,7 @@ const fs = require("fs");
 const axios = require("axios");
 const path = require("path");
 
-const { default: localPublic } = require("./nodejs/module/local-public.ts");
+const { default: localPublic } = require("./nodejs/module/service/local-public.ts");
 
 function directoryExists(dirPath) {
   try {
