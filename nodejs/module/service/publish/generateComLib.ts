@@ -141,12 +141,21 @@ export async function generateComLibRT(
   ];
 
   let definedComsDeps = []
+  let modulesDeps = []
 
-  Object.keys(json.definedComs).forEach(key => {
-    definedComsDeps = [...definedComsDeps, ...json.definedComs[key].json.deps]
-  })
+  if (json.definedComs){
+    Object.keys(json.definedComs).forEach(key => {
+      definedComsDeps = [...definedComsDeps, ...json.definedComs[key].json.deps]
+    })
+  }
 
-  const deps = [
+  if (json.modules) {
+    Object.keys(json.modules).forEach(key => {
+      modulesDeps = [...modulesDeps, ...json.modules[key].json.deps]
+    })
+  }
+  
+  let deps = [
     ...(json.scenes || [])
       .reduce((pre, scene) => [...pre, ...scene.deps], [])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
@@ -156,7 +165,18 @@ export async function generateComLibRT(
     ...definedComsDeps
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+    ...modulesDeps
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ];
+
+  deps = deps.reduce((accumulator, current) => {
+    const existingObject = accumulator.find(obj => obj.namespace === current.namespace);
+    if (!existingObject) {
+      accumulator.push(current);
+    }
+    return accumulator;
+  }, []);
   
   const selfComponents = deps.filter(
     (item) => mySelfComMap[`${item.namespace}@${item.version}`]

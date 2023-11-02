@@ -67,7 +67,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }
 
-  const designer = './public/designer-spa/1.3.47/index.min.js'
+  const designer = './public/designer-spa/1.3.48/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
@@ -580,15 +580,25 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     'mybricks.core-comlib.frame-output',
     'mybricks.core-comlib.scenes',
     'mybricks.core-comlib.defined-com',
+    'mybricks.core-comlib.module'
   ];
 
   let definedComsDeps = []
+  let modulesDeps = []
 
-  Object.keys(toJSON.definedComs).forEach(key => {
-    definedComsDeps = [...definedComsDeps, ...toJSON.definedComs[key].json.deps]
-  })
+  if (toJSON.definedComs) {
+    Object.keys(toJSON.definedComs).forEach(key => {
+      definedComsDeps = [...definedComsDeps, ...toJSON.definedComs[key].json.deps]
+    })
+  }
 
-  const deps = [
+  if (toJSON.modules) {
+    Object.keys(toJSON.modules).forEach(key => {
+      modulesDeps = [...modulesDeps, ...toJSON.modules[key].json.deps]
+    })
+  }
+
+  let deps = [
     ...(toJSON.scenes || [])
       .reduce((pre, scene) => [...pre, ...scene.deps], [])
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
@@ -600,7 +610,18 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     ...definedComsDeps
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+    ...modulesDeps
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ];
+
+  deps = deps.reduce((accumulator, current) => {
+    const existingObject = accumulator.find(obj => obj.namespace === current.namespace);
+    if (!existingObject) {
+      accumulator.push(current);
+    }
+    return accumulator;
+  }, []);
 
   if (deps.length) {
     const willFetchComLibs = curComLibs.filter(lib => !lib?.defined && lib.coms);
