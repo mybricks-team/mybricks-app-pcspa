@@ -29,18 +29,18 @@ const root = ({ renderType, env, ...props }) => {
   return renderUI(dumpJson, {
     env: {
       ...env,
-      renderCom(json, opts, coms) {
-        return renderUI(json, {
-          comDefs: { ...getComs(), ...coms },
-          // observable: window['rxui'].observable,
-          ...(opts || {}),
-          env: {
-            ...(opts?.env || {}),
-            edit: false,
-            runtime: true,
-          },
-        });
-      },
+      // renderCom(json, opts, coms) {
+      //   return renderUI(json, {
+      //     comDefs: { ...getComs(), ...coms },
+      //     // observable: window['rxui'].observable,
+      //     ...(opts || {}),
+      //     env: {
+      //       ...(opts?.env || {}),
+      //       edit: false,
+      //       runtime: true,
+      //     },
+      //   });
+      // },
       i18n(title) {
         //多语言
         return title;
