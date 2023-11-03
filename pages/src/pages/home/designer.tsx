@@ -67,7 +67,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }
 
-  const designer = './public/designer-spa/1.3.46/index.min.js'
+  const designer = './public/designer-spa/1.3.48/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
@@ -328,7 +328,7 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [appConfig])
 
   const publish = useCallback(
-    (publishConfig) => {
+    async (publishConfig) => {
       if (publishingRef.current) {
         return
       }
@@ -580,8 +580,25 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     'mybricks.core-comlib.frame-output',
     'mybricks.core-comlib.scenes',
     'mybricks.core-comlib.defined-com',
+    'mybricks.core-comlib.module',
   ];
-  const deps = [
+
+  let definedComsDeps = []
+  let modulesDeps = []
+
+  if (toJSON.definedComs) {
+    Object.keys(toJSON.definedComs).forEach(key => {
+      definedComsDeps = [...definedComsDeps, ...toJSON.definedComs[key].json.deps]
+    })
+  }
+
+  if (toJSON.modules) {
+    Object.keys(toJSON.modules).forEach(key => {
+      modulesDeps = [...modulesDeps, ...toJSON.modules[key].json.deps]
+    })
+  }
+
+  let deps = [
     ...(toJSON.scenes || [])
       .reduce((pre, scene) => [...pre, ...scene.deps], [])
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
@@ -589,8 +606,22 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     ...(toJSON.global?.fxFrames || [])
       .reduce((pre, fx) => [...pre, ...fx.deps], [])
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
-      .filter((item) => !ignoreNamespaces.includes(item.namespace))
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+    ...definedComsDeps
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+    ...modulesDeps
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ];
+
+  deps = deps.reduce((accumulator, current) => {
+    const existingObject = accumulator.find(obj => obj.namespace === current.namespace);
+    if (!existingObject) {
+      accumulator.push(current);
+    }
+    return accumulator;
+  }, []);
 
   if (deps.length) {
     const willFetchComLibs = curComLibs.filter(lib => !lib?.defined && lib.coms);

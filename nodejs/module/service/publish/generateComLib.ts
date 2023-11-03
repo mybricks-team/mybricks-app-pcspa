@@ -138,15 +138,52 @@ export async function generateComLibRT(
     "mybricks.core-comlib.frame-output",
     "mybricks.core-comlib.scenes",
     "mybricks.core-comlib.defined-com",
+    "mybricks.core-comlib.module",
   ];
-  const deps = [
+
+  let definedComsDeps = [];
+  let modulesDeps = [];
+
+  if (json.definedComs) {
+    Object.keys(json.definedComs).forEach((key) => {
+      definedComsDeps = [
+        ...definedComsDeps,
+        ...json.definedComs[key].json.deps,
+      ];
+    });
+  }
+
+  if (json.modules) {
+    Object.keys(json.modules).forEach((key) => {
+      modulesDeps = [...modulesDeps, ...json.modules[key].json.deps];
+    });
+  }
+
+  let deps = [
     ...(json.scenes || [])
       .reduce((pre, scene) => [...pre, ...scene.deps], [])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
     ...(json.global?.fxFrames || [])
       .reduce((pre, fx) => [...pre, ...fx.deps], [])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+    ...definedComsDeps
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+    ...modulesDeps
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ];
+
+  deps = deps.reduce((accumulator, current) => {
+    const existingObject = accumulator.find(
+      (obj) => obj.namespace === current.namespace
+    );
+    if (!existingObject) {
+      accumulator.push(current);
+    }
+    return accumulator;
+  }, []);
+
   const selfComponents = deps.filter(
     (item) => mySelfComMap[`${item.namespace}@${item.version}`]
   );

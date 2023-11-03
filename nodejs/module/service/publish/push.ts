@@ -152,7 +152,7 @@ export async function publishPush(
         )}`
       );
     } catch (e) {
-      Logger.error("[publish] 向静态服务推送数据失败！");
+      Logger.error(`[publish] 向静态服务推送数据失败！${JSON.stringify(e)}`);
       throw new Error("向静态服务推送数据失败！");
     }
   }
