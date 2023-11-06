@@ -106,8 +106,8 @@ export default {
     react: [
       // 引擎相关资源
       {
-        path: "public/designer-spa/1.3.48/index.min.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/index.min.js",
+        path: "public/designer-spa/1.3.49/index.min.js",
+        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.49/index.min.js",
       },
       // {
       //   path: "public/designer-spa/1.3.48/828.index.min.js",
@@ -171,8 +171,8 @@ export default {
     vue2: [
       // 引擎相关资源
       {
-        path: "public/designer-spa/1.3.48/index.min.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/index.min.js",
+        path: "public/designer-spa/1.3.49/index.min.js",
+        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.49/index.min.js",
       },
       // {
       //   path: "public/designer-spa/1.3.48/74.index.min.js",
