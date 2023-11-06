@@ -162,6 +162,44 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       { label: '自定义域名', value: EnumMode.CUSTOM }
     ]
 
+  const adder: Array<{ type: string, title: string, template?: Record<string, any> }> = [
+    {
+      type: 'normal',
+      title: '页面',
+    }
+  ]
+  if (isReact) {
+    adder.push(...[
+      {
+        type: 'popup',
+        title: '对话框',
+        template: {
+          namespace: 'mybricks.basic-comlib.popup',
+          deletable: false,
+          asRoot: true
+        },
+      },
+      {
+        type: 'popup',
+        title: '抽屉',
+        template: {
+          namespace: 'mybricks.basic-comlib.drawer',
+          deletable: false,
+          asRoot: true
+        }
+      },
+      {
+        type: 'popup',
+        title: '打印对话框',
+        template: {
+          namespace: 'mybricks.normal-pc.print',
+          deletable: false,
+          asRoot: true
+        }
+      }
+    ])
+  }
+
   return {
     shortcuts: {
       'ctrl+s': [save],
@@ -727,41 +765,9 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       ],
     },
     geoView: {
-      scenes: isReact ? {
-        adder: [
-          {
-            type: 'normal',
-            title: '页面',
-          },
-          {
-            type: 'popup',
-            title: '对话框',
-            template: {
-              namespace: 'mybricks.basic-comlib.popup',
-              deletable: false,
-              asRoot: true
-            },
-          },
-          {
-            type: 'popup',
-            title: '抽屉',
-            template: {
-              namespace: 'mybricks.basic-comlib.drawer',
-              deletable: false,
-              asRoot: true
-            }
-          },
-          {
-            type: 'popup',
-            title: '打印对话框',
-            template: {
-              namespace: 'mybricks.normal-pc.print',
-              deletable: false,
-              asRoot: true
-            }
-          }
-        ]
-      } : {},
+      scenes: {
+        adder
+      },
       theme: {
         css: [
           'public/antd/antd@4.21.6.min.css',
