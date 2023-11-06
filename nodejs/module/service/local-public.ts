@@ -81,7 +81,7 @@ export default {
     },
     {
       tag: "script",
-      path: "public/render-web-vue2/0.0.2/index.min.js",
+      path: "public/render-web-vue2/0.0.2/index.umd.js",
       CDN: "//f2.eckwai.com/kos/nlav12333/mybricks/render-web-vue2/0.0.2/index.umd.js",
     },
     {
