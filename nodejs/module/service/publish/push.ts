@@ -29,7 +29,6 @@ export async function publishPush(
     images,
     globalDeps,
     folderPath,
-    domainName,
     comlibRtName,
     fileName,
     userId,
@@ -105,8 +104,7 @@ export async function publishPush(
               content,
               folderPath: `${folderPath}/${envType || "prod"}/${path}`,
               fileName: name,
-              noHash: true,
-              domainName,
+              noHash: true
             });
           })
         );
@@ -119,8 +117,7 @@ export async function publishPush(
           content: comboScriptText,
           folderPath: `${folderPath}/${envType || "prod"}`,
           fileName: comlibRtName,
-          noHash: true,
-          domainName,
+          noHash: true
         });
         Logger.info("[publish] needCombo 上传成功！");
       }
@@ -130,8 +127,7 @@ export async function publishPush(
         content: template,
         folderPath: `${folderPath}/${envType || "prod"}`,
         fileName,
-        noHash: true,
-        domainName,
+        noHash: true
       });
       Logger.info(
         `[publish] template 上传成功！地址：${publishMaterialInfo.url}`
@@ -163,7 +159,8 @@ export async function publishPush(
 
   if (needPublishFile) {
     Logger.info("[publish] API.File.publish: begin ");
-
+    console.log('----------')
+    console.log('吸入的数据', publishMaterialInfo, envType)
     const result = await API.File.publish({
       userId,
       fileId,

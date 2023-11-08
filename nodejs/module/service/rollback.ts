@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import { Logger } from "@mybricks/rocker-commons";
 import { decompressGzipToObject } from "../tools/zip";
-import { getRealDomain } from "../tools/analysis";
 import { publishPush } from "./publish/push";
 import { saveRollbackData } from "./publish/save-rollback-data";
 
@@ -18,12 +17,6 @@ export async function rollback(
   let zipContent: Buffer;
 
   try {
-    const domainName =
-      process.env.NODE_ENV === "development"
-        ? process.env.MYBRICKS_PLATFORM_ADDRESS
-        : getRealDomain(req);
-
-    Logger.info(`[rollback] domainName is: ${domainName}`);
     Logger.info(`[rollback] 正在读取回滚数据 zip 包...`);
 
     zipContent = fs.readFileSync(filePath);
