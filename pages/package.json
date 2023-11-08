@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "mybricks PC页面",
   "scripts": {
-    "dev:react": "webpack serve --config ./packages/react/scripts/webpack.dev.js",
-    "dev:vue2": "webpack serve --config ./packages/vue2/scripts/webpack.dev.js",
+    "dev:react": "npm i && webpack serve --config ./packages/react/scripts/webpack.dev.js",
+    "dev:vue2": "npm i && webpack serve --config ./packages/vue2/scripts/webpack.dev.js",
     "build:react": "npm install && webpack build --config ./packages/react/scripts/webpack.prod.js",
     "build:react-offline": "npm install && webpack build --config ./packages/react/scripts/webpack.prod.js --env app.type='offline'",
     "build:vue2": "npm install && webpack build --config ./packages/vue2/scripts/webpack.prod.js",
