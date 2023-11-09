@@ -92,7 +92,6 @@ export async function publish(
       needCombo
     );
 
-    /** 推送数据 TODO: 待优化，目前推送的 JSON 太大了，想办法拆一下 */
     const result = await publishPush(
       {
         envType,
