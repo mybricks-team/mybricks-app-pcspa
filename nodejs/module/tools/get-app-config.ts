@@ -1,6 +1,5 @@
 import { Logger } from "@mybricks/rocker-commons";
 import API from "@mybricks/sdk-for-app/api";
-import { getRealDomain } from "./analysis";
 import { getAppTypeFromTemplate } from "./common";
 import * as path from "path";
 import * as fs from 'fs';
@@ -74,7 +73,5 @@ export const getCustomConnectorRuntime = (appConfig, req) => {
     Logger.error(`[publish] 插件【${connectorPlugin}】没有设置runtime地址`);
     return "";
   }
-  return connectorPlugin.runtimeUrl.startsWith("/")
-    ? `${getRealDomain(req)}/${connectorPlugin.runtimeUrl}`
-    : connectorPlugin.runtimeUrl;
+  return connectorPlugin.runtimeUrl
 };

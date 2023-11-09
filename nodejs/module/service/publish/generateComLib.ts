@@ -1,5 +1,6 @@
 import axios from "axios";
 import { APPType } from "../../types";
+import API from "@mybricks/sdk-for-app/api";
 export const generateComLib = (
   allComLibs: any[],
   allComponents: any[],
@@ -111,7 +112,7 @@ export const generateComLib = (
 export async function generateComLibRT(
   comlibs,
   json,
-  { domainName, fileId, noThrowError, app_type }
+  { fileId, noThrowError, app_type }
 ) {
   /**
    * TODO:
@@ -195,10 +196,9 @@ export async function generateComLibRT(
       const finalComponents = await Promise.all(
         selfComponents.map((component) => {
           return new Promise((resolve, reject) => {
-            axios({
-              method: "get",
-              url: `${domainName}/api/material/namespace/content?namespace=${component.namespace}&version=${component.version}`,
-              timeout: 30 * 1000,
+            API.Material.getMaterialContent({
+              namespace: component.namespace,
+              version: component.version,
             })
               .then(({ data }) => {
                 resolve(data.data);
@@ -240,13 +240,12 @@ export async function generateComLibRT(
 export async function getComboScriptText(
   comlibs,
   json,
-  { domainName, fileId, noThrowError, app_type },
+  { fileId, noThrowError, app_type },
   needCombo
 ) {
   /** 生成 combo 组件库代码 */
   if (needCombo) {
     return await generateComLibRT(comlibs, json, {
-      domainName,
       fileId,
       noThrowError,
       app_type,

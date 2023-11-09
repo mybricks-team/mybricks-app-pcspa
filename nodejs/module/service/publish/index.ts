@@ -3,7 +3,7 @@ import * as path from "path";
 import API from "@mybricks/sdk-for-app/api";
 import { getComboScriptText } from "./generateComLib";
 import { Logger } from "@mybricks/rocker-commons";
-import { getNextVersion, getRealDomain } from "../../tools/analysis";
+import { getNextVersion } from "../../tools/analysis";
 import { getAppTypeFromTemplate } from "../../tools/common";
 import { handleTemplate } from "./handle-template";
 import { localization } from "./localization";
@@ -41,13 +41,6 @@ export async function publish(
     Reflect.deleteProperty(json, "configuration");
 
     /** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
-    const domainName =
-      process.env.NODE_ENV === "development"
-        ? process.env.MYBRICKS_PLATFORM_ADDRESS
-        : getRealDomain(req);
-
-    Logger.info(`[publish] domainName is: ${domainName}`);
-
     Logger.info("[publish] getLatestPub begin");
 
     const latestPub = (
@@ -92,7 +85,6 @@ export async function publish(
       comlibs,
       json,
       {
-        domainName,
         fileId,
         noThrowError: hasOldComLib,
         app_type,
@@ -119,7 +111,6 @@ export async function publish(
         images,
         globalDeps,
         folderPath,
-        domainName,
         comlibRtName,
         fileName,
         userId,
@@ -146,7 +137,6 @@ export async function publish(
       images,
       globalDeps,
       folderPath,
-      domainName,
       comlibRtName,
       fileName,
       userId,
