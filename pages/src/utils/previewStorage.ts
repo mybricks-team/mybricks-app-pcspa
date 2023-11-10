@@ -9,11 +9,12 @@ export class PreviewStorage {
 
   getFileKeyTemplate = (fileId) => `--preview-${fileId}-`;
 
-  savePreviewPageData = ({ dumpJson, comlibs, hasPermissionFn, executeEnv, appConfig, envList, MYBRICKS_HOST }) => {
+  savePreviewPageData = ({ dumpJson, comlibs, hasPermissionFn, executeEnv, appConfig, envList, directConnection, MYBRICKS_HOST }) => {
     sessionStorage.setItem(`--preview-${this.fileId}-`, JSON.stringify(dumpJson))
     sessionStorage.setItem(`--preview--comlibs--${this.fileId}-`, JSON.stringify(comlibs))
     sessionStorage.setItem(`--preview--hasPermissionFn--${this.fileId}-`, hasPermissionFn)
     sessionStorage.setItem(`--preview--executeEnv--${this.fileId}-`, executeEnv)
+    sessionStorage.setItem(`--preview--directConnection--${this.fileId}-`, JSON.stringify(!!directConnection))
     sessionStorage.setItem(`--preview--appConfig--${this.fileId}-`, appConfig)
     sessionStorage.setItem(`--preview--envList--${this.fileId}-`, JSON.stringify(envList))
     sessionStorage.setItem(`--preview--MYBRICKS_HOST--${this.fileId}-`, JSON.stringify(MYBRICKS_HOST))
@@ -24,6 +25,7 @@ export class PreviewStorage {
     let comlibs = sessionStorage.getItem(`--preview--comlibs--${this.fileId}-`)
     let hasPermissionFn = sessionStorage.getItem(`--preview--hasPermissionFn--${this.fileId}-`)
     let executeEnv = sessionStorage.getItem(`--preview--executeEnv--${this.fileId}-`)
+    let directConnection = false;
     let MYBRICKS_HOST
     let appConfig
     let envList = []
@@ -51,6 +53,11 @@ export class PreviewStorage {
     } catch (ex) {
       throw ex
     }
+    try {
+      directConnection = JSON.parse(sessionStorage.getItem(`--preview--directConnection--${this.fileId}-`) || 'false')
+    } catch (ex) {
+      throw ex
+    }
 
     try {
       comlibs = JSON.parse(comlibs)
@@ -68,6 +75,7 @@ export class PreviewStorage {
       appConfig,
       MYBRICKS_HOST,
       envList,
+      directConnection,
     }
   }
 }

@@ -107,6 +107,7 @@ export default function MyDesigner({ appData: originAppData }) {
       executeEnv,
       envList,
       debugMode,
+      directConnection: appData.fileContent?.content?.directConnection || false,
       MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
       // 将新设置的环境附加到当前页面中，不能删除原有的环境
       debugMainProps: appData.fileContent?.content?.debugMainProps,
@@ -281,6 +282,7 @@ export default function MyDesigner({ appData: originAppData }) {
     const json = designerRef.current?.dump()
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
+    json.directConnection = ctx.directConnection
     json.executeEnv = ctx.executeEnv
     json.MYBRICKS_HOST = ctx.MYBRICKS_HOST
     json.envList = ctx.envList
@@ -318,6 +320,7 @@ export default function MyDesigner({ appData: originAppData }) {
       dumpJson: json,
       executeEnv: ctx.executeEnv,
       MYBRICKS_HOST: ctx.MYBRICKS_HOST,
+      directConnection: ctx.directConnection,
       envList: ctx.envList,
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
       hasPermissionFn: ctx.hasPermissionFn,
@@ -461,6 +464,7 @@ export default function MyDesigner({ appData: originAppData }) {
     json.pageConfig = {
       comlibs: ctx.comlibs,
       debugQuery: ctx.debugQuery,
+      directConnection: ctx.directConnection,
       // executeEnv: ctx.executeEnv,
       // MYBRICKS_HOST: ctx.MYBRICKS_HOST,
       // envList: ctx.envList,

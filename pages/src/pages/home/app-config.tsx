@@ -317,6 +317,19 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             title: '调试',
             items: [
               {
+                title: '直连',
+                type: 'Switch',
+                description: '直连模式下服务接口访问将直接请求，不再走代理',
+                value: {
+                  get() {
+                    return ctx.directConnection
+                  },
+                  set(_, value) {
+                    ctx.directConnection = value
+                  }
+                }
+              },
+              {
                 title: '调试模式',
                 type: 'Radio',
                 description: '选择配置接口前缀域名的方式',
@@ -625,7 +638,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
 
             //服务接口类型
             return callConnectorHttp(
-              { ...connector, script: connector.script, useProxy: true },
+              { ...connector, script: connector.script, useProxy: !ctx.directConnection },
               newParams,
               {
                 before: options => {
@@ -637,7 +650,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               }
             );
           } else {
-            return plugin.callConnector({ ...connector }, newParams, {
+            return plugin.callConnector({ ...connector, useProxy: !ctx.directConnection }, newParams, {
               ...connectorConfig,
               before: options => {
                 return {

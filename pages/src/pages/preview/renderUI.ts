@@ -19,6 +19,7 @@ const {
   appConfig,
   envList,
   MYBRICKS_HOST,
+  directConnection,
 } = previewStorage.getPreviewPageData();
 
 const root = ({ renderType, env, ...props }) => {
@@ -70,7 +71,7 @@ const root = ({ renderType, env, ...props }) => {
               );
           return curConnector
             ? plugin.call(
-                { ...connector, ...curConnector, useProxy: true },
+                { ...connector, ...curConnector, useProxy: !directConnection },
                 newParams,
                 {
                   before: (options) => {
