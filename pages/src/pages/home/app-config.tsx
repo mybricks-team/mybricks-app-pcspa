@@ -682,13 +682,6 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             // 返回插件中的国际化文本数据
             // 下面的内容需要避免每次掉用都计算
             return {
-              'u_WCZjt': {
-                id: 'u_WCZjt',
-                content: {
-                  'zh-CN': '你好',
-                  'en': 'hello'
-                }
-              }
             }
           },
           get locale() {
