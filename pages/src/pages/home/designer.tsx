@@ -19,6 +19,7 @@ import { PreviewStorage } from './../../utils/previewStorage'
 import { unionBy } from 'lodash'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
 import PublishModal, { EnumMode } from './components/PublishModal'
+import { createFromIconfontCN } from '@ant-design/icons';
 
 import css from './app.less'
 import { USE_CUSTOM_HOST } from './constants'
@@ -109,6 +110,7 @@ export default function MyDesigner({ appData: originAppData }) {
       debugMode,
       directConnection: appData.fileContent?.content?.directConnection || false,
       MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
+      fontJS: appData.fileContent?.content?.fontJS,
       // 将新设置的环境附加到当前页面中，不能删除原有的环境
       debugMainProps: appData.fileContent?.content?.debugMainProps,
       hasPermissionFn: appData.fileContent?.content?.hasPermissionFn,
@@ -165,6 +167,13 @@ export default function MyDesigner({ appData: originAppData }) {
 
   // 只有预览时 search 会携带 version 字段
   const isPreview = window.location.search.includes('version');
+
+  //页面刷新的时候，添加fontJS资源
+  useEffect(()=>{
+    createFromIconfontCN({
+      scriptUrl: ctx.fontJS, // 在 iconfont.cn 上生成
+    });
+  },[ctx.fontJS])
 
   useEffect(() => {
     const needSearchComlibs = comlibs.filter(lib => lib.id !== "_myself_");
@@ -289,6 +298,7 @@ export default function MyDesigner({ appData: originAppData }) {
     json.debugMainProps = ctx.debugMainProps
     json.hasPermissionFn = ctx.hasPermissionFn
     json.debugHasPermissionFn = ctx.debugHasPermissionFn
+    json.fontJS = ctx.fontJS
 
     json.projectId = ctx.sdk.projectId;
 
