@@ -19,6 +19,7 @@ import { shapeUrlByEnv } from '../../utils';
 import { EnumMode } from './components/PublishModal';
 import { USE_CUSTOM_HOST } from './constants';
 import { fAxios } from '@/services/http';
+import { createFromIconfontCN } from '@ant-design/icons';
 
 const defaultPermissionComments = `/**
 *
@@ -268,8 +269,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     },
     editView: {
       editorAppender(editConfig) {
+        editConfig.fontJS = ctx.fontJS;
         injectUpload(editConfig, ctx.uploadService, ctx.manateeUserInfo, ctx.fileId);
-
         return;
       },
       items({ }, cate0, cate1, cate2) {
@@ -503,7 +504,27 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                     }
                   }
                 }
-              },
+              }
+            ]
+          },
+          {
+            items: [
+              {
+                title: 'iconfont js链接',
+                type: 'Text',
+                description: '设置iconfont js链接',
+                value: {
+                  get() {
+                    return ctx.fontJS;
+                  },
+                  set(context, v: string) {
+                    ctx.fontJS = v;
+                    createFromIconfontCN({
+                      scriptUrl: v, // 在 iconfont.cn 上生成
+                    });
+                  }
+                }
+              }
             ]
           }
 

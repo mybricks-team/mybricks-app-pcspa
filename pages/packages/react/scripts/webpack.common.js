@@ -58,7 +58,7 @@ module.exports = {
       },
       moment: 'moment',
       antd: 'antd',
-      '@ant-design/icons': 'icons',
+      '@ant-design/icons': 'icons'
     },
   ],
   module: {
