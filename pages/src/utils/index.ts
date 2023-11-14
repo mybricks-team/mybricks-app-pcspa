@@ -385,9 +385,8 @@ export const getRenderWeb = (renderType: 'react' | 'vue2' | 'vue3') => {
 
 export const i18nLangContentFilter = (content, list) => {
   let newContent = {};
-  let contentIdList = Object.keys(content)
-  list.forEach((item)=>{
-    if(contentIdList.indexOf(item) !== -1){
+  list.forEach((item) => {
+    if (content[item]) {
       newContent[item] = content[item]
     }
   })

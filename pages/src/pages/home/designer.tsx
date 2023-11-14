@@ -113,16 +113,8 @@ export default function MyDesigner({ appData: originAppData }) {
       debugQuery: appData.fileContent?.content?.debugQuery,
       executeEnv,
       envList,
-      i18nLangContent: {
-        'u_WCZjt': {
-          id: 'u_WCZjt',
-          content: {
-            'zh-CN': '你好',
-            'en': 'hello'
-          }
-        }
-      },
-      idList: ['k_252272'],
+      i18nLangContent: {},
+      i18nUsedIdList: [],
       debugMode,
       directConnection: appData.fileContent?.content?.directConnection || false,
       MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
@@ -385,7 +377,7 @@ export default function MyDesigner({ appData: originAppData }) {
           json.hasPermissionFn = ctx.hasPermissionFn
           json.debugHasPermissionFn = ctx.debugHasPermissionFn
           json.projectId = ctx.sdk.projectId;
-          json.i18nLangContent = i18nLangContentFilter(ctx.i18nLangContent, ctx.idList)
+          json.i18nLangContent = i18nLangContentFilter(ctx.i18nLangContent, ctx.i18nUsedIdList)
 
           await ctx.save({ content: JSON.stringify(json), name: ctx.fileName }, true);
           setBeforeunload(false);
@@ -404,7 +396,7 @@ export default function MyDesigner({ appData: originAppData }) {
               publisherName: ctx.user?.name,
               projectId: ctx.sdk.projectId,
               envList: ctx.envList,
-              i18nLangContent: i18nLangContentFilter(ctx.i18nLangContent, ctx.idList),
+              i18nLangContent: i18nLangContentFilter(ctx.i18nLangContent, ctx.i18nUsedIdList),
               // 非模块下的页面直接发布到项目空间下
               folderPath: '/app/pcpage',
               fileName: `${ctx.fileId}.html`,

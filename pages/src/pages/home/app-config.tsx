@@ -215,6 +215,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       localePlugin({
         onPackLoad: ({ i18nLangContent }) => {
           ctx.i18nLangContent = i18nLangContent
+        },
+        onUsedIdChanged: ({ ids }) => {
+          console.log('ids', ids)
+          ctx.i18nUsedIdList = ids
         }
       }),
       ...remotePlugins,
@@ -628,7 +632,6 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         i18n(title) {
           if (typeof title === 'string') return title
           const i18nLangContent = ctx.i18nLangContent || {}
-          console.log(`ctx.i18nLangContent`, ctx.i18nLangContent)
           return i18nLangContent[title?.id]?.content?.[
             navigator.language
           ] || JSON.stringify(title)
