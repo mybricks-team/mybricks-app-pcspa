@@ -58,8 +58,7 @@ module.exports = {
       },
       moment: 'moment',
       antd: 'antd',
-      '@ant-design/icons': 'icons',
-      "@mybricks/rxui": "rxui"
+      '@ant-design/icons': 'icons'
     },
   ],
   module: {

@@ -504,7 +504,11 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                     }
                   }
                 }
-              },
+              }
+            ]
+          },
+          {
+            items: [
               {
                 title: 'iconfont js链接',
                 type: 'Text',
