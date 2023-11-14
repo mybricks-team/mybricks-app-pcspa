@@ -85,9 +85,9 @@ if (isOffline) {
   execChain([
     clearZipPkg,
     publishReactAppOffline,
-    fixPkg,
-    publishVue2AppOffline,
-    resetPkg
+    // fixPkg,
+    // publishVue2AppOffline,
+    // resetPkg
   ]);
 } else {
   execChain([

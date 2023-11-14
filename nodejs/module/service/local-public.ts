@@ -14,7 +14,7 @@ export default {
     },
     {
       tag: "link",
-      path: "public/antd/antd@4.21.6.min.css",
+      path: "public/antd/antd@4.21.6.variable.min.css",
       CDN: "//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/antd.variable.min.css",
     },
     {
