@@ -707,7 +707,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             return ctx.i18nLangContent || {}
           },
           get locale() {
-            return {}
+            return;
           },
           getQuery: () => ({ ...(ctx.debugQuery || {}) }),
           getProps: () => ({ ...(ctx.debugMainProps || {}) }),
