@@ -99,6 +99,9 @@ const root = ({ renderType, env, ...props }) => {
         }
       },
       vars: {
+        get locale(){
+          return env.locale();
+        },
         get getExecuteEnv() {
           return () => executeEnv;
         },
@@ -109,17 +112,6 @@ const root = ({ renderType, env, ...props }) => {
             if (!props) return undefined;
             return props;
           };
-        },
-        get locale() {
-          const LanToMUILocale = {
-            'zh-CN': 'zh_CN',
-            'en': 'en_US',
-          }
-          if (LanToMUILocale[navigator.language] === 'zh_CN') {
-            return LanToMUILocale[navigator.language]
-          } else {
-            return ''
-          }
         },
         get getRouter() {
           const isUri = (url: string) => {

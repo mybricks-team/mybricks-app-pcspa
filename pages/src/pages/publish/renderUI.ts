@@ -9,7 +9,7 @@ const executeEnv = "--executeEnv--";
 const envList = "--envList--";
 const i18nLangContent = "--i18nLangContent--";
 
-const root = ({ renderType, ...props }) => {
+const root = ({ renderType, locale, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   return renderUI(projectJson, {
     env: {
@@ -37,18 +37,7 @@ const root = ({ renderType, ...props }) => {
           },
           //antd 语言包地址
           get locale() {
-            //console.log('window.antd.locale["zh_CN"].default',window.antd.locale["zh_CN"].default)
-            const LanToMUILocale = {
-              'zh-CN': 'zh_CN',
-              'en': 'en_US',
-            }
-            //console.log('window.antd.locale[LanToMUILocale[navigator.language]].default',window.antd.locale[LanToMUILocale[navigator.language]].default)
-            //return {}
-            if (LanToMUILocale[navigator.language] === 'zh_CN') {
-              return LanToMUILocale[navigator.language]
-            } else {
-              return ''
-            }
+            return locale()
           },
           get getProps() {
             // 获取主应用参数方法，如：token等参数，取决于主应用传入

@@ -53,6 +53,20 @@ cssVariable(dumpJson)
 
 let reactRoot
 
+const getCurrentLocale = ()=>{
+  const LanToMUILocale = {
+    //key: 语言环境
+    //value: antd包名
+    'zh-CN': 'zh_CN',
+    'en': 'en_US',
+  }
+  if (LanToMUILocale[navigator.language]) {
+    return LanToMUILocale[navigator.language]
+  } else {
+    return;
+  }
+}
+
 function render(props) {
     const { container } = props;
     if (comlibs && Array.isArray(comlibs)) {
@@ -79,13 +93,20 @@ function render(props) {
             reactRoot.render(React.createElement(
                 antd.ConfigProvider,
                 {
-                    locale: antd.locale['zh_CN'].default,
+                  locale: getCurrentLocale() === 'en_US' ? 
+                          undefined : 
+                          (
+                            getCurrentLocale() !== undefined && antd.locale[getCurrentLocale()].default ? 
+                             antd.locale[getCurrentLocale()].default : 
+                            antd.locale['zh_CN'].default
+                          ),
                 },
                 renderUI({
                     ...props, renderType: 'react', env: {
                         callDomainModel(domainModel, type, params) {
                             return callDomainHttp(domainModel, params, { action: type } as any);
-                        }
+                        },
+                        locale: getCurrentLocale
                     }
                 })
             ));
