@@ -429,7 +429,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 },
                 value: {
                   get({ data, focusArea }) {
-                    return envList
+                    return ctx.envList
                   },
                   set({ data, focusArea, output, input, ...res }, value) {
                     ctx.envList = value
