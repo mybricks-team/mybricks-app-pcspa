@@ -9,7 +9,7 @@ import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-co
 import versionPlugin from 'mybricks-plugin-version'
 import { use as useTheme } from '@mybricks/plugin-theme';
 
-// import { render as renderUI } from '@mybricks/render-web';
+import { render as renderUI } from '@mybricks/render-web';
 import comlibLoaderFunc from './configs/comlibLoader'
 import { comLibAdderFunc } from './configs/comLibAdder'
 import { runJs } from '../../utils/runJs'
@@ -202,6 +202,9 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
   }
 
   return {
+    debugger(json, opts) {
+      return renderUI(json, opts)
+    },
     shortcuts: {
       'ctrl+s': [save],
     },
