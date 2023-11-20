@@ -116,9 +116,9 @@ const root = ({ renderType, env, ...props }) => {
             'en': 'en_US',
           }
           if (LanToMUILocale[navigator.language] === 'zh_CN') {
-            return window.antd.locale[LanToMUILocale[navigator.language]].default
+            return LanToMUILocale[navigator.language]
           } else {
-            return {}
+            return ''
           }
         },
         get getRouter() {

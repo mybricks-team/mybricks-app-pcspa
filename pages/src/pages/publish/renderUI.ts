@@ -44,10 +44,10 @@ const root = ({ renderType, ...props }) => {
             }
             //console.log('window.antd.locale[LanToMUILocale[navigator.language]].default',window.antd.locale[LanToMUILocale[navigator.language]].default)
             //return {}
-            if (LanToMUILocale[navigator.language] === 'zh-CN') {
-              return window.antd.locale[LanToMUILocale[navigator.language]].default
+            if (LanToMUILocale[navigator.language] === 'zh_CN') {
+              return LanToMUILocale[navigator.language]
             } else {
-              return {}
+              return ''
             }
           },
           get getProps() {
