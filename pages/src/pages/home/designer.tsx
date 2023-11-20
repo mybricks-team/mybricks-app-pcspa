@@ -107,7 +107,7 @@ export default function MyDesigner({ appData: originAppData }) {
       // comlibs,
       comlibs: [
         `http://localhost:20000/comlib.js`,
-        `http://localhost:20001/comlib.js`,
+        //`http://localhost:20001/comlib.js`,
       ],
       latestComlibs: [],
       debugQuery: appData.fileContent?.content?.debugQuery,
@@ -122,7 +122,7 @@ export default function MyDesigner({ appData: originAppData }) {
           }
         }
       },
-      idList: ['u_WCZjt'],
+      idList: ['k_252272'],
       debugMode,
       directConnection: appData.fileContent?.content?.directConnection || false,
       MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},

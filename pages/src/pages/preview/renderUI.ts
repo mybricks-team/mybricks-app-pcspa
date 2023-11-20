@@ -115,7 +115,7 @@ const root = ({ renderType, env, ...props }) => {
             'zh-CN': 'zh_CN',
             'en': 'en_US',
           }
-          if (LanToMUILocale[navigator.language] === 'zh-CN') {
+          if (LanToMUILocale[navigator.language] === 'zh_CN') {
             return window.antd.locale[LanToMUILocale[navigator.language]].default
           } else {
             return {}
