@@ -14,7 +14,7 @@ const root = ({ renderType, ...props }) => {
     env: {
       silent: true,
       showErrorNotification: false,
-      canvasElement: props?.canvasElement || undefined,
+      canvasElement: props?.canvasElement || props.container || document.body,
       get vars() {
         // 环境变量
         return {
