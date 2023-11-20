@@ -10,7 +10,9 @@ function createScript(src, index) {
   return script
 }
 
-export function myRequire(arr, onError): Promise<{ styles: any; rnStyles: any }> {
+let styleCount = 0
+
+export function myRequire(arr, onError): Promise<{ styles: any }> {
   return new Promise((resolve, reject) => {
     if (!(arr instanceof Array)) {
       console.error('arr is not a Array')
@@ -22,58 +24,60 @@ export function myRequire(arr, onError): Promise<{ styles: any; rnStyles: any }>
       REQLEN = arr.length
 
     const styles: any = []
-    const rnStyles: any = []
+    // const rnStyles: any = []
 
     const _headAppendChild = document.head.appendChild
-    const _headInsertBefore = document.head.insertBefore
+    // const _headInsertBefore = document.head.insertBefore
 
     document.head.appendChild = (ele) => {
       if (ele && ele.tagName?.toLowerCase() === 'style') {
+        ele.id = 'mybricks_' + styleCount
         styles.push(ele)
+        styleCount++
       }
       _headAppendChild.call(document.head, ele)
       return ele
     }
 
-    document.head.insertBefore = (...args) => {
-      _headInsertBefore.call(document.head, ...args)
-      rnStyles.push(args[0].cloneNode())
+    // document.head.insertBefore = (...args) => {
+    //   _headInsertBefore.call(document.head, ...args)
+    //   rnStyles.push(args[0].cloneNode())
 
-      const index = rnStyles.length - 1
-      const _insertRule = args[0].sheet.insertRule
+    //   const index = rnStyles.length - 1
+    //   const _insertRule = args[0].sheet.insertRule
 
-      args[0].sheet.insertRule = (...rule) => {
-        if (!rnStyles[index].sheet) {
-          _insertRule.call(args[0].sheet, ...rule)
-        }
+    //   args[0].sheet.insertRule = (...rule) => {
+    //     if (!rnStyles[index].sheet) {
+    //       _insertRule.call(args[0].sheet, ...rule)
+    //     }
 
-        if (!rnStyles[index].sheet.rules.length) {
-          for (let i = 0; i < args[0].sheet.rules.length; i++) {
-            rnStyles[index].sheet.insertRule(args[0].sheet.rules[i].cssText, i)
-          }
-        }
+    //     if (!rnStyles[index].sheet.rules.length) {
+    //       for (let i = 0; i < args[0].sheet.rules.length; i++) {
+    //         rnStyles[index].sheet.insertRule(args[0].sheet.rules[i].cssText, i)
+    //       }
+    //     }
 
-        let isAdded = false
+    //     let isAdded = false
 
-        for (let i = 0; i < rnStyles[index].sheet.rules.length; i++) {
-          const selectorText = rnStyles[index].sheet.rules[i].selectorText
+    //     for (let i = 0; i < rnStyles[index].sheet.rules.length; i++) {
+    //       const selectorText = rnStyles[index].sheet.rules[i].selectorText
 
-          if (rule[0].startsWith(`${selectorText}{`)) {
-            isAdded = true
-            break
-          }
-        }
+    //       if (rule[0].startsWith(`${selectorText}{`)) {
+    //         isAdded = true
+    //         break
+    //       }
+    //     }
 
-        if (!isAdded) {
-          rnStyles[index].sheet.insertRule(
-            rule[0],
-            rnStyles[index].sheet.rules.length
-          )
-        }
-      }
+    //     if (!isAdded) {
+    //       rnStyles[index].sheet.insertRule(
+    //         rule[0],
+    //         rnStyles[index].sheet.rules.length
+    //       )
+    //     }
+    //   }
 
-      return args[0]
-    }
+    //   return args[0]
+    // }
 
     arr.forEach(function (req_item, index, arr) {
       const script = createScript(req_item, index)
@@ -85,7 +89,7 @@ export function myRequire(arr, onError): Promise<{ styles: any; rnStyles: any }>
           onError(err)
           if (REQ_TOTAL == REQLEN) {
             document.head.appendChild = _headAppendChild
-            document.head.insertBefore = _headInsertBefore
+            // document.head.insertBefore = _headInsertBefore
           }
         }
         script.onload = function () {
@@ -95,15 +99,30 @@ export function myRequire(arr, onError): Promise<{ styles: any; rnStyles: any }>
 
           if (REQ_TOTAL == REQLEN) {
             // resolve(EXP_ARR)
-            resolve({ styles, rnStyles })
+            resolve({ styles })
+            removeStylesBySubstring('mybricks_')
             // callback && callback.apply(this, EXP_ARR);
             document.head.appendChild = _headAppendChild
-            document.head.insertBefore = _headInsertBefore
+            // document.head.insertBefore = _headInsertBefore
           }
         }
       })(script)
     })
   })
+}
+
+function removeStylesBySubstring(substring) {
+  // 获取所有的 style 标签
+  const styleTags = document.querySelectorAll('style');
+
+  // 遍历每个 style 标签
+  styleTags.forEach(styleTag => {
+    // 判断 id 是否包含指定的子字符串
+    if (styleTag.id.includes(substring)) {
+      // 如果匹配，则移除该 style 标签
+      styleTag.remove();
+    }
+  });
 }
 
 export const MySelfId = '_myself_';

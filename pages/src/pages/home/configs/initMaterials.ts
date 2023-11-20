@@ -9,10 +9,13 @@ export const initMaterials = async (ctx: Record<string, any>) => {
   const { comlibs, hasMaterialApp, latestComlibs } = ctx;
   const myselfLib = comlibs.find((lib) => lib?.id === MySelfId);
   const libs = comlibs.filter((lib) => lib?.id !== MySelfId);
+
   if (myselfLib && hasMaterialApp) {
     await getComlibsByNamespaceAndVersion(myselfLib?.comAray);
   }
+
   if (!libs.length) return [];
+
   const { styles } = await myRequire(
     libs.map((lib) => lib?.editJs ?? lib),
     (error) => {
