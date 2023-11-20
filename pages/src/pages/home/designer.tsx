@@ -20,6 +20,7 @@ import { unionBy } from 'lodash'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
 import PublishModal, { EnumMode } from './components/PublishModal'
 import { createFromIconfontCN } from '@ant-design/icons';
+import { i18nLangContentFilter } from '../../utils/index'
 
 import css from './app.less'
 import { USE_CUSTOM_HOST } from './constants'
@@ -106,12 +107,22 @@ export default function MyDesigner({ appData: originAppData }) {
       // comlibs,
       comlibs: [
         `http://localhost:20000/comlib.js`,
-        `http://localhost:20001/comlib.js`,
+        //`http://localhost:20001/comlib.js`,
       ],
       latestComlibs: [],
       debugQuery: appData.fileContent?.content?.debugQuery,
       executeEnv,
       envList,
+      i18nLangContent: {
+        'u_WCZjt': {
+          id: 'u_WCZjt',
+          content: {
+            'zh-CN': '你好',
+            'en': 'hello'
+          }
+        }
+      },
+      idList: ['u_WCZjt'],
       debugMode,
       directConnection: appData.fileContent?.content?.directConnection || false,
       MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
@@ -340,6 +351,7 @@ export default function MyDesigner({ appData: originAppData }) {
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
       hasPermissionFn: ctx.hasPermissionFn,
       appConfig: JSON.stringify(appConfig),
+      i18nLangContent: ctx.i18nLangContent
     })
 
     window.open(`./preview.html?fileId=${ctx.fileId}`)
@@ -373,6 +385,7 @@ export default function MyDesigner({ appData: originAppData }) {
           json.hasPermissionFn = ctx.hasPermissionFn
           json.debugHasPermissionFn = ctx.debugHasPermissionFn
           json.projectId = ctx.sdk.projectId;
+          json.i18nLangContent = i18nLangContentFilter(ctx.i18nLangContent, ctx.idList)
 
           await ctx.save({ content: JSON.stringify(json), name: ctx.fileName }, true);
           setBeforeunload(false);
@@ -391,6 +404,7 @@ export default function MyDesigner({ appData: originAppData }) {
               publisherName: ctx.user?.name,
               projectId: ctx.sdk.projectId,
               envList: ctx.envList,
+              i18nLangContent: i18nLangContentFilter(ctx.i18nLangContent, ctx.idList),
               // 非模块下的页面直接发布到项目空间下
               folderPath: '/app/pcpage',
               fileName: `${ctx.fileId}.html`,

@@ -20,6 +20,7 @@ const {
   envList,
   MYBRICKS_HOST,
   directConnection,
+  i18nLangContent,
 } = previewStorage.getPreviewPageData();
 
 const root = ({ renderType, env, ...props }) => {
@@ -44,7 +45,12 @@ const root = ({ renderType, env, ...props }) => {
       // },
       i18n(title) {
         //多语言
-        return title;
+        if (typeof title?.id === 'undefined') return title
+        return i18nLangContent[title.id]?.content?.[
+          //navigator.language
+          'en'
+        ] || title
+        //return title;
       },
       /** 调用领域模型 */
       //   callDomainModel(domainModel, type, params) {
@@ -67,26 +73,26 @@ const root = ({ renderType, env, ...props }) => {
           const curConnector = connector.script
             ? connector
             : (dumpJson.plugins[connector.connectorName] || []).find(
-                (con) => con.id === connector.id
-              );
+              (con) => con.id === connector.id
+            );
           return curConnector
             ? plugin.call(
-                { ...connector, ...curConnector, useProxy: !directConnection },
-                newParams,
-                {
-                  before: (options) => {
-                    return {
-                      ...options,
-                      url: shapeUrlByEnv(
-                        envList,
-                        executeEnv,
-                        options.url,
-                        MYBRICKS_HOST
-                      ),
-                    };
-                  },
-                }
-              )
+              { ...connector, ...curConnector, useProxy: !directConnection },
+              newParams,
+              {
+                before: (options) => {
+                  return {
+                    ...options,
+                    url: shapeUrlByEnv(
+                      envList,
+                      executeEnv,
+                      options.url,
+                      MYBRICKS_HOST
+                    ),
+                  };
+                },
+              }
+            )
             : Promise.reject("找不到对应连接器 Script 执行脚本.");
         } else {
           return Promise.reject("错误的连接器类型.");
@@ -103,6 +109,17 @@ const root = ({ renderType, env, ...props }) => {
             if (!props) return undefined;
             return props;
           };
+        },
+        get locale() {
+          const LanToMUILocale = {
+            'zh-CN': 'zh_CN',
+            'en': 'en_US',
+          }
+          if (LanToMUILocale[navigator.language] === 'zh-CN') {
+            return window.antd.locale[LanToMUILocale[navigator.language]].default
+          } else {
+            return {}
+          }
         },
         get getRouter() {
           const isUri = (url: string) => {

@@ -48,3 +48,12 @@ export const MySelf_COM_LIB = {
   title: '我的组件',
   defined: true,
 };
+
+export const LocaleUrl = [
+  {
+    'en': ''
+  },
+  {
+    'zh-CN': 'https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js'
+  }
+]

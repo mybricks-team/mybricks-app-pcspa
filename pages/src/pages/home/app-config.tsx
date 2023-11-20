@@ -621,7 +621,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         i18n(title) {
           const i18nLangContent = this.vars.i18nLangContent
           if (typeof title?.id === 'undefined') return title
-          return i18nLangContent[title.id]?.content?.[navigator.language] || title
+          return i18nLangContent[title.id]?.content?.[
+            navigator.language
+            //'en'
+          ] || title
         },
         /** 调用领域模型 */
         callDomainModel(domainModel, type, params) {
@@ -679,8 +682,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             // 返回插件中的国际化文本数据
             // 下面的内容需要避免每次掉用都计算
             return {
-              u_hQvPD: {
-                id: 'u_hQvPD',
+              'u_WCZjt': {
+                id: 'u_WCZjt',
                 content: {
                   'zh-CN': '你好',
                   'en': 'hello'

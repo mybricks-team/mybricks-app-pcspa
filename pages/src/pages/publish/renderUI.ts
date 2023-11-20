@@ -7,6 +7,7 @@ const projectJson = "--projectJson--";
 const projectId = "--slot-project-id--";
 const executeEnv = "--executeEnv--";
 const envList = "--envList--";
+const i18nLangContent = "--i18nLangContent--";
 
 const root = ({ renderType, ...props }) => {
   const renderUI = getRenderWeb(renderType);
@@ -15,6 +16,14 @@ const root = ({ renderType, ...props }) => {
       silent: true,
       showErrorNotification: false,
       canvasElement: props?.canvasElement || props.container || document.body,
+      i18n(title) {
+        //多语言
+        if (typeof title?.id === 'undefined') return title
+        return i18nLangContent[title.id]?.content?.[
+          //navigator.language
+          'en'
+        ] || title
+      },
       get vars() {
         // 环境变量
         return {
@@ -25,6 +34,21 @@ const root = ({ renderType, ...props }) => {
             return () => {
               return parseQuery(location.search);
             };
+          },
+          //antd 语言包地址
+          get locale() {
+            //console.log('window.antd.locale["zh_CN"].default',window.antd.locale["zh_CN"].default)
+            const LanToMUILocale = {
+              'zh-CN': 'zh_CN',
+              'en': 'en_US',
+            }
+            //console.log('window.antd.locale[LanToMUILocale[navigator.language]].default',window.antd.locale[LanToMUILocale[navigator.language]].default)
+            //return {}
+            if (LanToMUILocale[navigator.language] === 'zh-CN') {
+              return window.antd.locale[LanToMUILocale[navigator.language]].default
+            } else {
+              return {}
+            }
           },
           get getProps() {
             // 获取主应用参数方法，如：token等参数，取决于主应用传入
@@ -121,23 +145,23 @@ const root = ({ renderType, ...props }) => {
           const curConnector = connector.script
             ? connector
             : (projectJson.plugins[connector.connectorName] || []).find(
-                (con) => con.id === connector.id
-              );
+              (con) => con.id === connector.id
+            );
 
           return curConnector
             ? plugin.call({ ...connector, ...curConnector }, newParams, {
-                before: (options) => {
-                  return {
-                    ...options,
-                    url: shapeUrlByEnv(
-                      envList,
-                      executeEnv,
-                      options.url,
-                      MYBRICKS_HOST
-                    ),
-                  };
-                },
-              })
+              before: (options) => {
+                return {
+                  ...options,
+                  url: shapeUrlByEnv(
+                    envList,
+                    executeEnv,
+                    options.url,
+                    MYBRICKS_HOST
+                  ),
+                };
+              },
+            })
             : Promise.reject("找不到对应连接器 Script 执行脚本.");
         } else {
           return Promise.reject("错误的连接器类型.");
