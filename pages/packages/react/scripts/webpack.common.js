@@ -56,7 +56,6 @@ module.exports = {
         amd: 'react-dom',
         root: 'ReactDOM',
       },
-      "@mybricks/rxui": "rxui",
       moment: 'moment',
       antd: 'antd',
       '@ant-design/icons': 'icons'

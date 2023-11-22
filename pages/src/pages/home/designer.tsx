@@ -69,8 +69,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }
 
-  // const designer = './public/designer-spa/1.3.50/index.min.js'
-  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.63/index.min.js'
+  const designer = './public/designer-spa/1.3.63/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
@@ -104,11 +103,7 @@ export default function MyDesigner({ appData: originAppData }) {
       fileId: appData.fileId,
       setting: appData.config || {},
       hasMaterialApp: appData.hasMaterialApp,
-      // comlibs,
-      comlibs: [
-        `http://localhost:20000/comlib.js`,
-        `http://localhost:20001/comlib.js`,
-      ],
+      comlibs,
       latestComlibs: [],
       debugQuery: appData.fileContent?.content?.debugQuery,
       executeEnv,
