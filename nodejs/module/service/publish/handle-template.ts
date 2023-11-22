@@ -24,9 +24,7 @@ export async function handleTemplate({
   comlibs.forEach((lib) => {
     /** 旧组件库，未带组件 runtime 描述文件 */
     if (!lib.coms && !lib.defined) {
-      //comLibRtScript += `<script src="${lib.rtJs}"></script>`;
-      //发布时，目前替换成本地组件库
-      comLibRtScript += `<script src="https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.3.99/2023-11-07_21-26-42/rt.js"></script>`;
+      comLibRtScript += `<script src="${lib.rtJs}"></script>`;
       hasOldComLib = true;
     }
   });
@@ -37,18 +35,12 @@ export async function handleTemplate({
     comlibs.find((lib) => lib?.defined)?.comAray?.length ||
     comlibs.find((lib) => lib.componentRuntimeMap)
   ) {
-    //comLibRtScript += `<script src="./${comlibRtName}"></script>`;
-    //发布时，目前替换成了本地组件库
-    comLibRtScript += `<script src="https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.3.99/2023-11-07_21-26-42/rt.js"></script>`;
+    comLibRtScript += `<script src="./${comlibRtName}"></script>`;
     needCombo = true;
   }
 
-  //if(navigator.language === 'zh-CN'){
-    //语言包资源
-    localeScript += `<script src="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>`; 
-  // }else{
-    
-  // }
+  //语言包资源, 可以按需添加其他语言
+  localeScript += `<script src="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>`;
 
   Logger.info("[publish] 开始模板替换");
 
