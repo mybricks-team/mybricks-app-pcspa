@@ -31,31 +31,11 @@ const root = ({ renderType, env, ...props }) => {
   return renderUI(dumpJson, {
     env: {
       ...env,
-      // renderCom(json, opts, coms) {
-      //   return renderUI(json, {
-      //     comDefs: { ...getComs(), ...coms },
-      //     // observable: window['rxui'].observable,
-      //     ...(opts || {}),
-      //     env: {
-      //       ...(opts?.env || {}),
-      //       edit: false,
-      //       runtime: true,
-      //     },
-      //   });
-      // },
       i18n(title) {
         //多语言
         if (typeof title?.id === 'undefined') return title
-        return i18nLangContent[title.id]?.content?.[
-          //navigator.language
-          'en'
-        ] || title
-        //return title;
+        return i18nLangContent[title.id]?.content?.[env.locale] || JSON.stringify(title)
       },
-      /** 调用领域模型 */
-      //   callDomainModel(domainModel, type, params) {
-      //     return callDomainHttp(domainModel, params, { action: type } as any);
-      //   },
       async callConnector(connector, params) {
         await connectorLoader(appConfig);
         const plugin =
@@ -99,8 +79,8 @@ const root = ({ renderType, env, ...props }) => {
         }
       },
       vars: {
-        get locale(){
-          return env.locale();
+        get locale() {
+          return env.locale;
         },
         get getExecuteEnv() {
           return () => executeEnv;

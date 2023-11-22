@@ -7,22 +7,18 @@ const antd = window.antd;
 
 let reactRoot
 
-const getCurrentLocale = ()=>{
-  const LanToMUILocale = {
-    //key: 语言环境
-    //value: antd包名
-    'zh-CN': 'zh_CN',
-    'en': 'en_US',
-  }
-  if (LanToMUILocale[navigator.language]) {
-    return LanToMUILocale[navigator.language]
-  } else {
-    return;
-  }
+const getAntdLocalName = (locale) => {
+  const localeArr = locale.split('-');
+  const lang = localeArr.pop()?.toUpperCase();
+  return localeArr.concat(['_', lang as string]).join('');
+}
+
+const getCurrentLocale = () => {
+  return navigator.language
 }
 
 const render = (props) => {
-    const { container } = props;
+  const { container } = props;
   const root = (container || document).querySelector('#mybricks-page-root')
   /** publish template style */
   root.style.width = '100%';
@@ -34,47 +30,33 @@ const render = (props) => {
       },
     })
   }
-  // ReactDOM.render(
-  //   React.createElement(
-  //     antd.ConfigProvider,
-  //     {
-  //       locale: antd.locale['zh_CN'].default,
-  //     },
-  //     renderUI({...props, renderType: 'react'})
-  //   ),
-  //   root
-  // )
   reactRoot = ReactDOM.createRoot(root);
+  const antdLocalLib = antd?.locale[getAntdLocalName(getCurrentLocale())]?.default
 
   reactRoot.render(React.createElement(
     antd.ConfigProvider,
     {
-      locale: getCurrentLocale() === 'en_US' ? 
-              undefined : 
-              (
-                getCurrentLocale() !== undefined && antd.locale[getCurrentLocale()].default ? 
-                 antd.locale[getCurrentLocale()].default : 
-                antd.locale['zh_CN'].default
-              ),
+      // 如鬼哦没有因为就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
+      locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale())) ? undefined : (antdLocalLib || antd.locale['zh_CN'].default)
     },
-    renderUI({...props, renderType: 'react', locale: getCurrentLocale })
+    renderUI({ ...props, renderType: 'react', locale: getCurrentLocale() })
   ));
 }
 
 if (!window.__POWERED_BY_QIANKUN__) {
-    render({});
+  render({});
 }
 
 export async function bootstrap() {
-    console.log('react app bootstrap');
+  console.log('react app bootstrap');
 }
 
 export async function mount(props) {
-    render(props);
+  render(props);
 }
 
 export async function unmount(props) {
-    const { container } = props;
-    // ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#mybricks-page-root'));
-    reactRoot.unmount()
+  const { container } = props;
+  // ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#mybricks-page-root'));
+  reactRoot.unmount()
 }

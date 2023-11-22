@@ -19,10 +19,8 @@ const root = ({ renderType, locale, ...props }) => {
       i18n(title) {
         //多语言
         if (typeof title?.id === 'undefined') return title
-        return i18nLangContent[title.id]?.content?.[
-          //navigator.language
-          'en'
-        ] || title
+        return i18nLangContent[title.id]?.content?.[locale] || JSON.stringify(title)
+        //return title;
       },
       get vars() {
         // 环境变量
@@ -37,7 +35,7 @@ const root = ({ renderType, locale, ...props }) => {
           },
           //antd 语言包地址
           get locale() {
-            return locale()
+            return locale
           },
           get getProps() {
             // 获取主应用参数方法，如：token等参数，取决于主应用传入

@@ -7,8 +7,6 @@ import servicePlugin, {
 import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-connector-domain'
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
-// import localePlugin from '../../../../../plugin-locale/src'
-import { PcEditorMap } from '../../../packages/react/templates/public/editor-pc-common'
 import localePlugin from 'mybricks-plugin-locale'
 import { use as useTheme } from '@mybricks/plugin-theme';
 
@@ -204,6 +202,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     ])
   }
 
+  const getCurrentLocale = () => {
+    return `zh`
+  }
+
   return {
     debugger(json, opts) {
       return renderUI(json, opts)
@@ -214,6 +216,19 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     plugins: [
       servicePlugin(),
       localePlugin({
+        // visible: false,
+        // defaultPackLink: `https://unpkg.corp.kuaishou.com/@k18n/kibt-fe-shop-c-lang@1.1.97/language/k18n/index.json`,
+        // defaultTransform: (packData: any) => {
+        //   return packData.textList.map(item => {
+        //     return {
+        //       id: item.key,
+        //       content: packData.language.reduce((res, lang, index) => {
+        //         res[lang] = item.text[index]
+        //         return res
+        //       }, {})
+        //     }
+        //   })
+        // },
         onPackLoad: ({ i18nLangContent }) => {
           ctx.i18nLangContent = i18nLangContent
         },
@@ -285,21 +300,6 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       editorAppender(editConfig) {
         editConfig.fontJS = ctx.fontJS;
         injectUpload(editConfig, ctx.uploadService, ctx.manateeUserInfo, ctx.fileId);
-
-        if (editConfig.type.toUpperCase() === 'TEXTAREA') {
-          const editor = PcEditorMap[editConfig.type.toUpperCase()] || editConfig.render;
-          return editor({ editConfig });
-        }
-        if (editConfig.type.toUpperCase() === 'ARRAY') {
-          const editor = PcEditorMap[editConfig.type.toUpperCase()] || editConfig.render;
-          return editor({ editConfig });
-        }
-        if (editConfig.type.toUpperCase() === 'ARRAYCHECKBOX') {
-          const editor = PcEditorMap[editConfig.type.toUpperCase()] || editConfig.render;
-          return editor({ editConfig });
-        }
-
-
         return;
       },
       items({ }, cate0, cate1, cate2) {
@@ -647,9 +647,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         i18n(title) {
           if (typeof title === 'string') return title
           const i18nLangContent = ctx.i18nLangContent || {}
-          return i18nLangContent[title?.id]?.content?.[
-            navigator.language
-          ] || JSON.stringify(title)
+          // 搭建页面使用中文
+          return i18nLangContent[title?.id]?.content?.[getCurrentLocale()] || JSON.stringify(title)
         },
         /** 调用领域模型 */
         callDomainModel(domainModel, type, params) {
@@ -707,7 +706,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             return ctx.i18nLangContent || {}
           },
           get locale() {
-            return;
+            return getCurrentLocale();
           },
           getQuery: () => ({ ...(ctx.debugQuery || {}) }),
           getProps: () => ({ ...(ctx.debugMainProps || {}) }),
