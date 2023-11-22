@@ -7,8 +7,8 @@ import servicePlugin, {
 import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-connector-domain'
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
-// import localePlugin from '../../../../../plugin-locale/src'
-import localePlugin from 'mybricks-plugin-locale'
+import localePlugin from '../../../../../plugin-locale/src'
+// import localePlugin from 'mybricks-plugin-locale'
 import { use as useTheme } from '@mybricks/plugin-theme';
 
 import { render as renderUI } from '@mybricks/render-web';
@@ -628,9 +628,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         i18n(title) {
           if (typeof title === 'string') return title
           const i18nLangContent = ctx.i18nLangContent || {}
+          console.log(`ctx.i18nLangContent`, ctx.i18nLangContent)
           return i18nLangContent[title?.id]?.content?.[
             navigator.language
-          ] || String(title)
+          ] || JSON.stringify(title)
         },
         /** 调用领域模型 */
         callDomainModel(domainModel, type, params) {
