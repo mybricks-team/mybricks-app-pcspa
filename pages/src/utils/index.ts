@@ -356,6 +356,9 @@ export const getRenderWeb = (renderType: 'react' | 'vue2' | 'vue3') => {
 
 // 收集语料包中被用到的语料
 export const i18nLangContentFilter = (content, list) => {
+  if (!Array.isArray(list)) {
+    return {}
+  }
   let newContent = {};
   list.forEach((item) => {
     if (content[item]) {
