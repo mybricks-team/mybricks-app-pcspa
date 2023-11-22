@@ -216,19 +216,6 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     plugins: [
       servicePlugin(),
       localePlugin({
-        // visible: false,
-        // defaultPackLink: `https://unpkg.corp.kuaishou.com/@k18n/kibt-fe-shop-c-lang@1.1.97/language/k18n/index.json`,
-        // defaultTransform: (packData: any) => {
-        //   return packData.textList.map(item => {
-        //     return {
-        //       id: item.key,
-        //       content: packData.language.reduce((res, lang, index) => {
-        //         res[lang] = item.text[index]
-        //         return res
-        //       }, {})
-        //     }
-        //   })
-        // },
         onPackLoad: ({ i18nLangContent }) => {
           ctx.i18nLangContent = i18nLangContent
         },
