@@ -7,6 +7,8 @@ import servicePlugin, {
 import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-connector-domain'
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
+// import localePlugin from '../../../../../plugin-locale/src'
+import localePlugin from 'mybricks-plugin-locale'
 import { use as useTheme } from '@mybricks/plugin-theme';
 
 import { render as renderUI } from '@mybricks/render-web';
@@ -210,6 +212,11 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     },
     plugins: [
       servicePlugin(),
+      localePlugin({
+        onPackLoad: ({ i18nLangContent }) => {
+          ctx.i18nLangContent = i18nLangContent
+        }
+      }),
       ...remotePlugins,
       useTheme({ sdk: appData }),
       versionPlugin({
@@ -619,12 +626,11 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     com: {
       env: {
         i18n(title) {
-          const i18nLangContent = this.vars.i18nLangContent
-          if (typeof title?.id === 'undefined') return title
-          return i18nLangContent[title.id]?.content?.[
+          if (typeof title === 'string') return title
+          const i18nLangContent = ctx.i18nLangContent || {}
+          return i18nLangContent[title?.id]?.content?.[
             navigator.language
-            //'en'
-          ] || title
+          ] || String(title)
         },
         /** 调用领域模型 */
         callDomainModel(domainModel, type, params) {
@@ -679,10 +685,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             return () => ctx.executeEnv
           },
           get i18nLangContent() {
-            // 返回插件中的国际化文本数据
-            // 下面的内容需要避免每次掉用都计算
-            return {
-            }
+            return ctx.i18nLangContent || {}
           },
           get locale() {
             return {}

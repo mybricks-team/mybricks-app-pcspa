@@ -503,7 +503,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return json
   }, [JSON.stringify(ctx)])
-
+  window.designerRef = designerRef
   return (
     <div className={`${css.view} fangzhou-theme`}>
       <Toolbar
