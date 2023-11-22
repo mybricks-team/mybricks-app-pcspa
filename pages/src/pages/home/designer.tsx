@@ -68,7 +68,8 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }
 
-  const designer = './public/designer-spa/1.3.63/index.min.js'
+  // const designer = './public/designer-spa/1.3.54/index.min.js'
+  const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.63/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
@@ -102,7 +103,11 @@ export default function MyDesigner({ appData: originAppData }) {
       fileId: appData.fileId,
       setting: appData.config || {},
       hasMaterialApp: appData.hasMaterialApp,
-      comlibs,
+      // comlibs,
+      comlibs: [
+        `http://localhost:20000/comlib.js`,
+        `http://localhost:20001/comlib.js`,
+      ],
       latestComlibs: [],
       debugQuery: appData.fileContent?.content?.debugQuery,
       executeEnv,
@@ -169,11 +174,11 @@ export default function MyDesigner({ appData: originAppData }) {
   const isPreview = window.location.search.includes('version');
 
   //页面刷新的时候，添加fontJS资源
-  useEffect(()=>{
+  useEffect(() => {
     createFromIconfontCN({
       scriptUrl: ctx.fontJS, // 在 iconfont.cn 上生成
     });
-  },[ctx.fontJS])
+  }, [ctx.fontJS])
 
   useEffect(() => {
     const needSearchComlibs = comlibs.filter(lib => lib.id !== "_myself_");

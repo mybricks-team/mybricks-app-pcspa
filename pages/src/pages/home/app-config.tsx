@@ -222,19 +222,19 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         onInit: (versionApi) => {
           ctx.versionApi = versionApi
         },
-        onRevert: async (params: { pubAssetFilePath: string, nowVersion: string, fileId:number, type:string }) => {
+        onRevert: async (params: { pubAssetFilePath: string, nowVersion: string, fileId: number, type: string }) => {
           const { fileId, nowVersion, pubAssetFilePath, type } = params;
           try {
             const finish = message.loading('正在回滚...', 0);
             const res: { code: number, message: string } = await fAxios.post('/api/pcpage/rollback', { filePath: pubAssetFilePath, nowVersion, type, fileId });
             finish();
 
-            if(res.code === 1) {
+            if (res.code === 1) {
               message.success(res.message);
             } else {
               message.error("回滚失败！");
             }
-          } catch(e) {
+          } catch (e) {
             message.error("回滚失败！");
           }
         }
@@ -288,7 +288,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 return ctx.fileName
               },
               set: (context, v: any) => {
-                if(v !== ctx.fileName) {
+                if (v !== ctx.fileName) {
                   ctx.fileName = v
                 }
               },
@@ -618,24 +618,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     },
     com: {
       env: {
-        // renderCom(json, opts, coms) {
-        //   return renderUI(
-        //     json,
-        //     {
-        //       comDefs: { ...getComs(), ...coms },
-        //       // observable: window['rxui'].observable,
-        //       ...(opts || {}),
-        //       env: {
-        //         ...(opts?.env || {}),
-        //         edit: false,
-        //         runtime: true
-        //       }
-        //     }
-        //   )
-        // },
         i18n(title) {
-          //多语言
-          return title
+          const i18nLangContent = this.vars.i18nLangContent
+          if (typeof title?.id === 'undefined') return title
+          return i18nLangContent[title.id]?.content?.[navigator.language] || title
         },
         /** 调用领域模型 */
         callDomainModel(domainModel, type, params) {
@@ -688,6 +674,22 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         vars: {
           get getExecuteEnv() {
             return () => ctx.executeEnv
+          },
+          get i18nLangContent() {
+            // 返回插件中的国际化文本数据
+            // 下面的内容需要避免每次掉用都计算
+            return {
+              u_hQvPD: {
+                id: 'u_hQvPD',
+                content: {
+                  'zh-CN': '你好',
+                  'en': 'hello'
+                }
+              }
+            }
+          },
+          get locale() {
+            return {}
           },
           getQuery: () => ({ ...(ctx.debugQuery || {}) }),
           getProps: () => ({ ...(ctx.debugMainProps || {}) }),
