@@ -354,35 +354,7 @@ export const getRenderWeb = (renderType: 'react' | 'vue2' | 'vue3') => {
   return null;
 }
 
-//语料包筛选
-//content，语言包
-//list，用户选的语言key list
-// const content = {
-//   'u_WCZjt': {
-//     id: 'u_WCZjt',
-//     content: {
-//       'zh-CN': '你好',
-//       'en': 'hello'
-//     }
-//   },
-//   'x_zqWvf': {
-//     id: 'x_zqWvf',
-//     content: {
-//       'zh-CN': '苹果',
-//       'en': 'apple'
-//     }
-//   },
-//   'c_zqWvf': {
-//     id: 'c_zqWvf',
-//     content: {
-//       'zh-CN': '再见',
-//       'en': 'byebye'
-//     }
-//   },
-// }
-
-// const list = ['u_WCZjt', 'c_zqWvf']
-
+// 收集语料包中被用到的语料
 export const i18nLangContentFilter = (content, list) => {
   let newContent = {};
   list.forEach((item) => {
