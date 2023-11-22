@@ -8,6 +8,7 @@ import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-co
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
 // import localePlugin from '../../../../../plugin-locale/src'
+import { PcEditorMap } from '../../../packages/react/templates/public/editor-pc-common'
 import localePlugin from 'mybricks-plugin-locale'
 import { use as useTheme } from '@mybricks/plugin-theme';
 
@@ -217,7 +218,6 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           ctx.i18nLangContent = i18nLangContent
         },
         onUsedIdChanged: ({ ids }) => {
-          console.log('ids', ids)
           ctx.i18nUsedIdList = ids
         }
       }),
@@ -285,6 +285,21 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       editorAppender(editConfig) {
         editConfig.fontJS = ctx.fontJS;
         injectUpload(editConfig, ctx.uploadService, ctx.manateeUserInfo, ctx.fileId);
+
+        if (editConfig.type.toUpperCase() === 'TEXTAREA') {
+          const editor = PcEditorMap[editConfig.type.toUpperCase()] || editConfig.render;
+          return editor({ editConfig });
+        }
+        if (editConfig.type.toUpperCase() === 'ARRAY') {
+          const editor = PcEditorMap[editConfig.type.toUpperCase()] || editConfig.render;
+          return editor({ editConfig });
+        }
+        if (editConfig.type.toUpperCase() === 'ARRAYCHECKBOX') {
+          const editor = PcEditorMap[editConfig.type.toUpperCase()] || editConfig.render;
+          return editor({ editConfig });
+        }
+
+
         return;
       },
       items({ }, cate0, cate1, cate2) {

@@ -107,7 +107,7 @@ export default function MyDesigner({ appData: originAppData }) {
       // comlibs,
       comlibs: [
         `http://localhost:20000/comlib.js`,
-        //`http://localhost:20001/comlib.js`,
+        `http://localhost:20001/comlib.js`,
       ],
       latestComlibs: [],
       debugQuery: appData.fileContent?.content?.debugQuery,

@@ -1,6 +1,6 @@
 const path = require('path')
 const webpack = require('webpack')
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const pkg = require(path.join(__dirname, '../../../../package.json'))
 
 const appInfo = pkg.appConfig.react
@@ -56,6 +56,7 @@ module.exports = {
         amd: 'react-dom',
         root: 'ReactDOM',
       },
+      "@mybricks/rxui": "rxui",
       moment: 'moment',
       antd: 'antd',
       '@ant-design/icons': 'icons'
