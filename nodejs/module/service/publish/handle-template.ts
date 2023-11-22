@@ -40,7 +40,7 @@ export async function handleTemplate({
   }
 
   //语言包资源, 可以按需添加其他语言
-  localeScript += `<script src="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>`;
+  // localeScript += `<script src="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>`;
 
   Logger.info("[publish] 开始模板替换");
 
