@@ -20,6 +20,7 @@ import { unionBy } from 'lodash'
 import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
 import PublishModal, { EnumMode } from './components/PublishModal'
 import { createFromIconfontCN } from '@ant-design/icons';
+import { i18nLangContentFilter } from '../../utils/index'
 
 import css from './app.less'
 import { USE_CUSTOM_HOST } from './constants'
@@ -107,6 +108,8 @@ export default function MyDesigner({ appData: originAppData }) {
       debugQuery: appData.fileContent?.content?.debugQuery,
       executeEnv,
       envList,
+      i18nLangContent: {},
+      i18nUsedIdList: [],
       debugMode,
       directConnection: appData.fileContent?.content?.directConnection || false,
       MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
@@ -169,11 +172,11 @@ export default function MyDesigner({ appData: originAppData }) {
   const isPreview = window.location.search.includes('version');
 
   //页面刷新的时候，添加fontJS资源
-  useEffect(()=>{
+  useEffect(() => {
     createFromIconfontCN({
       scriptUrl: ctx.fontJS, // 在 iconfont.cn 上生成
     });
-  },[ctx.fontJS])
+  }, [ctx.fontJS])
 
   useEffect(() => {
     const needSearchComlibs = comlibs.filter(lib => lib.id !== "_myself_");
@@ -335,6 +338,7 @@ export default function MyDesigner({ appData: originAppData }) {
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
       hasPermissionFn: ctx.hasPermissionFn,
       appConfig: JSON.stringify(appConfig),
+      i18nLangContent: ctx.i18nLangContent
     })
 
     window.open(`./preview.html?fileId=${ctx.fileId}`)
@@ -368,6 +372,7 @@ export default function MyDesigner({ appData: originAppData }) {
           json.hasPermissionFn = ctx.hasPermissionFn
           json.debugHasPermissionFn = ctx.debugHasPermissionFn
           json.projectId = ctx.sdk.projectId;
+          json.i18nLangContent = i18nLangContentFilter(ctx.i18nLangContent, ctx.i18nUsedIdList)
 
           await ctx.save({ content: JSON.stringify(json), name: ctx.fileName }, true);
           setBeforeunload(false);
@@ -386,6 +391,7 @@ export default function MyDesigner({ appData: originAppData }) {
               publisherName: ctx.user?.name,
               projectId: ctx.sdk.projectId,
               envList: ctx.envList,
+              i18nLangContent: i18nLangContentFilter(ctx.i18nLangContent, ctx.i18nUsedIdList),
               // 非模块下的页面直接发布到项目空间下
               folderPath: '/app/pcpage',
               fileName: `${ctx.fileId}.html`,
@@ -484,7 +490,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return json
   }, [JSON.stringify(ctx)])
-
+  window.designerRef = designerRef
   return (
     <div className={`${css.view} fangzhou-theme`}>
       <Toolbar

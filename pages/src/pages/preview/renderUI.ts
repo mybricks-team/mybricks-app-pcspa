@@ -20,6 +20,7 @@ const {
   envList,
   MYBRICKS_HOST,
   directConnection,
+  i18nLangContent,
 } = previewStorage.getPreviewPageData();
 
 const root = ({ renderType, env, ...props }) => {
@@ -30,26 +31,11 @@ const root = ({ renderType, env, ...props }) => {
   return renderUI(dumpJson, {
     env: {
       ...env,
-      // renderCom(json, opts, coms) {
-      //   return renderUI(json, {
-      //     comDefs: { ...getComs(), ...coms },
-      //     // observable: window['rxui'].observable,
-      //     ...(opts || {}),
-      //     env: {
-      //       ...(opts?.env || {}),
-      //       edit: false,
-      //       runtime: true,
-      //     },
-      //   });
-      // },
       i18n(title) {
         //多语言
-        return title;
+        if (typeof title?.id === 'undefined') return title
+        return i18nLangContent[title.id]?.content?.[env.locale] || JSON.stringify(title)
       },
-      /** 调用领域模型 */
-      //   callDomainModel(domainModel, type, params) {
-      //     return callDomainHttp(domainModel, params, { action: type } as any);
-      //   },
       async callConnector(connector, params) {
         await connectorLoader(appConfig);
         const plugin =
@@ -67,32 +53,35 @@ const root = ({ renderType, env, ...props }) => {
           const curConnector = connector.script
             ? connector
             : (dumpJson.plugins[connector.connectorName] || []).find(
-                (con) => con.id === connector.id
-              );
+              (con) => con.id === connector.id
+            );
           return curConnector
             ? plugin.call(
-                { ...connector, ...curConnector, useProxy: !directConnection },
-                newParams,
-                {
-                  before: (options) => {
-                    return {
-                      ...options,
-                      url: shapeUrlByEnv(
-                        envList,
-                        executeEnv,
-                        options.url,
-                        MYBRICKS_HOST
-                      ),
-                    };
-                  },
-                }
-              )
+              { ...connector, ...curConnector, useProxy: !directConnection },
+              newParams,
+              {
+                before: (options) => {
+                  return {
+                    ...options,
+                    url: shapeUrlByEnv(
+                      envList,
+                      executeEnv,
+                      options.url,
+                      MYBRICKS_HOST
+                    ),
+                  };
+                },
+              }
+            )
             : Promise.reject("找不到对应连接器 Script 执行脚本.");
         } else {
           return Promise.reject("错误的连接器类型.");
         }
       },
       vars: {
+        get locale() {
+          return env.locale;
+        },
         get getExecuteEnv() {
           return () => executeEnv;
         },

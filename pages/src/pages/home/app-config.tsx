@@ -7,6 +7,7 @@ import servicePlugin, {
 import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-connector-domain'
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
+import localePlugin from 'mybricks-plugin-locale'
 import { use as useTheme } from '@mybricks/plugin-theme';
 
 import { render as renderUI } from '@mybricks/render-web';
@@ -201,6 +202,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     ])
   }
 
+  const getCurrentLocale = () => {
+    return `zh`
+  }
+
   return {
     debugger(json, opts) {
       return renderUI(json, opts)
@@ -210,6 +215,14 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     },
     plugins: [
       servicePlugin(),
+      localePlugin({
+        onPackLoad: ({ i18nLangContent }) => {
+          ctx.i18nLangContent = i18nLangContent
+        },
+        onUsedIdChanged: ({ ids }) => {
+          ctx.i18nUsedIdList = ids
+        }
+      }),
       ...remotePlugins,
       useTheme({ sdk: appData }),
       versionPlugin({
@@ -222,19 +235,19 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         onInit: (versionApi) => {
           ctx.versionApi = versionApi
         },
-        onRevert: async (params: { pubAssetFilePath: string, nowVersion: string, fileId:number, type:string }) => {
+        onRevert: async (params: { pubAssetFilePath: string, nowVersion: string, fileId: number, type: string }) => {
           const { fileId, nowVersion, pubAssetFilePath, type } = params;
           try {
             const finish = message.loading('正在回滚...', 0);
             const res: { code: number, message: string } = await fAxios.post('/api/pcpage/rollback', { filePath: pubAssetFilePath, nowVersion, type, fileId });
             finish();
 
-            if(res.code === 1) {
+            if (res.code === 1) {
               message.success(res.message);
             } else {
               message.error("回滚失败！");
             }
-          } catch(e) {
+          } catch (e) {
             message.error("回滚失败！");
           }
         }
@@ -288,7 +301,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 return ctx.fileName
               },
               set: (context, v: any) => {
-                if(v !== ctx.fileName) {
+                if (v !== ctx.fileName) {
                   ctx.fileName = v
                 }
               },
@@ -618,24 +631,11 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     },
     com: {
       env: {
-        // renderCom(json, opts, coms) {
-        //   return renderUI(
-        //     json,
-        //     {
-        //       comDefs: { ...getComs(), ...coms },
-        //       // observable: window['rxui'].observable,
-        //       ...(opts || {}),
-        //       env: {
-        //         ...(opts?.env || {}),
-        //         edit: false,
-        //         runtime: true
-        //       }
-        //     }
-        //   )
-        // },
         i18n(title) {
-          //多语言
-          return title
+          if (typeof title === 'string') return title
+          const i18nLangContent = ctx.i18nLangContent || {}
+          // 搭建页面使用中文
+          return i18nLangContent[title?.id]?.content?.[getCurrentLocale()] || JSON.stringify(title)
         },
         /** 调用领域模型 */
         callDomainModel(domainModel, type, params) {
@@ -688,6 +688,12 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         vars: {
           get getExecuteEnv() {
             return () => ctx.executeEnv
+          },
+          get i18nLangContent() {
+            return ctx.i18nLangContent || {}
+          },
+          get locale() {
+            return getCurrentLocale();
           },
           getQuery: () => ({ ...(ctx.debugQuery || {}) }),
           getProps: () => ({ ...(ctx.debugMainProps || {}) }),

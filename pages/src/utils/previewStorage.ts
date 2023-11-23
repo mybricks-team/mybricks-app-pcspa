@@ -9,7 +9,7 @@ export class PreviewStorage {
 
   getFileKeyTemplate = (fileId) => `--preview-${fileId}-`;
 
-  savePreviewPageData = ({ dumpJson, comlibs, hasPermissionFn, executeEnv, appConfig, envList, directConnection, MYBRICKS_HOST }) => {
+  savePreviewPageData = ({ dumpJson, comlibs, hasPermissionFn, executeEnv, appConfig, envList, MYBRICKS_HOST, directConnection, i18nLangContent }) => {
     sessionStorage.setItem(`--preview-${this.fileId}-`, JSON.stringify(dumpJson))
     sessionStorage.setItem(`--preview--comlibs--${this.fileId}-`, JSON.stringify(comlibs))
     sessionStorage.setItem(`--preview--hasPermissionFn--${this.fileId}-`, hasPermissionFn)
@@ -18,6 +18,7 @@ export class PreviewStorage {
     sessionStorage.setItem(`--preview--appConfig--${this.fileId}-`, appConfig)
     sessionStorage.setItem(`--preview--envList--${this.fileId}-`, JSON.stringify(envList))
     sessionStorage.setItem(`--preview--MYBRICKS_HOST--${this.fileId}-`, JSON.stringify(MYBRICKS_HOST))
+    sessionStorage.setItem(`--preview--i18nLangContent--${this.fileId}-`, JSON.stringify(i18nLangContent))
   }
 
   getPreviewPageData = () => {
@@ -29,8 +30,7 @@ export class PreviewStorage {
     let MYBRICKS_HOST
     let appConfig
     let envList = []
-
-
+    let i18nLangContent
 
     try {
       dumpJson = JSON.parse(dumpJson)
@@ -60,6 +60,12 @@ export class PreviewStorage {
     }
 
     try {
+      i18nLangContent = JSON.parse(sessionStorage.getItem(`--preview--i18nLangContent--${this.fileId}-`))
+    } catch (ex) {
+      throw ex
+    }
+
+    try {
       comlibs = JSON.parse(comlibs)
     } catch (error) {
 
@@ -76,6 +82,7 @@ export class PreviewStorage {
       MYBRICKS_HOST,
       envList,
       directConnection,
+      i18nLangContent
     }
   }
 }

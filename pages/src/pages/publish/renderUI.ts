@@ -7,14 +7,21 @@ const projectJson = "--projectJson--";
 const projectId = "--slot-project-id--";
 const executeEnv = "--executeEnv--";
 const envList = "--envList--";
+const i18nLangContent = "--i18nLangContent--";
 
-const root = ({ renderType, ...props }) => {
+const root = ({ renderType, locale, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   return renderUI(projectJson, {
     env: {
       silent: true,
       showErrorNotification: false,
       canvasElement: props?.canvasElement || props.container || document.body,
+      i18n(title) {
+        //多语言
+        if (typeof title?.id === 'undefined') return title
+        return i18nLangContent[title.id]?.content?.[locale] || JSON.stringify(title)
+        //return title;
+      },
       get vars() {
         // 环境变量
         return {
@@ -25,6 +32,10 @@ const root = ({ renderType, ...props }) => {
             return () => {
               return parseQuery(location.search);
             };
+          },
+          //antd 语言包地址
+          get locale() {
+            return locale
           },
           get getProps() {
             // 获取主应用参数方法，如：token等参数，取决于主应用传入
@@ -121,23 +132,23 @@ const root = ({ renderType, ...props }) => {
           const curConnector = connector.script
             ? connector
             : (projectJson.plugins[connector.connectorName] || []).find(
-                (con) => con.id === connector.id
-              );
+              (con) => con.id === connector.id
+            );
 
           return curConnector
             ? plugin.call({ ...connector, ...curConnector }, newParams, {
-                before: (options) => {
-                  return {
-                    ...options,
-                    url: shapeUrlByEnv(
-                      envList,
-                      executeEnv,
-                      options.url,
-                      MYBRICKS_HOST
-                    ),
-                  };
-                },
-              })
+              before: (options) => {
+                return {
+                  ...options,
+                  url: shapeUrlByEnv(
+                    envList,
+                    executeEnv,
+                    options.url,
+                    MYBRICKS_HOST
+                  ),
+                };
+              },
+            })
             : Promise.reject("找不到对应连接器 Script 执行脚本.");
         } else {
           return Promise.reject("错误的连接器类型.");
