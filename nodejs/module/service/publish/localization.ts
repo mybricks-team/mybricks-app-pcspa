@@ -118,8 +118,6 @@ async function resourceLocalization(
 
   template = template.replace("-- public --", publicHtmlStr);
 
-  Logger.info(`[template] 发布模版 ${template}`)
-
   Logger.info(`[localPublicInfos] 发布资源 ${localPublicInfos}`)
 
   let globalDeps: ILocalizationInfo[] = null;

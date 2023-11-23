@@ -1,5 +1,6 @@
 import { APPType } from "../../types";
 import API from "@mybricks/sdk-for-app/api";
+import { Logger } from "@mybricks/rocker-commons";
 
 type Component = {
   namespace: string;
@@ -12,8 +13,8 @@ const getComponentFromMaterial = (component: Component): Promise<Component> => {
   return API.Material.getMaterialContent({
     namespace: component.namespace,
     version: component.version,
-  }).then(({ data }) => {
-    const { version, namespace, runtime } = data.data;
+  }).then((data) => {
+    const { version, namespace, runtime } = data;
     return {
       version,
       namespace,
@@ -31,20 +32,21 @@ export const generateComLib = async (
   let script = "";
 
   for (const component of deps) {
-    let curComponent = await getComponentFromMaterial(component);
+    let curComponent = await getComponentFromMaterial(component).catch((err) => { });
     if (!curComponent) {
+      Logger.warn(`[getMaterialContent] 物料中心获取组件${component.namespace}失败，开始从rtComs获取……`)
       let lib = allComLibs.find(
         (lib) =>
-          lib.componentRuntimeMap[component.namespace + "@" + component.version]
+          lib.componentRuntimeMap && lib.componentRuntimeMap[component.namespace + "@" + component.version]
       );
       if (lib) {
         curComponent =
           lib.componentRuntimeMap[
-            component.namespace + "@" + component.version
+          component.namespace + "@" + component.version
           ];
       } else {
         lib = allComLibs.find((lib) =>
-          Object.keys(lib.componentRuntimeMap).find((key) =>
+          Object.keys(lib.componentRuntimeMap ?? {}).find((key) =>
             key.startsWith(component.namespace)
           )
         );
@@ -60,9 +62,9 @@ export const generateComLib = async (
         }
         curComponent =
           lib.componentRuntimeMap[
-            Object.keys(lib.componentRuntimeMap).find((key) =>
-              key.startsWith(component.namespace)
-            )
+          Object.keys(lib.componentRuntimeMap ?? {}).find((key) =>
+            key.startsWith(component.namespace)
+          )
           ];
       }
 
@@ -102,15 +104,13 @@ export const generateComLib = async (
 
     script += component.isCloud
       ? `
-			comAray.push({ namespace: '${component.namespace}', version: '${
-          curComponent.version
-        }', runtime: ${decodeURIComponent(componentRuntime)} });
+			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
+      }', runtime: ${decodeURIComponent(componentRuntime)} });
 		`
       : `
 			eval(${JSON.stringify(decodeURIComponent(componentRuntime))});
-			comAray.push({ namespace: '${component.namespace}', version: '${
-          curComponent.version
-        }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
+			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
+      }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
 			if(Reflect.has(window, 'fangzhouComDef')) Reflect.deleteProperty(window, 'fangzhouComDef');
 			if(Reflect.has(window, 'MybricksComDef')) Reflect.deleteProperty(window, 'MybricksComDef');
 		`;
