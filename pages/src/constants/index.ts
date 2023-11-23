@@ -23,7 +23,8 @@ export const PC_NORMAL_COM_LIB = {
   namespace: 'mybricks.normal-pc',
   editJs: "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
   rtJs: "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
-  version: '1.2.19'
+  version: '1.2.19',
+  legacy: true
 }
 
 export const CHARS_COM_LIB = {
@@ -31,7 +32,8 @@ export const CHARS_COM_LIB = {
   namespace: 'mybricks.normal-pc-chart',
   editJs: 'public/comlibs/5952_1.0.1/2023-07-25_22-02-32/edit.js',
   rtJs: 'public/comlibs/5952_1.0.1/2023-07-25_22-02-32/rt.js',
-  version: '1.0.1'
+  version: '1.0.1',
+  legacy: true
 }
 
 export const BASIC_COM_LIB = {
@@ -39,7 +41,8 @@ export const BASIC_COM_LIB = {
   namespace: 'mybricks.basic-comlib',
   editJs: 'public/comlibs/7182_1.0.29/2023-07-25_22-04-55/edit.js',
   rtJs: 'public/comlibs/7182_1.0.29/2023-07-25_22-04-55/rt.js',
-  version: '1.0.29'
+  version: '1.0.29',
+  legacy: true
 }
 
 export const MySelf_COM_LIB = {

@@ -27,6 +27,9 @@ export const upgradeLatestComlib = async (ctx: Record<string, any>, comlib: Reco
 }
 
 export const upgradeComlibByVersion = async (ctx: Record<string, any>, comlib: Record<string, any>) => {
+    if(comlib.hasOwnProperty){
+        Reflect.deleteProperty(comlib, 'legacy')
+    }
     const { id, namespace } = comlib;
     if(!namespace) return message.error('缺少物料namespace')
     const index = ctx.comlibs.findIndex((lib) => namespace===lib.namespace)
