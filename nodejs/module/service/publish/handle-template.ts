@@ -56,7 +56,7 @@ export async function handleTemplate({
       `"--slot-project-id--"`,
       projectId ? projectId : JSON.stringify(null)
     )
-    .replace(`"--localeScript--"`, JSON.stringify(localeScript));
+    .replace(`--localeScript--`, JSON.stringify(localeScript));
 
   Logger.info("[publish] 模板替换完成");
 
