@@ -8,6 +8,7 @@ import {
 import { runJs } from "@/utils/runJs";
 import { connectorLoader } from "@/utils/connectorLoader";
 import { PreviewStorage } from "@/utils/previewStorage";
+import { mock as connectorHttpMock } from '@mybricks/plugin-connector-http'
 
 const fileId = getQueryString("fileId");
 const USE_CUSTOM_HOST = "__USE_CUSTOM_HOST__";
@@ -36,7 +37,7 @@ const root = ({ renderType, env, ...props }) => {
         if (typeof title?.id === 'undefined') return title
         return i18nLangContent[title.id]?.content?.[env.locale] || JSON.stringify(title)
       },
-      async callConnector(connector, params) {
+      async callConnector(connector, params, connectorConfig) {
         await connectorLoader(appConfig);
         const plugin =
           window[connector.connectorName] ||
@@ -55,6 +56,11 @@ const root = ({ renderType, env, ...props }) => {
             : (dumpJson.plugins[connector.connectorName] || []).find(
               (con) => con.id === connector.id
             );
+
+          if (curConnector?.globalMock || connectorConfig?.openMock) {
+            return connectorHttpMock({ ...connector, outputSchema: connectorConfig.mockSchema }, {});
+          }
+
           return curConnector
             ? plugin.call(
               { ...connector, ...curConnector, useProxy: !directConnection },
