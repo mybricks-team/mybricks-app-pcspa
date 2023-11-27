@@ -7,6 +7,7 @@ type Component = {
   version: string;
   runtime?: string;
   isCloud?: boolean;
+  deps?: Component[]
 };
 
 const getComponentFromMaterial = (component: Component): Promise<Component> => {
@@ -14,10 +15,11 @@ const getComponentFromMaterial = (component: Component): Promise<Component> => {
     namespace: component.namespace,
     version: component.version,
   }).then((data) => {
-    const { version, namespace, runtime } = data;
+    const { version, namespace, runtime, deps } = data;
     return {
       version,
       namespace,
+      deps,
       runtime: encodeURIComponent(runtime),
     };
   });
@@ -30,9 +32,15 @@ export const generateComLib = async (
 ) => {
   const { comLibId, noThrowError, appType = APPType.React } = options;
   let script = "";
-
-  for (const component of deps) {
+  const componentModules = [...deps]
+  const componentCache: Component[] = [];
+  for (const component of componentModules) {
+    const hasCache = componentCache.find((item) => item.namespace===component.namespace && item.version===component.version);
+    if(hasCache) continue;
     let curComponent = await getComponentFromMaterial(component).catch((err) => { });
+    if(curComponent?.deps) {
+      componentModules.push(...curComponent.deps)
+    }
     if (!curComponent) {
       Logger.warn(`[getMaterialContent] 物料中心获取组件${component.namespace}失败，开始从rtComs获取……`)
       let lib = allComLibs.find(
@@ -78,6 +86,8 @@ export const generateComLib = async (
         }
       }
     }
+
+    componentCache.push(curComponent)
 
     let componentRuntime = "";
     switch (true) {
@@ -139,18 +149,11 @@ export async function generateComLibRT(
   json,
   { fileId, noThrowError, app_type }
 ) {
-  /**
-   * "我的组件"集合，标记为云组件
-   */
-  const mySelfComMap = [];
+  const mySelfComMap: Record<string, boolean> = {};
   comlibs.forEach((comlib) => {
     if (comlib?.defined && Array.isArray(comlib.comAray)) {
       comlib.comAray.forEach(({ namespace, version }) => {
-        mySelfComMap.push({
-          namespace,
-          version,
-          isCloud: true,
-        });
+        mySelfComMap[`${namespace}@${version}`] = true
       });
     }
   });
@@ -198,13 +201,20 @@ export async function generateComLibRT(
     ...modulesDeps
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
-    ...mySelfComMap,
   ];
+
+  const cloudNamespaceList = Object.keys(mySelfComMap)
 
   deps = deps.reduce((accumulator, current) => {
     const existingObject = accumulator.find(
-      (obj) => obj.namespace === current.namespace
+      (obj) => obj.namespace === current.namespace && obj.version === current.version
     );
+    /**
+   * "我的组件"集合，标记为云组件
+   */
+    if(cloudNamespaceList.includes(`${current.namespace}@${current.version}`)){
+      current.isCloud = true
+    }
     if (!existingObject) {
       accumulator.push(current);
     }

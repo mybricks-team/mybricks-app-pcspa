@@ -143,13 +143,12 @@ const root = ({ renderType, ...props }) => {
           return Promise.reject("错误的连接器类型.");
         }
       },
-      // renderCom(json, opts, coms) {
-      //   return renderUI(json, {
-      //     comDefs: { ...getComs(), ...coms },
-      //     // observable: window['rxui'].observable,
-      //     ...(opts || {}),
-      //   });
-      // },
+      renderCom(json, opts, coms) {
+        return renderUI(json, {
+          comDefs: { ...getComs(), ...coms },
+          ...(opts || {}),
+        });
+      },
       get hasPermission() {
         return ({ permission, key }) => {
           if (!projectJson?.hasPermissionFn) {
