@@ -37,7 +37,7 @@ const root = ({ renderType, env, ...props }) => {
         if (typeof title?.id === 'undefined') return title
         return i18nLangContent[title.id]?.content?.[env.locale] || JSON.stringify(title)
       },
-      async callConnector(connector, params, connectorConfig) {
+      async callConnector(connector, params, connectorConfig = {}) {
         await connectorLoader(appConfig);
         const plugin =
           window[connector.connectorName] ||
@@ -66,6 +66,7 @@ const root = ({ renderType, env, ...props }) => {
               { ...connector, ...curConnector, useProxy: !directConnection },
               newParams,
               {
+                ...connectorConfig,
                 before: (options) => {
                   return {
                     ...options,

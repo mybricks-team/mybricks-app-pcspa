@@ -665,6 +665,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               { ...connector, script: connector.script, useProxy: !ctx.directConnection },
               newParams,
               {
+                ...connectorConfig,
                 before: options => {
                   return {
                     ...options,
