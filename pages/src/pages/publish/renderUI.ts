@@ -102,7 +102,7 @@ const root = ({ renderType, locale, ...props }) => {
           },
         });
       },
-      callConnector(connector, params) {
+      callConnector(connector, params, connectorConfig = {}) {
         const plugin =
           window[connector.connectorName] ||
           window["@mybricks/plugins/service"];
@@ -137,6 +137,7 @@ const root = ({ renderType, locale, ...props }) => {
 
           return curConnector
             ? plugin.call({ ...connector, ...curConnector }, newParams, {
+              ...connectorConfig,
               before: (options) => {
                 return {
                   ...options,
