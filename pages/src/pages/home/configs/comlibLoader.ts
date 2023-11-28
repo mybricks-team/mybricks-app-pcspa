@@ -105,8 +105,7 @@ export default (ctx) => (libDesc) => {
                 content: '物料加载中……',
                 duration: 200,
               })
-              const component = await MaterialService.getMateralMaterialInfo({ namespace: comNamespace })
-              closeLoad()
+              const component = await MaterialService.getMateralMaterialInfo({ namespace: comNamespace }).finally(()=>closeLoad())
               if (component.version === com.version) {
                 message.warn('当前组件已经是最新版本了～')
                 return
