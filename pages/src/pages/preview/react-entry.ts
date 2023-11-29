@@ -15,98 +15,96 @@ const previewStorage = new PreviewStorage({ fileId })
 let { dumpJson, comlibs } = previewStorage.getPreviewPageData()
 
 if (!dumpJson) {
-    throw new Error('数据错误：项目数据缺失')
+  throw new Error('数据错误：项目数据缺失')
 }
 
 if (!comlibs) {
-    console.warn('数据错误: 组件库缺失')
-    comlibs = [PC_NORMAL_COM_LIB.rtJs, CHARS_COM_LIB.rtJs, BASIC_COM_LIB.rtJs]
+  console.warn('数据错误: 组件库缺失')
+  comlibs = [PC_NORMAL_COM_LIB.rtJs, CHARS_COM_LIB.rtJs, BASIC_COM_LIB.rtJs]
 }
 
 function cssVariable(dumpJson) {
-    const themes = dumpJson?.plugins?.['@mybricks/plugins/theme/use']?.themes
-    if (Array.isArray(themes)) {
-        themes.forEach(({ namespace, content }) => {
-            const variables = content?.variables
+  const themes = dumpJson?.plugins?.['@mybricks/plugins/theme/use']?.themes
+  if (Array.isArray(themes)) {
+    themes.forEach(({ namespace, content }) => {
+      const variables = content?.variables
 
-            if (Array.isArray(variables)) {
-                const style = document.createElement('style')
-                style.id = namespace
-                let innerHTML = ''
+      if (Array.isArray(variables)) {
+        const style = document.createElement('style')
+        style.id = namespace
+        let innerHTML = ''
 
-                variables.forEach(({ configs }) => {
-                    if (Array.isArray(configs)) {
-                        configs.forEach(({ key, value }) => {
-                            innerHTML = innerHTML + `${key}: ${value};\n`
-                        })
-                    }
-                })
-
-                style.innerHTML = `:root {\n${innerHTML}}`
-                document.body.appendChild(style)
-            }
+        variables.forEach(({ configs }) => {
+          if (Array.isArray(configs)) {
+            configs.forEach(({ key, value }) => {
+              innerHTML = innerHTML + `${key}: ${value};\n`
+            })
+          }
         })
-    }
+
+        style.innerHTML = `:root {\n${innerHTML}}`
+        document.body.appendChild(style)
+      }
+    })
+  }
 }
 
 cssVariable(dumpJson)
 
 let reactRoot
 
+
+const getAntdLocalName = (locale) => {
+  const localeArr = locale.split('-');
+  const lang = localeArr.pop()?.toUpperCase();
+  return localeArr.concat(['_', lang as string]).join('');
+}
+
+const getCurrentLocale = () => {
+  return navigator.language
+}
+
 function render(props) {
-    const { container } = props;
-    if (comlibs && Array.isArray(comlibs)) {
-        Promise.all(comlibs.map((t) => requireScript(t))).then(() => {
-            // ReactDOM.render(
-            //     React.createElement(
-            //         antd.ConfigProvider,
-            //         {
-            //             locale: antd.locale['zh_CN'].default,
-            //         },
-            //         renderUI({
-            //             ...props, renderType: 'react', env: {
-            //                 callDomainModel(domainModel, type, params) {
-            //                     return callDomainHttp(domainModel, params, { action: type } as any);
-            //                 }
-            //             }
-            //         })
-            //     ),
-            //     (container ?? document).querySelector('#root')
-            // )
+  const { container } = props;
+  if (comlibs && Array.isArray(comlibs)) {
+    Promise.all(comlibs.map((t) => requireScript(t))).then(() => {
+      const antdLocalLib = antd?.locale[getAntdLocalName(getCurrentLocale())]?.default
 
-            reactRoot = ReactDOM.createRoot((container ?? document).querySelector('#root'));
+      reactRoot = ReactDOM.createRoot((container ?? document).querySelector('#root'));
 
-            reactRoot.render(React.createElement(
-                antd.ConfigProvider,
-                {
-                    locale: antd.locale['zh_CN'].default,
-                },
-                renderUI({
-                    ...props, renderType: 'react', env: {
-                        callDomainModel(domainModel, type, params) {
-                            return callDomainHttp(domainModel, params, { action: type } as any);
-                        }
-                    }
-                })
-            ));
+      reactRoot.render(React.createElement(
+        antd.ConfigProvider,
+        {
+          // 如鬼哦没有因为就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
+          locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale())) ? undefined : (antdLocalLib || antd.locale['zh_CN'].default)
+        },
+        renderUI({
+          ...props, renderType: 'react', env: {
+            callDomainModel(domainModel, type, params) {
+              return callDomainHttp(domainModel, params, { action: type } as any);
+            },
+            locale: getCurrentLocale()
+          }
         })
-    }
+      ));
+    })
+  }
 }
 
 if (!window.__POWERED_BY_QIANKUN__) {
-    render({});
+  render({});
 }
 
 export async function bootstrap() {
-    console.log('react app bootstrap');
+  console.log('react app bootstrap');
 }
 
 export async function mount(props) {
-    render(props);
+  render(props);
 }
 
 export async function unmount(props) {
-    const { container } = props;
-    // ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#root'));
-    reactRoot.unmount();
+  const { container } = props;
+  // ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#root'));
+  reactRoot.unmount();
 }

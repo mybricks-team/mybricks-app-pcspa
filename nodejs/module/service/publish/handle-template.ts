@@ -11,12 +11,15 @@ export async function handleTemplate({
   envList,
   projectId,
   version,
+  i18nLangContent
 }) {
   const themesStyleStr = genThemesStyleStr(json);
 
   let comLibRtScript = "";
   let needCombo = false;
   let hasOldComLib = false;
+  //语言包
+  let localeScript = "";
 
   comlibs.forEach((lib) => {
     /** 旧组件库，未带组件 runtime 描述文件 */
@@ -36,6 +39,9 @@ export async function handleTemplate({
     needCombo = true;
   }
 
+  //语言包资源, 可以按需添加其他语言
+  // localeScript += `<script src="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>`;
+
   Logger.info("[publish] 开始模板替换");
 
   template = template
@@ -45,10 +51,12 @@ export async function handleTemplate({
     .replace(`"--projectJson--"`, JSON.stringify(transform(json)))
     .replace(`"--executeEnv--"`, JSON.stringify(envType))
     .replace(`"--envList--"`, JSON.stringify(envList))
+    .replace(`"--i18nLangContent--"`, JSON.stringify(i18nLangContent))
     .replace(
       `"--slot-project-id--"`,
       projectId ? projectId : JSON.stringify(null)
-    );
+    )
+    .replace(`--localeScript--`, JSON.stringify(localeScript));
 
   Logger.info("[publish] 模板替换完成");
 

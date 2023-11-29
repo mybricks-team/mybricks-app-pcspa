@@ -353,3 +353,17 @@ export const getRenderWeb = (renderType: 'react' | 'vue2' | 'vue3') => {
   if (renderType === 'vue3') return window._mybricks_render_web_vue3.render;
   return null;
 }
+
+// 收集语料包中被用到的语料
+export const i18nLangContentFilter = (content, list) => {
+  if (!Array.isArray(list)) {
+    return {}
+  }
+  let newContent = {};
+  list.forEach((item) => {
+    if (content[item]) {
+      newContent[item] = content[item]
+    }
+  })
+  return newContent;
+}

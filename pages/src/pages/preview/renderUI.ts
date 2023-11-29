@@ -8,6 +8,7 @@ import {
 import { runJs } from "@/utils/runJs";
 import { connectorLoader } from "@/utils/connectorLoader";
 import { PreviewStorage } from "@/utils/previewStorage";
+import { mock as connectorHttpMock } from '@mybricks/plugin-connector-http'
 
 const fileId = getQueryString("fileId");
 const USE_CUSTOM_HOST = "__USE_CUSTOM_HOST__";
@@ -20,6 +21,7 @@ const {
   envList,
   MYBRICKS_HOST,
   directConnection,
+  i18nLangContent,
 } = previewStorage.getPreviewPageData();
 
 const root = ({ renderType, env, ...props }) => {
@@ -44,13 +46,10 @@ const root = ({ renderType, env, ...props }) => {
       },
       i18n(title) {
         //多语言
-        return title;
+        if (typeof title?.id === 'undefined') return title
+        return i18nLangContent[title.id]?.content?.[env.locale] || JSON.stringify(title)
       },
-      /** 调用领域模型 */
-      //   callDomainModel(domainModel, type, params) {
-      //     return callDomainHttp(domainModel, params, { action: type } as any);
-      //   },
-      async callConnector(connector, params) {
+      async callConnector(connector, params, connectorConfig = {}) {
         await connectorLoader(appConfig);
         const plugin =
           window[connector.connectorName] ||
@@ -67,32 +66,41 @@ const root = ({ renderType, env, ...props }) => {
           const curConnector = connector.script
             ? connector
             : (dumpJson.plugins[connector.connectorName] || []).find(
-                (con) => con.id === connector.id
-              );
+              (con) => con.id === connector.id
+            );
+
+          if (curConnector?.globalMock || connectorConfig?.openMock) {
+            return connectorHttpMock({ ...connector, outputSchema: connectorConfig.mockSchema }, {});
+          }
+
           return curConnector
             ? plugin.call(
-                { ...connector, ...curConnector, useProxy: !directConnection },
-                newParams,
-                {
-                  before: (options) => {
-                    return {
-                      ...options,
-                      url: shapeUrlByEnv(
-                        envList,
-                        executeEnv,
-                        options.url,
-                        MYBRICKS_HOST
-                      ),
-                    };
-                  },
-                }
-              )
+              { ...connector, ...curConnector, useProxy: !directConnection },
+              newParams,
+              {
+                ...connectorConfig,
+                before: (options) => {
+                  return {
+                    ...options,
+                    url: shapeUrlByEnv(
+                      envList,
+                      executeEnv,
+                      options.url,
+                      MYBRICKS_HOST
+                    ),
+                  };
+                },
+              }
+            )
             : Promise.reject("找不到对应连接器 Script 执行脚本.");
         } else {
           return Promise.reject("错误的连接器类型.");
         }
       },
       vars: {
+        get locale() {
+          return env.locale;
+        },
         get getExecuteEnv() {
           return () => executeEnv;
         },
