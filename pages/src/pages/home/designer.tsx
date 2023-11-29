@@ -25,7 +25,7 @@ import { USE_CUSTOM_HOST } from './constants'
 import { getLibsFromConfig } from '../../utils/getComlibs'
 
 const msgSaveKey = 'save'
-const designer = './public/designer-spa/1.3.63/index.min.js'
+const designer = './public/designer-spa/1.3.65-v2/index.min.js'
 
 export default function MyDesigner({ appData: originAppData }) {
   const appData = useMemo(() => {
