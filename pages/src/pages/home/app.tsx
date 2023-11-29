@@ -4,6 +4,8 @@ import {View} from '@mybricks/sdk-for-app/ui'
 
 import Designer from './designer'
 
+import './prerender'
+
 import '@/reset.less'
 
 export default function App() {
