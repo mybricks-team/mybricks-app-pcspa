@@ -10,7 +10,7 @@ type Component = {
   deps?: Component[]
 };
 
-const getComponentFromMaterial = (component: Component): Promise<Component> => {
+const getComponentFromMaterial = (component: Component): Promise<Component | unknown> => {
   return API.Material.getMaterialContent({
     namespace: component.namespace,
     version: component.version,
@@ -23,7 +23,7 @@ const getComponentFromMaterial = (component: Component): Promise<Component> => {
       isCloud: isCloudComponent,
       runtime: encodeURIComponent(runtime),
     };
-  });
+  }).catch((err) => { });
 };
 
 export const generateComLib = async (
@@ -36,10 +36,10 @@ export const generateComLib = async (
   const componentModules = [...deps]
   const componentCache: Component[] = [];
   for (const component of componentModules) {
-    const hasCache = componentCache.find((item) => item.namespace===component.namespace && item.version===component.version);
-    if(hasCache) continue;
-    let curComponent = await getComponentFromMaterial(component).catch((err) => { });
-    if(curComponent?.deps) {
+    const hasCache = componentCache.find((item) => item.namespace === component.namespace && item.version === component.version);
+    if (hasCache) continue;
+    let curComponent = await getComponentFromMaterial(component);
+    if (curComponent?.deps) {
       componentModules.push(...curComponent.deps)
     }
     if (!curComponent) {
@@ -214,7 +214,7 @@ export async function generateComLibRT(
     /**
    * "我的组件"集合，标记为云组件
    */
-    if(cloudNamespaceList.includes(`${current.namespace}@${current.version}`)){
+    if (cloudNamespaceList.includes(`${current.namespace}@${current.version}`)) {
       current.isCloud = true
     }
     if (!existingObject) {
