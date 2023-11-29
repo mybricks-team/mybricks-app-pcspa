@@ -15,11 +15,12 @@ const getComponentFromMaterial = (component: Component): Promise<Component> => {
     namespace: component.namespace,
     version: component.version,
   }).then((data) => {
-    const { version, namespace, runtime, deps } = data;
+    const { version, namespace, runtime, isCloudComponent, deps } = data;
     return {
       version,
       namespace,
       deps,
+      isCloud: isCloudComponent,
       runtime: encodeURIComponent(runtime),
     };
   });
@@ -88,6 +89,7 @@ export const generateComLib = async (
     }
 
     componentCache.push(curComponent)
+    const isCloudComponent = component.isCloud || curComponent.isCloud
 
     let componentRuntime = "";
     switch (true) {
@@ -112,7 +114,7 @@ export const generateComLib = async (
       }
     }
 
-    script += component.isCloud
+    script += isCloudComponent
       ? `
 			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
       }', runtime: ${decodeURIComponent(componentRuntime)} });
