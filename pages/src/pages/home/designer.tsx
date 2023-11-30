@@ -311,15 +311,8 @@ export default function MyDesigner({ appData: originAppData }) {
     // 保存缩略图
     await API.App.getPreviewImage({ // Todo... name 中文乱码
       element: designerRef.current?.geoView.canvasDom,
-    }).then(async (res) => {
-      // 由于 API 返回的不是完整路径，路径得自己拼 (本地这里拼出来的地址是错的，线上正常)
-      const url = new URL(`${location.origin}${res}`)
-
-      if (url.protocol === 'https:') {
-        url.protocol = 'http:'
-      }
-
-      await ctx.save({ icon: url.href }, true)
+    }).then(async (url) => {
+      await ctx.save({ icon: url }, true)
     }).catch((err) => {
       console.error(err)
     })
