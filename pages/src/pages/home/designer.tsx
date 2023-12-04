@@ -25,7 +25,7 @@ import { USE_CUSTOM_HOST } from './constants'
 import { getLibsFromConfig } from '../../utils/getComlibs'
 
 const msgSaveKey = 'save'
-const designer = './public/designer-spa/1.3.65-v2/index.min.js'
+const designer = './public/designer-spa/1.3.66-v1/index.min.js'
 
 export default function MyDesigner({ appData: originAppData }) {
   const appData = useMemo(() => {
@@ -272,11 +272,12 @@ export default function MyDesigner({ appData: originAppData }) {
     await ctx.save({ name: ctx.fileName, content: JSON.stringify(json) })
 
     setBeforeunload(false)
-
+    // 保存缩略图
     await API.App.getPreviewImage({ // Todo... name 中文乱码
       element: designerRef.current?.geoView.canvasDom,
     }).then(async (res) => {
-      const url = new URL(res)
+      // 由于 API 返回的不是完整路径，路径得自己拼 (本地这里拼出来的地址是错的，线上正常)
+      const url = new URL(`${location.origin}${res}`)
 
       if (url.protocol === 'https:') {
         url.protocol = 'http:'
