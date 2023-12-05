@@ -16,6 +16,9 @@ export const upgradeLatestComlib = async (ctx: Record<string, any>, comlib: Reco
             Promise.reject(error)
         })
         ctx.comlibs[index] = {...ctx.comlibs[index], version: latestComlib.version, editJs, rtJs, id, coms}
+        if(ctx.comlibs[index].hasOwnProperty('legacy')){
+            Reflect.deleteProperty( ctx.comlibs[index], 'legacy')
+        }
         const loadedComlib = window[COMLIBS_EDIT].find(lib => lib.namespace===namespace);
         loadedComlib.id = id;
         loadedComlib._styleAry = styles;
@@ -27,7 +30,7 @@ export const upgradeLatestComlib = async (ctx: Record<string, any>, comlib: Reco
 }
 
 export const upgradeComlibByVersion = async (ctx: Record<string, any>, comlib: Record<string, any>) => {
-    if(comlib.hasOwnProperty){
+    if(comlib.hasOwnProperty('legacy')){
         Reflect.deleteProperty(comlib, 'legacy')
     }
     const { id, namespace } = comlib;

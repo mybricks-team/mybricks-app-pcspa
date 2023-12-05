@@ -4,11 +4,12 @@ import {
   CHARS_COM_LIB,
   BASIC_COM_LIB,
 } from "../constants";
+import { compareVersions } from "compare-versions";
 const legacyLibs =
   APP_TYPE === "react" ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : [];
 
 const getLibsFromConfig = (appData: Record<string, any>) => {
-  const libs = [];
+  let libs = [];
   if (appData?.defaultComlibs?.length) {
     appData?.defaultComlibs.forEach((lib) => {
       const { namespace, content, version } = lib;
@@ -37,7 +38,21 @@ const getLibsFromConfig = (appData: Record<string, any>) => {
     libs.unshift(myselfLib);
     return libs;
   } else {
-    return appData.fileContent?.content?.comlibs;
+    libs = appData.fileContent?.content?.comlibs.map((lib) => {
+      if (lib.id === "_myself_") return lib;
+      try {
+        const legacyLib = legacyLibs.find(
+          ({ namespace }) => lib.namespace === namespace
+        );
+        if (legacyLib && compareVersions(legacyLib.version, lib.version) >= 0) {
+          lib.legacy = true;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+      return lib;
+    });
+    return libs;
   }
 };
 
