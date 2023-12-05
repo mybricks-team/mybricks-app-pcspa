@@ -1,31 +1,83 @@
-import axios from "axios";
 import { APPType } from "../../types";
 import API from "@mybricks/sdk-for-app/api";
-export const generateComLib = (
+import { Logger } from "@mybricks/rocker-commons";
+
+type Component = {
+  namespace: string;
+  version: string;
+  runtime?: string;
+  isCloud?: boolean;
+  deps?: Component[]
+};
+
+const getComponentFromMaterial = (component: Component): Promise<Component | unknown> => {
+  return API.Material.getMaterialContent({
+    namespace: component.namespace,
+    version: component.version,
+  }).then((data) => {
+    const { version, namespace, runtime, isCloudComponent, deps } = data;
+    return {
+      version,
+      namespace,
+      deps,
+      isCloud: isCloudComponent,
+      runtime: encodeURIComponent(runtime),
+    };
+  }).catch((err) => { });
+};
+
+export const generateComLib = async (
   allComLibs: any[],
-  allComponents: any[],
+  deps: Component[],
   options: { comLibId: number; noThrowError: boolean; appType: APPType }
 ) => {
   const { comLibId, noThrowError, appType = APPType.React } = options;
   let script = "";
-
-  allComponents.forEach((component) => {
-    let lib = allComLibs.find(
-      (lib) =>
-        lib.componentRuntimeMap[component.namespace + "@" + component.version]
-    );
-    let curComponent = null;
-    if (lib) {
-      curComponent =
-        lib.componentRuntimeMap[component.namespace + "@" + component.version];
-    } else {
-      lib = allComLibs.find((lib) =>
-        Object.keys(lib.componentRuntimeMap).find((key) =>
-          key.startsWith(component.namespace)
-        )
+  const componentModules = [...deps]
+  const componentCache: Component[] = [];
+  for (const component of componentModules) {
+    const hasCache = componentCache.find((item) => item.namespace === component.namespace && item.version === component.version);
+    if (hasCache) continue;
+    let curComponent = await getComponentFromMaterial(component);
+    if (curComponent?.deps) {
+      componentModules.push(...curComponent.deps)
+    }
+    if (!curComponent) {
+      Logger.warn(`[getMaterialContent] 物料中心获取组件${component.namespace}失败，开始从rtComs获取……`)
+      let lib = allComLibs.find(
+        (lib) =>
+          lib.componentRuntimeMap && lib.componentRuntimeMap[component.namespace + "@" + component.version]
       );
+      if (lib) {
+        curComponent =
+          lib.componentRuntimeMap[
+          component.namespace + "@" + component.version
+          ];
+      } else {
+        lib = allComLibs.find((lib) =>
+          Object.keys(lib.componentRuntimeMap ?? {}).find((key) =>
+            key.startsWith(component.namespace)
+          )
+        );
 
-      if (!lib) {
+        if (!lib) {
+          if (noThrowError) {
+            return;
+          } else {
+            throw new Error(
+              `找不到 ${component.namespace}@${component.version} 对应的组件资源`
+            );
+          }
+        }
+        curComponent =
+          lib.componentRuntimeMap[
+          Object.keys(lib.componentRuntimeMap ?? {}).find((key) =>
+            key.startsWith(component.namespace)
+          )
+          ];
+      }
+
+      if (!curComponent) {
         if (noThrowError) {
           return;
         } else {
@@ -34,23 +86,10 @@ export const generateComLib = (
           );
         }
       }
-      curComponent =
-        lib.componentRuntimeMap[
-          Object.keys(lib.componentRuntimeMap).find((key) =>
-            key.startsWith(component.namespace)
-          )
-        ];
     }
 
-    if (!curComponent) {
-      if (noThrowError) {
-        return;
-      } else {
-        throw new Error(
-          `找不到 ${component.namespace}@${component.version} 对应的组件资源`
-        );
-      }
-    }
+    componentCache.push(curComponent)
+    const isCloudComponent = component.isCloud || curComponent.isCloud
 
     let componentRuntime = "";
     switch (true) {
@@ -75,21 +114,19 @@ export const generateComLib = (
       }
     }
 
-    script += lib.defined
+    script += isCloudComponent
       ? `
-			comAray.push({ namespace: '${component.namespace}', version: '${
-          curComponent.version
-        }', runtime: ${decodeURIComponent(componentRuntime)} });
+			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
+      }', runtime: ${decodeURIComponent(componentRuntime)} });
 		`
       : `
 			eval(${JSON.stringify(decodeURIComponent(componentRuntime))});
-			comAray.push({ namespace: '${component.namespace}', version: '${
-          curComponent.version
-        }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
+			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
+      }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
 			if(Reflect.has(window, 'fangzhouComDef')) Reflect.deleteProperty(window, 'fangzhouComDef');
 			if(Reflect.has(window, 'MybricksComDef')) Reflect.deleteProperty(window, 'MybricksComDef');
 		`;
-  });
+  }
 
   return `
 		(function() {
@@ -114,18 +151,11 @@ export async function generateComLibRT(
   json,
   { fileId, noThrowError, app_type }
 ) {
-  /**
-   * TODO:
-   * 1.目前应用里配置的edit.js 一定有 rt.js
-   * 2.物料体系完善后，应该都是按需加载的
-   * 3.目前只有匹配到“我的组件”内组件才去物料中心拉组件代码
-   */
-  let mySelfComMap = {};
-
+  const mySelfComMap: Record<string, boolean> = {};
   comlibs.forEach((comlib) => {
     if (comlib?.defined && Array.isArray(comlib.comAray)) {
-      comlib.comAray.forEach((com) => {
-        mySelfComMap[`${com.namespace}@${com.version}`] = true;
+      comlib.comAray.forEach(({ namespace, version }) => {
+        mySelfComMap[`${namespace}@${version}`] = true
       });
     }
   });
@@ -175,66 +205,30 @@ export async function generateComLibRT(
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ];
 
+  const cloudNamespaceList = Object.keys(mySelfComMap)
+
   deps = deps.reduce((accumulator, current) => {
     const existingObject = accumulator.find(
-      (obj) => obj.namespace === current.namespace
+      (obj) => obj.namespace === current.namespace && obj.version === current.version
     );
+    /**
+   * "我的组件"集合，标记为云组件
+   */
+    if (cloudNamespaceList.includes(`${current.namespace}@${current.version}`)) {
+      current.isCloud = true
+    }
     if (!existingObject) {
       accumulator.push(current);
     }
     return accumulator;
   }, []);
 
-  const selfComponents = deps.filter(
-    (item) => mySelfComMap[`${item.namespace}@${item.version}`]
-  );
-  const comLibContents = [...comlibs];
-
-  /** 处理我的组件 */
-  if (selfComponents.length) {
-    try {
-      const finalComponents = await Promise.all(
-        selfComponents.map((component) => {
-          return new Promise((resolve, reject) => {
-            API.Material.getMaterialContent({
-              namespace: component.namespace,
-              version: component.version,
-            })
-              .then(({ data }) => {
-                resolve(data.data);
-              })
-              .catch((error) => reject(error));
-          });
-        })
-      );
-
-      comLibContents.unshift({
-        comAray: [],
-        id: "_myself_",
-        title: "我的组件",
-        defined: true,
-        componentRuntimeMap: {},
-      });
-      finalComponents.forEach((finalComponent: any) => {
-        const { version, namespace, runtime } = finalComponent;
-
-        if (version && namespace && runtime) {
-          comLibContents[0].componentRuntimeMap[namespace + "@" + version] = {
-            version,
-            runtime: encodeURIComponent(runtime),
-          };
-        }
-      });
-    } catch (error) {
-      throw Error(error.message || error.msg || "获取我的组件物料信息异常");
-    }
-  }
-
-  return generateComLib(
-    comLibContents.filter((lib) => !!lib.componentRuntimeMap),
-    deps,
-    { comLibId: fileId, noThrowError, appType: app_type }
-  );
+  const scriptText = await generateComLib([...comlibs], deps, {
+    comLibId: fileId,
+    noThrowError,
+    appType: app_type,
+  });
+  return scriptText;
 }
 
 export async function getComboScriptText(

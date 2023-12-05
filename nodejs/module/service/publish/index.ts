@@ -23,7 +23,6 @@ export async function publish(
 
     app_type = getAppTypeFromTemplate(template);
     Logger.info(`[publish] app_type: ${app_type}`);
-    Logger.info(template);
     const {
       title,
       comlibs,

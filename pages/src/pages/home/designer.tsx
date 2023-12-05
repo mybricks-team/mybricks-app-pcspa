@@ -4,7 +4,6 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  useLayoutEffect
 } from 'react'
 import axios from 'axios'
 import { fAxios } from '../../services/http'
@@ -17,59 +16,24 @@ import { fetchPlugins, removeBadChar } from '../../utils'
 import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { unionBy } from 'lodash'
-import { MySelf_COM_LIB, PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB } from '../../constants'
 import PublishModal, { EnumMode } from './components/PublishModal'
 import { createFromIconfontCN } from '@ant-design/icons';
 import { i18nLangContentFilter } from '../../utils/index'
 
 import css from './app.less'
 import { USE_CUSTOM_HOST } from './constants'
-
-// 兜底物料
-export const localizationDefaultComlibs = APP_TYPE === 'react' ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : []
+import { getLibsFromConfig } from '../../utils/getComlibs'
 
 const msgSaveKey = 'save'
+const designer = './public/designer-spa/1.3.66-v1/index.min.js'
 
 export default function MyDesigner({ appData: originAppData }) {
-
   const appData = useMemo(() => {
     let data = { ...originAppData }
     // 防止触发originAppData.fileContent的getter计算
     data.fileContent = { ...data.fileContent }
     return data
   }, [originAppData])
-  const coms = []
-  if (appData?.defaultComlibs?.length) {
-    appData?.defaultComlibs.forEach(lib => {
-      const { namespace, content, version } = lib;
-      const com = localizationDefaultComlibs.find(lib => lib.namespace === namespace)
-      const { editJs, rtJs, coms: componentComs } = JSON.parse(content)
-      if (com) {
-        coms.push({ id: com.id, namespace, version, editJs, rtJs, coms: componentComs })
-      } else {
-        coms.push({ ...lib, editJs, rtJs, coms: componentComs })
-      }
-    })
-  } else {
-    coms.push(...localizationDefaultComlibs)
-  }
-
-  let comlibs = [];
-
-  if (!appData.fileContent?.content?.comlibs) {
-    coms.unshift(MySelf_COM_LIB)
-    comlibs = coms;
-  } else {
-    const myselfComlib = appData.fileContent?.content?.comlibs?.find(lib => lib.id === "_myself_") ?? MySelf_COM_LIB
-    coms.unshift(myselfComlib)
-    if (appData.fileContent?.content?.comlibs?.some(lib => typeof lib === 'string')) {
-      comlibs = coms;
-    } else {
-      comlibs = appData.fileContent?.content?.comlibs;
-    }
-  }
-
-  const designer = './public/designer-spa/1.3.66-v1/index.min.js'
 
   const appConfig = useMemo(() => {
     let config = null
@@ -103,7 +67,7 @@ export default function MyDesigner({ appData: originAppData }) {
       fileId: appData.fileId,
       setting: appData.config || {},
       hasMaterialApp: appData.hasMaterialApp,
-      comlibs,
+      comlibs: getLibsFromConfig(appData),
       latestComlibs: [],
       debugQuery: appData.fileContent?.content?.debugQuery,
       executeEnv,
@@ -179,7 +143,7 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [ctx.fontJS])
 
   useEffect(() => {
-    const needSearchComlibs = comlibs.filter(lib => lib.id !== "_myself_");
+    const needSearchComlibs = ctx.comlibs.filter(lib => lib.id !== "_myself_" && !!lib.coms);
     if (!!needSearchComlibs?.length) {
       API.Material.getLatestComponentLibrarys(needSearchComlibs.map(lib => lib.namespace)).then((res: any) => {
         const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))
@@ -188,7 +152,7 @@ export default function MyDesigner({ appData: originAppData }) {
     } else {
       setLatestComlibs([]);
     }
-  }, [JSON.stringify(comlibs.map(lib => lib.namespace))])
+  }, [JSON.stringify(ctx.comlibs.map(lib => lib.namespace))])
 
   useEffect(() => {
     fetchPlugins(plugins).then(setRemotePlugins);
@@ -217,7 +181,7 @@ export default function MyDesigner({ appData: originAppData }) {
           updateTime
         }
       }),
-      comlibs: comlibs.filter(item => item.id !== "_myself_").map(item => {
+      comlibs: ctx.comlibs.filter(item => item.id !== "_myself_").map(item => {
         const { id, namespace: name, version } = item || {}
         return {
           id,

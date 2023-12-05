@@ -23,7 +23,7 @@ export async function handleTemplate({
 
   comlibs.forEach((lib) => {
     /** 旧组件库，未带组件 runtime 描述文件 */
-    if (!lib.coms && !lib.defined) {
+    if (lib.legacy) {
       comLibRtScript += `<script src="${lib.rtJs}"></script>`;
       hasOldComLib = true;
     }
@@ -33,7 +33,7 @@ export async function handleTemplate({
   /** 需要聚合的组件资源 */
   if (
     comlibs.find((lib) => lib?.defined)?.comAray?.length ||
-    comlibs.find((lib) => lib.componentRuntimeMap)
+    comlibs.find((lib) => lib.componentRuntimeMap || !lib.legacy)
   ) {
     comLibRtScript += `<script src="./${comlibRtName}"></script>`;
     needCombo = true;

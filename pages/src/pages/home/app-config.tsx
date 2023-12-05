@@ -631,6 +631,21 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     },
     com: {
       env: {
+        renderCom(json, opts, coms) {
+          return renderUI(
+            json,
+            {
+              comDefs: { ...getComs(), ...coms },
+              observable: window["mybricks"].createObservable,
+              ...(opts || {}),
+              env: {
+                ...(opts?.env || {}),
+                edit: false,
+                runtime: true
+              }
+            }
+          )
+        },
         i18n(title) {
           if (typeof title === 'string') return title
           const i18nLangContent = ctx.i18nLangContent || {}
