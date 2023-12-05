@@ -23,27 +23,22 @@ const getLibsFromConfig = (appData: Record<string, any>) => {
   } else {
     libs.push(...legacyLibs);
   }
-  if (!appData.fileContent?.content?.comlibs) {
-    //initial
-    libs.unshift(MySelf_COM_LIB);
-    return libs;
-  } else {
+  if (
+    !appData.fileContent?.content?.comlibs ||
+    appData.fileContent?.content?.comlibs?.some(
+      (lib) => typeof lib === "string"
+    )
+  ) {
+    //initial or cdn legacy
     const myselfLib =
       appData.fileContent?.content?.comlibs?.find(
         (lib) => lib.id === "_myself_"
       ) ?? MySelf_COM_LIB;
     libs.unshift(myselfLib);
-    if (
-      appData.fileContent?.content?.comlibs?.some(
-        (lib) => typeof lib === "string"
-      )
-    ) {
-      //legacy cdn
-      return libs;
-    } else {
-      return appData.fileContent?.content?.comlibs;
-    }
+    return libs;
+  } else {
+    return appData.fileContent?.content?.comlibs;
   }
 };
 
-export { getLibsFromConfig }
+export { getLibsFromConfig };

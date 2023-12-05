@@ -143,7 +143,7 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [ctx.fontJS])
 
   useEffect(() => {
-    const needSearchComlibs = ctx.comlibs.filter(lib => lib.id !== "_myself_" && !!lib.coms);
+    const needSearchComlibs = ctx.comlibs.filter(lib => lib.id !== "_myself_");
     if (!!needSearchComlibs?.length) {
       API.Material.getLatestComponentLibrarys(needSearchComlibs.map(lib => lib.namespace)).then((res: any) => {
         const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))

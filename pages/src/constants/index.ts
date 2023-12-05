@@ -23,7 +23,7 @@ export const PC_NORMAL_COM_LIB = {
   namespace: 'mybricks.normal-pc',
   editJs: "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
   rtJs: "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
-  version: '1.2.19',
+  version: '1.2.72',
   legacy: true
 }
 
