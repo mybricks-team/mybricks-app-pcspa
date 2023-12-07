@@ -9,6 +9,27 @@ const executeEnv = "--executeEnv--";
 const envList = "--envList--";
 const i18nLangContent = "--i18nLangContent--";
 
+const getCustomHostFromUrl = () => {
+  try {
+    const url = new URL(location.href);
+    const params = new URLSearchParams(url.search);
+
+    // 获取单个参数
+    const MYBRICKS_HOST = params.get("MYBRICKS_HOST");
+    if (MYBRICKS_HOST) {
+      const hostJson = decodeURIComponent(MYBRICKS_HOST)
+      window.MYBRICKS_HOST = JSON.parse(hostJson)
+    }
+  } catch (e) {
+    console.error(`getCustomHostFromUrl error`, e)
+  }
+}
+getCustomHostFromUrl()
+
+const isEqual = (param1, param2) => {
+  return param1 === param2
+}
+
 const root = ({ renderType, locale, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   return renderUI(projectJson, {
@@ -109,7 +130,7 @@ const root = ({ renderType, locale, ...props }) => {
         //@ts-ignore
         const MYBRICKS_HOST = window?.MYBRICKS_HOST;
         //@ts-ignore
-        if (executeEnv === USE_CUSTOM_HOST) {
+        if (isEqual(executeEnv, USE_CUSTOM_HOST)) {
           if (typeof MYBRICKS_HOST === "undefined") {
             console.error(`没有设置window.MYBRICKS_HOST变量`);
             return;
@@ -120,7 +141,7 @@ const root = ({ renderType, locale, ...props }) => {
         }
         let newParams = params;
         //@ts-ignore
-        if (executeEnv === USE_CUSTOM_HOST) {
+        if (isEqual(executeEnv, USE_CUSTOM_HOST)) {
           if (params instanceof FormData) {
             newParams.append("MYBRICKS_HOST", JSON.stringify(MYBRICKS_HOST));
           } else {
