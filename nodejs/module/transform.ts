@@ -88,7 +88,7 @@ const transformScene = (scene: Record<string, any>) => {
       ) {
         tempObj[key].model.data.fns = transformCodeByBabel(
           tempObj[key].model.data.fns,
-          `JS计算编译失败`
+          `【${tempObj[key].title ?? tempObj[key].id}】—— JS计算编译失败，`
         );
       }
     });
