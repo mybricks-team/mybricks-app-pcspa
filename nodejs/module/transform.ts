@@ -54,7 +54,7 @@ const transformCodeByBabel = (
   } catch (e) {
     console.info(e);
     if (tips) {
-      throw new Error(`\n${tips}代码存在错误，请检查！！！`);
+      throw new Error(`${decodeURIComponent(code)}\n${tips}代码存在错误，请检查！！！`);
     }
     return code;
   }
