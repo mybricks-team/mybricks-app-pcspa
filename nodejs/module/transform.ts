@@ -44,7 +44,8 @@ const transformCodeByBabel = (
     }
     res = encodeURIComponent(
       Babel.transform(temp, {
-        presets: ["env"],
+        presets: ["env", "typescript"],
+        filename: 'types.d.ts'
       }).code
     );
     res = `${encodeURIComponent(
