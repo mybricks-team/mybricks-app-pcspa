@@ -750,27 +750,27 @@ const getMergedEnvList = (appData, appConfig) => {
 const infoList = [
   {
     name: '保存',
-    keys: ['⌘','S','/','Control','S']
+    keys: ['⌘','S','/','Control','S', '/', 'Ctrl','S']
   },
   {
     name: '撤销',
-    keys: ['⌘','Z','/','Control','Z']
+    keys: ['⌘','Z','/','Control','Z', '/', 'Ctrl','Z']
   },
   {
     name: '重做',
-    keys: ['⌘','Shift','Z']
+    keys: ['⌘','Shift','Z','/','Ctrl','Shift','Z']
   },
   {
     name: '复制组件',
-    keys: ['⌘','C','/','⌘','C']
+    keys: ['⌘','C','/','Control','C', '/','Ctrl','C']
   },
   {
     name: '粘贴组件',
-    keys: ['⌘','V','/','⌘','V']
+    keys: ['⌘','V','/','Control','V', '/','Ctrl','V']
   },
   {
     name: '剪切组件',
-    keys: ['⌘','X','/','⌘','X']
+    keys: ['⌘','X','/','Control','X', '/','Ctrl','X']
   },
   {
     name: '删除组件',
