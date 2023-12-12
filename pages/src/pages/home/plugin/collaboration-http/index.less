@@ -1,0 +1,151 @@
+.sidebarPanelEdit {
+  box-shadow: 5px 0 10px -5px #ddd;
+  overflow: hidden;
+  width: 560px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 26px;
+  left: 271px;
+  background-color: #f7f7f7;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarPanelTitle {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 0 10px;
+  line-height: 50px;
+  height: 50px;
+  background-color: #f7f7f7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: text;
+  border-bottom: 1px solid #D8D8D8;
+}
+
+.sidebarPanelContent {
+  padding: 12px;
+  overflow-y: auto;
+  height: calc(100% - 32px);
+  font-size: 12px;
+
+  .formItem {
+    padding: 0 6px 0;
+    border-radius: 6px;
+    border: 1px solid #eee;
+    margin-bottom: 12px;
+  }
+
+  .item {
+    display: flex;
+    flex-direction: row;
+    margin: 14px 0;
+    align-items: center;
+    font-size: 12px;
+
+    label {
+      width: 75px;
+      text-align: right;
+      padding-right: 5px;
+      font-size: 12px;
+
+      i {
+        font-style: normal;
+        color: #FF0000;
+      }
+    }
+
+    .editor {
+      flex: 1;
+      display: flex;
+      position: relative;
+      padding-left: 6px;
+
+    }
+
+    .serviceTitle {
+      line-height: 26px;
+      margin-left: 16px;
+      font-style: italic;
+      color: #AAA;
+      user-select: text;
+    }
+
+    .error {
+      border: 1px solid #FF0000 !important;
+      padding: 0;
+      margin-bottom: 4px;
+
+      &::after {
+        content: attr(data-err);
+        color: red;
+        position: absolute;
+        bottom: -17px;
+      }
+    }
+
+    .textEdt {
+      input, textarea {
+        border: 1px solid #DDD;
+        border-radius: 3px;
+        padding: 5px;
+        background: #FFF;
+        width: 100%;
+        line-height: 1;
+        &:focus {
+          outline: 1px solid #FA6400;
+        }
+      }
+
+      textarea {
+        min-height: 50px;
+      }
+    }
+
+    .defaultButton {
+      margin-left: 0 !important;
+    }
+  }
+}
+
+.sidebarPanelCode {
+  position: relative;
+  font-size: 12px;
+}
+
+.sidebarPanelCodeFull {
+  position: fixed;
+  z-index: 9;
+  padding: 40px 42px 26px;
+  background-color: rgba(0, 0, 0, 0.45);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+
+  :global {
+    .monaco-editor {
+      padding-top: 16px;
+    }
+  }
+}
+
+.sidebarPanelCodeIcon {
+  position: absolute;
+  top: 36px;
+  right: 6px;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.sidebarPanelCodeIconFull {
+  position: fixed;
+  top: 48px;
+  right: 50px;
+  z-index: 10;
+  cursor: pointer;
+}

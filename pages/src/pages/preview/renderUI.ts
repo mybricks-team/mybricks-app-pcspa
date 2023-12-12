@@ -9,6 +9,7 @@ import { runJs } from "@/utils/runJs";
 import { connectorLoader } from "@/utils/connectorLoader";
 import { PreviewStorage } from "@/utils/previewStorage";
 import { mock as connectorHttpMock } from '@mybricks/plugin-connector-http'
+import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
 
 const fileId = getQueryString("fileId");
 const USE_CUSTOM_HOST = "__USE_CUSTOM_HOST__";
@@ -49,6 +50,10 @@ const root = ({ renderType, env, ...props }) => {
         if (typeof title?.id === 'undefined') return title
         return i18nLangContent[title.id]?.content?.[env.locale] || JSON.stringify(title)
       },
+      /** 调用领域模型 */
+      callDomainModel(domainModel, type, params) {
+        return callDomainHttp(domainModel, params, { action: type } as any);
+      },
       async callConnector(connector, params, connectorConfig = {}) {
         await connectorLoader(appConfig);
         const plugin =
@@ -79,17 +84,28 @@ const root = ({ renderType, env, ...props }) => {
               newParams,
               {
                 ...connectorConfig,
-                before: (options) => {
-                  return {
-                    ...options,
-                    url: shapeUrlByEnv(
-                      envList,
-                      executeEnv,
-                      options.url,
-                      MYBRICKS_HOST
-                    ),
-                  };
-                },
+                /** http-sql表示为领域接口 */
+                before: connector.type === 'http-sql' ?
+                  options => {
+                    const newOptions = { ...options }
+                    if (!newOptions.headers) {
+                      newOptions.headers = {};
+                    }
+                    newOptions.headers['x-mybricks-debug'] = 'true';
+
+                    return newOptions;
+                  }
+                  : (options) => {
+                    return {
+                      ...options,
+                      url: shapeUrlByEnv(
+                        envList,
+                        executeEnv,
+                        options.url,
+                        MYBRICKS_HOST
+                      ),
+                    };
+                  },
               }
             )
             : Promise.reject("找不到对应连接器 Script 执行脚本.");

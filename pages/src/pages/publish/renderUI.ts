@@ -32,6 +32,8 @@ const isEqual = (param1, param2) => {
 
 const root = ({ renderType, locale, ...props }) => {
   const renderUI = getRenderWeb(renderType);
+  const domainServicePath = '--domain-service-path--';//replace it
+
   return renderUI(projectJson, {
     env: {
       silent: true,
@@ -106,7 +108,7 @@ const root = ({ renderType, locale, ...props }) => {
         return window.pluginConnectorDomain.call(domainModel, params, {
           action: type,
           before(options) {
-            if (["domain", "aggregation-model"].includes(domainModel.type)) {
+            if (['domain', 'aggregation-model'].includes(domainModel.type)) {
               let newOptions = { ...options };
               if (projectId) {
                 Object.assign(newOptions.data, {
@@ -115,7 +117,7 @@ const root = ({ renderType, locale, ...props }) => {
               }
               return {
                 ...newOptions,
-                // url: domainServicePath,
+                url: domainServicePath,
               };
             } else {
               return options;
@@ -159,17 +161,31 @@ const root = ({ renderType, locale, ...props }) => {
           return curConnector
             ? plugin.call({ ...connector, ...curConnector }, newParams, {
               ...connectorConfig,
-              before: (options) => {
-                return {
-                  ...options,
-                  url: shapeUrlByEnv(
-                    envList,
-                    executeEnv,
-                    options.url,
-                    MYBRICKS_HOST
-                  ),
-                };
-              },
+              /** http-sql表示为领域接口 */
+              before: connector.type === 'http-sql' ?
+                options => {
+                  let newOptions = { ...options }
+                  if (projectId) {
+                    Object.assign(newOptions.data, {
+                      projectId: projectId
+                    })
+                  }
+                  return {
+                    ...newOptions,
+                    url: domainServicePath
+                  }
+                }
+                : (options) => {
+                  return {
+                    ...options,
+                    url: shapeUrlByEnv(
+                      envList,
+                      executeEnv,
+                      options.url,
+                      MYBRICKS_HOST
+                    ),
+                  };
+                },
             })
             : Promise.reject("找不到对应连接器 Script 执行脚本.");
         } else {

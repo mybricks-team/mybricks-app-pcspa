@@ -1,0 +1,308 @@
+import React, {useCallback, useMemo, useRef, useState} from 'react';
+import {
+	formatSchema,
+	getDataByExcludeKeys,
+	getDataByOutputKeys,
+	getDecodeString,
+	getValidKeysBySchema,
+	jsonToSchema,
+	params2data,
+} from '../../../utils';
+import JSONView from '@mybricks/code-editor';
+import ReturnSchema from '../returnSchema';
+import ParamsEdit from '../paramsEdit';
+import Params from '../params';
+import OutputSchemaMock from '../outputSchemaMock';
+import FormItem from '../FormItem';
+import { cloneDeep } from '../../../cloneDeep';
+import {getScript} from '../../../script';
+import Button from '../Button';
+
+import styles from './index.less';
+
+function DataShow({ data }: any) {
+	let valueStr = '';
+	try {
+		valueStr = JSON.stringify(data, null, 2);
+	} catch (error) {
+		console.log(error, 'error');
+	}
+	
+	return !valueStr ? null : (
+		<div style={{ marginLeft: 87 }}>
+			<div className={styles.title}>标记后的返回结果示例</div>
+			{/* @ts-ignore */}
+			<JSONView
+				value={valueStr}
+				language='json'
+				env={{
+					isNode: false,
+					isElectronRenderer: false,
+				}}
+				readOnly
+			/>
+		</div>
+	);
+}
+
+const Debug = ({ service, onChange, globalConfig, connectorService }: any) => {
+	const [remoteData, setData] = useState<any>();
+	const allDataRef = useRef<any>();
+	const [errorInfo, setError] = useState('');
+	const [editNowId, setEditNowId] = useState(void 0);
+	const [edit, setEdit] = useState(false);
+	const params = useMemo(() => {
+		return service.params || { type: 'root', name: 'root', children: [] };
+	}, [service.params]);
+
+	const onDebugClick = async () => {
+		try {
+			const originParams = service.paramsList?.[0].data || [];
+			const params = params2data(originParams);
+			setError('');
+			const data = await connectorService.test(
+				{
+					type: service.type || 'http',
+					mode: 'test',
+					id: service.id,
+					script: getDecodeString(
+						getScript({
+							...service,
+							globalParamsFn: globalConfig.paramsFn,
+							globalResultFn: globalConfig.resultFn,
+							envList: globalConfig.envList,
+							path: service.path.trim(),
+							resultTransformDisabled: true,
+						})
+					),
+				},
+				params
+			);
+			allDataRef.current = data;
+			let { outputKeys = [], excludeKeys = [] } = service;
+	    const resultSchema = jsonToSchema(data);
+
+	    outputKeys = getValidKeysBySchema(outputKeys, resultSchema);
+	    excludeKeys = getValidKeysBySchema(excludeKeys, resultSchema);
+
+	    let outputData = getDataByExcludeKeys(getDataByOutputKeys(data, outputKeys), excludeKeys);
+	    let outputSchema = jsonToSchema(outputData);
+	    /** 当标记单项时，自动返回单项对应的值 */
+	    if (Array.isArray(outputKeys) && outputKeys.length && (outputKeys.length > 1 || !(outputKeys.length === 1 && outputKeys[0] === ''))) {
+		    try {
+					let cascadeOutputKeys = [...outputKeys].map(key => key.split('.'));
+			    while (Object.prototype.toString.call(outputData) === '[object Object]' && cascadeOutputKeys.every(keys => !!keys.length) && Object.values(outputData).length === 1) {
+				    outputData = Object.values(outputData)[0];
+				    outputSchema = Object.values(outputSchema.properties)[0];
+				    cascadeOutputKeys.forEach(keys => keys.shift());
+			    }
+		    } catch {}
+	    }
+
+			setData(outputData);
+
+			formatSchema(resultSchema);
+	    formatSchema(outputSchema);
+	    const inputSchema = jsonToSchema(params || {});
+	    formatSchema(inputSchema);
+			onChange({ resultSchema, outputKeys, excludeKeys, outputSchema, inputSchema });
+		} catch (error: any) {
+			console.log(error);
+			onChange({ outputSchema: void 0, resultSchema: void 0 });
+			setError(error?.message || error);
+		}
+	};
+
+	const onParamsChange = useCallback((params) => {
+		if (params !== void 0) {
+			const data = params2data(params || []);
+			const inputSchema = jsonToSchema(data);
+			formatSchema(inputSchema);
+			onChange({ inputSchema, params });
+		}
+	}, [onChange]);
+
+	const onKeysChange = useCallback((outputKeys = [], excludeKeys = []) => {
+		const { resultSchema } = service;
+
+	  try {
+		  /** 当标记单项时，自动返回单项对应的值 */
+		  let autoExtra = false;
+
+		  let outputSchema: any = {};
+		  if (outputKeys.length === 0) {
+			  outputSchema = resultSchema;
+		  } else if (outputKeys.length === 1 && outputKeys[0] === '') {
+			  outputSchema = { type: 'any' };
+		  } else {
+			  outputSchema = resultSchema.type === 'array'
+				  ? { type: 'array', items: (resultSchema.items?.type === 'object' ? { type: 'object', properties: {} } : (resultSchema.items?.type === 'array' ? { type: 'array', items: {} } : { type: resultSchema.items?.type })) }
+				  : { type: 'object', properties: {} };
+
+			  outputKeys.forEach((key: string) => {
+				  let subSchema = outputSchema.properties || outputSchema.items?.properties || outputSchema.items?.items;
+				  let subResultSchema = resultSchema.properties || resultSchema.items?.properties || resultSchema.items?.items;
+				  const keys = key.split('.');
+
+				  keys.forEach((field, index) => {
+						if (!subSchema || !subResultSchema || !subResultSchema[field]) {
+							return;
+						}
+
+						if (index === keys.length - 1) {
+							subSchema[field] = { ...subResultSchema[field] };
+						} else {
+							const { type } = subResultSchema[field];
+
+							if (type === 'array') {
+								subSchema[field] = subSchema[field] || {
+									...subResultSchema[field],
+									items: (subResultSchema[field].items.type === 'object' ? { type: 'object', properties: {} } : (subResultSchema[field].items.type === 'array' ? { type: 'array', items: {} } : { type: subResultSchema[field].items.type }))
+								};
+								subSchema = subSchema[field].items.properties;
+								subResultSchema = subResultSchema[field].items.properties;
+							} else if (type === 'object') {
+								subSchema[field] = subSchema[field] || { ...subResultSchema[field], properties: {} };
+								subSchema = subSchema[field].properties;
+								subResultSchema = subResultSchema[field].properties;
+							} else {
+								subSchema[field] = { ...subResultSchema[field] };
+								subSchema = subSchema[field].properties;
+								subResultSchema = subResultSchema[field].properties;
+							}
+						}
+				  });
+			  });
+			  if (Object.keys(outputSchema.properties).length === 1) {
+				  autoExtra = true;
+			  }
+		  }
+
+		  excludeKeys = excludeKeys
+			  .map(key => key.split('.'))
+			  .filter(keys => {
+				  let schema = outputSchema.properties || outputSchema.items?.properties;
+
+				  for (let idx = 0; idx < keys.length; idx++) {
+					  const key = keys[idx];
+
+					  if (schema && schema[key]) {
+						  schema = schema[key].properties || schema[key].items?.properties;
+					  } else {
+						  return false;
+					  }
+				  }
+
+				  return true;
+			  })
+			  .map(keys => keys.join('.'));
+
+		  let newOutputSchema = cloneDeep(outputSchema);
+		  excludeKeys?.forEach((key: string) => {
+			  const keys = key.split('.');
+			  const len = keys.length;
+			  let schema = newOutputSchema;
+			  for (let i = 0; i < len - 1; i++) {
+				  schema = (schema.properties || schema.items.properties)[keys[i]];
+			  }
+			  try {
+				  Reflect.deleteProperty(
+					  schema.properties || schema.items.properties,
+					  keys[len - 1]
+				  );
+			  } catch (error) {}
+		  });
+
+		  try {
+			  const cloneData = cloneDeep(allDataRef.current);
+			  let outputData = getDataByOutputKeys(getDataByExcludeKeys(cloneData, excludeKeys), outputKeys);
+
+			  if (autoExtra) {
+				  try {
+					  let cascadeOutputKeys = outputKeys.map(key => key.split('.'));
+					  while (newOutputSchema.type === 'object' && cascadeOutputKeys.every(keys => !!keys.length) && Object.values(newOutputSchema.properties || {}).length === 1) {
+						  outputData = allDataRef.current ? Object.values(outputData)[0] : outputData;
+						  newOutputSchema = Object.values(newOutputSchema.properties)[0];
+						  cascadeOutputKeys.forEach(keys => keys.shift());
+					  }
+				  } catch(e) {
+						console.log(e);
+				  }
+			  }
+			  if (outputData !== void 0) {
+				  setData(allDataRef.current ? outputData : undefined);
+			  }
+
+		  } catch (error) {}
+
+			onChange({ outputKeys, excludeKeys, outputSchema: newOutputSchema });
+		} catch (error) {
+			console.log(error);
+		}
+	}, [service, onChange]);
+
+	const onMockSchemaChange = useCallback(schema => onChange({ resultSchema: schema }), []);
+	const saveSchema = useCallback(() => {
+		onKeysChange(service.outputKeys, service.excludeKeys);
+		setEdit(false);
+	}, [service, onKeysChange]);
+	const editSchema = useCallback(() => setEdit(true), []);
+	return (
+		<>
+			<FormItem label='请求参数'>
+				<ParamsEdit
+					setEditNowId={setEditNowId}
+					value={params}
+					onChange={onParamsChange}
+				/>
+			</FormItem>
+			<FormItem>
+				<Params
+					onDebugClick={onDebugClick}
+					onChange={onChange}
+					params={params}
+					editNowId={editNowId}
+					setEditNowId={setEditNowId}
+					service={service}
+				/>
+			</FormItem>
+			{edit ? (
+				<>
+					<FormItem label='返回数据'>
+						<Button
+							style={{ margin: 0, marginBottom: 6 }}
+							onClick={saveSchema}
+						>
+							保存
+						</Button>
+						<OutputSchemaMock
+							setEditNowId={setEditNowId}
+							schema={service.resultSchema}
+							onChange={onMockSchemaChange}
+						/>
+					</FormItem>
+				</>
+			) : (
+				<>
+					<FormItem label='返回数据'>
+						<Button
+							style={{ margin: 0, marginBottom: 6 }}
+							onClick={editSchema}
+						>
+							编辑
+						</Button>
+						<ReturnSchema
+							outputKeys={service.outputKeys}
+							excludeKeys={service.excludeKeys}
+							onKeysChange={onKeysChange}
+							schema={service.resultSchema}
+							error={errorInfo}
+						/>
+					</FormItem>
+					<DataShow data={remoteData} />
+				</>
+			)}
+		</>
+	);
+};
+export default Debug;
