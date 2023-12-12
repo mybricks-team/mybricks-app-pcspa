@@ -111,6 +111,7 @@ export async function publish(
         images,
         globalDeps,
         folderPath,
+        projectId,
         comlibRtName,
         fileName,
         userId,
@@ -145,8 +146,7 @@ export async function publish(
     return result;
   } catch (e) {
     Logger.error(
-      `[publish] pcpage publish error ${
-        e?.message || JSON.stringify(e, null, 2)
+      `[publish] pcpage publish error ${e?.message || JSON.stringify(e, null, 2)
       }`
     );
     throw e;

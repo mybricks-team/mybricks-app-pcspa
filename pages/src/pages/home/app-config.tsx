@@ -654,7 +654,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         },
         /** 调用领域模型 */
         callDomainModel(domainModel, type, params) {
-          return callDomainHttp(domainModel, params, { action: type });
+          return callDomainHttp(domainModel, params, { action: type } as any);
         },
         callConnector(connector, params, connectorConfig = {}) {
           const plugin = designerRef.current?.getPlugin(connector.connectorName);

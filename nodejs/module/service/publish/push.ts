@@ -29,10 +29,22 @@ export async function publishPush(
     images,
     globalDeps,
     folderPath,
+    projectId,
     comlibRtName,
     fileName,
     userId,
   } = params;
+
+  let uploadfolderPath;
+  if (projectId) {
+    if (envType === 'staging') {
+      uploadfolderPath = `/staging/project/${projectId}/${fileId}`;
+    } else {
+      uploadfolderPath = `/project/${projectId}/${fileId}`;
+    }
+  } else {
+    uploadfolderPath = `${folderPath}/${envType || "prod"}`;
+  }
 
   let publishMaterialInfo;
 
@@ -102,7 +114,7 @@ export async function publishPush(
           globalDeps.map(({ content, path, name }) => {
             return API.Upload.staticServer({
               content,
-              folderPath: `${folderPath}/${envType || "prod"}/${path}`,
+              folderPath: `${uploadfolderPath}/${path}`,
               fileName: name,
               noHash: true
             });
@@ -115,7 +127,7 @@ export async function publishPush(
         Logger.info("[publish] 正在尝试上传 needCombo...");
         await API.Upload.staticServer({
           content: comboScriptText,
-          folderPath: `${folderPath}/${envType || "prod"}`,
+          folderPath: uploadfolderPath,
           fileName: comlibRtName,
           noHash: true
         });
@@ -125,7 +137,7 @@ export async function publishPush(
       Logger.info("[publish] 正在尝试上传 template...");
       publishMaterialInfo = await API.Upload.staticServer({
         content: template,
-        folderPath: `${folderPath}/${envType || "prod"}`,
+        folderPath: uploadfolderPath,
         fileName,
         noHash: true
       });
@@ -228,11 +240,11 @@ async function customPublish(params) {
       html: template,
       js: needCombo
         ? [
-            {
-              name: `${fileId}-${envType}-${version}.js`,
-              content: comboScriptText,
-            },
-          ]
+          {
+            name: `${fileId}-${envType}-${version}.js`,
+            content: comboScriptText,
+          },
+        ]
         : [],
       permissions,
       images,

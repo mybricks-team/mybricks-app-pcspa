@@ -468,11 +468,11 @@ export default function MyDesigner({ appData: originAppData }) {
           content={saveTip}
           onClick={handleSwitch2SaveVersion} />}
       >
-        <div onClick={()=>{setIsOptModalOpen(true)}}>
+        <div onClick={() => { setIsOptModalOpen(true) }}>
           <Popover
             placement='bottom'
             overlayClassName={css.overlayFilePopover}
-            content={()=>{
+            content={() => {
               return (
                 <div className={css.fileInfo}>
                   常规操作
@@ -486,11 +486,11 @@ export default function MyDesigner({ appData: originAppData }) {
           </Popover>
         </div>
 
-        <div onClick={()=>{setIsInfoModalOpen(true)}}>
+        <div onClick={() => { setIsInfoModalOpen(true) }}>
           <Popover
             placement='bottom'
             overlayClassName={css.overlayFilePopover}
-            content={()=>{
+            content={() => {
               return (
                 <div className={css.fileInfo}>
                   快捷键
@@ -504,11 +504,11 @@ export default function MyDesigner({ appData: originAppData }) {
           </Popover>
         </div>
 
-        <div onClick={()=>{window.open('https://docs.qingque.cn/f/eZQC4aflzXiNHfZaZrwRwqtpF?identityId=20b8F4mmCiS')}}>
+        <div onClick={() => { window.open('https://docs.qingque.cn/f/eZQC4aflzXiNHfZaZrwRwqtpF?identityId=20b8F4mmCiS') }}>
           <Popover
             placement='bottom'
             overlayClassName={css.overlayFilePopover}
-            content={()=>{
+            content={() => {
               return (
                 <div className={css.fileInfo}>
                   帮助文档
@@ -583,6 +583,7 @@ export default function MyDesigner({ appData: originAppData }) {
       </div>
       <PublishModal
         envList={ctx.envList}
+        projectId={ctx.sdk.projectId}
         visible={publishModalVisible}
         onOk={(publishConfig) => {
           publish(publishConfig)
@@ -590,7 +591,7 @@ export default function MyDesigner({ appData: originAppData }) {
         }}
         onCancel={() => setPublishModalVisible(false)}
       />
-      
+
       {/* 快捷键 */}
       <Modal
         visible={isInfoModalOpen}
@@ -750,27 +751,27 @@ const getMergedEnvList = (appData, appConfig) => {
 const infoList = [
   {
     name: '保存',
-    keys: ['⌘','S','/','Control','S', '/', 'Ctrl','S']
+    keys: ['⌘', 'S', '/', 'Control', 'S', '/', 'Ctrl', 'S']
   },
   {
     name: '撤销',
-    keys: ['⌘','Z','/','Control','Z', '/', 'Ctrl','Z']
+    keys: ['⌘', 'Z', '/', 'Control', 'Z', '/', 'Ctrl', 'Z']
   },
   {
     name: '重做',
-    keys: ['⌘','Shift','Z','/','Ctrl','Shift','Z']
+    keys: ['⌘', 'Shift', 'Z', '/', 'Ctrl', 'Shift', 'Z']
   },
   {
     name: '复制组件',
-    keys: ['⌘','C','/','Control','C', '/','Ctrl','C']
+    keys: ['⌘', 'C', '/', 'Control', 'C', '/', 'Ctrl', 'C']
   },
   {
     name: '粘贴组件',
-    keys: ['⌘','V','/','Control','V', '/','Ctrl','V']
+    keys: ['⌘', 'V', '/', 'Control', 'V', '/', 'Ctrl', 'V']
   },
   {
     name: '剪切组件',
-    keys: ['⌘','X','/','Control','X', '/','Ctrl','X']
+    keys: ['⌘', 'X', '/', 'Control', 'X', '/', 'Ctrl', 'X']
   },
   {
     name: '删除组件',
@@ -778,7 +779,7 @@ const infoList = [
   },
   {
     name: '选择组件',
-    keys: ['Drag','Click']
+    keys: ['Drag', 'Click']
   }
 ]
 
@@ -821,7 +822,7 @@ const optList = [
   },
   {
     name: '添加组件库',
-    keys: [`点击操作区右上角物料库图标`,store,`再点击添加按钮`]
+    keys: [`点击操作区右上角物料库图标`, store, `再点击添加按钮`]
   },
   {
     name: '画布缩放',
@@ -853,19 +854,19 @@ const optList = [
   }
 ]
 
-const infoListRender = ((list)=>{
+const infoListRender = ((list) => {
   return (
-    list.map((item)=>{
-      return(
+    list.map((item) => {
+      return (
         <div className={css.itemList}>
           <div className={css.itemListLeft}>
             {item.name}
           </div>
           <div className={css.itemListRight}>
-            {item.keys.map((key)=>{
-              if(key!=='/'){
+            {item.keys.map((key) => {
+              if (key !== '/') {
                 return (<div className={css.liBtn}>{key}</div>)
-              }else{
+              } else {
                 return (<div>{key}</div>)
               }
             })}
@@ -876,18 +877,18 @@ const infoListRender = ((list)=>{
   )
 })
 
-const optListRender = ((list)=>{
+const optListRender = ((list) => {
   return (
-    list.map((item)=>{
-      return(
+    list.map((item) => {
+      return (
         <div className={css.itemList}>
           <div className={css.itemListLeft}>
             {item.name}
           </div>
           <div className={css.itemListRight}>
-            {item.keys.map((key)=>{
+            {item.keys.map((key) => {
               return (<div className={css.liOpt}>{key}</div>)
-              })}
+            })}
           </div>
         </div>
       )
