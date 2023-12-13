@@ -93,35 +93,7 @@ export async function publish(
       needCombo
     );
 
-    const result = await publishPush(
-      {
-        envType,
-        fileId,
-        title,
-        publisherEmail,
-        publisherName,
-        version,
-        commitInfo,
-        groupId,
-        groupName,
-        json,
-        template,
-        needCombo,
-        comboScriptText,
-        images,
-        globalDeps,
-        folderPath,
-        projectId,
-        comlibRtName,
-        fileName,
-        userId,
-      },
-      version,
-      true
-    );
-
-    /** 保存回滚数据 */
-    saveRollbackData(fileId, version, envType, {
+    const params = {
       envType,
       fileId,
       title,
@@ -138,15 +110,25 @@ export async function publish(
       images,
       globalDeps,
       folderPath,
+      projectId,
       comlibRtName,
       fileName,
       userId,
-    });
+    };
+    const result = await publishPush(
+      params,
+      version,
+      true
+    );
+
+    /** 保存回滚数据 */
+    saveRollbackData(fileId, version, envType, params);
 
     return result;
   } catch (e) {
     Logger.error(
-      `[publish] pcpage publish error ${e?.message || JSON.stringify(e, null, 2)
+      `[publish] pcpage publish error ${
+        e?.message || JSON.stringify(e, null, 2)
       }`
     );
     throw e;
