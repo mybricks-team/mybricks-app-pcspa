@@ -39,9 +39,6 @@ export default ({
   };
 
   const envOptions = useMemo(() => {
-    if (projectId) {
-      return [{ label: '测试环境', value: 'staging' }, { label: '线上环境', value: 'prod' }];
-    }
     return envList.map(item => ({
       value: item.name,
       label: item.title
