@@ -8,7 +8,7 @@ import React, {
 import axios from 'axios'
 import { fAxios } from '../../services/http'
 import moment from 'moment'
-import { message, Popover, Divider, Modal } from 'antd'
+import { message } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
@@ -19,14 +19,13 @@ import { unionBy } from 'lodash'
 import PublishModal, { EnumMode } from './components/PublishModal'
 import { createFromIconfontCN } from '@ant-design/icons';
 import { i18nLangContentFilter } from '../../utils/index';
-import { FileIcon, keyIcon, optIcon, robot, info, link, record, search, play, store, locale } from './Icons';
 
 import css from './app.less'
 import { USE_CUSTOM_HOST } from './constants'
 import { getLibsFromConfig } from '../../utils/getComlibs'
 
 const msgSaveKey = 'save'
-const designer = './public/designer-spa/1.3.69/index.min.js'
+const designer = './public/designer-spa/1.3.72/index.min.js'
 
 export default function MyDesigner({ appData: originAppData }) {
   const appData = useMemo(() => {
@@ -133,8 +132,6 @@ export default function MyDesigner({ appData: originAppData }) {
   const [latestComlibs, setLatestComlibs] = useState<[]>()
   const [isDebugMode, setIsDebugMode] = useState(false);
 
-  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
-  const [isOptModalOpen, setIsOptModalOpen] = useState(false);
 
   // 只有预览时 search 会携带 version 字段
   const isPreview = window.location.search.includes('version');
@@ -280,14 +277,7 @@ export default function MyDesigner({ appData: originAppData }) {
     await API.App.getPreviewImage({ // Todo... name 中文乱码
       element: designerRef.current?.geoView.canvasDom,
     }).then(async (res) => {
-      // 由于 API 返回的不是完整路径，路径得自己拼 (本地这里拼出来的地址是错的，线上正常)
-      const url = new URL(`${location.origin}${res}`)
-
-      if (url.protocol === 'https:') {
-        url.protocol = 'http:'
-      }
-
-      await ctx.save({ icon: url.href }, true)
+      await ctx.save({ icon: res }, true)
     }).catch((err) => {
       console.error(err)
     })
@@ -468,60 +458,7 @@ export default function MyDesigner({ appData: originAppData }) {
           content={saveTip}
           onClick={handleSwitch2SaveVersion} />}
       >
-        <div onClick={() => { setIsOptModalOpen(true) }}>
-          <Popover
-            placement='bottom'
-            overlayClassName={css.overlayFilePopover}
-            content={() => {
-              return (
-                <div className={css.fileInfo}>
-                  常规操作
-                </div>
-              )
-            }}
-          >
-            <div className={css.filePosition}>
-              {optIcon}
-            </div>
-          </Popover>
-        </div>
-
-        <div onClick={() => { setIsInfoModalOpen(true) }}>
-          <Popover
-            placement='bottom'
-            overlayClassName={css.overlayFilePopover}
-            content={() => {
-              return (
-                <div className={css.fileInfo}>
-                  快捷键
-                </div>
-              )
-            }}
-          >
-            <div className={css.filePosition}>
-              {keyIcon}
-            </div>
-          </Popover>
-        </div>
-
-        <div onClick={() => { window.open('https://docs.qingque.cn/f/eZQC4aflzXiNHfZaZrwRwqtpF?identityId=20b8F4mmCiS') }}>
-          <Popover
-            placement='bottom'
-            overlayClassName={css.overlayFilePopover}
-            content={() => {
-              return (
-                <div className={css.fileInfo}>
-                  帮助文档
-                </div>
-              )
-            }}
-          >
-            <div className={css.filePosition}>
-              {FileIcon}
-            </div>
-          </Popover>
-        </div>
-        <Divider type="vertical" />
+        <Toolbar.Tips/>
         {!isPreview && RenderLocker}
         {
           !isPreview && <>
@@ -591,32 +528,6 @@ export default function MyDesigner({ appData: originAppData }) {
         }}
         onCancel={() => setPublishModalVisible(false)}
       />
-
-      {/* 快捷键 */}
-      <Modal
-        visible={isInfoModalOpen}
-        title={'快捷键'}
-        footer={null}
-        onCancel={() => setIsInfoModalOpen(false)}
-        width={520}
-      >
-        <div className={css.itemContent}>
-          {infoListRender(infoList)}
-        </div>
-      </Modal>
-
-      {/* 常规操作 */}
-      <Modal
-        visible={isOptModalOpen}
-        title={'常规操作'}
-        footer={null}
-        onCancel={() => setIsOptModalOpen(false)}
-        width={640}
-      >
-        <div className={css.itemContent}>
-          {optListRender(optList)}
-        </div>
-      </Modal>
     </div>
   )
 }
@@ -747,151 +658,3 @@ const getMergedEnvList = (appData, appConfig) => {
 
   return unionBy([...pageEnvlist, ...configEnvlist], 'name')
 }
-
-const infoList = [
-  {
-    name: '保存',
-    keys: ['⌘', 'S', '/', 'Control', 'S', '/', 'Ctrl', 'S']
-  },
-  {
-    name: '撤销',
-    keys: ['⌘', 'Z', '/', 'Control', 'Z', '/', 'Ctrl', 'Z']
-  },
-  {
-    name: '重做',
-    keys: ['⌘', 'Shift', 'Z', '/', 'Ctrl', 'Shift', 'Z']
-  },
-  {
-    name: '复制组件',
-    keys: ['⌘', 'C', '/', 'Control', 'C', '/', 'Ctrl', 'C']
-  },
-  {
-    name: '粘贴组件',
-    keys: ['⌘', 'V', '/', 'Control', 'V', '/', 'Ctrl', 'V']
-  },
-  {
-    name: '剪切组件',
-    keys: ['⌘', 'X', '/', 'Control', 'X', '/', 'Ctrl', 'X']
-  },
-  {
-    name: '删除组件',
-    keys: ['Backspace']
-  },
-  {
-    name: '选择组件',
-    keys: ['Drag', 'Click']
-  }
-]
-
-const optList = [
-  {
-    name: '唤起AI客服',
-    keys: [`页面右下角AI图标`, robot]
-  },
-  {
-    name: '锁定或释放编辑权限',
-    keys: ['点击顶部头像切换']
-  },
-  {
-    name: '查看大纲',
-    keys: ['页面左上角【#】']
-  },
-  {
-    name: '新建场景、对话框等',
-    keys: ['点击页面左上角【#】,再点击 +']
-  },
-  {
-    name: '新建或编辑接口',
-    keys: [`【服务接口】插件`, link]
-  },
-  {
-    name: '快速搜索组件、流程卡片等',
-    keys: [`左侧插件栏搜索图标`, search]
-  },
-  {
-    name: '页面调试',
-    keys: [`操作区右上角播放图标`, play]
-  },
-  {
-    name: '组件物料查看',
-    keys: [`操作区右上角物料库图标`, store]
-  },
-  {
-    name: '添加组件',
-    keys: [`点击组件，或者拖拽至画布`]
-  },
-  {
-    name: '添加组件库',
-    keys: [`点击操作区右上角物料库图标`, store, `再点击添加按钮`]
-  },
-  {
-    name: '画布缩放',
-    keys: [`点击操作区右上角, 缩放操作按钮`]
-  },
-  {
-    name: '画布宽高调整',
-    keys: [`聚焦操作区横向或纵向边缘, 长宽调节轴`]
-  },
-  {
-    name: '交互卡片显示画布',
-    keys: [`点击交互区左上角，卡片显示图标`, locale]
-  },
-  {
-    name: '交互卡片缩放',
-    keys: [`点击交互区右上角，缩放操作区`]
-  },
-  {
-    name: '查看保存记录',
-    keys: ['顶部时间信息或【保存/发布记录】插件']
-  },
-  {
-    name: '查看发布记录',
-    keys: [`【保存/发布记录】插件`, record]
-  },
-  {
-    name: '页面JSON导出',
-    keys: [`右上角页面信息操作图标`, info]
-  }
-]
-
-const infoListRender = ((list) => {
-  return (
-    list.map((item) => {
-      return (
-        <div className={css.itemList}>
-          <div className={css.itemListLeft}>
-            {item.name}
-          </div>
-          <div className={css.itemListRight}>
-            {item.keys.map((key) => {
-              if (key !== '/') {
-                return (<div className={css.liBtn}>{key}</div>)
-              } else {
-                return (<div>{key}</div>)
-              }
-            })}
-          </div>
-        </div>
-      )
-    })
-  )
-})
-
-const optListRender = ((list) => {
-  return (
-    list.map((item) => {
-      return (
-        <div className={css.itemList}>
-          <div className={css.itemListLeft}>
-            {item.name}
-          </div>
-          <div className={css.itemListRight}>
-            {item.keys.map((key) => {
-              return (<div className={css.liOpt}>{key}</div>)
-            })}
-          </div>
-        </div>
-      )
-    })
-  )
-})

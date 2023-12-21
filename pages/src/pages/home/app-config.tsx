@@ -242,9 +242,9 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     );
   }
   return {
-    debugger(json, opts) {
-      return renderUI(json, opts)
-    },
+    // debugger(json, opts) {
+    //   return renderUI(json, opts)
+    // },
     shortcuts: {
       'ctrl+s': [save],
     },
@@ -700,7 +700,9 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           if (ctx.executeEnv === USE_CUSTOM_HOST) {
             if (params instanceof FormData) {
               newParams.append('MYBRICKS_HOST', JSON.stringify(ctx.MYBRICKS_HOST));
-            } else {
+            } else if (Array.isArray(newParams)) {
+              newParams['MYBRICKS_HOST'] = { ...ctx.MYBRICKS_HOST };
+            } else if (typeof newParams === 'object') {
               newParams = { ...params, MYBRICKS_HOST: { ...ctx.MYBRICKS_HOST } };
             }
           }
