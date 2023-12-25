@@ -25,7 +25,17 @@ import { USE_CUSTOM_HOST } from './constants'
 import { getLibsFromConfig } from '../../utils/getComlibs'
 
 const msgSaveKey = 'save'
-const designer = './public/designer-spa/1.3.72/index.min.js'
+const designer = './public/designer-spa/1.3.71/index.min.js'
+
+/**
+ * @description 获取当前应用setting
+ * @returns object
+ */
+const getAppSetting = async () => {
+  const settings = await API.Setting.getSetting([APP_NAME])
+
+  return settings[APP_NAME]?.config
+}
 
 export default function MyDesigner({ appData: originAppData }) {
   const appData = useMemo(() => {
@@ -51,12 +61,15 @@ export default function MyDesigner({ appData: originAppData }) {
 
   const [ctx, setCtx] = useState(() => {
     const envList = getMergedEnvList(appData, appConfig)
+
     const executeEnv = appData.fileContent?.content?.executeEnv || ''
+
     const debugMode = executeEnv === USE_CUSTOM_HOST
       ? EnumMode.CUSTOM
       : envList.length > 0
         ? EnumMode.ENV
         : EnumMode.DEFAULT
+
     return {
       sdk: {
         projectId: appData.projectId,
@@ -96,12 +109,16 @@ export default function MyDesigner({ appData: originAppData }) {
       ) {
         const { name, shareType, content, icon } = param
 
+        const settings = await getAppSetting()
+        const isEncode = !!settings?.publishLocalizeConfig?.isEncode
+
         await appData.save({
           userId: ctx.user?.id,
           fileId: ctx.fileId,
           name,
           shareType,
           content: removeBadChar(content),
+          isEncode,
           icon,
         }).then(() => {
           !skipMessage && message.success({ content: `保存完成`, key: msgSaveKey });
@@ -340,7 +357,10 @@ export default function MyDesigner({ appData: originAppData }) {
 
           const curComLibs = await genLazyloadComs(ctx.comlibs, curToJSON)
 
-          const toJSON = JSON.parse(JSON.stringify({
+          const settings = await getAppSetting()
+          const isEncode = !!settings?.publishLocalizeConfig?.isEncode
+
+          const jsonParams = {
             ...curToJSON,
             configuration: {
               // scripts: encodeURIComponent(scripts),
@@ -359,7 +379,9 @@ export default function MyDesigner({ appData: originAppData }) {
               appConfig,
             },
             hasPermissionFn: ctx.hasPermissionFn
-          }));
+          }
+
+          const toJSON = isEncode ? btoa(encodeURIComponent(JSON.stringify(jsonParams))) : jsonParams
 
           const res: { code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
             userId: ctx.user?.id,
@@ -449,7 +471,9 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return json
   }, [JSON.stringify(ctx)])
+
   window.designerRef = designerRef
+
   return (
     <div className={`${css.view} fangzhou-theme`}>
       <Toolbar

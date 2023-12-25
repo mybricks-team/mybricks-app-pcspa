@@ -54,7 +54,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
           <Button htmlType='reset' style={{ marginRight: 8 }}>清空</Button>
         </Popconfirm>
         <Button type="primary" htmlType="submit">
-          提交
+          保存
         </Button>
       </Form.Item>
     </Form>

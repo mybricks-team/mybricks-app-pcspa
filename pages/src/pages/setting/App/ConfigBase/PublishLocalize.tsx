@@ -11,14 +11,22 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   const [form] = Form.useForm();
 
   const publishLocalizeConfig = config?.publishLocalizeConfig || {};
+  console.log(config)
   useEffect(() => {
     form.setFieldsValue(publishLocalizeConfig)
   }, [publishLocalizeConfig]);
 
   const onSubmit = (values) => {
     const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+
     mergeUpdateConfig({
-      publishLocalizeConfig: { ...publishLocalizeConfig, [fieldName]: !!values[fieldName], updateTime, user: user?.email }
+      publishLocalizeConfig: {
+        ...publishLocalizeConfig,
+        [fieldName]: !!values[fieldName],
+        isEncode: !!values.isEncode,
+        updateTime,
+        user: user?.email
+      }
     });
   }
 
@@ -32,10 +40,18 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       >
         <Switch />
       </Form.Item>
+      <Form.Item
+        name="isEncode"
+        label="数据编码"
+        tooltip="开启后对保存、发布的数据进行编码，避免防火墙错误拦截"
+        valuePropName="checked"
+      >
+        <Switch />
+      </Form.Item>
       <Form.Item style={{ textAlign: 'right' }}>
         {Object.keys(publishLocalizeConfig).length > 0 && <Meta description={`${publishLocalizeConfig.user} 更新于 ${publishLocalizeConfig.updateTime}`} />}
         <Button type="primary" htmlType="submit" onClick={() => { onSubmit(form.getFieldsValue()) }}>
-          提交
+          保存
         </Button>
       </Form.Item>
     </Form>

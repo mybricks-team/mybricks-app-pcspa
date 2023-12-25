@@ -35,7 +35,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
     <Form form={form} onFinish={onSubmit}>
       <Form.Item
         name="uploadService"
-        label="上传接口地址"
+        label="文件上传接口"
         required
         rules={[{ required: true, message: '请输入服务接口' }]}
         tooltip="该接口用于上传静态文件，如：搭建时的图片、文件上传"
@@ -54,7 +54,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
 
         </Popconfirm>
         <Button type="primary" htmlType="submit">
-          提交
+          保存
         </Button>
       </Form.Item>
     </Form>

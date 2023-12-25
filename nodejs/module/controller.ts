@@ -15,6 +15,8 @@ import Decorator from "@mybricks/sdk-for-app/decorator";
 import * as fs from "fs";
 import * as path from "path";
 import { getAppTypeFromTemplate } from "./tools/common";
+import { getAppConfig } from './tools/get-app-config'
+
 const pkg = require("../../package.json");
 const template = fs.readFileSync(
   path.resolve(__dirname, "../../assets") + "/publish.html",
@@ -50,8 +52,15 @@ export default class PcPageController {
       Logger.info("[publish] 调用发布接口");
       const startTime = Date.now();
 
+      const appConfig = await getAppConfig()
+      const isEncode = !!appConfig?.publishLocalizeConfig?.isEncode
+      
+      Logger.info(`[publish] 获取编码状态 isEncode ${isEncode}`);
+
+      const jsonTransform = isEncode ? JSON.parse(decodeURIComponent(Buffer.from(typeof json === 'string' ? json : JSON.stringify(json), 'base64').toString())) : json
+
       const result = await this.service.publish(req, {
-        json,
+        json: jsonTransform,
         userId,
         fileId,
         envType,
