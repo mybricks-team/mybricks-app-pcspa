@@ -16,7 +16,8 @@ const NeedTransformPlugin = [
 const transformCodeByBabel = (
   code: string,
   tips?: string,
-  keepCode?: boolean
+  keepCode?: boolean,
+  options?: any
 ) => {
   /**
    * 已经babel的code直接返回
@@ -25,6 +26,10 @@ const transformCodeByBabel = (
     return code;
   }
   let res = code;
+  const parserOptions = options ?? {
+    presets: ["env", "typescript"],
+    filename: "types.d.ts",
+  };
   try {
     let temp = decodeURIComponent(code);
     if (keepCode) {
@@ -43,10 +48,7 @@ const transformCodeByBabel = (
       temp = `_RTFN_ = ${temp} `;
     }
     res = encodeURIComponent(
-      Babel.transform(temp, {
-        presets: ["env", "typescript"],
-        filename: 'types.d.ts'
-      }).code
+      Babel.transform(temp, parserOptions).code
     );
     res = `${encodeURIComponent(
       `(function() { var _RTFN_; \n`
@@ -90,6 +92,26 @@ const transformScene = (scene: Record<string, any>) => {
         tempObj[key].model.data.fns = transformCodeByBabel(
           tempObj[key].model.data.fns,
           `【${tempObj[key].title ?? tempObj[key].id}】—— JS计算编译失败，`
+        );
+      } else if (namespace === "mybricks.normal-pc.custom-render") {
+        const parserOptions = {
+          presets: ['env', 'react'],
+          plugins: [
+            ['proposal-decorators', { legacy: true }],
+            'proposal-class-properties',
+            [
+              'transform-typescript',
+              {
+                isTSX: true
+              }
+            ]
+          ]
+        };
+        tempObj[key].model.data.componentCode = transformCodeByBabel(
+          tempObj[key].model.data.componentCode,
+          `【${tempObj[key].title ?? tempObj[key].id}】—— 自定义渲染编译失败，`,
+          false,
+          parserOptions
         );
       }
     });
