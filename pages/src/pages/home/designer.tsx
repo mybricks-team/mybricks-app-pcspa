@@ -544,6 +544,7 @@ export default function MyDesigner({ appData: originAppData }) {
       </div>
       <PublishModal
         envList={ctx.envList}
+        projectId={ctx.sdk.projectId}
         visible={publishModalVisible}
         onOk={(publishConfig) => {
           publish(publishConfig)

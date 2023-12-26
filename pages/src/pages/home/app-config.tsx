@@ -9,10 +9,12 @@ import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-co
 import versionPlugin from 'mybricks-plugin-version'
 import localePlugin from '@mybricks/plugin-locale'
 import { use as useTheme } from '@mybricks/plugin-theme';
+import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 
 import { render as renderUI } from '@mybricks/render-web';
 import comlibLoaderFunc from './configs/comlibLoader'
 import { comLibAdderFunc } from './configs/comLibAdder'
+import CollaborationHttp from './plugin/collaboration-http';
 import { runJs } from '../../utils/runJs'
 
 import axios from 'axios';
@@ -123,6 +125,7 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
 }
 
 const CUSTOM_HOST_TITLE = `自定义域名`
+const DOMAIN_APP_NAMESPACE = 'mybricks-domain';
 
 const isReact = APP_TYPE === 'react';
 
@@ -144,6 +147,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     return res
   }, {})
 
+  const domainApp = appData.installedApps.find(app => app.namespace === DOMAIN_APP_NAMESPACE);
 
   ctx.debugMode = ctx.executeEnv === USE_CUSTOM_HOST
     ? EnumMode.CUSTOM
@@ -206,6 +210,37 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     return `zh`
   }
 
+  const connetorPlugins: any[] = [
+    servicePlugin({
+      addActions: domainApp ? [
+        {
+          type: 'http-sql',
+          title: '领域接口',
+          noUseInnerEdit: true,
+          getTitle: item => {
+            return item.content?.domainServiceMap ? item.content.title : `${item.content.title || ''}(未选择)`
+          },
+          render: (props) => {
+            return (
+              <CollaborationHttp
+                {...props}
+                openFileSelector={() => openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })}
+              />
+            );
+          }
+        },
+      ] : void 0,
+    }),
+  ];
+  if (domainApp) {
+    connetorPlugins.push(
+      domainServicePlugin({
+        openFileSelector() {
+          return openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })
+        },
+      })
+    );
+  }
   return {
     // debugger(json, opts) {
     //   return renderUI(json, opts)
@@ -214,7 +249,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       'ctrl+s': [save],
     },
     plugins: [
-      servicePlugin(),
+      ...connetorPlugins,
       localePlugin({
         onPackLoad: ({ i18nLangContent }) => {
           ctx.i18nLangContent = i18nLangContent
@@ -654,7 +689,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         },
         /** 调用领域模型 */
         callDomainModel(domainModel, type, params) {
-          return callDomainHttp(domainModel, params, { action: type });
+          return callDomainHttp(domainModel, params, { action: type } as any);
         },
         callConnector(connector, params, connectorConfig = {}) {
           const plugin = designerRef.current?.getPlugin(connector.connectorName);

@@ -39,6 +39,14 @@ export async function handleTemplate({
     needCombo = true;
   }
 
+  let domainServicePath = '/api/system/domain/run';
+  if (projectId) {
+    // 项目下发布prod环境发布才调用线上接口，否则都是测试接口
+    if (envType === 'prod') {
+      domainServicePath = '/runtime/api/domain/service/run';
+    }
+  }
+
   //语言包资源, 可以按需添加其他语言
   // localeScript += `<script src="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>`;
 
@@ -56,7 +64,8 @@ export async function handleTemplate({
       `"--slot-project-id--"`,
       projectId ? projectId : JSON.stringify(null)
     )
-    .replace(`--localeScript--`, JSON.stringify(localeScript));
+    .replace(`--localeScript--`, JSON.stringify(localeScript))
+    .replace(`--domain-service-path--`, domainServicePath);
 
   Logger.info("[publish] 模板替换完成");
 

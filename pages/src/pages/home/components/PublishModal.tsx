@@ -13,8 +13,10 @@ export default ({
   visible,
   onOk,
   onCancel,
-  envList
-}: ModalProps & { envList: Array<any> }) => {
+  envList,
+  projectId
+}: ModalProps & { envList: Array<any>, projectId?: string }) => {
+
   const [mode, setMode] = useState(envList.length > 0 ? EnumMode.ENV : EnumMode.DEFAULT)
   const [form] = Form.useForm();
 
@@ -65,16 +67,19 @@ export default ({
       zIndex={1001}
     >
       <Form form={form} labelCol={{ span: 5 }} wrapperCol={{ span: 19 }}>
-        <Form.Item
-          label="发布模式"
-          name="mode"
-          required
-        >
-          <Radio.Group defaultValue={mode} onChange={e => setMode(e.target.value)}>
-            {hasEnv ? <Radio value={EnumMode.ENV}>选择环境</Radio> : <Radio value={EnumMode.DEFAULT}>默认</Radio>}
-            <Radio value={EnumMode.CUSTOM}>自定义域名</Radio>
-          </Radio.Group>
-        </Form.Item>
+        {projectId
+          ? null
+          : <Form.Item
+            label="发布模式"
+            name="mode"
+            required
+          >
+            <Radio.Group defaultValue={mode} onChange={e => setMode(e.target.value)}>
+              {hasEnv ? <Radio value={EnumMode.ENV}>选择环境</Radio> : <Radio value={EnumMode.DEFAULT}>默认</Radio>}
+              <Radio value={EnumMode.CUSTOM}>自定义域名</Radio>
+            </Radio.Group>
+          </Form.Item>
+        }
         {mode === EnumMode.ENV && <Form.Item
           label="发布环境"
           name="envType"
