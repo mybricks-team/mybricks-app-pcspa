@@ -98,7 +98,6 @@ zip.generateAsync({
     createTime: Date.now(),
   }));
   formData.append('file', content, `${appName}.zip`);
-  fs.writeFileSync('./test.zip', content, 'utf-8')
 
   // 发送请求
   axios
