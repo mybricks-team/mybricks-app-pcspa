@@ -66,7 +66,7 @@
     "@mybricks/plugin-locale": "1.0.0",
     "@mybricks/plugin-tools": "1.0.17",
     "@mybricks/render-web": "1.2.35",
-    "@mybricks/sdk-for-app": "1.0.21-beta.9",
+    "@mybricks/sdk-for-app": "1.0.23",
     "antd": "^4.23.6",
     "classnames": "^2.3.1",
     "compare-versions": "^6.0.0",
