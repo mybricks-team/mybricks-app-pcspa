@@ -1,6 +1,6 @@
 {
   "name": "mybricks-app-pcspa",
-  "version": "1.2.51",
+  "version": "1.2.52",
   "description": "中后台类PC页面搭建",
   "scripts": {
     "watch:be-local": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://localhost:3100 node nodejs/index.js'",
@@ -10,7 +10,6 @@
     "build:react": "cd pages && npm run build:react",
     "build:vue2": "cd pages && npm run build:vue2",
     "publish:offline": "node ./publish.js offline",
-    "publish:online": "node ./publish.js --noServiceUpdate --origin=https://my.mybricks.world",
     "publish:online:serviceUpdate": "node ./publish.js --origin=https://my.mybricks.world",
     "updateLocalPublic": "ts-node update_local_public"
   },
