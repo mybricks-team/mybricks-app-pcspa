@@ -30,12 +30,13 @@ const isEqual = (param1, param2) => {
   return param1 === param2
 }
 
-const root = ({ renderType, locale, ...props }) => {
+const root = ({ renderType, locale, runtime, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   const domainServicePath = '--domain-service-path--';//replace it
 
   return renderUI(projectJson, {
     env: {
+      runtime,
       silent: true,
       showErrorNotification: false,
       canvasElement: props?.canvasElement || props.container || document.body,

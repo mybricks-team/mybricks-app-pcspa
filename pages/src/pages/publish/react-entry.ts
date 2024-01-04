@@ -1,11 +1,14 @@
 import renderUI from './renderUI'
 import '@/reset.less'
+import { scheduleTaskListen } from '../../utils/scheduleTask'
 
 const React = window.React;
 const ReactDOM = window.ReactDOM;
 const antd = window.antd;
 
 let reactRoot
+
+const scheduleTask = scheduleTaskListen()
 
 const getAntdLocalName = (locale) => {
   const localeArr = locale.split('-');
@@ -33,14 +36,23 @@ const render = (props) => {
   reactRoot = ReactDOM.createRoot(root);
   const antdLocalLib = antd?.locale[getAntdLocalName(getCurrentLocale())]?.default
 
-  reactRoot.render(React.createElement(
-    antd.ConfigProvider,
-    {
-      // 如鬼哦没有因为就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
-      locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale())) ? undefined : (antdLocalLib || antd.locale['zh_CN'].default)
-    },
-    renderUI({ ...props, renderType: 'react', locale: getCurrentLocale() })
-  ));
+  reactRoot.render(
+    React.createElement(
+      antd.ConfigProvider,
+      {
+        // 如鬼哦没有因为就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
+        locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale()))
+          ? undefined
+          : antdLocalLib || antd.locale["zh_CN"].default,
+      },
+      renderUI({
+        ...props,
+        renderType: "react",
+        locale: getCurrentLocale(),
+        runtime: { onComplete: scheduleTask.addListen },
+      })
+    )
+  );
 }
 
 if (!window.__POWERED_BY_QIANKUN__) {
@@ -56,7 +68,8 @@ export async function mount(props) {
 }
 
 export async function unmount(props) {
-  const { container } = props;
+  // const { container } = props;
   // ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#mybricks-page-root'));
+  scheduleTask.cleanListen()
   reactRoot.unmount()
 }
