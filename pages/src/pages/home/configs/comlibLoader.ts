@@ -97,7 +97,7 @@ export default (ctx) => (libDesc) => {
         switch (cmd) {
           case 'upgradeCom':
             const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId) ?? [];
-            const curCom = mySelfLib.find(com => com.namespace === comNamespace);
+            const curCom = mySelfLib.comAray?.find(com => com.namespace === comNamespace);
             ctx.sdk.openUrl({
               url: 'MYBRICKS://mybricks-material/materialSelectorPage',
               params: {
