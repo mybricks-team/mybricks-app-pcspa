@@ -96,40 +96,29 @@ export default (ctx) => (libDesc) => {
         let com
         switch (cmd) {
           case 'upgradeCom':
-            index = comlib.comAray.findIndex((com) => com.namespace === comNamespace);
-
-            if (index !== -1) {
-              com = comlib.comAray[index];
-              const closeLoad = message.loading({
-                key: 'loading',
-                content: '物料加载中……',
-                duration: 200,
-              })
-              const component = await MaterialService.getMateralMaterialInfo({ namespace: comNamespace }).finally(()=>closeLoad())
-              if (component.version === com.version) {
-                message.warn('当前组件已经是最新版本了～')
-                return
-              }
-              Modal.confirm({
-                className: 'fangzhou-theme',
-                okText: '确定',
-                cancelText: '取消',
-                centered: true,
-                title: `请确认是否升级组件“${com.title}”到最新版本`,
-                getContainer: () => document.body,
-                onOk() {
-                  const newComponents = updateSelfLibComponent(component)
-                  getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
-                    resolve({
-                      id: '_myself_',
-                      title: '我的组件',
-                      defined: true,
-                      comAray: newComlib?.comAray || []
-                    })
+            const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId) ?? [];
+            const curCom = mySelfLib.find(com => com.namespace === comNamespace);
+            ctx.sdk.openUrl({
+              url: 'MYBRICKS://mybricks-material/materialSelectorPage',
+              params: {
+                defaultSelected: getSelfComponents(),
+                curUpgradeMaterial: curCom,
+                userId: ctx.user?.id,
+                combo: true,
+                tags: [APP_TYPE]
+              },
+              onSuccess: ({ materials, updatedMaterials }) => {
+                const newComponents = addSelfLibComponents(materials)
+                getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
+                  resolve({
+                    id: '_myself_',
+                    title: '我的组件',
+                    defined: true,
+                    comAray: newComlib?.comAray || []
                   })
-                },
-              });
-            }
+                })
+              }
+            })
             break;
           case 'deleteCom': /** 需要resolve一个comlib对象 */
             index = comlib.comAray.findIndex((com) => com.namespace === comNamespace);
