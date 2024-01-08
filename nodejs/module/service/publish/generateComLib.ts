@@ -7,23 +7,41 @@ type Component = {
   version: string;
   runtime?: string;
   isCloud?: boolean;
-  deps?: Component[]
+  deps?: Component[];
 };
 
-const getComponentFromMaterial = (component: Component): Promise<Component | unknown> => {
+const ignoreNamespaces = [
+  "mybricks.core-comlib.fn",
+  "mybricks.core-comlib.var",
+  "mybricks.core-comlib.type-change",
+  "mybricks.core-comlib.connector",
+  "mybricks.core-comlib.frame-input",
+  "mybricks.core-comlib.frame-output",
+  "mybricks.core-comlib.scenes",
+  "mybricks.core-comlib.defined-com",
+  "mybricks.core-comlib.module",
+];
+
+const getComponentFromMaterial = (
+  component: Component
+): Promise<Component | undefined> => {
   return API.Material.getMaterialContent({
     namespace: component.namespace,
     version: component.version,
-  }).then((data) => {
-    const { version, namespace, runtime, isCloudComponent, deps } = data;
-    return {
-      version,
-      namespace,
-      deps,
-      isCloud: isCloudComponent,
-      runtime: encodeURIComponent(runtime),
-    };
-  }).catch((err) => { });
+  })
+    .then((data) => {
+      const { version, namespace, runtime, isCloudComponent, deps } = data;
+      return {
+        version,
+        namespace,
+        deps,
+        isCloud: isCloudComponent,
+        runtime: encodeURIComponent(runtime),
+      };
+    })
+    .catch((err) => {
+      return undefined;
+    });
 };
 
 export const generateComLib = async (
@@ -33,25 +51,36 @@ export const generateComLib = async (
 ) => {
   const { comLibId, noThrowError, appType = APPType.React } = options;
   let script = "";
-  const componentModules = [...deps]
+  const componentModules = [...deps];
   const componentCache: Component[] = [];
   for (const component of componentModules) {
-    const hasCache = componentCache.find((item) => item.namespace === component.namespace && item.version === component.version);
+    const hasCache = componentCache.find(
+      (item) =>
+        item.namespace === component.namespace &&
+        item.version === component.version
+    );
     if (hasCache) continue;
     let curComponent = await getComponentFromMaterial(component);
     if (curComponent?.deps) {
-      componentModules.push(...curComponent.deps)
+      componentModules.push(
+        ...curComponent.deps.filter(
+          (dep) => !ignoreNamespaces.includes(dep.namespace)
+        )
+      );
     }
     if (!curComponent) {
-      Logger.warn(`[getMaterialContent] 物料中心获取组件${component.namespace}失败，开始从rtComs获取……`)
+      Logger.warn(
+        `[getMaterialContent] 物料中心获取组件${component.namespace}失败，开始从rtComs获取……`
+      );
       let lib = allComLibs.find(
         (lib) =>
-          lib.componentRuntimeMap && lib.componentRuntimeMap[component.namespace + "@" + component.version]
+          lib.componentRuntimeMap &&
+          lib.componentRuntimeMap[component.namespace + "@" + component.version]
       );
       if (lib) {
         curComponent =
           lib.componentRuntimeMap[
-          component.namespace + "@" + component.version
+            component.namespace + "@" + component.version
           ];
       } else {
         lib = allComLibs.find((lib) =>
@@ -71,9 +100,9 @@ export const generateComLib = async (
         }
         curComponent =
           lib.componentRuntimeMap[
-          Object.keys(lib.componentRuntimeMap ?? {}).find((key) =>
-            key.startsWith(component.namespace)
-          )
+            Object.keys(lib.componentRuntimeMap ?? {}).find((key) =>
+              key.startsWith(component.namespace)
+            )
           ];
       }
 
@@ -88,8 +117,8 @@ export const generateComLib = async (
       }
     }
 
-    componentCache.push(curComponent)
-    const isCloudComponent = component.isCloud || curComponent.isCloud
+    componentCache.push(curComponent);
+    const isCloudComponent = component.isCloud || curComponent.isCloud;
 
     let componentRuntime = "";
     switch (true) {
@@ -116,13 +145,15 @@ export const generateComLib = async (
 
     script += isCloudComponent
       ? `
-			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
-      }', runtime: ${decodeURIComponent(componentRuntime)} });
+			comAray.push({ namespace: '${component.namespace}', version: '${
+          curComponent.version
+        }', runtime: ${decodeURIComponent(componentRuntime)} });
 		`
       : `
 			eval(${JSON.stringify(decodeURIComponent(componentRuntime))});
-			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
-      }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
+			comAray.push({ namespace: '${component.namespace}', version: '${
+          curComponent.version
+        }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
 			if(Reflect.has(window, 'fangzhouComDef')) Reflect.deleteProperty(window, 'fangzhouComDef');
 			if(Reflect.has(window, 'MybricksComDef')) Reflect.deleteProperty(window, 'MybricksComDef');
 		`;
@@ -155,22 +186,10 @@ export async function generateComLibRT(
   comlibs.forEach((comlib) => {
     if (comlib?.defined && Array.isArray(comlib.comAray)) {
       comlib.comAray.forEach(({ namespace, version }) => {
-        mySelfComMap[`${namespace}@${version}`] = true
+        mySelfComMap[`${namespace}@${version}`] = true;
       });
     }
   });
-
-  const ignoreNamespaces = [
-    "mybricks.core-comlib.fn",
-    "mybricks.core-comlib.var",
-    "mybricks.core-comlib.type-change",
-    "mybricks.core-comlib.connector",
-    "mybricks.core-comlib.frame-input",
-    "mybricks.core-comlib.frame-output",
-    "mybricks.core-comlib.scenes",
-    "mybricks.core-comlib.defined-com",
-    "mybricks.core-comlib.module",
-  ];
 
   let definedComsDeps = [];
   let modulesDeps = [];
@@ -205,17 +224,20 @@ export async function generateComLibRT(
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ];
 
-  const cloudNamespaceList = Object.keys(mySelfComMap)
+  const cloudNamespaceList = Object.keys(mySelfComMap);
 
   deps = deps.reduce((accumulator, current) => {
     const existingObject = accumulator.find(
-      (obj) => obj.namespace === current.namespace && obj.version === current.version
+      (obj) =>
+        obj.namespace === current.namespace && obj.version === current.version
     );
     /**
-   * "我的组件"集合，标记为云组件
-   */
-    if (cloudNamespaceList.includes(`${current.namespace}@${current.version}`)) {
-      current.isCloud = true
+     * "我的组件"集合，标记为云组件
+     */
+    if (
+      cloudNamespaceList.includes(`${current.namespace}@${current.version}`)
+    ) {
+      current.isCloud = true;
     }
     if (!existingObject) {
       accumulator.push(current);
