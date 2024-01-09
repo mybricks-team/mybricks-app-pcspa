@@ -1,5 +1,5 @@
 import { ILocalizationInfo } from "../../interface";
-import { analysisAllUrl } from "../../tools/analysis";
+import { analysisAllImageUrl } from "../../tools/analysis";
 import {
   getCustomConnectorRuntime,
   getCustomNeedLocalization,
@@ -11,9 +11,16 @@ import {
 import LocalPublic from "../local-public";
 import { Logger } from "@mybricks/rocker-commons";
 
-export async function localization({ req, appConfig, template, app_type }) {
+export async function localization({
+  req,
+  appConfig,
+  template,
+  app_type,
+  json,
+}) {
   /** 是否本地化发布 */
   const needLocalization = await getCustomNeedLocalization();
+  const origin = req.headers.origin;
 
   /** 所有要本地化的公共依赖 */
   let globalDeps: ILocalizationInfo[] = [];
@@ -69,7 +76,13 @@ export async function localization({ req, appConfig, template, app_type }) {
       globalDeps: _globalDeps,
       images: _images,
       template: _template,
-    } = await resourceLocalization(template, needLocalization, app_type);
+    } = await resourceLocalization(
+      template,
+      needLocalization,
+      json,
+      origin,
+      app_type
+    );
     globalDeps = globalDeps.concat(_globalDeps || []);
     images = _images;
     template = _template;
@@ -94,6 +107,8 @@ export async function localization({ req, appConfig, template, app_type }) {
 async function resourceLocalization(
   template: string,
   needLocalization: boolean,
+  json: any,
+  origin,
   type = "react"
 ) {
   const localPublicInfos = LocalPublic[type].map((info) => {
@@ -118,7 +133,7 @@ async function resourceLocalization(
 
   template = template.replace("-- public --", publicHtmlStr);
 
-  Logger.info(`[localPublicInfos] 发布资源 ${localPublicInfos}`)
+  Logger.info(`[localPublicInfos] 发布资源 ${localPublicInfos}`);
 
   let globalDeps: ILocalizationInfo[] = null;
   if (needLocalization) {
@@ -134,26 +149,24 @@ async function resourceLocalization(
   }
 
   // 模板中所有的图片资源
-  const imageURLs = [
-    ...new Set(
-      analysisAllUrl(template).filter((url) => url.includes("/mfs/files/"))
-    ),
-  ];
+  const imageURLs = analysisAllImageUrl(template, json, origin);
 
-  // 图片放在固定位置，方便配置 nginx
-  let images = await Promise.all(
-    imageURLs.map((url) =>
-      getLocalizationInfoByNetwork(
-        url,
-        `mfs/files/${url
-          .split("/mfs/files/")[1]
-          .split("/")
-          .slice(0, -1)
-          .join("/")}`,
-        { responseType: "arraybuffer", withoutError: true }
+  // 图片地址改成相对路径，放在固定位置，方便配置 nginx
+  let images = (
+    await Promise.all(
+      imageURLs.map((url) =>
+        getLocalizationInfoByNetwork(
+          url,
+          `mfs/files/${url
+            .split("/mfs/files/")[1]
+            .split("/")
+            .slice(0, -1)
+            .join("/")}`,
+          { responseType: "arraybuffer", withoutError: true }
+        )
       )
     )
-  );
+  ).filter((item) => !!item);
 
   // 把模板中的图片资源地址替换成本地化后的地址
   imageURLs.forEach((url, index) => {

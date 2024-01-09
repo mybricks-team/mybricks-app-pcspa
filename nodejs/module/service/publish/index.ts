@@ -35,7 +35,7 @@ export async function publish(
       groupName,
       envList = [],
       appConfig = {},
-      i18nLangContent
+      i18nLangContent,
     } = json.configuration;
 
     Reflect.deleteProperty(json, "configuration");
@@ -70,7 +70,7 @@ export async function publish(
       envList,
       projectId,
       version,
-      i18nLangContent
+      i18nLangContent,
     });
     template = _template;
 
@@ -79,7 +79,7 @@ export async function publish(
       globalDeps,
       images,
       template: __template,
-    } = await localization({ req, appConfig, template, app_type });
+    } = await localization({ req, appConfig, template, app_type, json });
     template = __template;
 
     const comboScriptText = await getComboScriptText(
@@ -115,11 +115,7 @@ export async function publish(
       fileName,
       userId,
     };
-    const result = await publishPush(
-      params,
-      version,
-      true
-    );
+    const result = await publishPush(params, version, true);
 
     /** 保存回滚数据 */
     saveRollbackData(fileId, version, envType, params);

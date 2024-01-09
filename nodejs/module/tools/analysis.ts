@@ -37,14 +37,49 @@ export function getNextVersion(version, max = 100) {
 }
 
 /**
- * 获取文本中所有 URL
- * @param str 被处理的文本
- * @returns 文本中的所有 URL
+ * 解析出对象中所有字符类型的值
+ * @param obj 被解析对象
+ * @returns 对象中所有字符类型的值
  */
-export function analysisAllUrl(str: string): string[] {
-  return (
-    str.match(
+function extractStringsFromJSON(obj) {
+  let strings = [];
+
+  function explore(obj) {
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        if (typeof obj[key] === "string") {
+          strings.push(obj[key]);
+        } else if (typeof obj[key] === "object") {
+          explore(obj[key]);
+        }
+      }
+    }
+  }
+
+  explore(obj);
+  return strings;
+}
+
+/**
+ * 获取 template 中所有的图片资源地址 (图片资源一定是通过引擎提供的上传逻辑来的)
+ */
+export function analysisAllImageUrl(
+  template: string,
+  json: any,
+  origin: string
+): string[] {
+  const matches1 = (
+    template.match(
       /(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?/g
     ) || []
-  );
+  ).filter((url) => url.includes("/mfs/files/"));
+
+  const matches2 = extractStringsFromJSON(json)
+    .filter((url) => url.includes("/mfs/files/"))
+    .map((url) => {
+      if (url.startsWith("/mfs/files")) return origin + url;
+      return url;
+    });
+
+  return [...new Set([...matches1, ...matches2])];
 }
