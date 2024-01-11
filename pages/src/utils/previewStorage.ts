@@ -9,7 +9,7 @@ export class PreviewStorage {
 
   getFileKeyTemplate = (fileId) => `--preview-${fileId}-`;
 
-  savePreviewPageData = ({ dumpJson, comlibs, hasPermissionFn, executeEnv, appConfig, envList, MYBRICKS_HOST, directConnection, i18nLangContent }) => {
+  savePreviewPageData = ({ dumpJson, comlibs, hasPermissionFn, executeEnv, debugMockConfig, appConfig, envList, MYBRICKS_HOST, directConnection, i18nLangContent }) => {
     sessionStorage.setItem(`--preview-${this.fileId}-`, JSON.stringify(dumpJson))
     sessionStorage.setItem(`--preview--comlibs--${this.fileId}-`, JSON.stringify(comlibs))
     sessionStorage.setItem(`--preview--hasPermissionFn--${this.fileId}-`, hasPermissionFn)
@@ -19,6 +19,7 @@ export class PreviewStorage {
     sessionStorage.setItem(`--preview--envList--${this.fileId}-`, JSON.stringify(envList))
     sessionStorage.setItem(`--preview--MYBRICKS_HOST--${this.fileId}-`, JSON.stringify(MYBRICKS_HOST))
     sessionStorage.setItem(`--preview--i18nLangContent--${this.fileId}-`, JSON.stringify(i18nLangContent))
+    sessionStorage.setItem(`--preview--debugMockConfig--${this.fileId}-`, JSON.stringify(debugMockConfig))
   }
 
   getPreviewPageData = () => {
@@ -26,6 +27,7 @@ export class PreviewStorage {
     let comlibs = sessionStorage.getItem(`--preview--comlibs--${this.fileId}-`)
     let hasPermissionFn = sessionStorage.getItem(`--preview--hasPermissionFn--${this.fileId}-`)
     let executeEnv = sessionStorage.getItem(`--preview--executeEnv--${this.fileId}-`)
+    let debugMockConfig = sessionStorage.getItem(`--preview--debugMockConfig--${this.fileId}-`)
     let directConnection = false;
     let MYBRICKS_HOST
     let appConfig
@@ -64,6 +66,11 @@ export class PreviewStorage {
     } catch (ex) {
       throw ex
     }
+    try {
+      debugMockConfig = JSON.parse(sessionStorage.getItem(`--preview--debugMockConfig--${this.fileId}-`))
+    } catch (ex) {
+      throw ex
+    }
 
     try {
       comlibs = JSON.parse(comlibs)
@@ -76,6 +83,7 @@ export class PreviewStorage {
       dumpJson: dumpJson as any,
       // TODO: 没找到 comlibs 对应的类型，等这个类型补上了吧这里修改掉
       comlibs: comlibs as any,
+      debugMockConfig: debugMockConfig as any,
       hasPermissionFn,
       executeEnv,
       appConfig,
