@@ -8,8 +8,9 @@ import {
 import { runJs } from "@/utils/runJs";
 import { connectorLoader } from "@/utils/connectorLoader";
 import { PreviewStorage } from "@/utils/previewStorage";
-import { mock as connectorHttpMock } from '@mybricks/plugin-connector-http'
-import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
+// import { mock as connectorHttpMock } from '@mybricks/plugin-connector-http'
+import connectorHttpMock from '@mybricks/plugin-connector-http/runtime/mock'
+import { call as callDomainHttp } from '@mybricks/plugin-connector-domain/runtime';
 
 const fileId = getQueryString("fileId");
 const USE_CUSTOM_HOST = "__USE_CUSTOM_HOST__";

@@ -60,8 +60,8 @@
     "webpackbar": "^5.0.2"
   },
   "dependencies": {
-    "@mybricks/plugin-connector-domain": "0.0.51",
-    "@mybricks/plugin-connector-http": "1.1.90",
+    "@mybricks/plugin-connector-domain": "0.0.52",
+    "@mybricks/plugin-connector-http": "1.1.94",
     "@mybricks/plugin-locale": "1.0.0",
     "@mybricks/plugin-theme": "^0.0.45",
     "@mybricks/plugin-tools": "1.0.17",
