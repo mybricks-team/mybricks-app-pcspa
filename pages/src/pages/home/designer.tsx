@@ -23,6 +23,7 @@ import { i18nLangContentFilter } from '../../utils/index';
 import css from './app.less'
 import { USE_CUSTOM_HOST } from './constants'
 import { getLibsFromConfig } from '../../utils/getComlibs'
+import { proxLocalStorage } from '@/utils/debugMockUtils'
 
 const msgSaveKey = 'save'
 const designer = './public/designer-spa/1.3.83.5/index.min.js'
@@ -88,6 +89,12 @@ export default function MyDesigner({ appData: originAppData }) {
       i18nLangContent: {},
       i18nUsedIdList: [],
       debugMode,
+      debugMockConfig: appData.fileContent?.content?.debugMockConfig || {
+        debugQuery: [],
+        debugProps: [],
+        localStorageMock: [],
+        debugHeaders: [],
+      },
       directConnection: appData.fileContent?.content?.directConnection || false,
       MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
       fontJS: appData.fileContent?.content?.fontJS,
@@ -276,6 +283,7 @@ export default function MyDesigner({ appData: originAppData }) {
     const json = designerRef.current?.dump()
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
+    json.debugMockConfig = ctx.debugMockConfig
     json.directConnection = ctx.directConnection
     json.executeEnv = ctx.executeEnv
     json.MYBRICKS_HOST = ctx.MYBRICKS_HOST
@@ -310,6 +318,7 @@ export default function MyDesigner({ appData: originAppData }) {
       executeEnv: ctx.executeEnv,
       MYBRICKS_HOST: ctx.MYBRICKS_HOST,
       directConnection: ctx.directConnection,
+      debugMockConfig: ctx.debugMockConfig,
       envList: ctx.envList,
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
       hasPermissionFn: ctx.hasPermissionFn,
@@ -341,6 +350,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
           json.comlibs = ctx.comlibs
           json.debugQuery = ctx.debugQuery
+          json.debugMockConfig = ctx.debugMockConfig
           json.executeEnv = ctx.executeEnv
           json.MYBRICKS_HOST = ctx.MYBRICKS_HOST
           json.envList = ctx.envList
@@ -461,6 +471,7 @@ export default function MyDesigner({ appData: originAppData }) {
     json.pageConfig = {
       comlibs: ctx.comlibs,
       debugQuery: ctx.debugQuery,
+      debugMockConfig: ctx.debugMockConfig,
       directConnection: ctx.directConnection,
       // executeEnv: ctx.executeEnv,
       // MYBRICKS_HOST: ctx.MYBRICKS_HOST,
@@ -471,6 +482,12 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return json
   }, [JSON.stringify(ctx)])
+
+  useEffect(() => {
+    const removeProxy = proxLocalStorage(ctx.debugMockConfig?.localStorageMock)
+
+    return removeProxy
+  }, [ ctx.debugMockConfig?.localStorageMock ])
 
   window.designerRef = designerRef
 

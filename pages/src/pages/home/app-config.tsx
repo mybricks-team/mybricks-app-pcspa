@@ -75,6 +75,7 @@ const getDomainFromPath = (path: string) => {
   }
 }
 
+
 const injectUpload = (editConfig: Record<string, any>, uploadService: string, manateeUserInfo: { token: string, session: string }, fileId: string) => {
 
   if (!!editConfig && !editConfig.upload) {
@@ -157,6 +158,34 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
 
 
   getExecuteEnvByMode(ctx.debugMode, ctx, envList)
+
+
+  const createMockConfigEditor = (field, title, description) => {
+    return  {
+      title: title,
+      type: 'mapCheckbox',
+      options: {
+        kType: 'auto',
+        displayType: 'button',
+        addTip: '添加',
+        title: title,
+        // option: [
+        //   { label: 'Cookie', value: 'Cookie' },
+        //   { label: 'trace-context', value: 'trace-context' },
+        // ]
+      },
+      description: description,
+      value: {
+        get() {
+          return ctx.debugMockConfig[field]
+        },
+        //每个字段的数据结构为{ key, value, checked }
+        set(context, v) {
+          ctx.debugMockConfig[field] = v
+        }
+      }
+    }
+  }
 
   const debugModeOptions = envList.length > 0
     ? [
@@ -555,7 +584,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                     }
                   }
                 }
-              }
+              },
+              createMockConfigEditor('localStorageMock', 'localStorage模拟', '调试模式下，localStorage模拟'),
             ]
           },
           {
