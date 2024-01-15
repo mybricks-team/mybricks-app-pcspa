@@ -23,7 +23,7 @@ import { i18nLangContentFilter } from '../../utils/index';
 import css from './app.less'
 import { USE_CUSTOM_HOST } from './constants'
 import { getLibsFromConfig } from '../../utils/getComlibs'
-import { proxLocalStorage } from '@/utils/debugMockUtils'
+import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 
 const msgSaveKey = 'save'
 const designer = './public/designer-spa/1.3.83.5/index.min.js'
@@ -94,6 +94,7 @@ export default function MyDesigner({ appData: originAppData }) {
         debugProps: [],
         localStorageMock: [],
         debugHeaders: [],
+        sessionStorageMock:[],
       },
       directConnection: appData.fileContent?.content?.directConnection || false,
       MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
@@ -484,10 +485,14 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [JSON.stringify(ctx)])
 
   useEffect(() => {
-    const removeProxy = proxLocalStorage(ctx.debugMockConfig?.localStorageMock)
+    const removeLocalProxy = proxLocalStorage(ctx.debugMockConfig?.localStorageMock)
+    const removeSessionProxy = proxSessionStorage(ctx.debugMockConfig?.sessionStorageMock)
 
-    return removeProxy
-  }, [ ctx.debugMockConfig?.localStorageMock ])
+    return () => {
+      removeLocalProxy()
+      removeSessionProxy()
+    }
+  }, [ ctx.debugMockConfig?.localStorageMock, ctx.debugMockConfig?.sessionStorageMock ])
 
   window.designerRef = designerRef
 

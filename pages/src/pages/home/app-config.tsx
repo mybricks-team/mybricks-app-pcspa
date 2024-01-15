@@ -586,6 +586,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 }
               },
               createMockConfigEditor('localStorageMock', 'localStorage模拟', '调试模式下，localStorage模拟'),
+              createMockConfigEditor('sessionStorageMock', 'sessionStorage模拟', '调试模式下，sessionStorage模拟'),
             ]
           },
           {

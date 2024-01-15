@@ -11,7 +11,7 @@ import { PreviewStorage } from "@/utils/previewStorage";
 // import { mock as connectorHttpMock } from '@mybricks/plugin-connector-http'
 import connectorHttpMock from '@mybricks/plugin-connector-http/runtime/mock'
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain/runtime';
-import { proxLocalStorage } from "@/utils/debugMockUtils";
+import { proxLocalStorage, proxSessionStorage } from "@/utils/debugMockUtils";
 
 const fileId = getQueryString("fileId");
 const USE_CUSTOM_HOST = "__USE_CUSTOM_HOST__";
@@ -30,6 +30,7 @@ const {
 
 
 proxLocalStorage(debugMockConfig?.localStorageMock)
+proxSessionStorage(debugMockConfig?.sessionStorageMock)
 const root = ({ renderType, env, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   if (!renderUI) {
