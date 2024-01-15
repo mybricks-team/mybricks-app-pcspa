@@ -549,7 +549,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   set(context: any, v: string) {
                     const jsonString = decodeURIComponent(v);
                     try {
-                      const jsonData = JSON.parse(jsonString);
+                      const jsonData = JSON.parse(jsonString || '{}');
                       ctx.debugQuery = jsonData
                     } catch {
                       console.error('路由参数数据格式错误');
@@ -577,7 +577,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   set(context: any, v: string) {
                     const jsonString = decodeURIComponent(v);
                     try {
-                      const jsonData = JSON.parse(jsonString);
+                      const jsonData = JSON.parse(jsonString || '{}');
                       ctx.debugMainProps = jsonData
                     } catch {
                       console.error('主应用参数数据格式错误');
