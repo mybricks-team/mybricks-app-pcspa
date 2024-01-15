@@ -12,6 +12,9 @@ const scheduleTask = scheduleTaskListen()
 
 const getAntdLocalName = (locale) => {
   const localeArr = locale.split('-');
+  if(localeArr.length <= 1) {
+    return locale
+  }
   const lang = localeArr.pop()?.toUpperCase();
   return localeArr.concat(['_', lang as string]).join('');
 }

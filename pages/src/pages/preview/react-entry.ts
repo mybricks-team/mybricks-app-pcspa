@@ -56,6 +56,9 @@ let reactRoot
 
 const getAntdLocalName = (locale) => {
   const localeArr = locale.split('-');
+  if(localeArr.length <= 1) {
+    return locale
+  }
   const lang = localeArr.pop()?.toUpperCase();
   return localeArr.concat(['_', lang as string]).join('');
 }
@@ -75,7 +78,7 @@ function render(props) {
       reactRoot.render(React.createElement(
         antd.ConfigProvider,
         {
-          // 如鬼哦没有因为就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
+          // 如鬼没有就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
           locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale())) ? undefined : (antdLocalLib || antd.locale['zh_CN'].default)
         },
         renderUI({
