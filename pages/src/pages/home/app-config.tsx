@@ -4,6 +4,7 @@ import servicePlugin, {
   call as callConnectorHttp,
   mock as connectorHttpMock,
 } from '@mybricks/plugin-connector-http'
+import AIPlugin from '/Users/andyzou/Work/registry/mybricks-team/plugin-connector-http/src/index.tsx';
 import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-connector-domain'
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
@@ -278,6 +279,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       'ctrl+s': [save],
     },
     plugins: [
+
+      AIPlugin({ userId: ctx.user?.id }),
       ...connetorPlugins,
       localePlugin({
         onPackLoad: ({ i18nLangContent }) => {
