@@ -280,8 +280,6 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       'ctrl+s': [save],
     },
     plugins: [
-
-      AIPlugin({ userId: ctx.user?.id }),
       ...connetorPlugins,
       localePlugin({
         onPackLoad: ({ i18nLangContent }) => {
@@ -320,6 +318,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           }
         }
       }),
+      AIPlugin({ userId: ctx.user?.id }),
     ],
     ...(ctx.hasMaterialApp ? {
       comLibAdder: comLibAdderFunc(ctx),
