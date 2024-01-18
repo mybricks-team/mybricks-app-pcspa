@@ -27,7 +27,7 @@ import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 
 const msgSaveKey = 'save'
 // const designer = 'https://f2.beckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.85/index.min.js'
-const designer = './public/designer-spa/1.3.83.5/index.min.js'
+const designer = './public/designer-spa/1.3.85.10/index.min.js'
 
 /**
  * @description 获取当前应用setting

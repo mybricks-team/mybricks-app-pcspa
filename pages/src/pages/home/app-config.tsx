@@ -4,7 +4,8 @@ import servicePlugin, {
   call as callConnectorHttp,
   mock as connectorHttpMock,
 } from '@mybricks/plugin-connector-http'
-import AIPlugin from '/Users/andyzou/Work/registry/mybricks-team/plugin-connector-http/src/index.tsx';
+// import AIPlugin from '/Users/andyzou/Work/registry/mybricks-team/plugin-connector-http/src/index.tsx';
+import AIPlugin from '@mybricks/plugin-ai-copilot'
 import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-connector-domain'
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
