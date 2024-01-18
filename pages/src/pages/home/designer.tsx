@@ -26,7 +26,7 @@ import { getLibsFromConfig } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 
 const msgSaveKey = 'save'
-const designer = './public/designer-spa/1.3.85.11/index.min.js'
+const designer = './public/designer-spa/1.3.86/index.min.js'
 
 /**
  * @description 获取当前应用setting
