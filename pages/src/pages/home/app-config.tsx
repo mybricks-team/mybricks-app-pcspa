@@ -382,7 +382,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                     return ctx.absoluteNamePath
                   },
                   set: (context, v: any) => {
-                    if (v !== ctx.fileName) {
+                    if (v !== ctx.absoluteNamePath) {
                       ctx.absoluteNamePath = v
                     }
                   },
