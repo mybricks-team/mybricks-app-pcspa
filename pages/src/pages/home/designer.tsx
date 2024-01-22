@@ -78,6 +78,7 @@ export default function MyDesigner({ appData: originAppData }) {
       },
       user: appData.user,
       fileName: appData.fileContent?.name,
+      absoluteNamePath: appData.hierarchy.absoluteNamePath,
       fileId: appData.fileId,
       setting: appData.config || {},
       hasMaterialApp: appData.hasMaterialApp,
