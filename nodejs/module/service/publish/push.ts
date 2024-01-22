@@ -108,7 +108,9 @@ export async function publishPush(
         Logger.info("[publish] 正在尝试上传公共依赖...");
         // 将所有的公共依赖上传到对应位置
         await Promise.all(
-          globalDeps.map(({ content, path, name }) => {
+          globalDeps.map(async ({ content, path, name }) => {
+            const isExist = await checkStaticFile(origin, `${uploadfolderPath}/${path}`, name);
+            if (isExist) return
             return API.Upload.staticServer({
               folderPath: `${uploadfolderPath}/${path}`,
               content,
