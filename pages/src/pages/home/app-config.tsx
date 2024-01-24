@@ -360,19 +360,38 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         cate0.title = `项目`
         cate0.items = [
           {
-            title: '名称',
-            type: 'Text',
-            //options: {readOnly: true},
-            value: {
-              get: (context) => {
-                return ctx.fileName
+            items: [
+              {
+                title: '名称',
+                type: 'Text',
+                //options: {readOnly: true},
+                value: {
+                  get: (context) => {
+                    return ctx.fileName
+                  },
+                  set: (context, v: any) => {
+                    if (v !== ctx.fileName) {
+                      ctx.fileName = v
+                    }
+                  },
+                },
               },
-              set: (context, v: any) => {
-                if (v !== ctx.fileName) {
-                  ctx.fileName = v
+              {
+                title: '文件路径',
+                type: 'Text',
+                options: {readOnly: true},
+                value: {
+                  get: (context) => {
+                    return ctx.absoluteNamePath
+                  },
+                  set: (context, v: any) => {
+                    if (v !== ctx.absoluteNamePath) {
+                      ctx.absoluteNamePath = v
+                    }
+                  },
                 }
-              },
-            },
+              }
+            ]
           },
           {
             title: '全局方法',

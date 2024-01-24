@@ -82,6 +82,10 @@ export async function publish(
     } = await localization({ req, appConfig, template, app_type, json });
     template = __template;
 
+    const startComboScriptTime = Date.now();
+    
+    Logger.info(`[publish] 开始处理组件库脚本`);
+
     const comboScriptText = await getComboScriptText(
       comlibs,
       json,
@@ -92,6 +96,8 @@ export async function publish(
       },
       needCombo
     );
+
+    Logger.info(`[publish] 处理组件库脚本完成，耗时：${(Date.now() - startComboScriptTime) / 1000}s`);
 
     const params = {
       envType,

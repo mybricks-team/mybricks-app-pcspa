@@ -93,7 +93,7 @@ const transformScene = (scene: Record<string, any>) => {
           tempObj[key].model.data.fns,
           `【${tempObj[key].title ?? tempObj[key].id}】—— JS计算编译失败，`
         );
-      } else if (namespace === "mybricks.normal-pc.custom-render") {
+      } else if (["mybricks.normal-pc.custom-render", "mybricks.normal-pc-chart.line"].includes(namespace)) {
         const parserOptions = {
           presets: ['env', 'react'],
           plugins: [

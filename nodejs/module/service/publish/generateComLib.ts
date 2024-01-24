@@ -25,12 +25,17 @@ const ignoreNamespaces = [
 const getComponentFromMaterial = (
   component: Component
 ): Promise<Component | undefined> => {
+  Logger.info(`[publish] 开始从物料中心获取 ${component.namespace}@${component.version}`);
+
   return API.Material.getMaterialContent({
     namespace: component.namespace,
     version: component.version,
   })
     .then((data) => {
       const { version, namespace, runtime, isCloudComponent, deps } = data;
+
+      Logger.info(`[publish] 获取 ${component.namespace}@${component.version} 成功`);
+
       return {
         version,
         namespace,
@@ -53,6 +58,9 @@ export const generateComLib = async (
   let script = "";
   const componentModules = [...deps];
   const componentCache: Component[] = [];
+
+  Logger.info(`[publish] 开始从物料中心获取组件内容`);
+
   for (const component of componentModules) {
     const hasCache = componentCache.find(
       (item) =>
@@ -158,6 +166,8 @@ export const generateComLib = async (
 			if(Reflect.has(window, 'MybricksComDef')) Reflect.deleteProperty(window, 'MybricksComDef');
 		`;
   }
+
+  Logger.info(`[publish] 组件内容获取完毕`);
 
   return `
 		(function() {
