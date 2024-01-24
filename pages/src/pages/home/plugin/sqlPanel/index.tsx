@@ -1,12 +1,7 @@
-import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import {Modal} from 'antd';
-import {
-	exampleOpenSQLParamsFunc,
-	exampleResultFunc,
-	exampleSelectOpenSQLParamsFunc,
-	exampleSQLParamsFunc,
-} from '../constant';
+import { Modal } from 'antd';
+import { exampleOpenSQLParamsFunc, exampleResultFunc, exampleSelectOpenSQLParamsFunc, exampleSQLParamsFunc } from '../constant';
 
 import styles from './index.less';
 
@@ -216,30 +211,69 @@ const SQLPanel: FC<SQLPanelProps> = props => {
         method: 'POST',
         type: 'http-sql',
         inputSchema: inputSchema,
-        outputSchema: {
-          type: 'object',
-          properties: {
-            code: {
-              type: 'number',
-            },
-            data: outputSchema,
-            msg: {
-              type: 'string',
-            },
-          },
-        },
-        resultSchema: {
-          type: 'object',
-          properties: {
-            code: {
-              type: 'number',
-            },
-	          data: outputSchema,
-            msg: {
-              type: 'string',
-            },
-          },
-        },
+				markList: [
+					{
+						id: 'default',
+						title: '默认',
+						predicate: {
+							key: 'code',
+							value: 1,
+							operator: '=',
+							type: 'success'
+						},
+						outputKeys: ['data'],
+						excludeKeys: [],
+						outputSchema: {
+							type: 'object',
+							properties: {
+								code: {
+									type: 'number',
+								},
+								data: outputSchema,
+								msg: {
+									type: 'string',
+								},
+							},
+						},
+						resultSchema: {
+							type: 'object',
+							properties: {
+								code: {
+									type: 'number',
+								},
+								data: outputSchema,
+								msg: {
+									type: 'string',
+								},
+							},
+						},
+					},
+					{
+						id: 'error',
+						title: '错误',
+						predicate: {
+							key: 'code',
+							value: 1,
+							operator: '!=',
+							type: 'failed'
+						},
+						outputKeys: ['msg'],
+						excludeKeys: [],
+						outputSchema: { type: 'string' },
+						resultSchema: {
+							type: 'object',
+							properties: {
+								code: {
+									type: 'number',
+								},
+								data: outputSchema,
+								msg: {
+									type: 'string',
+								},
+							},
+						},
+					}
+				],
         domainServiceMap: { serviceId, fileId, serviceTitle: item.title },
         params: debugParams
           ? {
