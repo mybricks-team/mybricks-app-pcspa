@@ -49,6 +49,11 @@ export default {
     },
     {
       tag: "script",
+      path: "public/ant-design-charts@1.3.5.min.js",
+      CDN: "//f2.beckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/ant-design/charts-1.3.5/charts.min.js",
+    },
+    {
+      tag: "script",
       path: "public/plugin-http-connector/1.1.79/index.js",
       CDN: "//f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.1.79/index.js",
     },
