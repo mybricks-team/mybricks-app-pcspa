@@ -44,11 +44,6 @@ export default {
     },
     {
       tag: "script",
-      path: "public/ant-design-charts@1.2.14.min.js",
-      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444283932.ant-design_charts@1.2.14.min.js",
-    },
-    {
-      tag: "script",
       path: "public/ant-design-charts@1.3.5.min.js",
       CDN: "//f2.beckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/ant-design/charts-1.3.5/charts.min.js",
     },
