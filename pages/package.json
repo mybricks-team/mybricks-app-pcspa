@@ -60,7 +60,7 @@
     "webpackbar": "^5.0.2"
   },
   "dependencies": {
-    "@mybricks/plugin-ai-copilot": "0.0.8",
+    "@mybricks/plugin-ai-copilot": "0.0.9",
     "@mybricks/plugin-connector-domain": "0.0.52",
     "@mybricks/plugin-connector-http": "1.1.99-beta.7",
     "@mybricks/plugin-locale": "1.0.0",
