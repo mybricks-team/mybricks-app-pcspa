@@ -11,7 +11,6 @@ import localePlugin from '@mybricks/plugin-locale'
 import { use as useTheme } from '@mybricks/plugin-theme';
 import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 
-import { render as renderUI } from '@mybricks/render-web';
 import comlibLoaderFunc from './configs/comlibLoader'
 import { comLibAdderFunc } from './configs/comLibAdder'
 import CollaborationHttp from './plugin/collaboration-http';
