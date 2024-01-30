@@ -252,6 +252,11 @@ async function customPublish(params) {
     },
   });
 
+  // 计算发布集成推送数据的 MB 大小 (四舍五入)
+  const megabytes =
+    Math.round((Buffer.byteLength(dataForCustom) / (1024 * 1024)) * 100) / 100;
+
+  Logger.info(`[publish] 发布集成推送数据大小(压缩后)为: ${megabytes} MB`);
   Logger.info(`[publish] nowVersion = ${nowVersion} dataVersion = ${version}`);
 
   const { code, message, data } = await axios
