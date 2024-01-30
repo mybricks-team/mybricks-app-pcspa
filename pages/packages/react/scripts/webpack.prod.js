@@ -5,11 +5,14 @@ const common = require('./webpack.common')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const Plugins = require('@mybricks/sdk-for-app/plugin');
 const WebpackBar = require('webpackbar')
 const HtmlWebpackInlineSourcePlugin = require('@effortlessmotion/html-webpack-inline-source-plugin')
 const pkg = require(path.join(__dirname, '../../../../package.json'))
 
-const appInfo = pkg.appConfig.react;
+const appInfo = pkg.appConfig.react
+
+const { generateAssetMapPlugin } = Plugins.default;
 module.exports = (env) => merge(common, (function () {
   const isOffline = env && env.app?.type === 'offline';
   return {
@@ -30,21 +33,19 @@ module.exports = (env) => merge(common, (function () {
         cleanOnceBeforeBuildPatterns: ['**/*', '!favicon.ico*', '!css/**'],
       }),
       new WebpackBar(),
-      new HtmlWebpackPlugin({
+      ...generateAssetMapPlugin({
         filename: 'index.html',
-        template: path.resolve(__dirname, '../templates/index.html'),
         chunks: ['index'],
-
-        templateContent: isOffline ? ({ htmlWebpackPlugin }) => {
-          let content = fs.readFileSync(path.resolve(__dirname, '../templates/index.html'), 'utf-8')
-          content = content.replace('<!-- _APP_CONFIG_ -->', `<script>const _APP_CONFIG_ = {namespace: '${appInfo.name}'}</script>`)
-          return content
-        } : false
+        assetsMap: [],
+        templateContent: () => {
+          return fs.readFileSync(path.resolve(__dirname, '../templates/index.html'), 'utf-8')
+              .replace('<!-- _APP_CONFIG_ -->', `<script>const _APP_CONFIG_ = {namespace: '${appInfo.name}'}</script>`);
+        }
       }),
-      new HtmlWebpackPlugin({
+      ...generateAssetMapPlugin({
         filename: 'preview.html',
-        template: path.resolve(__dirname, '../templates/preview.html'),
         chunks: ['preview'],
+        template: path.resolve(__dirname, '../templates/preview.html'),
       }),
       new HtmlWebpackPlugin({
         filename: 'setting.html',
