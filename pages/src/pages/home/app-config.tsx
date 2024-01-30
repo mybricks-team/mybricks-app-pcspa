@@ -22,6 +22,7 @@ import { EnumMode } from './components/PublishModal';
 import { USE_CUSTOM_HOST } from './constants';
 import { fAxios } from '@/services/http';
 import { createFromIconfontCN } from '@ant-design/icons';
+import { render } from "./index.min"
 
 const defaultPermissionComments = `/**
 *
@@ -270,9 +271,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     );
   }
   return {
-    // debugger(json, opts) {
-    //   return renderUI(json, opts)
-    // },
+    debugger(json, opts) {
+      console.log("debugger: ", json, opts)
+      return render(json, opts)
+    },
     shortcuts: {
       'ctrl+s': [save],
     },
