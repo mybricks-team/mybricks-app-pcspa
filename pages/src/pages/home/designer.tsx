@@ -55,7 +55,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return config || {}
   }, [appData.config[APP_NAME]?.config])
-  const designer = useMemo(() => appConfig.designer?.url || 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.94/index.min.js', [appConfig]);
+  const designer = useMemo(() => appConfig.designer?.url || './public/designer-spa/1.3.94.2/index.min.js', [appConfig]);
 
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || '';
