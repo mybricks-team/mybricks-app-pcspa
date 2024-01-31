@@ -13,7 +13,6 @@ import localePlugin from '@mybricks/plugin-locale'
 import { use as useTheme } from '@mybricks/plugin-theme';
 import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 
-import { render as renderUI } from '@mybricks/render-web';
 import comlibLoaderFunc from './configs/comlibLoader'
 import { comLibAdderFunc } from './configs/comLibAdder'
 import CollaborationHttp from './plugin/collaboration-http';
@@ -243,6 +242,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
 
   const connetorPlugins: any[] = [
     servicePlugin({
+      isPrivatization: ctx.setting?.system.config?.isPureIntranet === true,
       addActions: domainApp ? [
         {
           type: 'http-sql',
@@ -634,7 +634,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
 
         ]
       },
-      editorOptions: {
+      editorOptions: ctx.setting?.system.config?.isPureIntranet ? {
         expression: {
           CDN: {
             codemirror: '/mfs/editor_assets/codemirror/codemirror_1.0.13_index.min.js'
@@ -715,7 +715,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             monacoLoader: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js'
           }
         }
-      }
+      } : undefined
     },
     com: {
       env: {

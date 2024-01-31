@@ -23,7 +23,6 @@ module.exports = {
       APP_NAME: JSON.stringify(appInfo.name),
       APP_TYPE: JSON.stringify('vue2'),
       APP_VERSION: JSON.stringify(pkg.version),
-      RENDERWEB_VERSION: JSON.stringify(require('@mybricks/render-web/package.json').version),
     }),
     new CopyWebpackPlugin({
       patterns: [

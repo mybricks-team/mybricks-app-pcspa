@@ -26,7 +26,7 @@ import { getLibsFromConfig } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 
 const msgSaveKey = 'save'
-const designer = './public/designer-spa/1.3.92.4/index.min.js'
+const designer = './public/designer-spa/1.3.94.2/index.min.js'
 
 /**
  * @description 获取当前应用setting
@@ -199,7 +199,6 @@ export default function MyDesigner({ appData: originAppData }) {
         name: APP_NAME || ''
       },
       designerSPAVerison,
-      renderWebVersion: RENDERWEB_VERSION || '',
       plugins: plugins.map(item => {
         const { name, title, updateTime } = item || {}
         return {
