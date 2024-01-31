@@ -6,6 +6,7 @@ import ConfigEnv from './ConfigEnv'
 import useConfig from './useConfig'
 import ConfigPlugin from './ConfigPlugin'
 import ConfigBase from './ConfigBase'
+import ConfigDesigner from './ConfigDesigner'
 export const _NAMESPACE_ = APP_NAME
 import style from './app.less'
 import { Collapse, Spin } from 'antd'
@@ -18,7 +19,10 @@ export default (props) => {
 
   return (
     <Spin spinning={configContext.loading}>
-      <Collapse style={{ padding: 24 }} className={style.wrapper} defaultActiveKey={[1, 2, 3, 4]}>
+      <Collapse style={{ padding: 24 }} className={style.wrapper} defaultActiveKey={[0, 1, 2, 3, 4]}>
+        <Collapse.Panel key={0} header="设计器">
+          <ConfigDesigner {...configContext} />
+        </Collapse.Panel>
         {
           !isInGroup && (
             <>
