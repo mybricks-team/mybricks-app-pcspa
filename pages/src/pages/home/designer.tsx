@@ -26,6 +26,7 @@ import { getLibsFromConfig } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 
 const msgSaveKey = 'save'
+const designer = './public/designer-spa/1.3.94.2/index.min.js'
 
 /**
  * @description 获取当前应用setting
@@ -151,7 +152,7 @@ export default function MyDesigner({ appData: originAppData }) {
   const [saveTip, setSaveTip] = useState('')
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
-  const [SPADesigner] = useState((window as any).mybricks.SPADesigner);
+  const [SPADesigner, setSPADesigner] = useState(null);
   const [remotePlugins, setRemotePlugins] = useState(null);
   const [publishModalVisible, setPublishModalVisible] = useState(false)
   const [latestComlibs, setLatestComlibs] = useState<[]>()
@@ -187,6 +188,11 @@ export default function MyDesigner({ appData: originAppData }) {
 
   useEffect(() => {
     let designerSPAVerison = ''
+    const regex = /(\d+?\.\d+\.\d+)/g;
+    const matches = designer.match(regex);
+    if (matches) {
+      designerSPAVerison = matches[0];
+    }
     const appInfo = {
       app: {
         verison: APP_VERSION || '',
@@ -220,6 +226,17 @@ export default function MyDesigner({ appData: originAppData }) {
       }
     })
   }, [])
+
+  useMemo(() => {
+    if (designer) {
+      const script = document.createElement('script');
+      script.src = designer
+      document.head.appendChild(script);
+      script.onload = () => {
+        (window as any).mybricks.SPADesigner && setSPADesigner((window as any).mybricks.SPADesigner);
+      };
+    }
+  }, [designer])
 
   useEffect(() => {
     if (beforeunload) {

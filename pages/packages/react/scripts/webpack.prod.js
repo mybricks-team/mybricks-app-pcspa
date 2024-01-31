@@ -36,13 +36,7 @@ module.exports = (env) => merge(common, (function () {
       ...generateAssetMapPlugin({
         filename: 'index.html',
         chunks: ['index'],
-        assetsMap: [
-          {
-            tag: 'script',
-            path: 'public/designer-spa/1.3.94.2/index.min.js',
-            CDN: 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.94/index.min.js'
-          }
-        ],
+        assetsMap: [],
         templateContent: () => {
           return fs.readFileSync(path.resolve(__dirname, '../templates/index.html'), 'utf-8')
               .replace('<!-- _APP_CONFIG_ -->', `<script>const _APP_CONFIG_ = {namespace: '${appInfo.name}'}</script>`);
