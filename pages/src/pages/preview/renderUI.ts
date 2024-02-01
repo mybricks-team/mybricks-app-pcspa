@@ -81,7 +81,7 @@ const root = ({ renderType, env, ...props }) => {
             );
 
           if (curConnector?.globalMock || connectorConfig?.openMock) {
-            return connectorHttpMock({ ...connector, outputSchema: connectorConfig.mockSchema }, {});
+            return connectorHttpMock({ ...connector, ...connectorConfig }, {});
           }
 
           return curConnector
