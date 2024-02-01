@@ -95,7 +95,7 @@ export default function MyDesigner({ appData: originAppData }) {
         debugProps: [],
         localStorageMock: [],
         debugHeaders: [],
-        sessionStorageMock:[],
+        sessionStorageMock: [],
       },
       directConnection: appData.fileContent?.content?.directConnection || false,
       MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
@@ -157,7 +157,7 @@ export default function MyDesigner({ appData: originAppData }) {
   const [publishModalVisible, setPublishModalVisible] = useState(false)
   const [latestComlibs, setLatestComlibs] = useState<[]>()
   const [isDebugMode, setIsDebugMode] = useState(false);
-
+  const operationList = useRef<any[]>([]);
 
   // 只有预览时 search 会携带 version 字段
   const isPreview = window.location.search.includes('version');
@@ -248,7 +248,12 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }, [beforeunload])
 
-  const onEdit = useCallback(() => {
+  const onEdit = useCallback(info => {
+    operationList.current.push({
+      ...info,
+      detail: info.title,
+      updateTime: moment()
+    });
     setBeforeunload(true);
   }, [])
 
@@ -296,8 +301,11 @@ export default function MyDesigner({ appData: originAppData }) {
 
     json.projectId = ctx.sdk.projectId;
 
+    json.operationList = operationList.current.reverse();
+
     await ctx.save({ name: ctx.fileName, content: JSON.stringify(json) })
 
+    operationList.current = [];
     setBeforeunload(false)
     // 保存缩略图
     await API.App.getPreviewImage({ // Todo... name 中文乱码
@@ -360,8 +368,10 @@ export default function MyDesigner({ appData: originAppData }) {
           json.debugHasPermissionFn = ctx.debugHasPermissionFn
           json.projectId = ctx.sdk.projectId;
           json.i18nLangContent = i18nLangContentFilter(ctx.i18nLangContent, ctx.i18nUsedIdList)
+          json.operationList = operationList.current.reverse();
 
           await ctx.save({ content: JSON.stringify(json), name: ctx.fileName }, true);
+          operationList.current = [];
           setBeforeunload(false);
 
           const curToJSON = designerRef?.current?.toJSON();
@@ -492,7 +502,7 @@ export default function MyDesigner({ appData: originAppData }) {
       removeLocalProxy()
       removeSessionProxy()
     }
-  }, [ ctx.debugMockConfig?.localStorageMock, ctx.debugMockConfig?.sessionStorageMock ])
+  }, [ctx.debugMockConfig?.localStorageMock, ctx.debugMockConfig?.sessionStorageMock])
 
   window.designerRef = designerRef
 
@@ -504,7 +514,7 @@ export default function MyDesigner({ appData: originAppData }) {
           content={saveTip}
           onClick={handleSwitch2SaveVersion} />}
       >
-        <Toolbar.Tips/>
+        <Toolbar.Tips />
         {!isPreview && RenderLocker}
         {
           !isPreview && <>
