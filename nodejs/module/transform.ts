@@ -13,6 +13,14 @@ const NeedTransformPlugin = [
   "@manatee/service-interface"
 ]
 
+const safeDecoder = (code: string) => {
+  try {
+    return decodeURIComponent(code)
+  } catch (error) {
+    return code
+  }
+}
+
 const transformCodeByBabel = (
   code: string,
   tips?: string,
@@ -31,7 +39,7 @@ const transformCodeByBabel = (
     filename: "types.d.ts",
   };
   try {
-    let temp = decodeURIComponent(code);
+    let temp = safeDecoder(code);
     if (keepCode) {
       // 不做处理
     } else if (/export\s+default.*async.*function.*\(/g.test(temp)) {
