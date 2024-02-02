@@ -26,7 +26,6 @@ import { getLibsFromConfig } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 
 const msgSaveKey = 'save'
-const designer = './public/designer-spa/1.3.95.2/index.min.js'
 
 /**
  * @description 获取当前应用setting
@@ -56,6 +55,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return config || {}
   }, [appData.config[APP_NAME]?.config])
+  const designer = useMemo(() => appConfig.designer?.url || './public/designer-spa/1.3.96.2/index.min.js', [appConfig]);
 
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || '';
