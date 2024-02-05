@@ -55,12 +55,8 @@ const transformCodeByBabel = (
     } else {
       temp = `_RTFN_ = ${temp} `;
     }
-    res = encodeURIComponent(
-      Babel.transform(temp, parserOptions).code
-    );
-    res = `${encodeURIComponent(
-      `(function() { var _RTFN_; \n`
-    )}${res}${encodeURIComponent(`\n; return _RTFN_; })()`)}`;
+    res = Babel.transform(temp, parserOptions).code;
+    res = encodeURIComponent(`(function() { var _RTFN_; \n${res}\n; return _RTFN_; })()`)
   } catch (e) {
     console.info(e);
     if (tips) {
