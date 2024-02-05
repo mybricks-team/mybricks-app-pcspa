@@ -13,6 +13,14 @@ const NeedTransformPlugin = [
   "@manatee/service-interface"
 ]
 
+const safeDecoder = (code: string) => {
+  try {
+    return decodeURIComponent(code)
+  } catch (error) {
+    return code
+  }
+}
+
 const transformCodeByBabel = (
   code: string,
   tips?: string,
@@ -31,7 +39,7 @@ const transformCodeByBabel = (
     filename: "types.d.ts",
   };
   try {
-    let temp = decodeURIComponent(code);
+    let temp = safeDecoder(code);
     if (keepCode) {
       // 不做处理
     } else if (/export\s+default.*async.*function.*\(/g.test(temp)) {
@@ -47,12 +55,8 @@ const transformCodeByBabel = (
     } else {
       temp = `_RTFN_ = ${temp} `;
     }
-    res = encodeURIComponent(
-      Babel.transform(temp, parserOptions).code
-    );
-    res = `${encodeURIComponent(
-      `(function() { var _RTFN_; \n`
-    )}${res}${encodeURIComponent(`\n; return _RTFN_; })()`)}`;
+    res = Babel.transform(temp, parserOptions).code;
+    res = encodeURIComponent(`(function() { var _RTFN_; \n${res}\n; return _RTFN_; })()`)
   } catch (e) {
     console.info(e);
     if (tips) {

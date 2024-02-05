@@ -81,7 +81,7 @@ const root = ({ renderType, env, ...props }) => {
             );
 
           if (curConnector?.globalMock || connectorConfig?.openMock) {
-            return connectorHttpMock({ ...connector, outputSchema: connectorConfig.mockSchema }, {});
+            return connectorHttpMock({ ...connector, ...connectorConfig }, {});
           }
 
           return curConnector
@@ -114,9 +114,9 @@ const root = ({ renderType, env, ...props }) => {
                   },
               }
             )
-            : Promise.reject("找不到对应连接器 Script 执行脚本.");
+            : Promise.reject("接口不存在，请检查连接器插件中接口配置");
         } else {
-          return Promise.reject("错误的连接器类型.");
+          return Promise.reject("错误的连接器类型");
         }
       },
       vars: {

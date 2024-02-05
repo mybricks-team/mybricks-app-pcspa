@@ -761,7 +761,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           if (!plugin) {
             /** 启动 Mock */
             if (connectorConfig?.openMock) {
-              return connectorHttpMock({ ...connector, outputSchema: connectorConfig.mockSchema });
+              return connectorHttpMock({ ...connector, ...connectorConfig });
             }
 
             //服务接口类型
