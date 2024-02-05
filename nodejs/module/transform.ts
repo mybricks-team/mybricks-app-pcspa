@@ -123,9 +123,31 @@ const transformScene = (scene: Record<string, any>) => {
   return scene;
 };
 
+const transformGlobalFx = (json) => {
+  if (json.global!.fxFrames) {
+    json.global.fxFrames = (json.global.fxFrames ?? []).map((fx) => {
+      (Object.keys(fx.coms) ?? []).forEach((id) => {
+        const namespace = fx.coms[id]!.def.namespace;
+        if (
+          namespace &&
+          NeedTransformCom.includes(namespace) &&
+          typeof fx.coms[id]?.model?.data?.fns === "string"
+        ) {
+          fx.coms[id].model.data.fns = transformCodeByBabel(
+            fx.coms[id].model.data.fns,
+            `【${fx.coms[id].title ?? id}】—— 全局Fx中JS计算编译失败，`
+          );
+        }
+      });
+      return fx;
+    });
+  }
+};
+
 const transform = (json: Record<string, any>) => {
   Logger.info("[publish] transform start");
 
+  transformGlobalFx(json)
   json.hasPermissionFn = transformCodeByBabel(
     decodeURIComponent(json.hasPermissionFn),
     "全局方法-权限校验"
