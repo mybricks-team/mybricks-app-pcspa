@@ -24,17 +24,15 @@ export async function publishPush(
     groupName,
     json,
     template,
-    needCombo,
-    comboScriptText,
+    jsFiles,
     images,
     globalDeps,
     folderPath,
     projectId,
-    comlibRtName,
     fileName,
     userId,
+    origin
   } = params;
-
   let uploadfolderPath;
   if (projectId) {
     if (envType === 'staging') {
@@ -72,8 +70,7 @@ export async function publishPush(
         groupName,
         json,
         template,
-        needCombo,
-        comboScriptText,
+        jsFiles,
         customPublishApi,
         images: images.map(({ content, name, path }) => ({
           content,
@@ -113,8 +110,8 @@ export async function publishPush(
         await Promise.all(
           globalDeps.map(({ content, path, name }) => {
             return API.Upload.staticServer({
-              content,
               folderPath: `${uploadfolderPath}/${path}`,
+              content,
               fileName: name,
               noHash: true
             });
@@ -123,21 +120,26 @@ export async function publishPush(
         Logger.info("[publish] 公共依赖上传成功！");
       }
 
-      if (needCombo) {
-        Logger.info("[publish] 正在尝试上传 needCombo...");
-        await API.Upload.staticServer({
-          content: comboScriptText,
-          folderPath: uploadfolderPath,
-          fileName: comlibRtName,
-          noHash: true
-        });
-        Logger.info("[publish] needCombo 上传成功！");
+      if (jsFiles?.length > 0) {
+        Logger.info(`[publish] 正在尝试上传 jsFiles...`);
+        await Promise.all(jsFiles.map(async file => {
+          const isExist = await checkStaticFile(origin, uploadfolderPath, file.name);
+          if (isExist) return
+          await API.Upload.staticServer({
+            folderPath: uploadfolderPath,
+            content: file.content,
+            fileName: file.name,
+            noHash: true
+          });
+          Logger.info(`[publish] ${file.name} 上传成功！`);
+        }))
       }
+
 
       Logger.info("[publish] 正在尝试上传 template...");
       publishMaterialInfo = await API.Upload.staticServer({
-        content: template,
         folderPath: uploadfolderPath,
+        content: template,
         fileName,
         noHash: true
       });
@@ -160,6 +162,7 @@ export async function publishPush(
         )}`
       );
     } catch (e) {
+      console.error(`[publish] 向静态服务推送数据失败`, e)
       Logger.error(`[publish] 向静态服务推送数据失败！${JSON.stringify(e)}`);
       throw new Error("向静态服务推送数据失败！");
     }
@@ -205,8 +208,7 @@ async function customPublish(params) {
     groupName,
     json,
     template,
-    needCombo,
-    comboScriptText,
+    jsFiles,
     customPublishApi,
     images,
     globalDeps,
@@ -238,14 +240,7 @@ async function customPublish(params) {
     content: {
       json: JSON.stringify(json),
       html: template,
-      js: needCombo
-        ? [
-          {
-            name: `${fileId}-${envType}-${version}.js`,
-            content: comboScriptText,
-          },
-        ]
-        : [],
+      js: jsFiles,
       permissions,
       images,
       globalDeps,
@@ -277,4 +272,15 @@ async function customPublish(params) {
   }
 
   return data;
+}
+
+async function checkStaticFile(origin, forlder, fileName) {
+  const url = `${origin}/mfs${forlder}/${fileName}`
+  const res = await axios
+    .get(url)
+    .then((res) => true)
+    .catch((e) => {
+      return false
+    });
+  return res;
 }

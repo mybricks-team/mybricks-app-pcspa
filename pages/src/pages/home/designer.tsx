@@ -95,7 +95,7 @@ export default function MyDesigner({ appData: originAppData }) {
         debugProps: [],
         localStorageMock: [],
         debugHeaders: [],
-        sessionStorageMock:[],
+        sessionStorageMock: [],
       },
       directConnection: appData.fileContent?.content?.directConnection || false,
       MYBRICKS_HOST: appData.fileContent?.content?.MYBRICKS_HOST || {},
@@ -388,6 +388,7 @@ export default function MyDesigner({ appData: originAppData }) {
               groupName: appData?.hierarchy?.groupName || '',
               groupId: appData?.hierarchy?.groupId || 0,
               appConfig,
+              splitCom: true,
             },
             hasPermissionFn: ctx.hasPermissionFn
           }
@@ -492,7 +493,7 @@ export default function MyDesigner({ appData: originAppData }) {
       removeLocalProxy()
       removeSessionProxy()
     }
-  }, [ ctx.debugMockConfig?.localStorageMock, ctx.debugMockConfig?.sessionStorageMock ])
+  }, [ctx.debugMockConfig?.localStorageMock, ctx.debugMockConfig?.sessionStorageMock])
 
   window.designerRef = designerRef
 
@@ -504,7 +505,7 @@ export default function MyDesigner({ appData: originAppData }) {
           content={saveTip}
           onClick={handleSwitch2SaveVersion} />}
       >
-        <Toolbar.Tips/>
+        <Toolbar.Tips />
         {!isPreview && RenderLocker}
         {
           !isPreview && <>

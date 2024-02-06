@@ -88,7 +88,7 @@ export const generateComLib = async (
       if (lib) {
         curComponent =
           lib.componentRuntimeMap[
-            component.namespace + "@" + component.version
+          component.namespace + "@" + component.version
           ];
       } else {
         lib = allComLibs.find((lib) =>
@@ -108,9 +108,9 @@ export const generateComLib = async (
         }
         curComponent =
           lib.componentRuntimeMap[
-            Object.keys(lib.componentRuntimeMap ?? {}).find((key) =>
-              key.startsWith(component.namespace)
-            )
+          Object.keys(lib.componentRuntimeMap ?? {}).find((key) =>
+            key.startsWith(component.namespace)
+          )
           ];
       }
 
@@ -153,15 +153,13 @@ export const generateComLib = async (
 
     script += isCloudComponent
       ? `
-			comAray.push({ namespace: '${component.namespace}', version: '${
-          curComponent.version
-        }', runtime: ${decodeURIComponent(componentRuntime)} });
+			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
+      }', runtime: ${decodeURIComponent(componentRuntime)} });
 		`
       : `
 			eval(${JSON.stringify(decodeURIComponent(componentRuntime))});
-			comAray.push({ namespace: '${component.namespace}', version: '${
-          curComponent.version
-        }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
+			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
+      }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
 			if(Reflect.has(window, 'fangzhouComDef')) Reflect.deleteProperty(window, 'fangzhouComDef');
 			if(Reflect.has(window, 'MybricksComDef')) Reflect.deleteProperty(window, 'MybricksComDef');
 		`;
@@ -187,11 +185,9 @@ export const generateComLib = async (
 	`;
 };
 
-export async function generateComLibRT(
-  comlibs,
-  json,
-  { fileId, noThrowError, app_type }
-) {
+
+export function getPageComs(comlibs, json): Component[] {
+  // 记录我的组件中的组件
   const mySelfComMap: Record<string, boolean> = {};
   comlibs.forEach((comlib) => {
     if (comlib?.defined && Array.isArray(comlib.comAray)) {
@@ -219,6 +215,7 @@ export async function generateComLibRT(
     });
   }
 
+  // 获取页面的所有依赖组件
   let deps = [
     ...(json.scenes || [])
       .reduce((pre, scene) => [...pre, ...scene.deps], [])
@@ -255,28 +252,41 @@ export async function generateComLibRT(
     return accumulator;
   }, []);
 
-  const scriptText = await generateComLib([...comlibs], deps, {
-    comLibId: fileId,
-    noThrowError,
-    appType: app_type,
-  });
-  return scriptText;
+  return deps
 }
 
-export async function getComboScriptText(
+type TComlibScript = string | Array<{
+  name: string,
+  content: string
+}>
+
+export async function getComScriptText(
   comlibs,
   json,
   { fileId, noThrowError, app_type },
-  needCombo
-) {
+  splitCom
+): Promise<TComlibScript> {
+  const coms = getPageComs(comlibs, json)
   /** 生成 combo 组件库代码 */
-  if (needCombo) {
-    return await generateComLibRT(comlibs, json, {
-      fileId,
+  if (!splitCom) {
+    return generateComLib([...comlibs], coms, {
+      comLibId: fileId,
       noThrowError,
-      app_type,
+      appType: app_type,
     });
-  }
+  } else {
+    return Promise.all(coms.map(async (com) => {
+      const { namespace, version } = com
+      const content = await generateComLib([...comlibs], [com], {
+        comLibId: fileId,
+        noThrowError,
+        appType: app_type,
+      });
 
-  return "";
+      return {
+        name: `${namespace}-${version}.js`,
+        content,
+      }
+    }))
+  }
 }

@@ -1,5 +1,6 @@
 import { Logger } from "@mybricks/rocker-commons";
 import { transform } from "../../transform";
+import { getPageComs } from "./generateComLib";
 
 export async function handleTemplate({
   json,
@@ -11,7 +12,8 @@ export async function handleTemplate({
   envList,
   projectId,
   version,
-  i18nLangContent
+  i18nLangContent,
+  splitCom,
 }) {
   const themesStyleStr = genThemesStyleStr(json);
 
@@ -30,13 +32,21 @@ export async function handleTemplate({
   });
 
   const comlibRtName = `${fileId}-${envType}-${version}.js`;
-  /** 需要聚合的组件资源 */
   if (
+    /** 需要聚合的组件资源 */
     comlibs.find((lib) => lib?.defined)?.comAray?.length ||
     comlibs.find((lib) => lib.componentRuntimeMap || !lib.legacy)
   ) {
-    comLibRtScript += `<script src="./${comlibRtName}"></script>`;
     needCombo = true;
+    // 采用单组件文件形式
+    if (splitCom) {
+      const fileNames = getPageComs(comlibs, json).map((com) => `${com.namespace}-${com.version}.js`);
+      for (let fileName of fileNames) {
+        comLibRtScript += `<script src="./${fileName}"></script>\n`;
+      }
+    } else {
+      comLibRtScript += `<script src="./${comlibRtName}"></script>`;
+    }
   }
 
   let domainServicePath = '/api/system/domain/run';

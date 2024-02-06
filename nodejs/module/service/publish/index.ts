@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import API from "@mybricks/sdk-for-app/api";
-import { getComboScriptText } from "./generateComLib";
+import { getComScriptText } from "./generateComLib";
 import { Logger } from "@mybricks/rocker-commons";
 import { getNextVersion } from "../../tools/analysis";
 import { getAppTypeFromTemplate } from "../../tools/common";
@@ -36,6 +36,7 @@ export async function publish(
       envList = [],
       appConfig = {},
       i18nLangContent,
+      splitCom = false,
     } = json.configuration;
 
     Reflect.deleteProperty(json, "configuration");
@@ -71,6 +72,7 @@ export async function publish(
       projectId,
       version,
       i18nLangContent,
+      splitCom,
     });
     template = _template;
 
@@ -83,10 +85,10 @@ export async function publish(
     template = __template;
 
     const startComboScriptTime = Date.now();
-    
+
     Logger.info(`[publish] 开始处理组件库脚本`);
 
-    const comboScriptText = await getComboScriptText(
+    const comboScriptText = needCombo ? await getComScriptText(
       comlibs,
       json,
       {
@@ -94,8 +96,18 @@ export async function publish(
         noThrowError: hasOldComLib,
         app_type,
       },
-      needCombo
-    );
+      splitCom
+    ) : '';
+
+    const jsFiles = !needCombo
+      ? []
+      : splitCom
+        ? comboScriptText
+        : [{
+          name: comlibRtName,
+          content: comboScriptText,
+        },
+        ]
 
     Logger.info(`[publish] 处理组件库脚本完成，耗时：${(Date.now() - startComboScriptTime) / 1000}s`);
 
@@ -111,15 +123,14 @@ export async function publish(
       groupName,
       json,
       template,
-      needCombo,
-      comboScriptText,
+      jsFiles,
       images,
       globalDeps,
       folderPath,
       projectId,
-      comlibRtName,
       fileName,
       userId,
+      origin: req.headers.origin
     };
     const result = await publishPush(params, version, true);
 
@@ -129,8 +140,7 @@ export async function publish(
     return result;
   } catch (e) {
     Logger.error(
-      `[publish] pcpage publish error ${
-        e?.message || JSON.stringify(e, null, 2)
+      `[publish] pcpage publish error ${e?.message || JSON.stringify(e, null, 2)
       }`
     );
     throw e;
