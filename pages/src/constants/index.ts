@@ -51,3 +51,6 @@ export const MySelf_COM_LIB = {
   title: '我的组件',
   defined: true,
 };
+
+
+export const DESIGNER_STATIC_PATH = './public/designer-spa/1.3.97.7/index.min.js'

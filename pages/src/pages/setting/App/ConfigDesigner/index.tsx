@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Button, Form, Input, Card } from 'antd';
 import dayjs from 'dayjs';
 import { TConfigProps } from '../useConfig';
+import { DESIGNER_STATIC_PATH } from '../../../../constants'
 
 const { Meta } = Card;
 export default (props: TConfigProps) => {
@@ -25,7 +26,7 @@ export default (props: TConfigProps) => {
         label="链接"
         tooltip="相对路径或CDN"
       >
-        <Input placeholder='./public/designer-spa/1.3.94.2/index.min.js' />
+        <Input placeholder={DESIGNER_STATIC_PATH} />
       </Form.Item>
       <Form.Item style={{ textAlign: 'right' }}>
         {Object.keys(designerConfig).length > 0 && <Meta description={`${designerConfig.user} 更新于 ${designerConfig.updateTime}`} />}
