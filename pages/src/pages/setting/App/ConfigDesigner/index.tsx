@@ -23,8 +23,6 @@ export default (props: TConfigProps) => {
       <Form.Item
         name="url"
         label="链接"
-        required
-        rules={[{ required: true, message: '请输入设计器链接' }]}
         tooltip="相对路径或CDN"
       >
         <Input placeholder='./public/designer-spa/1.3.94.2/index.min.js' />
