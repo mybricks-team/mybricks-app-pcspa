@@ -20,10 +20,12 @@ import PublishModal, { EnumMode } from './components/PublishModal'
 import { createFromIconfontCN } from '@ant-design/icons';
 import { i18nLangContentFilter } from '../../utils/index';
 
-import css from './app.less'
+import { DESIGNER_STATIC_PATH } from '../../constants'
 import { USE_CUSTOM_HOST } from './constants'
 import { getLibsFromConfig } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
+
+import css from './app.less'
 
 const msgSaveKey = 'save'
 
@@ -55,7 +57,8 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return config || {}
   }, [appData.config[APP_NAME]?.config])
-  const designer = useMemo(() => appConfig.designer?.url || './public/designer-spa/1.3.96.2/index.min.js', [appConfig]);
+  
+  const designer = useMemo(() => appConfig.designer?.url || DESIGNER_STATIC_PATH, [appConfig]);
 
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || '';
