@@ -24,6 +24,7 @@ import { DESIGNER_STATIC_PATH } from '../../constants'
 import { USE_CUSTOM_HOST } from './constants'
 import { getLibsFromConfig } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
+import download from '@/utils/download'
 
 import css from './app.less'
 
@@ -397,7 +398,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
           const toJSON = isEncode ? btoa(encodeURIComponent(JSON.stringify(jsonParams))) : jsonParams
 
-          const res: { code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
+          const res: { data?: any, code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
             userId: ctx.user?.id,
             fileId: ctx.fileId,
             json: toJSON,
@@ -427,6 +428,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
           setPublishLoading(false)
 
+          return res;
         })()
           .catch((e) => {
             console.error(e)
@@ -443,6 +445,25 @@ export default function MyDesigner({ appData: originAppData }) {
     },
     [appData]
   )
+
+  const publishAndDownload = async (publishConfig) => {
+
+    const res = await publish(publishConfig);
+    if(res && res.code === 1 && res.data?.pib_id) {
+      const loadingEnd = message.loading('正在下载发布产物...', 0);
+      const { fileId, envType, version } = res.data;
+      let isSuccess = true;
+      try {
+        await download(`api/pcpage/download-product/${fileId}/${envType}/${version}`, 'publish-content.zip');
+      } catch(e) {
+        isSuccess = false;
+        message.error('下载发布产物失败!');
+      } finally {
+        loadingEnd();
+      }
+      isSuccess && message.success('下载发布产物成功!');
+    }
+  }
 
   const RenderLocker = useMemo(() => {
     return (
@@ -573,6 +594,10 @@ export default function MyDesigner({ appData: originAppData }) {
         visible={publishModalVisible}
         onOk={(publishConfig) => {
           publish(publishConfig)
+          setPublishModalVisible(false)
+        }}
+        onOkAndDownload={async (publishConfig)=>{
+          publishAndDownload(publishConfig)
           setPublishModalVisible(false)
         }}
         onCancel={() => setPublishModalVisible(false)}

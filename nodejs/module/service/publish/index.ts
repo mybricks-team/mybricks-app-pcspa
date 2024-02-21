@@ -124,9 +124,9 @@ export async function publish(
     const result = await publishPush(params, version, true);
 
     /** 保存回滚数据 */
-    saveRollbackData(fileId, version, envType, params);
+    await saveRollbackData(fileId, version, envType, params);
 
-    return result;
+    return { ...result, fileId, envType, version };
   } catch (e) {
     Logger.error(
       `[publish] pcpage publish error ${

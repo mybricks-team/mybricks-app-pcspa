@@ -171,8 +171,6 @@ export async function publishPush(
 
   if (needPublishFile) {
     Logger.info("[publish] API.File.publish: begin ");
-    console.log('----------')
-    console.log('吸入的数据', publishMaterialInfo, envType)
     const result = await API.File.publish({
       userId,
       fileId,

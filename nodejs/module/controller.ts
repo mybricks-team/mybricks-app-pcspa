@@ -1,11 +1,12 @@
 import {
   Req,
   Post,
+  Res,
+  Get,
   Body,
-  Inject,
-  Controller,
   UploadedFile,
   UseInterceptors,
+  Param,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 // 别把 /index 删了，平台有脏数据
@@ -15,7 +16,9 @@ import Decorator from "@mybricks/sdk-for-app/decorator";
 import * as fs from "fs";
 import * as path from "path";
 import { getAppTypeFromTemplate } from "./tools/common";
-import { getAppConfig } from './tools/get-app-config'
+import { getAppConfig } from "./tools/get-app-config";
+
+import { Response } from "express";
 
 const pkg = require("../../package.json");
 const template = fs.readFileSync(
@@ -52,12 +55,21 @@ export default class PcPageController {
       Logger.info("[publish] 调用发布接口");
       const startTime = Date.now();
 
-      const appConfig = await getAppConfig()
-      const isEncode = !!appConfig?.publishLocalizeConfig?.isEncode
-      
+      const appConfig = await getAppConfig();
+      const isEncode = !!appConfig?.publishLocalizeConfig?.isEncode;
+
       Logger.info(`[publish] 获取编码状态 isEncode ${isEncode}`);
 
-      const jsonTransform = isEncode ? JSON.parse(decodeURIComponent(Buffer.from(typeof json === 'string' ? json : JSON.stringify(json), 'base64').toString())) : json
+      const jsonTransform = isEncode
+        ? JSON.parse(
+            decodeURIComponent(
+              Buffer.from(
+                typeof json === "string" ? json : JSON.stringify(json),
+                "base64"
+              ).toString()
+            )
+          )
+        : json;
 
       const result = await this.service.publish(req, {
         json: jsonTransform,
@@ -132,14 +144,47 @@ export default class PcPageController {
     }
   }
 
-  // @Post("/testPublish")
-  // async testPublish(
-  //   @Body("version") version: string,
-  //   @Body("content") content: any
-  // ) {
-  //   Logger.info(`content.js[0].name JD==> ${content.js[0].name}`,);
-  //   Logger.info(`version JD==> ${version}`, );
-  // }
+  @Get("/download-product/:fileId/:envType/:version")
+  async downloadProduct(
+    @Param("fileId") fileId: number,
+    @Param("envType") envType: string,
+    @Param("version") version: string,
+    @Res() res: Response
+  ) {
+    try {
+      Logger.info(`[downloadProduct] 调用下载发布产物接口`);
+
+      const startTime = Date.now();
+      const result = await this.service.downloadProduct(res, {
+        fileId,
+        envType,
+        version,
+      });
+
+      Logger.info("[downloadProduct] 下载发布产物成功！");
+      Logger.info(
+        `[downloadProduct] 下载发布产物时长：${String(
+          (Date.now() - startTime) / 1000
+        )}s`
+      );
+
+      return {
+        code: 1,
+        data: result,
+        message: "下载发布产物完成",
+      };
+    } catch (error) {
+      Logger.error(
+        `[downloadProduct] 下载发布产物失败: ${
+          error?.message || JSON.stringify(error, null, 2)
+        }`
+      );
+      return {
+        code: -1,
+        message: error?.message || "下载发布产物失败",
+      };
+    }
+  }
 
   // @Post('/generateHTML')
   // async generateHTML(
