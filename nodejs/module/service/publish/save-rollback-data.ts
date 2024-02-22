@@ -34,8 +34,6 @@ export async function saveRollbackData(
       })}`
     );
 
-    // require('fs').writeFileSync(`${__dirname}/../rollback.zip`, content)
-
     await API.Upload.saveProducts({
       fileId,
       version,
@@ -46,8 +44,7 @@ export async function saveRollbackData(
     Logger.info("[saveRollbackData] 保存回滚数据成功！");
   } catch (e) {
     Logger.error(
-      `[saveRollbackData] 保存回滚数据失败！ ${
-        e?.message || JSON.stringify(e, null, 2)
+      `[saveRollbackData] 保存回滚数据失败！ ${e?.message || JSON.stringify(e, null, 2)
       }`
     );
     if (retry >= 3) return;
