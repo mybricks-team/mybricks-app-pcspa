@@ -454,7 +454,7 @@ export default function MyDesigner({ appData: originAppData }) {
       const { fileId, envType, version } = res.data;
       let isSuccess = true;
       try {
-        await download(`api/pcpage/download-product/${fileId}/${envType}/${version}`, 'publish-content.zip');
+        await download(`api/pcpage/download-product/${fileId}/${envType}/${version}`);
       } catch(e) {
         isSuccess = false;
         message.error('下载发布产物失败!');

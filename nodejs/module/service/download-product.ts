@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import API from "@mybricks/sdk-for-app/api";
 import { Logger } from "@mybricks/rocker-commons";
-import { decompressGzipToObject } from "../tools/zip";
+import { decompressGzipToObject, getCurrentTimeForFileName } from "../tools/zip";
 import { Response } from "express";
 import * as os from "os";
 import * as mkdirp from "mkdirp";
@@ -27,12 +27,16 @@ export async function downloadProduct(
     })) as { assetPath: string };
     Logger.info(`[downloadProduct] 下载资源地址为: ${assetPath}`);
     Logger.info('[downloadProduct] 开始读取资源...');
+    // const zipContent = fs.readFileSync(`${__dirname}/rollback.zip`);
     const zipContent = fs.readFileSync(assetPath);
     Logger.info('[downloadProduct] 解压资源...');
     const params = (await decompressGzipToObject(zipContent)) as any;
 
+    const fileName= `${fileId}_${envType}_${version}_${getCurrentTimeForFileName()}`;
+    const zipName = `${fileName}.zip`
+
     // 创建临时文件夹
-    const tempDir = path.join(os.tmpdir(), "product-content");
+    const tempDir = path.join(os.tmpdir(), fileName);
     rimrafSync(tempDir);
     mkdirp.sync(tempDir);
 
@@ -57,7 +61,7 @@ export async function downloadProduct(
     Logger.info('[downloadProduct] 开始压缩下载文件...');
 
     // 创建zip文件并写入文件
-    const zipFilePath = path.join(os.tmpdir(), "product-content.zip");
+    const zipFilePath = path.join(os.tmpdir(), zipName);
     const output = fs.createWriteStream(zipFilePath);
     const archive = archiver("zip", { zlib: { level: 9 } });
     archive.pipe(output);
@@ -67,7 +71,7 @@ export async function downloadProduct(
     // 发送zip文件给客户端
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=product-content.zip"
+      `attachment; filename=${zipName}`
     );
     res.setHeader("Content-Type", "application/zip");
     fs.createReadStream(zipFilePath).pipe(res);

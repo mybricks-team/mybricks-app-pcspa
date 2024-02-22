@@ -1,6 +1,12 @@
-export default async function download(url: string, fileName: string) {
+export default async function download(url: string) {
+  let fileName;
+
   return await fetch(url)
     .then((response) => {
+      const disposition = response.headers.get("Content-Disposition");
+      const match = disposition.match(/filename=(.+)/);
+      fileName = match ? match[1] : "defaultFileName";
+
       if (!response.ok) {
         throw new Error("下载文件失败！");
       }

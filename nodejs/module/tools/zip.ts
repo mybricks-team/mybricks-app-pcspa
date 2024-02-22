@@ -80,3 +80,25 @@ export function decompressGzipToObject(
     });
   });
 }
+
+/**
+ * 获取可用于文件名的当前时间
+ */
+export function getCurrentTimeForFileName() {
+  var now = new Date();
+  var eventString =
+    now.getFullYear() +
+    padZero(now.getMonth() + 1) +
+    padZero(now.getDate()) +
+    "_" +
+    padZero(now.getHours()) +
+    padZero(now.getMinutes()) +
+    padZero(now.getSeconds());
+
+  // 添加前导零的辅助函数
+  function padZero(num) {
+    return (num < 10 ? "0" : "") + num;
+  }
+
+  return eventString;
+}
