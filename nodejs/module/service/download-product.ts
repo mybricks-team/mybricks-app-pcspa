@@ -53,6 +53,7 @@ export async function downloadProduct(
       fs.writeFileSync(path.join(indexHtmlDir, name), content);
     };
 
+    createFile("/", `${params.fileId}.html`, params.template);
     createFile("/", params.comlibRtName, params.comboScriptText || '');
     params.globalDeps.forEach(({ content, path, name }) => {
       createFile(path, name, content);
