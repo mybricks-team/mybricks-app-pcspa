@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Modal, Select, Form, Radio, ModalProps } from "antd";
+import { Modal, Select, Form, Radio, Space, Button, ModalProps } from "antd";
 import TextArea from "antd/lib/input/TextArea";
 import { USE_CUSTOM_HOST } from "../constants";
 
@@ -13,9 +13,10 @@ export default ({
   visible,
   onOk,
   onCancel,
+  onOkAndDownload,
   envList,
   projectId
-}: ModalProps & { envList: Array<any>, projectId?: string }) => {
+}: ModalProps & { envList: Array<any>, projectId?: string, onOk: (publishConfig: any) => void, onOkAndDownload: (publishConfig: any) => void}) => {
 
   const [mode, setMode] = useState(envList.length > 0 ? EnumMode.ENV : EnumMode.DEFAULT)
   const [form] = Form.useForm();
@@ -37,6 +38,24 @@ export default ({
         console.log(error);
       });
   };
+
+  const _onOkAndDownload= () => {
+    form
+      .validateFields()
+      .then((values) => {
+        let { envType, commitInfo } = values
+        if (mode === EnumMode.CUSTOM) {
+          envType = USE_CUSTOM_HOST
+        }
+        onOkAndDownload({
+          envType,
+          commitInfo
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
   const envOptions = useMemo(() => {
     return envList.map(item => ({
@@ -64,6 +83,13 @@ export default ({
       maskClosable={false}
       onOk={_onOk}
       onCancel={onCancel}
+      footer={
+        <Space>
+          <Button onClick={onCancel}>取消</Button>
+          <Button onClick={_onOkAndDownload}>发布并下载</Button>
+          <Button type="primary" onClick={_onOk}>发布</Button>
+        </Space>
+      }
       zIndex={1001}
     >
       <Form form={form} labelCol={{ span: 5 }} wrapperCol={{ span: 19 }}>
