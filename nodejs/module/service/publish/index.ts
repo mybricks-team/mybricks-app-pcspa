@@ -79,7 +79,7 @@ export async function publish(
       globalDeps,
       images,
       template: __template,
-    } = await localization({ req, appConfig, template, app_type, json });
+    } = await localization({ req, appConfig, template, app_type, json, hasOldComLib });
     template = __template;
 
     const startComboScriptTime = Date.now();

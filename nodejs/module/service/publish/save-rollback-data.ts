@@ -34,6 +34,8 @@ export async function saveRollbackData(
       })}`
     );
 
+    // require('fs').writeFileSync(`${__dirname}/../rollback.zip`, content)
+
     await API.Upload.saveProducts({
       fileId,
       version,

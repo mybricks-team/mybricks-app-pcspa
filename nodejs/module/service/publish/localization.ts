@@ -17,6 +17,7 @@ export async function localization({
   template,
   app_type,
   json,
+  hasOldComLib,
 }) {
   /** 是否本地化发布 */
   const needLocalization = await getCustomNeedLocalization();
@@ -27,25 +28,27 @@ export async function localization({
   /** 所有要本地化的图片 */
   let images: ILocalizationInfo[];
 
-  try {
-    Logger.info("[publish] 正在尝试组件库本地化...");
-    // 由于老数据无法判断是否是需要本地化的组件库，所以无法按需加载
-    const localizationComLibInfoList: ILocalizationInfo[] = await Promise.all(
-      [
-        "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
-        "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
-        "public/comlibs/5952_1.0.1/2023-07-25_22-02-32/edit.js",
-        "public/comlibs/5952_1.0.1/2023-07-25_22-02-32/rt.js",
-        "public/comlibs/7182_1.0.29/2023-07-25_22-04-55/edit.js",
-        "public/comlibs/7182_1.0.29/2023-07-25_22-04-55/rt.js",
-      ].map((url) =>
-        getLocalizationInfoByLocal(url, url.split("/").slice(0, -1).join("/"))
-      )
-    );
-    globalDeps = globalDeps.concat(localizationComLibInfoList);
-  } catch (e) {
-    Logger.error(`[publish] 组件库本地化失败！ ${JSON.stringify(e)}`);
-    throw e;
+  if (hasOldComLib) {
+    try {
+      Logger.info("[publish] 正在尝试组件库本地化...");
+      // 由于老数据无法判断是否是需要本地化的组件库，所以无法按需加载
+      const localizationComLibInfoList: ILocalizationInfo[] = await Promise.all(
+        [
+          "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
+          "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
+          "public/comlibs/5952_1.0.1/2023-07-25_22-02-32/edit.js",
+          "public/comlibs/5952_1.0.1/2023-07-25_22-02-32/rt.js",
+          "public/comlibs/7182_1.0.29/2023-07-25_22-04-55/edit.js",
+          "public/comlibs/7182_1.0.29/2023-07-25_22-04-55/rt.js",
+        ].map((url) =>
+          getLocalizationInfoByLocal(url, url.split("/").slice(0, -1).join("/"))
+        )
+      );
+      globalDeps = globalDeps.concat(localizationComLibInfoList);
+    } catch (e) {
+      Logger.error(`[publish] 组件库本地化失败！ ${JSON.stringify(e)}`);
+      throw e;
+    }
   }
 
   try {

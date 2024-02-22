@@ -50,7 +50,7 @@ export async function downloadProduct(
     };
 
     createFile("/", "index.html", params.template);
-    createFile("/", params.comlibRtName, params.comboScriptText);
+    createFile("/", params.comlibRtName, params.comboScriptText || '');
     params.globalDeps.forEach(({ content, path, name }) => {
       createFile(path, name, content);
     });
