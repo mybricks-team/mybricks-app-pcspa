@@ -126,7 +126,7 @@ export async function publishPush(
       if (needCombo) {
         Logger.info("[publish] 正在尝试上传 needCombo...");
         await API.Upload.staticServer({
-          content: comboScriptText,
+          content: comboScriptText || '',
           folderPath: uploadfolderPath,
           fileName: comlibRtName,
           noHash: true
