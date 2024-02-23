@@ -61,7 +61,7 @@
   },
   "dependencies": {
     "@mybricks/plugin-connector-domain": "0.0.52",
-    "@mybricks/plugin-connector-http": "1.2.3",
+    "@mybricks/plugin-connector-http": "1.2.6",
     "@mybricks/plugin-locale": "1.0.0",
     "@mybricks/plugin-theme": "^0.0.45",
     "@mybricks/plugin-tools": "1.0.17",
@@ -72,7 +72,7 @@
     "dayjs": "^1.11.3",
     "html-to-image": "^1.10.8",
     "lodash": "^4.17.21",
-    "mybricks-plugin-version": "0.0.19",
+    "mybricks-plugin-version": "0.0.16",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
