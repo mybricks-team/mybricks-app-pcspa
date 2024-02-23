@@ -22,6 +22,7 @@ import { EnumMode } from './components/PublishModal';
 import { USE_CUSTOM_HOST } from './constants';
 import { fAxios } from '@/services/http';
 import { createFromIconfontCN } from '@ant-design/icons';
+import download from '@/utils/download';
 
 const defaultPermissionComments = `/**
 *
@@ -314,7 +315,19 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           } catch (e) {
             message.error("回滚失败！");
           }
-        }
+        },
+        modalActiveExtends: [
+          {
+            type: "publish",
+            title: "下载",
+            onClick({ fileId, type: envType, version }) {
+              const loadend = message.loading(`版本 ${version} 下载中...`, 0)
+              download(`api/pcpage/download-product/${fileId}/${envType}/${version}`).finally(() => {
+                loadend()
+              })
+            },
+          },
+        ],
       }),
     ],
     ...(ctx.hasMaterialApp ? {
