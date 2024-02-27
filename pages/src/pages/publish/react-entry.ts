@@ -8,6 +8,8 @@ const antd = window.antd;
 
 let reactRoot
 
+const isReact18 = !!ReactDOM.createRoot
+
 const scheduleTask = scheduleTaskListen()
 
 const getAntdLocalName = (locale) => {
@@ -36,26 +38,48 @@ const render = (props) => {
       },
     })
   }
-  reactRoot = ReactDOM.createRoot(root);
   const antdLocalLib = antd?.locale[getAntdLocalName(getCurrentLocale())]?.default
 
-  reactRoot.render(
-    React.createElement(
-      antd.ConfigProvider,
-      {
-        // 如鬼哦没有因为就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
-        locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale()))
-          ? undefined
-          : antdLocalLib || antd.locale["zh_CN"].default,
-      },
-      renderUI({
-        ...props,
-        renderType: "react",
-        locale: getCurrentLocale(),
-        runtime: { onComplete: scheduleTask.addListen },
-      })
+  if (isReact18) {
+    reactRoot = ReactDOM.createRoot(root);
+
+    reactRoot.render(
+      React.createElement(
+        antd.ConfigProvider,
+        {
+          // 如鬼哦没有因为就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
+          locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale()))
+            ? undefined
+            : antdLocalLib || antd.locale["zh_CN"].default,
+        },
+        renderUI({
+          ...props,
+          renderType: "react",
+          locale: getCurrentLocale(),
+          runtime: { onComplete: scheduleTask.addListen },
+        })
+      )
+    );
+  } else {
+    ReactDOM.render(
+      React.createElement(
+        antd.ConfigProvider,
+        {
+          // 如鬼哦没有因为就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
+          locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale()))
+            ? undefined
+            : antdLocalLib || antd.locale["zh_CN"].default,
+        },
+        renderUI({
+          ...props,
+          renderType: "react",
+          locale: getCurrentLocale(),
+          runtime: { onComplete: scheduleTask.addListen },
+        })
+      ),
+      root
     )
-  );
+  }
 }
 
 if (!window.__POWERED_BY_QIANKUN__) {
@@ -71,8 +95,11 @@ export async function mount(props) {
 }
 
 export async function unmount(props) {
-  // const { container } = props;
-  // ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#mybricks-page-root'));
   scheduleTask.cleanListen()
-  reactRoot.unmount()
+  if (isReact18) {
+    reactRoot.unmount()
+  } else {
+    const { container } = props;
+    ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#mybricks-page-root'));
+  }
 }
