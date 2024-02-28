@@ -9,12 +9,12 @@ const antd = window.antd;
 let reactRoot
 
 const isReact18 = !!ReactDOM.createRoot
-
+const useRender = true
 const scheduleTask = scheduleTaskListen()
 
 const getAntdLocalName = (locale) => {
   const localeArr = locale.split('-');
-  if(localeArr.length <= 1) {
+  if (localeArr.length <= 1) {
     return locale
   }
   const lang = localeArr.pop()?.toUpperCase();
@@ -40,7 +40,8 @@ const render = (props) => {
   }
   const antdLocalLib = antd?.locale[getAntdLocalName(getCurrentLocale())]?.default
 
-  if (isReact18) {
+
+  if (isReact18 && !useRender) {
     reactRoot = ReactDOM.createRoot(root);
 
     reactRoot.render(
@@ -96,7 +97,7 @@ export async function mount(props) {
 
 export async function unmount(props) {
   scheduleTask.cleanListen()
-  if (isReact18) {
+  if (isReact18 && !useRender) {
     reactRoot.unmount()
   } else {
     const { container } = props;
