@@ -14,7 +14,7 @@ let app_type;
 
 export async function publish(
   req,
-  { json, userId, fileId, envType, commitInfo, appConfig }
+  { json, userId, fileId, envType, commitInfo }
 ) {
   try {
     const publishFilePath = path.resolve(__dirname, "../../../../assets");
@@ -34,6 +34,7 @@ export async function publish(
       groupId,
       groupName,
       envList = [],
+      appConfig = {},
       i18nLangContent,
     } = json.configuration;
 
