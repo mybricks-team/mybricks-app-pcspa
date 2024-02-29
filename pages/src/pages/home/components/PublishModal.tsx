@@ -86,7 +86,7 @@ export default ({
       footer={
         <Space>
           <Button onClick={onCancel}>取消</Button>
-          <Button onClick={_onOkAndDownload}>发布并下载</Button>
+          {/* <Button onClick={_onOkAndDownload}>发布并下载</Button> */}
           <Button type="primary" onClick={_onOk}>发布</Button>
         </Space>
       }
