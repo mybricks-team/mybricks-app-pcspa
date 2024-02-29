@@ -6,8 +6,8 @@ import { downloadProduct } from "./download-product";
 
 @Injectable()
 export default class PcPageService {
-  async publish(req, { json, userId, fileId, envType, commitInfo }) {
-    return await publish(req, { json, userId, fileId, envType, commitInfo });
+  async publish(req, { json, userId, fileId, envType, commitInfo, appConfig }) {
+    return await publish(req, { json, userId, fileId, envType, commitInfo, appConfig });
   }
 
   async upload(req, { file }, { groupId = "" } = {}) {

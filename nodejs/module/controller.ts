@@ -77,6 +77,7 @@ export default class PcPageController {
         fileId,
         envType,
         commitInfo,
+        appConfig
       });
 
       Logger.info("[publish] 发布成功！");
