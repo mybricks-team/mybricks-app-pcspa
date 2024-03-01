@@ -58,7 +58,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return config || {}
   }, [appData.config[APP_NAME]?.config])
-  
+
   const designer = useMemo(() => appConfig.designer?.url || DESIGNER_STATIC_PATH, [appConfig]);
 
   const { plugins = [] } = appConfig
@@ -186,7 +186,10 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [JSON.stringify(ctx.comlibs.map(lib => lib.namespace))])
 
   useEffect(() => {
-    fetchPlugins(plugins).then(setRemotePlugins);
+    fetchPlugins(plugins, {
+      user: appData.user,
+      fileContent: appData.fileContent
+    }).then(setRemotePlugins);
     console.log('应用数据:', appData);
   }, [])
 
@@ -459,13 +462,13 @@ export default function MyDesigner({ appData: originAppData }) {
   const publishAndDownload = async (publishConfig) => {
 
     const res = await publish(publishConfig);
-    if(res && res.code === 1 && res.data?.pib_id) {
+    if (res && res.code === 1 && res.data?.pib_id) {
       const loadingEnd = message.loading('正在下载发布产物...', 0);
       const { fileId, envType, version } = res.data;
       let isSuccess = true;
       try {
         await download(`api/pcpage/download-product/${fileId}/${envType}/${version}`);
-      } catch(e) {
+      } catch (e) {
         isSuccess = false;
         message.error('下载发布产物失败!');
       } finally {
@@ -526,7 +529,7 @@ export default function MyDesigner({ appData: originAppData }) {
       removeLocalProxy()
       removeSessionProxy()
     }
-  }, [ ctx.debugMockConfig?.localStorageMock, ctx.debugMockConfig?.sessionStorageMock ])
+  }, [ctx.debugMockConfig?.localStorageMock, ctx.debugMockConfig?.sessionStorageMock])
 
   window.designerRef = designerRef
 
@@ -538,7 +541,7 @@ export default function MyDesigner({ appData: originAppData }) {
           content={saveTip}
           onClick={handleSwitch2SaveVersion} />}
       >
-        <Toolbar.Tips/>
+        <Toolbar.Tips />
         {!isPreview && RenderLocker}
         {
           !isPreview && <>
@@ -606,7 +609,7 @@ export default function MyDesigner({ appData: originAppData }) {
           publish(publishConfig)
           setPublishModalVisible(false)
         }}
-        onOkAndDownload={async (publishConfig)=>{
+        onOkAndDownload={async (publishConfig) => {
           publishAndDownload(publishConfig)
           setPublishModalVisible(false)
         }}

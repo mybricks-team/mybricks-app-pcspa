@@ -239,10 +239,10 @@ const importScript = (() => {
  * @param cb 回调函数
  * @returns 
  */
-export const fetchPlugins = async (plugins: PluginType[]) => {
+export const fetchPlugins = async (plugins: PluginType[], props = {}) => {
   const promises = plugins.map((plugin) => importScript(plugin)
     .then(com => {
-      return com()
+      return com(props)
     }).catch(e => {
       message.error(`${plugin.title} 插件加载失败，失败信息：${e}`);
       console.error(`${plugin.title} 插件加载失败，失败信息：${e}`);
