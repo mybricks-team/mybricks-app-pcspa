@@ -11,7 +11,7 @@ import { TConfigProps } from "../useConfig";
 export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   const [visible, setVisible] = useState<boolean>(false);
   const [status, setStatus] = useState<"edit" | "append">();
-  const [currentPlugin, setCurrentPlugin] = useState<PluginType & { index: number }>();
+  const [currentPlugin, setCurrentPlugin] = useState<PluginType & { index: number }>({});
 
   const plugins: PluginType[] = config?.plugins || [];
 
@@ -22,7 +22,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       plugins.splice(currentPlugin.index, 1, {
         ...values,
         user: {
-          email: user.email
+          email: user?.email
         },
         updateTime,
       });
@@ -34,7 +34,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       plugins.push({
         ...values,
         user: {
-          email: user.email
+          email: user?.email
         },
         updateTime,
       });
@@ -49,7 +49,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   };
 
   const onAdd = () => {
-    setCurrentPlugin(undefined);
+    setCurrentPlugin({});
     setStatus("append");
     setVisible(true);
   };
