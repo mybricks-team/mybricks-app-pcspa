@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Modal, Form, Input, ModalProps, Select, Switch } from "antd";
 import { EnumPluginType, PluginType } from "./type";
 
@@ -17,11 +17,12 @@ interface AppendModalProps
 export default ({
   status,
   visible,
-  plugin,
+  plugin = {},
   onOk,
   onCancel,
 }: AppendModalProps) => {
   const [form] = Form.useForm();
+  const [currentType, setCurrentType] = useState(EnumPluginType.NORMAL)
   const _onOk = () => {
     form
       .validateFields()
@@ -39,6 +40,10 @@ export default ({
   );
 
   useEffect(() => {
+    if (!plugin.type) {
+      plugin.type = EnumPluginType.NORMAL
+    }
+    setCurrentType(plugin.type)
     form.setFieldsValue(plugin);
     return () => form.resetFields();
   }, [plugin, visible]);
@@ -81,7 +86,8 @@ export default ({
           rules={[{ required: true, message: '请选择插件类型' }]}
         >
           <Select
-            defaultValue={'normal'}
+            onChange={val => setCurrentType(val)}
+            defaultValue={EnumPluginType.NORMAL}
             options={Object.keys(pluginTypeMap).map(item => ({
               label: pluginTypeMap[item],
               value: item
@@ -105,7 +111,7 @@ export default ({
         <Form.Item
           label="runtime地址"
           name='runtimeUrl'
-          rules={[{ required: true, message: '请填写插件Runtime地址' }]}
+          rules={currentType === EnumPluginType.CONNECTOR ? [{ required: true, message: '请填写插件Runtime地址' }] : []}
           extra="搭建页发布后，生产环境使用"
         >
           <Input.TextArea allowClear />
