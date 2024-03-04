@@ -4,7 +4,7 @@ import { loadMicroApp } from "qiankun";
 const pageName = "--pageName--"
 const pageId = "--pageId--"
 
-const AppContainer = () => {
+const AppContainer = (props) => {
     const container = useRef(null);
     useEffect(() => {
         const app = {
@@ -14,7 +14,7 @@ const AppContainer = () => {
         let currentApp;
         if (app && container.current) {
             currentApp = loadMicroApp(
-                { ...app, container: container.current },
+                { ...app, container: container.current, props },
                 {
                     sandbox: {
                         experimentalStyleIsolation: true

@@ -7,14 +7,12 @@ const ReactDOM = window.ReactDOM;
 const antd = window.antd;
 
 let reactRoot
-
-const isReact18 = !!ReactDOM.createRoot
-
+let useReactRender = false
 const scheduleTask = scheduleTaskListen()
 
 const getAntdLocalName = (locale) => {
   const localeArr = locale.split('-');
-  if(localeArr.length <= 1) {
+  if (localeArr.length <= 1) {
     return locale
   }
   const lang = localeArr.pop()?.toUpperCase();
@@ -25,8 +23,10 @@ const getCurrentLocale = () => {
   return navigator.language
 }
 
+
 const render = (props) => {
   const { container } = props;
+  useReactRender = props?.useReactRender
   const root = (container || document).querySelector('#mybricks-page-root')
   /** publish template style */
   root.style.width = '100%';
@@ -40,7 +40,8 @@ const render = (props) => {
   }
   const antdLocalLib = antd?.locale[getAntdLocalName(getCurrentLocale())]?.default
 
-  if (isReact18) {
+
+  if (!useReactRender) {
     reactRoot = ReactDOM.createRoot(root);
 
     reactRoot.render(
@@ -61,6 +62,7 @@ const render = (props) => {
       )
     );
   } else {
+
     ReactDOM.render(
       React.createElement(
         antd.ConfigProvider,
@@ -96,10 +98,12 @@ export async function mount(props) {
 
 export async function unmount(props) {
   scheduleTask.cleanListen()
-  if (isReact18) {
+  if (!useReactRender) {
+
     reactRoot.unmount()
   } else {
     const { container } = props;
+
     ReactDOM.unmountComponentAtNode((container ?? document).querySelector('#mybricks-page-root'));
   }
 }
