@@ -1,0 +1,32 @@
+<template>
+  <div ref="containerRef"></div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { loadMicroApp } from 'qiankun'
+import type { MicroApp } from 'qiankun'
+
+const pageName = "--pageName--"
+const pageId = "--pageId--"
+
+const containerRef = ref<HTMLElement | null>(null)
+
+let microApp: MicroApp | null = null
+
+onMounted(() => {
+  microApp = loadMicroApp({
+    name: pageName,
+    entry: `./${pageId}.html`,
+    container: containerRef.value,
+    props: {}
+  })
+})
+
+onBeforeUnmount(() => {
+  microApp?.unmount()
+})
+
+</script>
+
+
