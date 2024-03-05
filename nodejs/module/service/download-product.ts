@@ -23,7 +23,9 @@ export async function downloadProduct(
 ) {
   try {
     Logger.info("[downloadProduct] 开始获取下载资源地址...");
-    Logger.info(`[downloadProduct] 调用 API.File.getPubAssetPath，参数 fileId: ${fileId} envType: ${envType} version: ${version}`);
+    Logger.info(
+      `[downloadProduct] 调用 API.File.getPubAssetPath，参数 fileId: ${fileId} envType: ${envType} version: ${version}`
+    );
     const { assetPath } = (await API.File.getPubAssetPath({
       fileId,
       envType,
@@ -54,7 +56,7 @@ export async function downloadProduct(
     };
 
     createFile("/", `${params.fileId}.html`, params.template);
-    createFile("/", params.comlibRtName, params.comboScriptText || '');
+    createFile("/", params.comlibRtName, params.comboScriptText || "");
     params.globalDeps.forEach(({ content, path, name }) => {
       createFile(path, name, content);
     });
@@ -67,7 +69,13 @@ export async function downloadProduct(
       .replace("--pageName--", params.title)
       .replace("--pageId--", params.fileId);
 
+    const vue3CanUseTemplate = fs
+      .readFileSync(`${__dirname}/download-vue3-can-use-template.txt`, "utf-8")
+      .replace("--pageName--", params.title)
+      .replace("--pageId--", params.fileId);
+
     createFile("/", `${params.fileId}-app.js`, reactCanUseTemplate);
+    createFile("/", `${params.fileId}-app-vue3.vue`, vue3CanUseTemplate);
 
     Logger.info("[downloadProduct] 开始压缩下载文件...");
 
@@ -87,7 +95,8 @@ export async function downloadProduct(
     Logger.info("[downloadProduct] 压缩下载文件完成");
   } catch (e) {
     Logger.error(
-      `[downloadProduct] 下载发布产物执行报错: ${e?.message || JSON.stringify(e, null, 2)
+      `[downloadProduct] 下载发布产物执行报错: ${
+        e?.message || JSON.stringify(e, null, 2)
       }`
     );
     throw e;
