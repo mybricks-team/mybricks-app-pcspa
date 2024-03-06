@@ -35,7 +35,7 @@ const getComponentFromMaterial = (
     .then((data) => {
       const { version, namespace, runtime, isCloudComponent, deps } = data;
 
-      Logger.info(`[publish] 获取 ${component.namespace}@${component.version} 成功`);
+      Logger.info(`[publish] 获取 ${namespace}@${version} 成功`);
 
       return {
         version,
