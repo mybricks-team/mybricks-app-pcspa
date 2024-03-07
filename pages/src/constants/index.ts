@@ -53,4 +53,4 @@ export const MySelf_COM_LIB = {
 };
 
 
-export const DESIGNER_STATIC_PATH = './public/designer-spa/1.4.9/index.min.js'
+export const DESIGNER_STATIC_PATH = './public/designer-spa/1.4.10.5/index.min.js'
