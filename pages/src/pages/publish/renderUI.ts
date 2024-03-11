@@ -1,5 +1,6 @@
 import { getComs, shapeUrlByEnv, parseQuery, getRenderWeb } from "@/utils";
 import { runJs } from "@/utils/runJs";
+import processKeyboardEvent from '@/utils/keyboardEvent'
 
 const USE_CUSTOM_HOST = "__USE_CUSTOM_HOST__";
 /** template */
@@ -35,6 +36,9 @@ const root = ({ renderType, locale, runtime, ...props }) => {
   const domainServicePath = '--domain-service-path--';//replace it
 
   return renderUI(projectJson, {
+    ref(refs) {
+      processKeyboardEvent(projectJson, refs.inputs);
+    },
     env: {
       runtime,
       silent: true,

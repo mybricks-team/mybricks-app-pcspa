@@ -161,7 +161,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
 
 
   const createMockConfigEditor = (field, title, description) => {
-    return {
+    return  {
       title: title,
       type: 'mapCheckbox',
       options: {
@@ -389,7 +389,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               {
                 title: '文件路径',
                 type: 'Text',
-                options: { readOnly: true },
+                options: {readOnly: true},
                 value: {
                   get: (context) => {
                     return ctx.absoluteNamePath
@@ -434,7 +434,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 type: 'Switch',
                 description: '直连模式下服务接口访问将直接请求，不再走代理',
                 value: {
-                  get() {
+                  get() { 
                     return ctx.directConnection
                   },
                   set(_, value) {

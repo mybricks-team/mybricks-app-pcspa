@@ -25,6 +25,7 @@ import { USE_CUSTOM_HOST } from './constants'
 import { getLibsFromConfig } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
+import processKeyboardEvent from '@/utils/keyboardEvent'
 
 import css from './app.less'
 
@@ -495,6 +496,7 @@ export default function MyDesigner({ appData: originAppData }) {
     message[type](msg);
   }, []);
 
+  // TODO：调试态快捷键事件 待引擎支持
   const onDebug = useCallback(() => {
     setIsDebugMode(true)
     ctx.isDebugMode = true

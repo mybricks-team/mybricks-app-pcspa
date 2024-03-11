@@ -12,6 +12,7 @@ import { PreviewStorage } from "@/utils/previewStorage";
 import connectorHttpMock from '@mybricks/plugin-connector-http/runtime/mock'
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain/runtime';
 import { proxLocalStorage, proxSessionStorage } from "@/utils/debugMockUtils";
+import processKeyboardEvent from '@/utils/keyboardEvent'
 
 const fileId = getQueryString("fileId");
 const USE_CUSTOM_HOST = "__USE_CUSTOM_HOST__";
@@ -31,12 +32,16 @@ const {
 
 proxLocalStorage(debugMockConfig?.localStorageMock)
 proxSessionStorage(debugMockConfig?.sessionStorageMock)
+
 const root = ({ renderType, env, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   if (!renderUI) {
     throw Error(`找不到${renderType}渲染器`);
   }
   return renderUI(dumpJson, {
+    ref(refs) {
+      processKeyboardEvent(dumpJson, refs.inputs);
+    },
     env: {
       ...env,
       renderCom(json, opts, coms) {
