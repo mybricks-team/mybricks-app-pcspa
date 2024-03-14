@@ -27,6 +27,8 @@ const transformCodeByBabel = (
   keepCode?: boolean,
   options?: any
 ) => {
+  Logger.info(`[publish] 开始编译「${tips}」`)
+
   /**
    * 已经babel的code直接返回
    */
@@ -55,7 +57,9 @@ const transformCodeByBabel = (
     } else {
       temp = `_RTFN_ = ${temp} `;
     }
+    Logger.info("[publish] 开始 Babel 编译...");
     res = Babel.transform(temp, parserOptions).code;
+    Logger.info("[publish] Babel 编译完成");
     res = encodeURIComponent(`(function() { var _RTFN_; \n${res}\n; return _RTFN_; })()`)
   } catch (e) {
     console.info(e);
@@ -158,7 +162,7 @@ const transform = (json: Record<string, any>) => {
         ...service,
         script: transformCodeByBabel(
           decodeURIComponent(service.script),
-          "连接器"
+          `连接器${pluginName}`
         ),
       }));
     }
