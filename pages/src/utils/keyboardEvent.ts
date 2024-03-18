@@ -11,7 +11,7 @@ export default function (toJson: any, inputs: {}) {
         }
     });
 
-    window.onkeyup = (e: KeyboardEvent) => {
+    window.onkeydown = (e: KeyboardEvent) => {
         let evtKey: string = e.key;
         const target: EventTarget = e.target;
         if (evtKey !== 'Meta') {
