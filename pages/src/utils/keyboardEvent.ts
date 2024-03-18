@@ -11,7 +11,7 @@ export default function (toJson: any, inputs: {}) {
         }
     });
 
-    window.onkeydown = (e: KeyboardEvent) => {
+    window.addEventListener('keydown', (e: KeyboardEvent) => {
         let evtKey: string = e.key;
         const target: EventTarget = e.target;
         if (evtKey !== 'Meta') {
@@ -32,5 +32,5 @@ export default function (toJson: any, inputs: {}) {
                 isBody: target.tagName === 'BODY'
             });
         }
-    }
+    });
 }
