@@ -197,10 +197,19 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       { label: '自定义域名', value: EnumMode.CUSTOM }
     ]
 
-  const adder: Array<{ type: string, title: string, template?: Record<string, any> }> = [
+  const adder: Array<{ type: string, title: string, inputs: { id: string, title: string, schema: Record<string, string> }[], template?: Record<string, any> }> = [
     {
       type: 'normal',
       title: '页面',
+      inputs: [
+        {
+          id: 'open',
+          title: '打开',
+          schema: {
+            type: 'any'
+          }
+        }
+      ]
     }
   ]
   if (isReact) {
@@ -350,7 +359,16 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       title: '交互',
       cards: {
         main: {
-          title: '页面'
+          title: '页面',
+          inputs: [
+            {
+              id: 'open',
+              title: '打开',
+              schema: {
+                type: 'any'
+              }
+            }
+          ]
         }
       },
       globalIO: {

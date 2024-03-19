@@ -64,8 +64,8 @@ export default {
     },
     {
       tag: "script",
-      path: "public/render-web/1.2.54/index.min.js",
-      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.2.54/index.min.js",
+      path: "public/render-web/1.2.57/index.min.js",
+      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.2.57/index.min.js",
     },
   ],
   vue2: [
