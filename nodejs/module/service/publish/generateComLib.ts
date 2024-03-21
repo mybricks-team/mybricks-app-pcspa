@@ -74,7 +74,7 @@ export const generateComLib = async (
     if (curComponent?.deps) {
       componentModules.push(
         ...curComponent.deps.filter(
-          (dep) => !ignoreNamespaces.includes(dep.namespace)
+          (dep) => !ignoreNamespaces.includes(dep.namespace) && componentModules.findIndex((item) => item.namespace === dep.namespace && item.version === dep.version) === -1
         )
       );
     }
@@ -90,7 +90,7 @@ export const generateComLib = async (
       if (lib) {
         curComponent =
           lib.componentRuntimeMap[
-            component.namespace + "@" + component.version
+          component.namespace + "@" + component.version
           ];
       } else {
         lib = allComLibs.find((lib) =>
@@ -110,9 +110,9 @@ export const generateComLib = async (
         }
         curComponent =
           lib.componentRuntimeMap[
-            Object.keys(lib.componentRuntimeMap ?? {}).find((key) =>
-              key.startsWith(component.namespace)
-            )
+          Object.keys(lib.componentRuntimeMap ?? {}).find((key) =>
+            key.startsWith(component.namespace)
+          )
           ];
       }
 
@@ -127,6 +127,14 @@ export const generateComLib = async (
       }
     }
 
+    // 去重从comlib rt中获取的组件
+    if (componentCache.find(
+      (item) =>
+        item.namespace === component.namespace &&
+        item.version === curComponent.version
+    )) {
+      continue
+    }
     componentCache.push(curComponent);
     const isCloudComponent = component.isCloud || curComponent.isCloud;
 
@@ -155,15 +163,13 @@ export const generateComLib = async (
 
     script += isCloudComponent
       ? `
-			comAray.push({ namespace: '${component.namespace}', version: '${
-          curComponent.version
-        }', runtime: ${decodeURIComponent(componentRuntime)} });
+			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
+      }', runtime: ${decodeURIComponent(componentRuntime)} });
 		`
       : `
 			eval(${JSON.stringify(decodeURIComponent(componentRuntime))});
-			comAray.push({ namespace: '${component.namespace}', version: '${
-          curComponent.version
-        }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
+			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
+      }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
 			if(Reflect.has(window, 'fangzhouComDef')) Reflect.deleteProperty(window, 'fangzhouComDef');
 			if(Reflect.has(window, 'MybricksComDef')) Reflect.deleteProperty(window, 'MybricksComDef');
 		`;
@@ -235,6 +241,8 @@ export async function generateComLibRT(
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ];
+
+
 
   const cloudNamespaceList = Object.keys(mySelfComMap);
 
