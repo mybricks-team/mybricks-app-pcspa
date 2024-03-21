@@ -1,28 +1,30 @@
-import React from 'react';
-import { message } from 'antd';
+import React from 'react'
+import { message } from 'antd'
 import servicePlugin, {
   call as callConnectorHttp,
   mock as connectorHttpMock,
 } from '@mybricks/plugin-connector-http'
-import domainServicePlugin, { call as callDomainHttp } from '@mybricks/plugin-connector-domain'
+import domainServicePlugin, {
+  call as callDomainHttp,
+} from '@mybricks/plugin-connector-domain'
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
 import localePlugin from '@mybricks/plugin-locale'
-import { use as useTheme } from '@mybricks/plugin-theme';
-import { openFilePanel } from "@mybricks/sdk-for-app/ui";
+import { use as useTheme } from '@mybricks/plugin-theme'
+import { openFilePanel } from '@mybricks/sdk-for-app/ui'
 
 import comlibLoaderFunc from './configs/comlibLoader'
 import { comLibAdderFunc } from './configs/comLibAdder'
-import CollaborationHttp from './plugin/collaboration-http';
+import CollaborationHttp from './plugin/collaboration-http'
 import { runJs } from '../../utils/runJs'
 
-import axios from 'axios';
-import { shapeUrlByEnv } from '../../utils';
-import { EnumMode } from './components/PublishModal';
-import { USE_CUSTOM_HOST } from './constants';
-import { fAxios } from '@/services/http';
-import { createFromIconfontCN } from '@ant-design/icons';
-import download from '@/utils/download';
+import axios from 'axios'
+import { shapeUrlByEnv } from '../../utils'
+import { EnumMode } from './components/PublishModal'
+import { USE_CUSTOM_HOST } from './constants'
+import { fAxios } from '@/services/http'
+import { createFromIconfontCN } from '@ant-design/icons'
+import download from '@/utils/download'
 
 const defaultPermissionComments = `/**
 *
@@ -40,51 +42,54 @@ const defaultPermissionFn = `export default function ({ key }) {
 }
 `
 const getComs = () => {
-  const comDefs = {};
+  const comDefs = {}
   const regAry = (comAray) => {
     comAray.forEach((comDef) => {
       if (comDef.comAray) {
-        regAry(comDef.comAray);
+        regAry(comDef.comAray)
       } else {
-        comDefs[`${comDef.namespace}-${comDef.version}`] = comDef;
+        comDefs[`${comDef.namespace}-${comDef.version}`] = comDef
       }
-    });
-  };
+    })
+  }
 
   const comlibs = [
     ...(window['__comlibs_edit_'] || []),
     ...(window['__comlibs_rt_'] || []),
-  ];
+  ]
   comlibs.forEach((lib) => {
-    const comAray = lib.comAray;
+    const comAray = lib.comAray
     if (comAray && Array.isArray(comAray)) {
-      regAry(comAray);
+      regAry(comAray)
     }
-  });
-  return comDefs;
-};
+  })
+  return comDefs
+}
 
 const getDomainFromPath = (path: string) => {
-  if (!path) return path;
+  if (!path) return path
   if (path.startsWith('http') || path.startsWith('https')) {
-    const [protocol, url] = path.split('//');
+    const [protocol, url] = path.split('//')
     const domain = url.split('/')[0]
     return `${protocol}//${domain}`
   } else {
-    return location.origin;
+    return location.origin
   }
 }
 
-
-const injectUpload = (editConfig: Record<string, any>, uploadService: string, manateeUserInfo: { token: string, session: string }, fileId: string) => {
-
+const injectUpload = (
+  editConfig: Record<string, any>,
+  uploadService: string,
+  manateeUserInfo: { token: string; session: string },
+  fileId: string
+) => {
   if (!!editConfig && !editConfig.upload) {
     editConfig.upload = async (files: Array<File>): Promise<Array<string>> => {
-      const formData = new FormData();
-      formData.append("file", files[0])
+      const formData = new FormData()
+      formData.append('file', files[0])
       formData.append('folderPath', `/files/${fileId}`)
 
-      const useConfigService = !!uploadService;
+      const useConfigService = !!uploadService
 
       if (!useConfigService) {
         uploadService = '/paas/api/flow/saveFile'
@@ -97,10 +102,10 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
           data: formData,
           headers: {
             'Content-Type': 'multipart/form-data',
-            ...manateeUserInfo
-          }
-        });
-        const { status, data, message, code } = res.data;
+            ...manateeUserInfo,
+          },
+        })
+        const { status, data, message, code } = res.data
 
         if (status === 200 || code === 1) {
           let url = ''
@@ -112,8 +117,10 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
           if (!url) {
             throw Error(`没有返回图片地址`)
           }
-          const staticUrl = /^http/.test(url) ? url : `${getDomainFromPath(uploadService)}${url}`
-          return [staticUrl].map(url => url.replace('https', 'http'))
+          const staticUrl = /^http/.test(url)
+            ? url
+            : `${getDomainFromPath(uploadService)}${url}`
+          return [staticUrl].map((url) => url.replace('https', 'http'))
         }
 
         throw Error(`【图片上传出错】: ${message}`)
@@ -121,19 +128,22 @@ const injectUpload = (editConfig: Record<string, any>, uploadService: string, ma
         message.error(error.message)
         return []
       }
-    };
+    }
   }
 }
 
 const CUSTOM_HOST_TITLE = `自定义域名`
-const DOMAIN_APP_NAMESPACE = 'mybricks-domain';
+const DOMAIN_APP_NAMESPACE = 'mybricks-domain'
 
-const isReact = APP_TYPE === 'react';
+const isReact = APP_TYPE === 'react'
 
 const getExecuteEnvByMode = (debugMode, ctx, envList) => {
   if (debugMode === EnumMode.DEFAULT) {
     ctx.executeEnv = ''
-  } else if (debugMode === EnumMode.ENV && (!ctx.executeEnv || !envList.find(item => item.name === ctx.executeEnv))) {
+  } else if (
+    debugMode === EnumMode.ENV &&
+    (!ctx.executeEnv || !envList.find((item) => item.name === ctx.executeEnv))
+  ) {
     ctx.executeEnv = envList[0].name
   } else if (debugMode === EnumMode.CUSTOM) {
     ctx.executeEnv = USE_CUSTOM_HOST
@@ -143,22 +153,26 @@ const getExecuteEnvByMode = (debugMode, ctx, envList) => {
 export default function (ctx, appData, save, designerRef, remotePlugins = []) {
   const envList = ctx.envList
   // 获得环境信息映射表
-  const envMap = ([...envList, { name: USE_CUSTOM_HOST, title: CUSTOM_HOST_TITLE }]).reduce((res, item) => {
+  const envMap = [
+    ...envList,
+    { name: USE_CUSTOM_HOST, title: CUSTOM_HOST_TITLE },
+  ].reduce((res, item) => {
     res[item.name] = item.title
     return res
   }, {})
 
-  const domainApp = appData.installedApps.find(app => app.namespace === DOMAIN_APP_NAMESPACE);
+  const domainApp = appData.installedApps.find(
+    (app) => app.namespace === DOMAIN_APP_NAMESPACE
+  )
 
-  ctx.debugMode = ctx.executeEnv === USE_CUSTOM_HOST
-    ? EnumMode.CUSTOM
-    : envList.length > 0
+  ctx.debugMode =
+    ctx.executeEnv === USE_CUSTOM_HOST
+      ? EnumMode.CUSTOM
+      : envList.length > 0
       ? EnumMode.ENV
       : EnumMode.DEFAULT
 
-
   getExecuteEnvByMode(ctx.debugMode, ctx, envList)
-
 
   const createMockConfigEditor = (field, title, description) => {
     return {
@@ -182,22 +196,28 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         //每个字段的数据结构为{ key, value, checked }
         set(context, v) {
           ctx.debugMockConfig[field] = v
-        }
-      }
+        },
+      },
     }
   }
 
-  const debugModeOptions = envList.length > 0
-    ? [
-      { label: '选择环境', value: EnumMode.ENV },
-      { label: '自定义域名', value: EnumMode.CUSTOM }
-    ]
-    : [
-      { label: '默认', value: EnumMode.DEFAULT },
-      { label: '自定义域名', value: EnumMode.CUSTOM }
-    ]
+  const debugModeOptions =
+    envList.length > 0
+      ? [
+          { label: '选择环境', value: EnumMode.ENV },
+          { label: '自定义域名', value: EnumMode.CUSTOM },
+        ]
+      : [
+          { label: '默认', value: EnumMode.DEFAULT },
+          { label: '自定义域名', value: EnumMode.CUSTOM },
+        ]
 
-  const adder: Array<{ type: string, title: string, inputs: { id: string, title: string, schema: Record<string, string> }[], template?: Record<string, any> }> = [
+  const adder: Array<{
+    type: string
+    title: string
+    inputs?: { id: string; title: string; schema: Record<string, string> }[]
+    template?: Record<string, any>
+  }> = [
     {
       type: 'normal',
       title: '页面',
@@ -206,42 +226,44 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           id: 'open',
           title: '打开',
           schema: {
-            type: 'any'
-          }
-        }
-      ]
-    }
+            type: 'any',
+          },
+        },
+      ],
+    },
   ]
   if (isReact) {
-    adder.push(...[
-      {
-        type: 'popup',
-        title: '对话框',
-        template: {
-          namespace: 'mybricks.basic-comlib.popup',
-          deletable: false,
-          asRoot: true
+    adder.push(
+      ...[
+        {
+          type: 'popup',
+          title: '对话框',
+          template: {
+            namespace: 'mybricks.basic-comlib.popup',
+            deletable: false,
+            asRoot: true,
+          },
         },
-      },
-      {
-        type: 'popup',
-        title: '抽屉',
-        template: {
-          namespace: 'mybricks.basic-comlib.drawer',
-          deletable: false,
-          asRoot: true
-        }
-      },
-      {
-        type: 'popup',
-        title: '打印对话框',
-        template: {
-          namespace: 'mybricks.normal-pc.print',
-          deletable: false,
-          asRoot: true
-        }
-      }
-    ])
+        {
+          type: 'popup',
+          title: '抽屉',
+          template: {
+            namespace: 'mybricks.basic-comlib.drawer',
+            deletable: false,
+            asRoot: true,
+          },
+        },
+        {
+          type: 'popup',
+          title: '打印对话框',
+          template: {
+            namespace: 'mybricks.normal-pc.print',
+            deletable: false,
+            asRoot: true,
+          },
+        },
+      ]
+    )
   }
 
   const getCurrentLocale = () => {
@@ -251,34 +273,48 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
   const connetorPlugins: any[] = [
     servicePlugin({
       isPrivatization: ctx.setting?.system.config?.isPureIntranet === true,
-      addActions: domainApp ? [
-        {
-          type: 'http-sql',
-          title: '领域接口',
-          noUseInnerEdit: true,
-          getTitle: item => {
-            return item.content?.domainServiceMap ? item.content.title : `${item.content.title || ''}(未选择)`
-          },
-          render: (props) => {
-            return (
-              <CollaborationHttp
-                {...props}
-                openFileSelector={() => openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })}
-              />
-            );
-          }
-        },
-      ] : void 0,
+      addActions: domainApp
+        ? [
+            {
+              type: 'http-sql',
+              title: '领域接口',
+              noUseInnerEdit: true,
+              getTitle: (item) => {
+                return item.content?.domainServiceMap
+                  ? item.content.title
+                  : `${item.content.title || ''}(未选择)`
+              },
+              render: (props) => {
+                return (
+                  <CollaborationHttp
+                    {...props}
+                    openFileSelector={() =>
+                      openFilePanel({
+                        allowedFileExtNames: ['domain'],
+                        parentId: ctx.sdk.projectId,
+                        fileId: ctx.fileId,
+                      })
+                    }
+                  />
+                )
+              },
+            },
+          ]
+        : void 0,
     }),
-  ];
+  ]
   if (domainApp) {
     connetorPlugins.push(
       domainServicePlugin({
         openFileSelector() {
-          return openFilePanel({ allowedFileExtNames: ['domain'], parentId: ctx.sdk.projectId, fileId: ctx.fileId })
+          return openFilePanel({
+            allowedFileExtNames: ['domain'],
+            parentId: ctx.sdk.projectId,
+            fileId: ctx.fileId,
+          })
         },
       })
-    );
+    )
   }
   return {
     // debugger(json, opts) {
@@ -295,7 +331,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         },
         onUsedIdChanged: ({ ids }) => {
           ctx.i18nUsedIdList = ids
-        }
+        },
       }),
       ...remotePlugins,
       useTheme({ sdk: appData }),
@@ -309,29 +345,39 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         onInit: (versionApi) => {
           ctx.versionApi = versionApi
         },
-        onRevert: async (params: { pubAssetFilePath: string, nowVersion: string, fileId: number, type: string }) => {
-          const { fileId, nowVersion, pubAssetFilePath, type } = params;
+        onRevert: async (params: {
+          pubAssetFilePath: string
+          nowVersion: string
+          fileId: number
+          type: string
+        }) => {
+          const { fileId, nowVersion, pubAssetFilePath, type } = params
           try {
-            const finish = message.loading('正在回滚...', 0);
-            const res: { code: number, message: string } = await fAxios.post('/api/pcpage/rollback', { filePath: pubAssetFilePath, nowVersion, type, fileId });
-            finish();
+            const finish = message.loading('正在回滚...', 0)
+            const res: { code: number; message: string } = await fAxios.post(
+              '/api/pcpage/rollback',
+              { filePath: pubAssetFilePath, nowVersion, type, fileId }
+            )
+            finish()
 
             if (res.code === 1) {
-              message.success(res.message);
+              message.success(res.message)
             } else {
-              message.error("回滚失败！");
+              message.error('回滚失败！')
             }
           } catch (e) {
-            message.error("回滚失败！");
+            message.error('回滚失败！')
           }
         },
         modalActiveExtends: [
           {
-            type: "publish",
-            title: "下载",
+            type: 'publish',
+            title: '下载',
             onClick({ fileId, type: envType, version }) {
               const loadend = message.loading(`版本 ${version} 下载中...`, 0)
-              download(`api/pcpage/download-product/${fileId}/${envType}/${version}`).finally(() => {
+              download(
+                `api/pcpage/download-product/${fileId}/${envType}/${version}`
+              ).finally(() => {
                 loadend()
               })
             },
@@ -339,9 +385,11 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         ],
       }),
     ],
-    ...(ctx.hasMaterialApp ? {
-      comLibAdder: comLibAdderFunc(ctx),
-    } : {}),
+    ...(ctx.hasMaterialApp
+      ? {
+          comLibAdder: comLibAdderFunc(ctx),
+        }
+      : {}),
     comLibLoader: comlibLoaderFunc(ctx),
     pageContentLoader() {
       //加载页面内容
@@ -365,26 +413,31 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               id: 'open',
               title: '打开',
               schema: {
-                type: 'any'
-              }
-            }
-          ]
-        }
+                type: 'any',
+              },
+            },
+          ],
+        },
       },
       globalIO: {
-        startWithSingleton: true
+        startWithSingleton: true,
       },
       vars: {},
       fx: {},
-      useStrict: false
+      useStrict: false,
     },
     editView: {
       editorAppender(editConfig) {
-        editConfig.fontJS = ctx.fontJS;
-        injectUpload(editConfig, ctx.uploadService, ctx.manateeUserInfo, ctx.fileId);
-        return;
+        editConfig.fontJS = ctx.fontJS
+        injectUpload(
+          editConfig,
+          ctx.uploadService,
+          ctx.manateeUserInfo,
+          ctx.fileId
+        )
+        return
       },
-      items({ }, cate0, cate1, cate2) {
+      items({}, cate0, cate1, cate2) {
         cate0.title = `项目`
         cate0.items = [
           {
@@ -417,9 +470,9 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                       ctx.absoluteNamePath = v
                     }
                   },
-                }
-              }
-            ]
+                },
+              },
+            ],
           },
           {
             title: '全局方法',
@@ -431,18 +484,21 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 options: {
                   title: '权限校验',
                   comments: defaultPermissionComments,
-                  displayType: 'button'
+                  displayType: 'button',
                 },
                 value: {
                   get() {
-                    return decodeURIComponent(ctx?.hasPermissionFn || encodeURIComponent(defaultPermissionFn))
+                    return decodeURIComponent(
+                      ctx?.hasPermissionFn ||
+                        encodeURIComponent(defaultPermissionFn)
+                    )
                   },
                   set(context, v: string) {
                     ctx.hasPermissionFn = encodeURIComponent(v)
-                  }
-                }
-              }
-            ]
+                  },
+                },
+              },
+            ],
           },
           {
             title: '调试',
@@ -457,8 +513,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   },
                   set(_, value) {
                     ctx.directConnection = value
-                  }
-                }
+                  },
+                },
               },
               {
                 title: '调试模式',
@@ -472,22 +528,23 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   set(_, value) {
                     ctx.debugMode = value
                     getExecuteEnvByMode(value, ctx, envList)
-                  }
-                }
+                  },
+                },
               },
               {
                 title: '调试环境',
                 type: 'select',
-                description: '所选环境对应的域名将拼接到接口地址前，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
+                description:
+                  '所选环境对应的域名将拼接到接口地址前，发布时的环境不受此控制，你可以在应用配置处修改可选环境（需管理员权限）',
                 ifVisible({ data }) {
-                  return ctx.debugMode === EnumMode.ENV;
+                  return ctx.debugMode === EnumMode.ENV
                 },
                 options: {
-                  options: envList.map(item => ({
+                  options: envList.map((item) => ({
                     value: item.name,
-                    label: item.title
+                    label: item.title,
                   })),
-                  placeholder: '请选择调试环境'
+                  placeholder: '请选择调试环境',
                 },
                 value: {
                   get() {
@@ -495,24 +552,25 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   },
                   set(context, v) {
                     ctx.executeEnv = v
-                  }
-                }
+                  },
+                },
               },
               {
                 title: '自定义域名',
-                description: '自定义各个接口的域名，在接口中以{MYBRICKS_HOST.变量}的形式进行引用，发布后的页面需要主动在window.MYBRICKS_HOST对象上设置域名信息',
+                description:
+                  '自定义各个接口的域名，在接口中以{MYBRICKS_HOST.变量}的形式进行引用，发布后的页面需要主动在window.MYBRICKS_HOST对象上设置域名信息',
                 type: 'map',
                 ifVisible(info) {
                   return ctx.debugMode === EnumMode.CUSTOM
                 },
                 options: {
-                  allowEmptyString: false
+                  allowEmptyString: false,
                 },
                 value: {
                   get(info) {
                     if (!ctx.MYBRICKS_HOST) {
                       ctx.MYBRICKS_HOST = {}
-                    } else if (!("default" in ctx.MYBRICKS_HOST)) {
+                    } else if (!('default' in ctx.MYBRICKS_HOST)) {
                       ctx.MYBRICKS_HOST.default = 'https://your-domain-name.com'
                     }
                     return ctx.MYBRICKS_HOST
@@ -522,40 +580,43 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                       message.error('必须包含变量名为default的域名')
                     } else if (!value?.default) {
                       message.error('default域名不能为空')
-                    } else if (Object.values(value).some(item => !item)) {
+                    } else if (Object.values(value).some((item) => !item)) {
                       message.error('域名不能为空')
                     } else {
                       ctx.MYBRICKS_HOST = value
                     }
-                  }
+                  },
                 },
               },
               {
                 title: '环境信息设置',
                 description: '可以在应用配置处修改使用的环境',
                 ifVisible({ data }) {
-                  return ctx.debugMode === EnumMode.ENV;
+                  return ctx.debugMode === EnumMode.ENV
                 },
                 type: 'array',
                 options: {
                   getTitle: (item) => {
                     return item.title
                   },
-                  items: [{
-                    title: '环境标识(禁止修改)',
-                    type: 'text',
-                    value: 'name',
-                    options: {
-                      readonly: true
-                    }
-                  }, {
-                    title: '域名',
-                    type: 'text',
-                    value: 'value'
-                  }],
+                  items: [
+                    {
+                      title: '环境标识(禁止修改)',
+                      type: 'text',
+                      value: 'name',
+                      options: {
+                        readonly: true,
+                      },
+                    },
+                    {
+                      title: '域名',
+                      type: 'text',
+                      value: 'value',
+                    },
+                  ],
                   addable: false,
                   deletable: false,
-                  draggable: false
+                  draggable: false,
                 },
                 value: {
                   get({ data, focusArea }) {
@@ -563,8 +624,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   },
                   set({ data, focusArea, output, input, ...res }, value) {
                     ctx.envList = value
-                  }
-                }
+                  },
+                },
               },
               {
                 title: '权限校验',
@@ -576,8 +637,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   },
                   set(context, v) {
                     ctx.debugHasPermissionFn = v
-                  }
-                }
+                  },
+                },
               },
               {
                 title: '路由参数',
@@ -588,24 +649,26 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   language: 'json',
                   width: 500,
                   minimap: {
-                    enabled: false
+                    enabled: false,
                   },
-                  displayType: 'button'
+                  displayType: 'button',
                 },
                 value: {
                   get() {
-                    return ctx.debugQuery ? JSON.stringify(ctx.debugQuery, null, 2) : '{}'
+                    return ctx.debugQuery
+                      ? JSON.stringify(ctx.debugQuery, null, 2)
+                      : '{}'
                   },
                   set(context: any, v: string) {
-                    const jsonString = decodeURIComponent(v);
+                    const jsonString = decodeURIComponent(v)
                     try {
-                      const jsonData = JSON.parse(jsonString || '{}');
+                      const jsonData = JSON.parse(jsonString || '{}')
                       ctx.debugQuery = jsonData
                     } catch {
-                      console.error('路由参数数据格式错误');
+                      console.error('路由参数数据格式错误')
                     }
-                  }
-                }
+                  },
+                },
               },
               {
                 title: '主应用参数',
@@ -616,28 +679,38 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   language: 'json',
                   width: 500,
                   minimap: {
-                    enabled: false
+                    enabled: false,
                   },
-                  displayType: 'button'
+                  displayType: 'button',
                 },
                 value: {
                   get() {
-                    return ctx.debugMainProps ? JSON.stringify(ctx.debugMainProps, null, 2) : '{}'
+                    return ctx.debugMainProps
+                      ? JSON.stringify(ctx.debugMainProps, null, 2)
+                      : '{}'
                   },
                   set(context: any, v: string) {
-                    const jsonString = decodeURIComponent(v);
+                    const jsonString = decodeURIComponent(v)
                     try {
-                      const jsonData = JSON.parse(jsonString || '{}');
+                      const jsonData = JSON.parse(jsonString || '{}')
                       ctx.debugMainProps = jsonData
                     } catch {
-                      console.error('主应用参数数据格式错误');
+                      console.error('主应用参数数据格式错误')
                     }
-                  }
-                }
+                  },
+                },
               },
-              createMockConfigEditor('localStorageMock', 'localStorage模拟', '调试模式下，localStorage模拟'),
-              createMockConfigEditor('sessionStorageMock', 'sessionStorage模拟', '调试模式下，sessionStorage模拟'),
-            ]
+              createMockConfigEditor(
+                'localStorageMock',
+                'localStorage模拟',
+                '调试模式下，localStorage模拟'
+              ),
+              createMockConfigEditor(
+                'sessionStorageMock',
+                'sessionStorage模拟',
+                '调试模式下，sessionStorage模拟'
+              ),
+            ],
           },
           {
             items: [
@@ -647,103 +720,114 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 description: '设置iconfont js链接',
                 value: {
                   get() {
-                    return ctx.fontJS;
+                    return ctx.fontJS
                   },
                   set(context, v: string) {
-                    ctx.fontJS = v;
+                    ctx.fontJS = v
                     createFromIconfontCN({
                       scriptUrl: v, // 在 iconfont.cn 上生成
-                    });
-                  }
-                }
-              }
-            ]
-          }
-
+                    })
+                  },
+                },
+              },
+            ],
+          },
         ]
       },
-      editorOptions: ctx.setting?.system.config?.isPureIntranet ? {
-        expression: {
-          CDN: {
-            codemirror: '/mfs/editor_assets/codemirror/codemirror_1.0.13_index.min.js'
-          }
-        },
-        richtext: {
-          CDN: {
-            tinymce: '/mfs/editor_assets/richText/tinymce/5.7.1/tinymce.min.js',
-            language: '/mfs/editor_assets/richText/tinymce/5.7.1/zh_CN.js',
-          }
-        },
-        align: {
-          CDN: {
-            left: '/mfs/editor_assets/align/left.defc4a63ebe8ea7d.svg',
-            rowCenter: '/mfs/editor_assets/align/center.c284343a9ff9672a.svg',
-            right: '/mfs/editor_assets/align/right.a7763b38b84b5894.svg',
-            top: '/mfs/editor_assets/align/top.98906024d52b69de.svg',
-            columnCenter: '/mfs/editor_assets/align/center.100376f4ade480cd.svg',
-            bottom: '/mfs/editor_assets/align/bottom.6ee532067ed440ca.svg',
-            column: '/mfs/editor_assets/align/column-space-between.31d560c0e611198f.svg',
-            row: '/mfs/editor_assets/align/row-space-between.ead5cd660c0f1c33.svg',
-          }
-        },
-        array: {
-          CDN: {
-            sortableHoc: '/mfs/editor_assets/react-sortable/react-sortable-hoc-2.0.0_index.umd.min.js'
-          }
-        },
-        expcode: {
-          CDN: {
-            prettier: {
-              standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
-              babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js'
+      editorOptions: ctx.setting?.system.config?.isPureIntranet
+        ? {
+            expression: {
+              CDN: {
+                codemirror:
+                  '/mfs/editor_assets/codemirror/codemirror_1.0.13_index.min.js',
+              },
             },
-            eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
-            paths: {
-              vs: "/mfs/editor_assets/monaco-editor/0.33.0/min/vs",
+            richtext: {
+              CDN: {
+                tinymce:
+                  '/mfs/editor_assets/richText/tinymce/5.7.1/tinymce.min.js',
+                language: '/mfs/editor_assets/richText/tinymce/5.7.1/zh_CN.js',
+              },
             },
-            monacoLoader: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js'
+            align: {
+              CDN: {
+                left: '/mfs/editor_assets/align/left.defc4a63ebe8ea7d.svg',
+                rowCenter:
+                  '/mfs/editor_assets/align/center.c284343a9ff9672a.svg',
+                right: '/mfs/editor_assets/align/right.a7763b38b84b5894.svg',
+                top: '/mfs/editor_assets/align/top.98906024d52b69de.svg',
+                columnCenter:
+                  '/mfs/editor_assets/align/center.100376f4ade480cd.svg',
+                bottom: '/mfs/editor_assets/align/bottom.6ee532067ed440ca.svg',
+                column:
+                  '/mfs/editor_assets/align/column-space-between.31d560c0e611198f.svg',
+                row: '/mfs/editor_assets/align/row-space-between.ead5cd660c0f1c33.svg',
+              },
+            },
+            array: {
+              CDN: {
+                sortableHoc:
+                  '/mfs/editor_assets/react-sortable/react-sortable-hoc-2.0.0_index.umd.min.js',
+              },
+            },
+            expcode: {
+              CDN: {
+                prettier: {
+                  standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                  babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
+                },
+                eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+                paths: {
+                  vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
+                },
+                monacoLoader:
+                  '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+              },
+            },
+            csseditor: {
+              CDN: {
+                prettier: {
+                  standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                  babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
+                },
+                eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+                paths: {
+                  vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
+                },
+                monacoLoader:
+                  '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+              },
+            },
+            stylenew: {
+              CDN: {
+                prettier: {
+                  standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                  babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
+                },
+                eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+                paths: {
+                  vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
+                },
+                monacoLoader:
+                  '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+              },
+            },
+            code: {
+              CDN: {
+                prettier: {
+                  standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                  babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
+                },
+                eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+                paths: {
+                  vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
+                },
+                monacoLoader:
+                  '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+              },
+            },
           }
-        },
-        csseditor: {
-          CDN: {
-            prettier: {
-              standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
-              babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js'
-            },
-            eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
-            paths: {
-              vs: "/mfs/editor_assets/monaco-editor/0.33.0/min/vs",
-            },
-            monacoLoader: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js'
-          }
-        },
-        stylenew: {
-          CDN: {
-            prettier: {
-              standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
-              babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js'
-            },
-            eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
-            paths: {
-              vs: "/mfs/editor_assets/monaco-editor/0.33.0/min/vs",
-            },
-            monacoLoader: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js'
-          }
-        },
-        code: {
-          CDN: {
-            prettier: {
-              standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
-              babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js'
-            },
-            eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
-            paths: {
-              vs: "/mfs/editor_assets/monaco-editor/0.33.0/min/vs",
-            },
-            monacoLoader: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js'
-          }
-        }
-      } : undefined
+        : undefined,
     },
     com: {
       env: {
@@ -766,57 +850,84 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           if (typeof title === 'string') return title
           const i18nLangContent = ctx.i18nLangContent || {}
           // 搭建页面使用中文
-          return i18nLangContent[title?.id]?.content?.[getCurrentLocale()] || JSON.stringify(title)
+          return (
+            i18nLangContent[title?.id]?.content?.[getCurrentLocale()] ||
+            JSON.stringify(title)
+          )
         },
         /** 调用领域模型 */
         callDomainModel(domainModel, type, params) {
-          return callDomainHttp(domainModel, params, { action: type } as any);
+          return callDomainHttp(domainModel, params, { action: type } as any)
         },
         callConnector(connector, params, connectorConfig = {}) {
-          const plugin = designerRef.current?.getPlugin(connector.connectorName);
-          if (ctx.executeEnv === USE_CUSTOM_HOST && !ctx.MYBRICKS_HOST.default) {
+          const plugin = designerRef.current?.getPlugin(connector.connectorName)
+          if (
+            ctx.executeEnv === USE_CUSTOM_HOST &&
+            !ctx.MYBRICKS_HOST.default
+          ) {
             throw new Error(`自定义域名必须设置default域名`)
           }
-          let newParams = params;
+          let newParams = params
           if (ctx.executeEnv === USE_CUSTOM_HOST) {
             if (params instanceof FormData) {
-              newParams.append('MYBRICKS_HOST', JSON.stringify(ctx.MYBRICKS_HOST));
+              newParams.append(
+                'MYBRICKS_HOST',
+                JSON.stringify(ctx.MYBRICKS_HOST)
+              )
             } else if (Array.isArray(newParams)) {
-              newParams['MYBRICKS_HOST'] = { ...ctx.MYBRICKS_HOST };
+              newParams['MYBRICKS_HOST'] = { ...ctx.MYBRICKS_HOST }
             } else if (typeof newParams === 'object') {
-              newParams = { ...params, MYBRICKS_HOST: { ...ctx.MYBRICKS_HOST } };
+              newParams = { ...params, MYBRICKS_HOST: { ...ctx.MYBRICKS_HOST } }
             }
           }
           if (!plugin) {
             /** 启动 Mock */
             if (connectorConfig?.openMock) {
-              return connectorHttpMock({ ...connector, ...connectorConfig });
+              return connectorHttpMock({ ...connector, ...connectorConfig })
             }
 
             //服务接口类型
             return callConnectorHttp(
-              { ...connector, script: connector.script, useProxy: !ctx.directConnection },
+              {
+                ...connector,
+                script: connector.script,
+                useProxy: !ctx.directConnection,
+              },
               newParams,
               {
                 ...connectorConfig,
-                before: options => {
+                before: (options) => {
                   return {
                     ...options,
-                    url: shapeUrlByEnv(envList, ctx.executeEnv, options.url, ctx.MYBRICKS_HOST)
+                    url: shapeUrlByEnv(
+                      envList,
+                      ctx.executeEnv,
+                      options.url,
+                      ctx.MYBRICKS_HOST
+                    ),
                   }
-                }
+                },
               }
-            );
+            )
           } else {
-            return plugin.callConnector({ ...connector, useProxy: !ctx.directConnection }, newParams, {
-              ...connectorConfig,
-              before: options => {
-                return {
-                  ...options,
-                  url: shapeUrlByEnv(envList, ctx.executeEnv, options.url, ctx.MYBRICKS_HOST)
-                }
+            return plugin.callConnector(
+              { ...connector, useProxy: !ctx.directConnection },
+              newParams,
+              {
+                ...connectorConfig,
+                before: (options) => {
+                  return {
+                    ...options,
+                    url: shapeUrlByEnv(
+                      envList,
+                      ctx.executeEnv,
+                      options.url,
+                      ctx.MYBRICKS_HOST
+                    ),
+                  }
+                },
               }
-            });
+            )
           }
         },
         vars: {
@@ -827,14 +938,14 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             return ctx.i18nLangContent || {}
           },
           get locale() {
-            return getCurrentLocale();
+            return getCurrentLocale()
           },
           getQuery: () => ({ ...(ctx.debugQuery || {}) }),
           getProps: () => ({ ...(ctx.debugMainProps || {}) }),
           get getRouter() {
             const toast = (info: string) => {
-              message.info(info);
-            };
+              message.info(info)
+            }
             return () => ({
               reload: () => toast('reload'),
               redirect: ({ url }: { url: string }) => toast(`redirect: ${url}`),
@@ -845,80 +956,80 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 title,
                 url,
               }: {
-                state: any;
-                title: string;
-                url: string;
+                state: any
+                title: string
+                url: string
               }) =>
                 toast(`pushState: ${JSON.stringify({ state, title, url })}`),
               openTab: ({ url, title }: { url: string; title: string }) =>
                 toast(`open a new tab: ${JSON.stringify({ url, title })}`),
-            });
+            })
           },
           get getCookies() {
             return () => {
               return {}
             }
-          }
+          },
         },
         get hasPermission() {
           return ({ permission, key }) => {
-            const hasPermissionFn = ctx?.hasPermissionFn;
+            const hasPermissionFn = ctx?.hasPermissionFn
 
             if (!ctx.debugHasPermissionFn) {
               return true
             }
 
             if (!hasPermissionFn) {
-              return true;
+              return true
             }
 
             // 编辑权限配置为”无“时，不需要进行权限校验
             if (permission?.type === 'none') {
-              return true;
+              return true
             }
 
-            const code = permission?.register?.code || key;
+            const code = permission?.register?.code || key
 
             // 如果没有权限编码，不需要校验
             if (code === undefined) {
-              return true;
+              return true
             }
 
-            let result: boolean;
+            let result: boolean
 
             try {
               result = runJs(decodeURIComponent(hasPermissionFn), [
                 { key: code },
-              ]);
+              ])
 
               if (typeof result !== 'boolean') {
-                result = true;
+                result = true
                 designerRef.current?.console?.log.error(
                   '权限方法',
                   `权限方法返回值类型应为 Boolean 请检查，[Key] ${code}; [返回值] Type: ${typeof result}; Value: ${JSON.stringify(
-                    result,
-                  )}`,
-                );
+                    result
+                  )}`
+                )
 
                 console.error(
                   `权限方法返回值类型应为 Boolean 请检查，[Key] ${code}; [返回值] Type: ${typeof result}; Value: ${JSON.stringify(
-                    result,
-                  )}`,
-                );
+                    result
+                  )}`
+                )
               }
             } catch (error) {
-              result = true;
+              result = true
               designerRef.current?.console?.log.error(
                 '权限方法',
-                `${error.message}`,
-              );
+                `${error.message}`
+              )
               // ctx.console?.log.error('权限方法', `${error.message}`)
-              console.error(`权限方法出错 [Key] ${code}；`, error);
+              console.error(`权限方法出错 [Key] ${code}；`, error)
             }
 
-            return result;
-          };
-        }
+            return result
+          }
+        },
       },
       events: [
         //配置事件
@@ -943,16 +1054,14 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     },
     geoView: {
       scenes: {
-        adder
+        adder,
       },
       theme: {
         css: [
           'public/antd/antd@4.21.6.variable.min.css',
-          ...(
-            !isReact ? ['./public/elementUI/element@2.15.14.css'] : []
-          )
+          ...(!isReact ? ['./public/elementUI/element@2.15.14.css'] : []),
         ],
       },
-    }
+    },
   }
 }
