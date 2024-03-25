@@ -10,6 +10,7 @@ import domainServicePlugin, {
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
 import localePlugin from '@mybricks/plugin-locale'
+import notePlugin from './plugin/plugin-note/src'
 import { use as useTheme } from '@mybricks/plugin-theme'
 import { openFilePanel } from '@mybricks/sdk-for-app/ui'
 
@@ -325,6 +326,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     },
     plugins: [
       ...connetorPlugins,
+      notePlugin(ctx),
       localePlugin({
         onPackLoad: ({ i18nLangContent }) => {
           ctx.i18nLangContent = i18nLangContent
