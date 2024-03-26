@@ -33,7 +33,7 @@ export async function downloadProduct(
     })) as { assetPath: string };
     Logger.info(`[downloadProduct] 下载资源地址为: ${assetPath}`);
     Logger.info("[downloadProduct] 开始读取资源...");
-    // const zipContent = fs.readFileSync(`${__dirname}/rollback.zip`);
+
     const zipContent = fs.readFileSync(assetPath);
     Logger.info("[downloadProduct] 解压资源...");
     const params = (await decompressGzipToObject(zipContent)) as any;
@@ -55,11 +55,36 @@ export async function downloadProduct(
       fs.writeFileSync(path.join(indexHtmlDir, name), content);
     };
 
+    const publicAssetsRegex = /<!--\s*public\s*assets\s*begin\s*-->[\s\S]*?<!--\s*public\s*assets\s*end\s*-->/
+    params.template = params.template
+      // 将组件库代码写入html中，不是使用单独的js文件
+      .replace(`<script src="./${params.comlibRtName}"></script>`, () => {
+        return `<script>${params.comboScriptText || ""}</script>`
+      })
+      // 将本地资源替换成cdn资源
+      .replace(publicAssetsRegex, () => {
+        return `<script src="http://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443543399.2.29.4_moment.min.js"></script>
+      <script src="http://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443577599.2.29.4_locale_zh-cn.min.js"></script>
+      <link rel="stylesheet" href="http://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/antd.variable.min.css" />
+      <script src="http://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690446345009.react.18.0.0.production.min.js"></script>
+      <script
+        src="http://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443341846.umd_react-dom.production.min.js"></script>
+      <script src="http://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444184854.4.21.6_antd.min.js"></script>
+      <script src="http://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>
+      <script src="http://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444248634.ant-design-icons_4.7.0_min.js"></script>
+      <script src="http://f2.beckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/ant-design/charts-1.3.5/charts.min.js"></script>
+      <script src="http://f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.2.3/index.js"></script>
+      <script
+        src="http://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690445635042.mybricks_plugin-connector-domain@0.0.44.js"></script>
+      <script src="http://f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.2.52/index.min.js"></script>
+`
+      })
     createFile("/", `${params.fileId}.html`, params.template);
-    createFile("/", params.comlibRtName, params.comboScriptText || "");
-    params.globalDeps.forEach(({ content, path, name }) => {
-      createFile(path, name, content);
-    });
+
+    // params.globalDeps.forEach(({ content, path, name }) => {
+    //   createFile(path, name, content);
+    // });
+
     params.images.forEach(({ content, name, path }) => {
       createFile(path, name, Buffer.from(content));
     });
@@ -95,8 +120,7 @@ export async function downloadProduct(
     Logger.info("[downloadProduct] 压缩下载文件完成");
   } catch (e) {
     Logger.error(
-      `[downloadProduct] 下载发布产物执行报错: ${
-        e?.message || JSON.stringify(e, null, 2)
+      `[downloadProduct] 下载发布产物执行报错: ${e?.message || JSON.stringify(e, null, 2)
       }`
     );
     throw e;

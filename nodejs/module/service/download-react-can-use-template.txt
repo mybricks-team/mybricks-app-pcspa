@@ -1,8 +1,38 @@
 import React, { useEffect, useRef, useState } from "react";
-import { loadMicroApp } from "qiankun";
+// import { loadMicroApp } from 'qiankun'
 
 const pageName = "--pageName--"
 const pageId = "--pageId--"
+
+const qianKunCdn = `https://cdn.jsdelivr.net/npm/qiankun@2.10.16/dist/index.umd.min.js`
+const importScirpt = (url) => {
+    return new Promise((resolve, reject) => {
+        // 保存最后一个 window 属性 key
+        // 创建 script
+        const script = document.createElement('script')
+        script.setAttribute('src', url)
+        document.head.appendChild(script)
+
+        // 监听加载完成事件
+        script.addEventListener('load', () => {
+            console.log(`load`, window.qiankun)
+            document.head.removeChild(script)
+            resolve()
+        })
+    })
+}
+
+const importQiankunIfNeed = () => {
+    return new Promise(res => {
+        if (window.qiankun) {
+            console.log(`have qiankun`)
+            res()
+        } else {
+            console.log(`no qiankun`)
+            importScirpt(qianKunCdn).then(res)
+        }
+    })
+}
 
 const AppContainer = (props) => {
     const container = useRef(null);
@@ -13,22 +43,29 @@ const AppContainer = (props) => {
         }
         let currentApp;
         if (app && container.current) {
-            currentApp = loadMicroApp(
-                { ...app, container: container.current, props },
-                {
-                    sandbox: {
-                        experimentalStyleIsolation: true
+            importQiankunIfNeed().then(() => {
+                console.log('success')
+                currentApp = window?.qiankun?.loadMicroApp(
+                    { ...app, container: container.current, props },
+                    {
+                        sandbox: {
+                            experimentalStyleIsolation: true
+                        }
+                    },
+                    {
+                        beforeLoad() {
+                            return Promise.resolve();
+                        },
+                        afterMount() {
+                            return Promise.resolve();
+                        },
                     }
-                },
-                {
-                    beforeLoad() {
-                        return Promise.resolve();
-                    },
-                    afterMount() {
-                        return Promise.resolve();
-                    },
-                }
-            );
+                );
+
+            }).catch(e => {
+                console.log(`error`)
+                throw new Error(e)
+            })
         }
         return () => {
             currentApp?.unmount();
