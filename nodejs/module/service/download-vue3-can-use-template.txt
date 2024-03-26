@@ -4,22 +4,52 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { loadMicroApp } from 'qiankun'
-import type { MicroApp } from 'qiankun'
 
 const pageName = "--pageName--"
 const pageId = "--pageId--"
 
+const qianKunCdn = `https://cdn.jsdelivr.net/npm/qiankun@2.10.16/dist/index.umd.min.js`
+const importScirpt = (url) => {
+    return new Promise((resolve, reject) => {
+        // 保存最后一个 window 属性 key
+        // 创建 script
+        const script = document.createElement('script')
+        script.setAttribute('src', url)
+        document.head.appendChild(script)
+
+        // 监听加载完成事件
+        script.addEventListener('load', () => {
+            console.log(`load`, window.qiankun)
+            document.head.removeChild(script)
+            resolve()
+        })
+    })
+}
+
+const importQiankunIfNeed = () => {
+    return new Promise(res => {
+        if (window.qiankun) {
+            console.log(`have qiankun`)
+            res()
+        } else {
+            console.log(`no qiankun`)
+            importScirpt(qianKunCdn).then(res)
+        }
+    })
+}
+
 const containerRef = ref<HTMLElement | null>(null)
 
-let microApp: MicroApp | null = null
+let microApp
 
 onMounted(() => {
-  microApp = loadMicroApp({
-    name: pageName,
-    entry: `./${pageId}.html`,
-    container: containerRef.value,
-    props: {}
+  importQiankunIfNeed().then(() => {
+    microApp = window?.qiankun?.loadMicroApp({
+      name: pageName,
+      entry: `./${pageId}.html`,
+      container: containerRef.value,
+      props: {}
+    })
   })
 })
 
