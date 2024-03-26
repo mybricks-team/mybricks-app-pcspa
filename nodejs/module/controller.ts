@@ -62,13 +62,13 @@ export default class PcPageController {
 
       const jsonTransform = isEncode
         ? JSON.parse(
-            decodeURIComponent(
-              Buffer.from(
-                typeof json === "string" ? json : JSON.stringify(json),
-                "base64"
-              ).toString()
-            )
+          decodeURIComponent(
+            Buffer.from(
+              typeof json === "string" ? json : JSON.stringify(json),
+              "base64"
+            ).toString()
           )
+        )
         : json;
 
       const result = await this.service.publish(req, {
@@ -104,6 +104,13 @@ export default class PcPageController {
     return await this.service.upload(req, { file });
   }
 
+  @Post("/searchUser")
+  async searchUser(
+    @Body("keyword") keyword: string,
+  ) {
+    return await this.service.searchUser({ keyword });
+  }
+
   @Post("/rollback")
   async rollback(
     @Body("filePath") filePath: string,
@@ -134,8 +141,7 @@ export default class PcPageController {
       };
     } catch (error) {
       Logger.error(
-        `[rollback] 回滚失败: ${
-          error?.message || JSON.stringify(error, null, 2)
+        `[rollback] 回滚失败: ${error?.message || JSON.stringify(error, null, 2)
         }`
       );
       return {
@@ -176,8 +182,7 @@ export default class PcPageController {
       };
     } catch (error) {
       Logger.error(
-        `[downloadProduct] 下载发布产物失败: ${
-          error?.message || JSON.stringify(error, null, 2)
+        `[downloadProduct] 下载发布产物失败: ${error?.message || JSON.stringify(error, null, 2)
         }`
       );
       return {

@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { publish } from "./publish";
+import { searchUser } from "./seachUser";
 import { upload } from "./upload";
 import { rollback } from "./rollback";
 import { downloadProduct } from "./download-product";
@@ -20,6 +21,10 @@ export default class PcPageService {
     rollbackDataParams: { nowVersion: string; fileId: number; type: string }
   ) {
     return await rollback(req, filePath, rollbackDataParams);
+  }
+
+  async searchUser(params: { keyword: string }) {
+    return await searchUser(params);
   }
 
   async downloadProduct(

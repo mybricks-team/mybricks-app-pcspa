@@ -10,6 +10,7 @@ import domainServicePlugin, {
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
 import localePlugin from '@mybricks/plugin-locale'
+// import notePlugin from '../../../../../plugin-note'
 import notePlugin from 'mybricks-plugin-note'
 import { use as useTheme } from '@mybricks/plugin-theme'
 import { openFilePanel } from '@mybricks/sdk-for-app/ui'
@@ -26,6 +27,8 @@ import { USE_CUSTOM_HOST } from './constants'
 import { fAxios } from '@/services/http'
 import { createFromIconfontCN } from '@ant-design/icons'
 import download from '@/utils/download'
+import upload from '@/utils/upload'
+import searchUser from '@/utils/searchUser'
 
 const defaultPermissionComments = `/**
 *
@@ -170,8 +173,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     ctx.executeEnv === USE_CUSTOM_HOST
       ? EnumMode.CUSTOM
       : envList.length > 0
-      ? EnumMode.ENV
-      : EnumMode.DEFAULT
+        ? EnumMode.ENV
+        : EnumMode.DEFAULT
 
   getExecuteEnvByMode(ctx.debugMode, ctx, envList)
 
@@ -205,13 +208,13 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
   const debugModeOptions =
     envList.length > 0
       ? [
-          { label: '选择环境', value: EnumMode.ENV },
-          { label: '自定义域名', value: EnumMode.CUSTOM },
-        ]
+        { label: '选择环境', value: EnumMode.ENV },
+        { label: '自定义域名', value: EnumMode.CUSTOM },
+      ]
       : [
-          { label: '默认', value: EnumMode.DEFAULT },
-          { label: '自定义域名', value: EnumMode.CUSTOM },
-        ]
+        { label: '默认', value: EnumMode.DEFAULT },
+        { label: '自定义域名', value: EnumMode.CUSTOM },
+      ]
 
   const adder: Array<{
     type: string
@@ -219,20 +222,20 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     inputs?: { id: string; title: string; schema: Record<string, string> }[]
     template?: Record<string, any>
   }> = [
-    {
-      type: 'normal',
-      title: '页面',
-      inputs: [
-        {
-          id: 'open',
-          title: '打开',
-          schema: {
-            type: 'any',
+      {
+        type: 'normal',
+        title: '页面',
+        inputs: [
+          {
+            id: 'open',
+            title: '打开',
+            schema: {
+              type: 'any',
+            },
           },
-        },
-      ],
-    },
-  ]
+        ],
+      },
+    ]
   if (isReact) {
     adder.push(
       ...[
@@ -276,31 +279,31 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       isPrivatization: ctx.setting?.system.config?.isPureIntranet === true,
       addActions: domainApp
         ? [
-            {
-              type: 'http-sql',
-              title: '领域接口',
-              noUseInnerEdit: true,
-              getTitle: (item) => {
-                return item.content?.domainServiceMap
-                  ? item.content.title
-                  : `${item.content.title || ''}(未选择)`
-              },
-              render: (props) => {
-                return (
-                  <CollaborationHttp
-                    {...props}
-                    openFileSelector={() =>
-                      openFilePanel({
-                        allowedFileExtNames: ['domain'],
-                        parentId: ctx.sdk.projectId,
-                        fileId: ctx.fileId,
-                      })
-                    }
-                  />
-                )
-              },
+          {
+            type: 'http-sql',
+            title: '领域接口',
+            noUseInnerEdit: true,
+            getTitle: (item) => {
+              return item.content?.domainServiceMap
+                ? item.content.title
+                : `${item.content.title || ''}(未选择)`
             },
-          ]
+            render: (props) => {
+              return (
+                <CollaborationHttp
+                  {...props}
+                  openFileSelector={() =>
+                    openFilePanel({
+                      allowedFileExtNames: ['domain'],
+                      parentId: ctx.sdk.projectId,
+                      fileId: ctx.fileId,
+                    })
+                  }
+                />
+              )
+            },
+          },
+        ]
         : void 0,
     }),
   ]
@@ -326,7 +329,44 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     },
     plugins: [
       ...connetorPlugins,
-      notePlugin(ctx),
+      notePlugin({
+        user: ctx.user,
+        onUpload: async (file: File) => {
+          return new Promise(async (resolve, reject) => {
+            try {
+              const res = await upload(`api/pcpage/upload`, file);
+              console.log(res, 'onUpload')
+              resolve(res);
+            } catch (e) {
+              message.error('上传图片失败!');
+              reject(e);
+            }
+          })
+        },
+        onSearchUser: (keyword: string) => {
+          return new Promise(async (resolve, reject) => {
+            try {
+              const res = await searchUser(`api/pcpage/searchUser`, {
+                keyword
+              });
+              const formatRes = (res || []).map(item => {
+                const { email, id, name, avatar = '/default_avatar.png' } = item;
+                return {
+                  name: name ? `${name}(${email})` : email,
+                  id,
+                  username: email,
+                  orgDisplayName: '',
+                  thumbnailAvatarUrl: avatar
+                }
+              })
+              resolve(formatRes);
+            } catch (e) {
+              message.error('搜索用户失败!');
+              reject('搜索用户失败!');
+            }
+          })
+        }
+      }),
       localePlugin({
         onPackLoad: ({ i18nLangContent }) => {
           ctx.i18nLangContent = i18nLangContent
@@ -378,7 +418,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             onClick({ fileId, type: envType, version }) {
               const loadend = message.loading(`版本 ${version} 下载中...`, 0)
               download(
-                `api/pcpage/download-product/${fileId}/${envType}/${version}`
+                `api / pcpage / download - product / ${fileId} / ${envType} / ${version}`
               ).finally(() => {
                 loadend()
               })
@@ -389,8 +429,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     ],
     ...(ctx.hasMaterialApp
       ? {
-          comLibAdder: comLibAdderFunc(ctx),
-        }
+        comLibAdder: comLibAdderFunc(ctx),
+      }
       : {}),
     comLibLoader: comlibLoaderFunc(ctx),
     pageContentLoader() {
@@ -439,7 +479,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         )
         return
       },
-      items({}, cate0, cate1, cate2) {
+      items({ }, cate0, cate1, cate2) {
         cate0.title = `项目`
         cate0.items = [
           {
@@ -492,7 +532,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   get() {
                     return decodeURIComponent(
                       ctx?.hasPermissionFn ||
-                        encodeURIComponent(defaultPermissionFn)
+                      encodeURIComponent(defaultPermissionFn)
                     )
                   },
                   set(context, v: string) {
@@ -738,97 +778,97 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       },
       editorOptions: ctx.setting?.system.config?.isPureIntranet
         ? {
-            expression: {
-              CDN: {
-                codemirror:
-                  '/mfs/editor_assets/codemirror/codemirror_1.0.13_index.min.js',
-              },
+          expression: {
+            CDN: {
+              codemirror:
+                '/mfs/editor_assets/codemirror/codemirror_1.0.13_index.min.js',
             },
-            richtext: {
-              CDN: {
-                tinymce:
-                  '/mfs/editor_assets/richText/tinymce/5.7.1/tinymce.min.js',
-                language: '/mfs/editor_assets/richText/tinymce/5.7.1/zh_CN.js',
-              },
+          },
+          richtext: {
+            CDN: {
+              tinymce:
+                '/mfs/editor_assets/richText/tinymce/5.7.1/tinymce.min.js',
+              language: '/mfs/editor_assets/richText/tinymce/5.7.1/zh_CN.js',
             },
-            align: {
-              CDN: {
-                left: '/mfs/editor_assets/align/left.defc4a63ebe8ea7d.svg',
-                rowCenter:
-                  '/mfs/editor_assets/align/center.c284343a9ff9672a.svg',
-                right: '/mfs/editor_assets/align/right.a7763b38b84b5894.svg',
-                top: '/mfs/editor_assets/align/top.98906024d52b69de.svg',
-                columnCenter:
-                  '/mfs/editor_assets/align/center.100376f4ade480cd.svg',
-                bottom: '/mfs/editor_assets/align/bottom.6ee532067ed440ca.svg',
-                column:
-                  '/mfs/editor_assets/align/column-space-between.31d560c0e611198f.svg',
-                row: '/mfs/editor_assets/align/row-space-between.ead5cd660c0f1c33.svg',
-              },
+          },
+          align: {
+            CDN: {
+              left: '/mfs/editor_assets/align/left.defc4a63ebe8ea7d.svg',
+              rowCenter:
+                '/mfs/editor_assets/align/center.c284343a9ff9672a.svg',
+              right: '/mfs/editor_assets/align/right.a7763b38b84b5894.svg',
+              top: '/mfs/editor_assets/align/top.98906024d52b69de.svg',
+              columnCenter:
+                '/mfs/editor_assets/align/center.100376f4ade480cd.svg',
+              bottom: '/mfs/editor_assets/align/bottom.6ee532067ed440ca.svg',
+              column:
+                '/mfs/editor_assets/align/column-space-between.31d560c0e611198f.svg',
+              row: '/mfs/editor_assets/align/row-space-between.ead5cd660c0f1c33.svg',
             },
-            array: {
-              CDN: {
-                sortableHoc:
-                  '/mfs/editor_assets/react-sortable/react-sortable-hoc-2.0.0_index.umd.min.js',
-              },
+          },
+          array: {
+            CDN: {
+              sortableHoc:
+                '/mfs/editor_assets/react-sortable/react-sortable-hoc-2.0.0_index.umd.min.js',
             },
-            expcode: {
-              CDN: {
-                prettier: {
-                  standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
-                  babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
-                },
-                eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
-                paths: {
-                  vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
-                },
-                monacoLoader:
-                  '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+          },
+          expcode: {
+            CDN: {
+              prettier: {
+                standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
               },
-            },
-            csseditor: {
-              CDN: {
-                prettier: {
-                  standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
-                  babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
-                },
-                eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
-                paths: {
-                  vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
-                },
-                monacoLoader:
-                  '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+              eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+              paths: {
+                vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
               },
+              monacoLoader:
+                '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
             },
-            stylenew: {
-              CDN: {
-                prettier: {
-                  standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
-                  babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
-                },
-                eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
-                paths: {
-                  vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
-                },
-                monacoLoader:
-                  '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+          },
+          csseditor: {
+            CDN: {
+              prettier: {
+                standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
               },
-            },
-            code: {
-              CDN: {
-                prettier: {
-                  standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
-                  babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
-                },
-                eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
-                paths: {
-                  vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
-                },
-                monacoLoader:
-                  '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+              eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+              paths: {
+                vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
               },
+              monacoLoader:
+                '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
             },
-          }
+          },
+          stylenew: {
+            CDN: {
+              prettier: {
+                standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
+              },
+              eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+              paths: {
+                vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
+              },
+              monacoLoader:
+                '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+            },
+          },
+          code: {
+            CDN: {
+              prettier: {
+                standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
+              },
+              eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+              paths: {
+                vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
+              },
+              monacoLoader:
+                '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+            },
+          },
+        }
         : undefined,
     },
     com: {
@@ -1008,15 +1048,17 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 result = true
                 designerRef.current?.console?.log.error(
                   '权限方法',
-                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${code}; [返回值] Type: ${typeof result}; Value: ${JSON.stringify(
+                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(
                     result
-                  )}`
+                  )
+                  }`
                 )
 
                 console.error(
-                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${code}; [返回值] Type: ${typeof result}; Value: ${JSON.stringify(
+                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(
                     result
-                  )}`
+                  )
+                  }`
                 )
               }
             } catch (error) {
@@ -1025,8 +1067,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 '权限方法',
                 `${error.message}`
               )
-              // ctx.console?.log.error('权限方法', `${error.message}`)
-              console.error(`权限方法出错 [Key] ${code}；`, error)
+              // ctx.console?.log.error('权限方法', `${ error.message }`)
+              console.error(`权限方法出错[Key] ${code}；`, error)
             }
 
             return result
