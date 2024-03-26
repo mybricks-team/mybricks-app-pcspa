@@ -17,6 +17,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { getAppTypeFromTemplate } from "./tools/common";
 import { getAppConfig } from "./tools/get-app-config";
+import { generateCode } from "./tocode";
 
 import { Response } from "express";
 
@@ -95,6 +96,31 @@ export default class PcPageController {
         code: -1,
         message: error.message || "发布失败",
       };
+    }
+  }
+
+  @Post("/toCode")
+  async toCode(@Body("json") json: any, @Res() res: Response) {
+    Logger.info(`[toCode] 开始`);
+
+    try {
+      const zipFilePath = await generateCode(json)
+      Logger.info(`[toCode] ${zipFilePath}`);
+      res.setHeader("Content-Disposition", `attachment; filename=1`);
+      res.setHeader("Content-Type", "application/zip");
+      fs.createReadStream(zipFilePath).pipe(res);
+      Logger.info(`[toCode] setHeader`);
+  
+      res.on('finish', () => {
+        Logger.info(`[toCode] finish`);
+        fs.unlink(zipFilePath, () => {
+          Logger.info(`[toCode] delete`);
+        })
+      })
+    } catch (e) {
+      Logger.info("[toCode] 失败")
+      Logger.info(e.message)
+      Logger.info(e)
     }
   }
 

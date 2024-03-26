@@ -533,6 +533,43 @@ export default function MyDesigner({ appData: originAppData }) {
 
   window.designerRef = designerRef
 
+  const downloadCode = async () => {
+    const close = message.loading({
+      key: 'toCode',
+      content: '出码中...',
+      duration: 0,
+    })
+    const toJSON = designerRef.current.toJSON({withDiagrams:true});
+    fAxios({
+      method: 'post',
+      url: '/api/pcpage/toCode',
+      responseType: 'blob',
+      data: {
+        json: toJSON
+      }
+    }).then((response) => {
+      // // 创建一个URL指向blob响应数据
+      const url = window.URL.createObjectURL(new Blob([response]));
+      // 创建一个a标签用于触发下载
+      const link = document.createElement('a');
+      link.href = url;
+      // 设置下载后的文件名，如果服务器未指定，则可以在这里指定
+      link.setAttribute('download', '出码-react.zip'); // 注意: 该名称可以根据实际情况命名
+      // 将a标签添加到body，触发点击事件，然后移除
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      // 清理用完的URL对象
+      window.URL.revokeObjectURL(url);
+    })
+    .catch((error) => {
+      console.error("出码失败，报错信息:", error);
+      throw error;
+    }).finally(() => {
+      close()
+    });
+  }
+
   return (
     <div className={`${css.view} fangzhou-theme`}>
       <Toolbar
@@ -559,6 +596,11 @@ export default function MyDesigner({ appData: originAppData }) {
               loading={publishLoading}
               onClick={() => setPublishModalVisible(true)}
             >发布</Toolbar.Button>
+            <Toolbar.Button
+              onClick={downloadCode}
+            >
+              出码
+            </Toolbar.Button>
           </>
         }
         <div className={`${isPreview ? css.toolbarWrapperPreview : ""}`}>
