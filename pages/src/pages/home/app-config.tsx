@@ -418,7 +418,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             onClick({ fileId, type: envType, version }) {
               const loadend = message.loading(`版本 ${version} 下载中...`, 0)
               download(
-                `api / pcpage / download - product / ${fileId} / ${envType} / ${version}`
+                `api/pcpage/download-product/${fileId}/${envType}/${version}`
               ).finally(() => {
                 loadend()
               })
