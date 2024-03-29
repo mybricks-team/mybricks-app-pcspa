@@ -37,7 +37,7 @@ const defaultPermissionComments = `/**
 * }
 *
 * @param {object} props: Props
-* @return {boolean}
+* @return {boolean \\ { permission: boolean, type: "hide" | "hintLink", hintLinkUrl?: string, hintLinkTitle?: string }}
 */
 `
 
@@ -154,7 +154,17 @@ const getExecuteEnvByMode = (debugMode, ctx, envList) => {
   }
 }
 
+// let renderUI;
+
 export default function (ctx, appData, save, designerRef, remotePlugins = []) {
+
+  // const script = document.createElement('script');
+  // script.src = 'http://localhost:9001/public/render-web/1.2.58/index.min.js'
+  // document.head.appendChild(script);
+  // script.onload = () => {
+  //   renderUI = window._mybricks_render_web.render;
+  // };
+
   const envList = ctx.envList
   // 获得环境信息映射表
   const envMap = [
@@ -1037,38 +1047,23 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               return true
             }
 
-            let result: boolean
+            let result: (boolean | { permission: boolean })
 
             try {
-              result = runJs(decodeURIComponent(hasPermissionFn), [
-                { key: code },
-              ])
+              result = runJs(decodeURIComponent(hasPermissionFn), [{ key: code }])
 
-              if (typeof result !== 'boolean') {
+              if (typeof result !== 'boolean' && typeof result.permission !== 'boolean') {
                 result = true
                 designerRef.current?.console?.log.error(
                   '权限方法',
-                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(
-                    result
-                  )
-                  }`
+                  `权限方法返回值类型应为 Boolean 或者 { permission: Boolean } 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(result)}`
                 )
-
-                console.error(
-                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(
-                    result
-                  )
-                  }`
-                )
+                console.error(`权限方法返回值类型应为 Boolean 或者 { permission: Boolean } 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(result)}`)
               }
             } catch (error) {
               result = true
-              designerRef.current?.console?.log.error(
-                '权限方法',
-                `${error.message}`
-              )
-              // ctx.console?.log.error('权限方法', `${ error.message }`)
-              console.error(`权限方法出错[Key] ${code}；`, error)
+              designerRef.current?.console?.log.error('权限方法', `${error.message}`)
+              console.error(`权限方法出错[Key] ${code};`, error)
             }
 
             return result
