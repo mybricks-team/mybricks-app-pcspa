@@ -360,7 +360,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 keyword
               });
               const formatRes = (res || []).map(item => {
-                const { email, id, name, avatar = '/default_avatar.png' } = item;
+                const { email, id, name, avatar } = item;
                 return {
                   name: name ? `${name}(${email})` : email,
                   id,
