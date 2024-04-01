@@ -35,6 +35,8 @@ export async function downloadProduct(
     Logger.info("[downloadProduct] 开始读取资源...");
 
     const zipContent = fs.readFileSync(assetPath);
+    // 本地测试下载时，读取保存到本地的资源
+    // const zipContent = fs.readFileSync(path.resolve(__dirname, './rollback.zip'));
     Logger.info("[downloadProduct] 解压资源...");
     const params = (await decompressGzipToObject(zipContent)) as any;
 
@@ -89,15 +91,34 @@ export async function downloadProduct(
       createFile(path, name, Buffer.from(content));
     });
 
+
+    // 从html中提取pageRuntime代码
+    // const regex = /<script type="text\/javascript">([\s\S]*?)<\/script><\/body>/;
+    // const match = params.template.match(regex);
+    let pageRunime = fs.readFileSync(`${__dirname}/page-runtime-template.txt`, "utf-8")
+    // 检查是否有匹配项
+    // if (match && match[1]) {
+    //   // 输出匹配到的脚本内容
+    //   pageRunime = match[1]
+    // }
+
     const reactCanUseTemplate = fs
       .readFileSync(`${__dirname}/download-react-can-use-template.txt`, "utf-8")
       .replace("--pageName--", params.title)
-      .replace("--pageId--", params.fileId);
+      .replace(/\\n/g, '\\\\n')
+      .replace("--mybricks_comlibsText--", params.comboScriptText.replace(/\\/g, '\\\\').replace(/\`/g, '\\\`'))
+      .replace("--mybricks_pageRuntime--", pageRunime.replace(/\\/g, '\\\\').replace(/\`/g, '\\\`'))
+      .replace(`"--projectJson--"`, JSON.stringify(params.json).replace(/\\/g, '\\\\').replace(/\`/g, '\\\`'))
+
 
     const vue3CanUseTemplate = fs
       .readFileSync(`${__dirname}/download-vue3-can-use-template.txt`, "utf-8")
       .replace("--pageName--", params.title)
-      .replace("--pageId--", params.fileId);
+      .replace(/\\n/g, '\\\\n')
+      .replace("--mybricks_comlibsText--", params.comboScriptText.replace(/\\/g, '\\\\').replace(/\`/g, '\\\`'))
+      .replace("--mybricks_pageRuntime--", pageRunime.replace(/\\/g, '\\\\').replace(/\`/g, '\\\`'))
+      .replace(`"--projectJson--"`, JSON.stringify(params.json).replace(/\\/g, '\\\\').replace(/\`/g, '\\\`'))
+
 
     createFile("/", `${params.fileId}-app.js`, reactCanUseTemplate);
     createFile("/", `${params.fileId}-app-vue3.vue`, vue3CanUseTemplate);

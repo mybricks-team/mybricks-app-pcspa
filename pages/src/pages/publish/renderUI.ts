@@ -39,7 +39,7 @@ const root = ({ renderType, locale, runtime, ...props }) => {
       runtime,
       silent: true,
       showErrorNotification: false,
-      canvasElement: props?.canvasElement || props.container || document.body,
+      canvasElement: props?.canvasElement || props.container || props.renderRoot || document.body,
       i18n(title) {
         //多语言
         if (typeof title?.id === 'undefined') return title
