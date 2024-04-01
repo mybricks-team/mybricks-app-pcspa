@@ -342,7 +342,35 @@ export default function MyDesigner({ appData: originAppData }) {
       i18nLangContent: ctx.i18nLangContent
     })
 
-    window.open(`./preview.html?fileId=${ctx.fileId}`)
+    // 对象 => 拼接成路由参数
+    const objectToQueryString = (params: { [key: string]: any }): string => {
+      const queryParams: string[] = [];
+
+      for (const key in params) {
+        if (params.hasOwnProperty(key)) {
+          const value = params[key];
+          // 对齐连接器 如果属性值是数组，则将每个元素转换为类似于 `a[]=b&a[]=c` 的形式
+          if (Array.isArray(value)) {
+            value.forEach((item: string) => {
+              queryParams.push(
+                `${encodeURIComponent(key)}[]=${encodeURIComponent(item)}`
+              );
+            });
+          }
+          // 如果属性值是字符串、数字或布尔值，则直接转换为 `key=value` 的形式
+          else if (["string", "number", "boolean"].includes(typeof value)) {
+            queryParams.push(
+              `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+            );
+          }
+        }
+      }
+
+      // 如果queryParams不为空，则在前面加上 &，否则返回空字符串
+      return queryParams.length > 0 ? `&${queryParams.join("&")}` : "";
+    };
+
+    window.open(`./preview.html?fileId=${ctx.fileId}${objectToQueryString(ctx?.debugQuery || {})}`)
   }, [appConfig])
 
   const publish = useCallback(
