@@ -11,7 +11,7 @@ import domainServicePlugin, {
 import versionPlugin from 'mybricks-plugin-version'
 import localePlugin from '@mybricks/plugin-locale'
 // import notePlugin from '../../../../../plugin-note'
-import notePlugin from 'mybricks-plugin-note'
+import notePlugin from '@mybricks/plugin-note'
 import { use as useTheme } from '@mybricks/plugin-theme'
 import { openFilePanel } from '@mybricks/sdk-for-app/ui'
 
