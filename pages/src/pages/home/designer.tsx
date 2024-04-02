@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useLayoutEffect
 } from 'react'
 import axios from 'axios'
 import { fAxios } from '../../services/http'
@@ -22,7 +23,7 @@ import { i18nLangContentFilter } from '../../utils/index';
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
 import { USE_CUSTOM_HOST } from './constants'
-import { getLibsFromConfig } from '../../utils/getComlibs'
+import { getLibsFromConfig, getInitComLibs } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
 
@@ -86,7 +87,7 @@ export default function MyDesigner({ appData: originAppData }) {
       fileId: appData.fileId,
       setting: appData.config || {},
       hasMaterialApp: appData.hasMaterialApp,
-      comlibs: getLibsFromConfig(appData),
+      comlibs: [],
       latestComlibs: [],
       debugQuery: appData.fileContent?.content?.debugQuery,
       executeEnv,
@@ -162,6 +163,10 @@ export default function MyDesigner({ appData: originAppData }) {
   const [latestComlibs, setLatestComlibs] = useState<[]>()
   const [isDebugMode, setIsDebugMode] = useState(false);
   const operationList = useRef<any[]>([]);
+
+  useLayoutEffect(() => {
+    getInitComLibs(appData).then(comlibs => setCtx(pre => ({...pre, comlibs })))
+  }, [])
 
   // 只有预览时 search 会携带 version 字段
   const isPreview = window.location.search.includes('version');

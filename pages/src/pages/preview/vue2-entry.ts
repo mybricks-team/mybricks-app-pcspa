@@ -1,6 +1,8 @@
 import { getQueryString, requireScript } from '@/utils'
 import { PreviewStorage } from '@/utils/previewStorage';
 import renderUI from './renderUI';
+import { getRtComlibsFromConfigEdit } from '../../utils/comlib'
+import { insertDeps } from '../../utils/getComlibs'
 import '@/reset.less'
 const fileId = getQueryString('fileId')
 const previewStorage = new PreviewStorage({ fileId })
@@ -44,7 +46,8 @@ cssVariable(dumpJson)
 const render = (props) => {
     const { container } = props
     if (comlibs && Array.isArray(comlibs)) {
-        Promise.all(comlibs.map((t) => requireScript(t))).then(() => {
+        insertDeps(comlibs)
+        Promise.all(getRtComlibsFromConfigEdit(comlibs).map((t) => requireScript(t))).then(() => {
             vueApp = new Vue({
                 render: (h) => h(renderUI({ ...props, renderType: 'vue2' })),
             }).$mount((container ?? document).querySelector('#root'))

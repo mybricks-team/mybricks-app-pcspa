@@ -5,6 +5,7 @@ import {
   BASIC_COM_LIB,
 } from "../constants";
 import { compareVersions } from "compare-versions";
+import API from "@mybricks/sdk-for-app/api";
 const legacyLibs =
   APP_TYPE === "react" ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : [];
 
@@ -56,4 +57,86 @@ const getLibsFromConfig = (appData: Record<string, any>) => {
   }
 };
 
-export { getLibsFromConfig };
+const checkDeps = async (libs) => {
+  for (let i = 0; i < libs.length; i++) {
+    const lib = libs[i];
+    if ('externals' in lib || lib.id === "_myself_") continue;
+    try {
+      const material = await getLibExternals({ namespace: lib.namespace, version: lib.version });
+      Object.assign(lib, material);
+    } catch (error) {
+      console.error('获取物料依赖失败\n', error);
+    }
+  }
+  return libs;
+}
+
+const getLibExternals = ({namespace, version}) => {
+  return API.Material.getMaterialContent({
+    namespace: namespace,
+    version: version,
+    codeType: 'pure'
+  }).then(lib => {
+    const content = JSON.parse(lib.content);
+    const externals = content![APP_TYPE]!.externals ?? content.externals;
+    return {
+      ...lib,
+      ...content,
+      externals
+    }
+  })
+}
+
+const createScript = (url: string) => {
+  if (document.querySelector(`script[src="${url}"]`)) return;
+  const script = document.createElement('script');
+  script.src = url;
+  script.defer = true;
+  document.body.appendChild(script);
+  return script;
+}
+
+const createLink = (url: string) => {
+  if (document.querySelector(`link[href="${url}"]`)) return;
+  const link = document.createElement('link');
+  link.href = url;
+  link.rel = 'stylesheet';
+  document.head.appendChild(link);
+  return link;
+}
+
+const insertDeps = (libs) => {
+  for (let i = 0; i < libs.length; i++) {
+    const lib = libs[i];
+    if ('externals' in lib) {
+      insertExternal(lib)
+    }
+  }
+  return libs;
+}
+ 
+
+const insertExternal = (lib) => {
+  const { library, urls } = lib.externals;
+  if(Array.isArray(urls) && urls.length) {
+    urls.forEach(url => {
+      if(url.endsWith('.js')){
+        if(library in window) return;
+        createScript(url);
+      }
+      if(url.endsWith('.css')){
+        createLink(url)
+      }
+    })
+  }
+  return lib
+}
+
+const asyncCompose = (...fns) => async (arg) => fns.reduceRight(async (pre, fn) => fn(await pre), Promise.resolve(arg))
+
+const getInitComLibs = asyncCompose(insertDeps, checkDeps, getLibsFromConfig)
+
+const upgradeExternal = asyncCompose(insertExternal, getLibExternals)
+
+
+export { getLibsFromConfig, getInitComLibs, upgradeExternal, insertDeps };

@@ -3,6 +3,8 @@ import { getQueryString, requireScript } from '@/utils'
 import { PreviewStorage } from '@/utils/previewStorage'
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
 import renderUI from './renderUI'
+import { getRtComlibsFromConfigEdit } from '../../utils/comlib'
+import { insertDeps } from '../../utils/getComlibs'
 import '@/reset.less'
 
 const React = window.React;
@@ -20,7 +22,7 @@ if (!dumpJson) {
 
 if (!comlibs) {
   console.warn('数据错误: 组件库缺失')
-  comlibs = [PC_NORMAL_COM_LIB.rtJs, CHARS_COM_LIB.rtJs, BASIC_COM_LIB.rtJs]
+  comlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
 }
 
 function cssVariable(dumpJson) {
@@ -70,7 +72,8 @@ const getCurrentLocale = () => {
 function render(props) {
   const { container } = props;
   if (comlibs && Array.isArray(comlibs)) {
-    Promise.all(comlibs.map((t) => requireScript(t))).then(() => {
+    insertDeps(comlibs)
+    Promise.all(getRtComlibsFromConfigEdit(comlibs).map((t) => requireScript(t))).then(() => {
       const antdLocalLib = antd?.locale[getAntdLocalName(getCurrentLocale())]?.default
 
       reactRoot = ReactDOM.createRoot((container ?? document).querySelector('#root'));
