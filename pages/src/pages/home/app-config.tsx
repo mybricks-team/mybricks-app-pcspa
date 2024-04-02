@@ -1,5 +1,5 @@
 import React from 'react'
-import { message } from 'antd'
+import { message, Tooltip } from 'antd'
 import servicePlugin, {
   call as callConnectorHttp,
   mock as connectorHttpMock,
@@ -424,7 +424,14 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         modalActiveExtends: [
           {
             type: 'publish',
-            title: '下载',
+            title: <Tooltip
+              color='white'
+              title={<a
+                target='_blank'
+                href="https://docs.mybricks.world/docs/publish-integration/kjkj/">使用说明</a>}
+            >
+              下载
+            </Tooltip>,
             onClick({ fileId, type: envType, version }) {
               const loadend = message.loading(`版本 ${version} 下载中...`, 0)
               download(
