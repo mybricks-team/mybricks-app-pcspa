@@ -8,6 +8,7 @@ const projectId = "--slot-project-id--";
 const executeEnv = "--executeEnv--";
 const envList = "--envList--";
 const i18nLangContent = "--i18nLangContent--";
+const runtimeUploadService = "--runtimeUploadService--";
 
 const getCustomHostFromUrl = () => {
   try {
@@ -230,7 +231,42 @@ const root = ({ renderType, locale, runtime, ...props }) => {
           return result;
         };
       },
-      // uploadFile: uploadApi,
+      get uploadFile() {
+        return async (files) => {
+          if (!runtimeUploadService) {
+            throw new Error('请先配置运行时上传接口')
+          }
+          // 创建FormData对象
+          const formData = new FormData();
+
+          // 添加文件到FormData对象
+          for (const file of files) {
+            formData.append('file', file);
+          }
+
+          try {
+            // 发送POST请求
+            const response = await fetch(runtimeUploadService, {
+              method: "POST",
+              body: formData
+            }).then(res => {
+              if (res.status !== 200 && res.status !== 201) {
+                throw new Error(`上传失败！`)
+              }
+              return res.json()
+            })
+
+            return {
+              url: response?.data?.url,
+              name: files[0].name
+            }
+          } catch (error) {
+            // 错误处理
+            console.error('文件上传失败', error);
+            throw new Error(`上传失败，请检查上传接口设置！`)
+          }
+        }
+      },
     },
   });
 };

@@ -9,7 +9,7 @@ export class PreviewStorage {
 
   getFileKeyTemplate = (fileId) => `--preview-${fileId}-`;
 
-  savePreviewPageData = ({ dumpJson, comlibs, hasPermissionFn, executeEnv, debugMockConfig, appConfig, envList, MYBRICKS_HOST, directConnection, i18nLangContent }) => {
+  savePreviewPageData = ({ dumpJson, comlibs, hasPermissionFn, executeEnv, debugMockConfig, appConfig, envList, MYBRICKS_HOST, directConnection, i18nLangContent, runtimeUploadService }) => {
     sessionStorage.setItem(`--preview-${this.fileId}-`, JSON.stringify(dumpJson))
     sessionStorage.setItem(`--preview--comlibs--${this.fileId}-`, JSON.stringify(comlibs))
     sessionStorage.setItem(`--preview--hasPermissionFn--${this.fileId}-`, hasPermissionFn)
@@ -20,6 +20,7 @@ export class PreviewStorage {
     sessionStorage.setItem(`--preview--MYBRICKS_HOST--${this.fileId}-`, JSON.stringify(MYBRICKS_HOST))
     sessionStorage.setItem(`--preview--i18nLangContent--${this.fileId}-`, JSON.stringify(i18nLangContent))
     sessionStorage.setItem(`--preview--debugMockConfig--${this.fileId}-`, JSON.stringify(debugMockConfig))
+    sessionStorage.setItem(`--preview--runtimeUploadService--${this.fileId}-`, JSON.stringify(runtimeUploadService))
   }
 
   getPreviewPageData = () => {
@@ -33,6 +34,7 @@ export class PreviewStorage {
     let appConfig
     let envList = []
     let i18nLangContent
+    let runtimeUploadService
 
     try {
       dumpJson = JSON.parse(dumpJson)
@@ -71,6 +73,11 @@ export class PreviewStorage {
     } catch (ex) {
       throw ex
     }
+    try {
+      runtimeUploadService = JSON.parse(sessionStorage.getItem(`--preview--runtimeUploadService--${this.fileId}-`)) || ''
+    } catch (ex) {
+      throw ex
+    }
 
     try {
       comlibs = JSON.parse(comlibs)
@@ -90,7 +97,8 @@ export class PreviewStorage {
       MYBRICKS_HOST,
       envList,
       directConnection,
-      i18nLangContent
+      i18nLangContent,
+      runtimeUploadService
     }
   }
 }

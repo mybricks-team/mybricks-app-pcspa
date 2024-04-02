@@ -63,6 +63,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || '';
+  const runtimeUploadService = appConfig?.runtimeUploadServer?.uploadService || '';
 
   const [ctx, setCtx] = useState(() => {
     const envList = getMergedEnvList(appData, appConfig)
@@ -111,6 +112,7 @@ export default function MyDesigner({ appData: originAppData }) {
       versionApi: null,
       appConfig,
       uploadService,
+      runtimeUploadService,
       operable: false,
       isDebugMode: false,
       saveContent(content) {
@@ -339,7 +341,8 @@ export default function MyDesigner({ appData: originAppData }) {
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
       hasPermissionFn: ctx.hasPermissionFn,
       appConfig: JSON.stringify(appConfig),
-      i18nLangContent: ctx.i18nLangContent
+      i18nLangContent: ctx.i18nLangContent,
+      runtimeUploadService: ctx.runtimeUploadService
     })
 
     // 对象 => 拼接成路由参数
@@ -424,6 +427,7 @@ export default function MyDesigner({ appData: originAppData }) {
               title: ctx.fileName,
               publisherEmail: ctx.user.email,
               publisherName: ctx.user?.name,
+              runtimeUploadService: ctx.runtimeUploadService,
               projectId: ctx.sdk.projectId,
               envList: ctx.envList,
               i18nLangContent: i18nLangContentFilter(ctx.i18nLangContent, ctx.i18nUsedIdList),
@@ -567,7 +571,7 @@ export default function MyDesigner({ appData: originAppData }) {
       content: '出码中...',
       duration: 0,
     })
-    const toJSON = designerRef.current.toJSON({withDiagrams:true});
+    const toJSON = designerRef.current.toJSON({ withDiagrams: true });
     fAxios({
       method: 'post',
       url: '/api/pcpage/toCode',
@@ -590,12 +594,12 @@ export default function MyDesigner({ appData: originAppData }) {
       // 清理用完的URL对象
       window.URL.revokeObjectURL(url);
     })
-    .catch((error) => {
-      console.error("出码失败，报错信息:", error);
-      throw error;
-    }).finally(() => {
-      close()
-    });
+      .catch((error) => {
+        console.error("出码失败，报错信息:", error);
+        throw error;
+      }).finally(() => {
+        close()
+      });
   }
 
   return (

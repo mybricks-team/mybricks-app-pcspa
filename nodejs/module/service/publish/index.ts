@@ -35,6 +35,7 @@ export async function publish(
       groupName,
       envList = [],
       i18nLangContent,
+      runtimeUploadService
     } = json.configuration;
 
     Reflect.deleteProperty(json, "configuration");
@@ -70,6 +71,7 @@ export async function publish(
       projectId,
       version,
       i18nLangContent,
+      runtimeUploadService
     });
     template = _template;
 
@@ -82,7 +84,7 @@ export async function publish(
     template = __template;
 
     const startComboScriptTime = Date.now();
-    
+
     Logger.info(`[publish] 开始处理组件库脚本`);
 
     const comboScriptText = await getComboScriptText(
@@ -128,8 +130,7 @@ export async function publish(
     return { ...result, fileId, envType, version };
   } catch (e) {
     Logger.error(
-      `[publish] pcpage publish error ${
-        e?.message || JSON.stringify(e, null, 2)
+      `[publish] pcpage publish error ${e?.message || JSON.stringify(e, null, 2)
       }`
     );
     throw e;

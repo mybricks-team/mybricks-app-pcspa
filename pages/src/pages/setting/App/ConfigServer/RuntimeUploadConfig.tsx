@@ -9,7 +9,7 @@ const { Meta } = Card;
 export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   const [form] = Form.useForm();
 
-  const uploadConfig = config?.uploadServer || {}
+  const uploadConfig = config?.runtimeUploadServer || {}
   useEffect(() => {
     form.setFieldsValue(uploadConfig)
   }, [uploadConfig])
@@ -17,14 +17,14 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   const onSubmit = (values) => {
     const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     mergeUpdateConfig({
-      uploadServer: { ...values, updateTime, user: user?.email }
+      runtimeUploadServer: { ...values, updateTime, user: user?.email }
     })
   }
 
   const onReset = () => {
     const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     mergeUpdateConfig({
-      uploadServer: { uploadService: '', updateTime, user: user?.email }
+      runtimeUploadServer: { uploadService: '', runtimeUploadService: '', updateTime, user: user?.email }
     }).finally(() => {
       form.resetFields()
 
@@ -35,10 +35,10 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
     <Form form={form} onFinish={onSubmit}>
       <Form.Item
         name="uploadService"
-        label="搭建态文件上传接口"
+        label="运行时文件上传接口"
         required
         rules={[{ required: true, message: '请输入服务接口' }]}
-        tooltip="该接口用于上传静态文件，如：搭建时的图片、文件上传"
+        tooltip="该接口用于在发布后的页面中上传静态文件"
       >
         <Input />
       </Form.Item>
