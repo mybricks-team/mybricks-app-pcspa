@@ -78,7 +78,7 @@ export async function downloadProduct(
       <script src="http://f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.2.3/index.js"></script>
       <script
         src="http://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690445635042.mybricks_plugin-connector-domain@0.0.44.js"></script>
-      <script src="http://f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.2.52/index.min.js"></script>
+      <script src="https://test.mybricks.world/mfs/app/pcpage/test/public/render-web/1.2.62/index.min.js"></script>
 `
       })
     createFile("/", `${params.fileId}.html`, params.template);

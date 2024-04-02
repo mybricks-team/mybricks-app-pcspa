@@ -62,16 +62,15 @@ onMounted(() => {
           "http://f2.beckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/ant-design/charts-1.3.5/charts.min.js",
           "http://f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.2.3/index.js",
           "http://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690445635042.mybricks_plugin-connector-domain@0.0.44.js",
-          "http://f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.2.52/index.min.js",
+          "https://test.mybricks.world/mfs/app/pcpage/test/public/render-web/1.2.62/index.min.js",
           "https://mock.com/mybricks-page-assets"
         ],
         html: `<div id="mybricks-page-root"></div>`
       },
     }
-    let currentApp;
     if (app && containerRef.value) {
       importQiankunIfNeed().then(() => {
-        currentApp = window?.qiankun?.loadMicroApp(
+        microApp = window?.qiankun?.loadMicroApp(
           { ...app, container: containerRef.value, props },
           {
             sandbox: {
