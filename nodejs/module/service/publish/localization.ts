@@ -10,6 +10,7 @@ import {
 } from "../../tools/localization";
 import LocalPublic from "../local-public";
 import { Logger } from "@mybricks/rocker-commons";
+import commonChunks from '../common-chunks'
 
 export async function localization({
   req,
@@ -122,6 +123,31 @@ async function resourceLocalization(
     return res;
   });
 
+   let chunks = commonChunks[type].reduce((pre, cur) => {
+    if(cur.path.endsWith('.js')) {
+      pre += `\n<script src="${cur.path}" defer></script>`
+    }
+    if(cur.path.endsWith('.css')) {
+      pre += `\n<link rel="stylesheet" href="${cur.path}"/>`
+    }
+    return pre;
+  }, '')
+
+  const chunkAssets = (json.comlibs ?? []).filter(({id}) => id!=='_myself_').reduce((pre, cur) => {
+    const { urls } = cur.externals;
+    if(Array.isArray(urls) && urls.length) {
+      urls.forEach((url) => {
+        if(url.endsWith('.js')) {
+          pre += `\n<script src="${url}" defer></script>`
+        }
+        if(url.endsWith('.css')) {
+          pre += `\n<link rel="stylesheet" href="${url}"/>`
+        }
+      })
+    }
+    return pre
+  }, chunks)
+
   const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
     switch (cur.tag) {
       case "link":
@@ -134,7 +160,7 @@ async function resourceLocalization(
     return pre;
   }, "");
 
-  template = template.replace("-- public --", publicHtmlStr);
+  template = template.replace("-- public --", chunkAssets);
 
   Logger.info(`[localPublicInfos] 发布资源 ${localPublicInfos}`);
 
