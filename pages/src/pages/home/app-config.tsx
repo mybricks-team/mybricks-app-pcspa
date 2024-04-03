@@ -23,12 +23,13 @@ import { runJs } from '../../utils/runJs'
 import axios from 'axios'
 import { shapeUrlByEnv } from '../../utils'
 import { EnumMode } from './components/PublishModal'
-import { USE_CUSTOM_HOST } from './constants'
+import { GET_DEFAULT_PAGE_HEADER, GET_PAGE_CONFIG_EDITOR, USE_CUSTOM_HOST } from './constants'
 import { fAxios } from '@/services/http'
 import { createFromIconfontCN } from '@ant-design/icons'
 import download from '@/utils/download'
 import upload from '@/utils/upload'
 import searchUser from '@/utils/searchUser'
+import { blobToBase64 } from '@/utils/blobToBase64'
 
 const defaultPermissionComments = `/**
 *
@@ -89,6 +90,20 @@ const injectUpload = (
 ) => {
   if (!!editConfig && !editConfig.upload) {
     editConfig.upload = async (files: Array<File>): Promise<Array<string>> => {
+
+      /**
+       * @description 图片上传支持返回Base64
+       */
+      if (editConfig.options?.useBase64) {
+        try {
+          const b64 = await blobToBase64(files[0]);
+          return [b64];
+        } catch (e) {
+          throw Error(`【图片转Base64出错】: ${e}`)
+        }
+      }
+      // =========== 图片上传支持返回Base64 end ===============
+
       const formData = new FormData()
       formData.append('file', files[0])
       formData.append('folderPath', `/files/${fileId}`)
@@ -213,81 +228,6 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         },
       },
     }
-  }
-
-  const pageConfigEditor = {
-    title: '页面',
-    items: [
-      {
-        title: '头(header)配置',
-        items: [
-          {
-            title: '标题(title)',
-            type: 'Text',
-            options: {
-              locale: true
-            },
-            value: {
-              get: (context) => {
-                return ctx.pageHeader.title
-              },
-              set: (context, v: any) => {
-                ctx.pageHeader.title = v
-              },
-            },
-          },
-          {
-            title: '图标(favicon)',
-            type: 'ImageSelector',
-            value: {
-              get: (context) => {
-                return ctx.pageHeader.favicon
-              },
-              set: (context, v: any) => {
-                ctx.pageHeader.favicon = v
-              },
-            },
-          },
-          {
-            title: '元信息(meta)',
-            type: 'array',
-            options: {
-              getTitle: ({ name, content }) => {
-                return name;
-              },
-              onAdd: () => {
-                const defaultMeta = {
-                  name: `author`,
-                  content: ``
-                };
-                return defaultMeta;
-              },
-              items: [
-                {
-                  title: 'name',
-                  type: 'Text',
-                  value: 'name'
-                },
-                {
-                  title: 'content',
-                  type: 'Textarea',
-                  value: 'content'
-                }
-              ]
-            },
-            description: '',
-            value: {
-              get() {
-                return ctx.pageHeader.meta
-              },
-              set(context, v) {
-                ctx.pageHeader.meta = v;
-              },
-            },
-          }
-        ]
-      }
-    ]
   }
 
   const debugModeOptions =
@@ -861,20 +801,9 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           },
         ]
         if (!ctx.pageHeader) {
-          ctx.pageHeader = {
-            title: ctx.fileName,
-            meta: [
-              {
-                name: 'viewport',
-                content: 'width=device-width, initial-scale=1.0'
-              },
-              {
-                name: 'referrer',
-                content: 'no-referrer'
-              },
-            ]
-          };
+          ctx.pageHeader = GET_DEFAULT_PAGE_HEADER(appData);
         }
+        const pageConfigEditor = GET_PAGE_CONFIG_EDITOR(ctx);
         cate1.title = pageConfigEditor.title;
         cate1.items = pageConfigEditor.items;
       },

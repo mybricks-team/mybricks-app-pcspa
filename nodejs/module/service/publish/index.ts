@@ -37,7 +37,7 @@ export async function publish(
       i18nLangContent,
       pageHeader,
     } = json.configuration;
-    console.log(pageHeader, 'pageHeader')
+
     Reflect.deleteProperty(json, "configuration");
 
     /** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */

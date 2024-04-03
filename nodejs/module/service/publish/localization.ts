@@ -153,7 +153,7 @@ async function resourceLocalization(
 
   // 模板中所有的图片资源
   const imageURLs = analysisAllImageUrl(template, json, origin);
-  console.log(imageURLs, 'imageURLs')
+
   // 图片地址改成相对路径，放在固定位置，方便配置 nginx
   let images = (
     await Promise.all(

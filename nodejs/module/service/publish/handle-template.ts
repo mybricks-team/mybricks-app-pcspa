@@ -53,13 +53,15 @@ export async function handleTemplate({
   Logger.info("[publish] 开始模板替换");
   let metaInfo = '';
   pageHeader.meta?.forEach(meta => {
-    metaInfo += `
-    <meta name="${meta.name}" content="${meta.content}" />`
+    if (meta.key && meta.content) {
+      metaInfo += `
+      <meta ${meta.type}="${meta.key}" content="${meta.content}" />`
+    }
   });
 
   template = template
     .replace(`--title--`, pageHeader.title)
-    .replace(`--favicon--`, `<link rel="icon" href="${pageHeader.favicon}" />`)
+    .replace(`--favicon--`, `<link rel="icon" href="${pageHeader.favicon}" type="image/x-icon"/>`)
     .replace(`--meta--`, metaInfo)
     .replace(`-- themes-style --`, themesStyleStr)
     .replace(`-- comlib-rt --`, comLibRtScript)

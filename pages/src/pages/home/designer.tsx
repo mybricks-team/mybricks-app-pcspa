@@ -21,7 +21,7 @@ import { createFromIconfontCN } from '@ant-design/icons';
 import { i18nLangContentFilter } from '../../utils/index';
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
-import { USE_CUSTOM_HOST } from './constants'
+import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
 import { getLibsFromConfig } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
@@ -82,20 +82,7 @@ export default function MyDesigner({ appData: originAppData }) {
       },
       user: appData.user,
       fileName: appData.fileContent?.name,
-      pageHeader: appData.fileContent?.content?.pageHeader || {
-        title: appData.fileContent?.name,
-        favicon: '',
-        meta: [
-          {
-            name: 'viewport',
-            content: 'width=device-width, initial-scale=1.0'
-          },
-          {
-            name: 'referrer',
-            content: 'no-referrer'
-          },
-        ],
-      },
+      pageHeader: appData.fileContent?.content?.pageHeader || GET_DEFAULT_PAGE_HEADER(appData),
       absoluteNamePath: appData.hierarchy.absoluteNamePath,
       fileId: appData.fileId,
       setting: appData.config || {},
@@ -319,6 +306,7 @@ export default function MyDesigner({ appData: originAppData }) {
     json.hasPermissionFn = ctx.hasPermissionFn
     json.debugHasPermissionFn = ctx.debugHasPermissionFn
     json.fontJS = ctx.fontJS
+    json.pageHeader = ctx.pageHeader
 
     json.projectId = ctx.sdk.projectId;
 
@@ -418,6 +406,7 @@ export default function MyDesigner({ appData: originAppData }) {
           json.projectId = ctx.sdk.projectId;
           json.i18nLangContent = i18nLangContentFilter(ctx.i18nLangContent, ctx.i18nUsedIdList)
           json.operationList = operationList.current.reverse();
+          json.pageHeader = ctx.pageHeader
 
           await ctx.save({ content: JSON.stringify(json), name: ctx.fileName }, true);
           operationList.current = [];
@@ -582,7 +571,7 @@ export default function MyDesigner({ appData: originAppData }) {
       content: '出码中...',
       duration: 0,
     })
-    const toJSON = designerRef.current.toJSON({withDiagrams:true});
+    const toJSON = designerRef.current.toJSON({ withDiagrams: true });
     fAxios({
       method: 'post',
       url: '/api/pcpage/toCode',
@@ -605,12 +594,12 @@ export default function MyDesigner({ appData: originAppData }) {
       // 清理用完的URL对象
       window.URL.revokeObjectURL(url);
     })
-    .catch((error) => {
-      console.error("出码失败，报错信息:", error);
-      throw error;
-    }).finally(() => {
-      close()
-    });
+      .catch((error) => {
+        console.error("出码失败，报错信息:", error);
+        throw error;
+      }).finally(() => {
+        close()
+      });
   }
 
   return (
