@@ -23,7 +23,7 @@ import { i18nLangContentFilter } from '../../utils/index';
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
 import { USE_CUSTOM_HOST } from './constants'
-import { getLibsFromConfig, getInitComLibs } from '../../utils/getComlibs'
+import { getInitComLibs } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
 

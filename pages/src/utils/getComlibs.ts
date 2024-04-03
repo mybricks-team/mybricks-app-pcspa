@@ -132,11 +132,11 @@ const insertExternal = (lib) => {
   return lib
 }
 
-const asyncCompose = (...fns) => async (arg) => fns.reduceRight(async (pre, fn) => fn(await pre), Promise.resolve(arg))
+const composeAsync = (...fns) => async (arg) => fns.reduceRight(async (pre, fn) => fn(await pre), Promise.resolve(arg))
 
-const getInitComLibs = asyncCompose(insertDeps, checkDeps, getLibsFromConfig)
+const getInitComLibs = composeAsync(insertDeps, checkDeps, getLibsFromConfig)
 
-const upgradeExternal = asyncCompose(insertExternal, getLibExternals)
+const upgradeExternal = composeAsync(insertExternal, getLibExternals)
 
 
-export { getLibsFromConfig, getInitComLibs, upgradeExternal, insertDeps };
+export { getInitComLibs, upgradeExternal, insertDeps };
