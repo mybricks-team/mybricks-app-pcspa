@@ -82,6 +82,20 @@ export default function MyDesigner({ appData: originAppData }) {
       },
       user: appData.user,
       fileName: appData.fileContent?.name,
+      pageHeader: appData.fileContent?.content?.pageHeader || {
+        title: appData.fileContent?.name,
+        favicon: '',
+        meta: [
+          {
+            name: 'viewport',
+            content: 'width=device-width, initial-scale=1.0'
+          },
+          {
+            name: 'referrer',
+            content: 'no-referrer'
+          },
+        ],
+      },
       absoluteNamePath: appData.hierarchy.absoluteNamePath,
       fileId: appData.fileId,
       setting: appData.config || {},
@@ -422,6 +436,7 @@ export default function MyDesigner({ appData: originAppData }) {
               // scripts: encodeURIComponent(scripts),
               comlibs: curComLibs,
               title: ctx.fileName,
+              pageHeader: ctx.pageHeader,
               publisherEmail: ctx.user.email,
               publisherName: ctx.user?.name,
               projectId: ctx.sdk.projectId,

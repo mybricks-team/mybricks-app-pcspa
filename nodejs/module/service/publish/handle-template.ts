@@ -7,7 +7,7 @@ export async function handleTemplate({
   fileId,
   envType,
   comlibs,
-  title,
+  pageHeader,
   envList,
   projectId,
   version,
@@ -51,9 +51,16 @@ export async function handleTemplate({
   // localeScript += `<script src="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>`;
 
   Logger.info("[publish] 开始模板替换");
+  let metaInfo = '';
+  pageHeader.meta?.forEach(meta => {
+    metaInfo += `
+    <meta name="${meta.name}" content="${meta.content}" />`
+  });
 
   template = template
-    .replace(`--title--`, title)
+    .replace(`--title--`, pageHeader.title)
+    .replace(`--favicon--`, `<link rel="icon" href="${pageHeader.favicon}" />`)
+    .replace(`--meta--`, metaInfo)
     .replace(`-- themes-style --`, themesStyleStr)
     .replace(`-- comlib-rt --`, comLibRtScript)
     .replace(`"--projectJson--"`, JSON.stringify(transform(json)))

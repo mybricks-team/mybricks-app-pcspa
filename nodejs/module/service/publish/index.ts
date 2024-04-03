@@ -35,8 +35,9 @@ export async function publish(
       groupName,
       envList = [],
       i18nLangContent,
+      pageHeader,
     } = json.configuration;
-
+    console.log(pageHeader, 'pageHeader')
     Reflect.deleteProperty(json, "configuration");
 
     /** 本地测试 根目录 npm run start:nodejs，调平台接口需要起平台（apaas-platform）服务 */
@@ -65,7 +66,7 @@ export async function publish(
       fileId,
       envType,
       comlibs,
-      title,
+      pageHeader,
       envList,
       projectId,
       version,
@@ -82,7 +83,7 @@ export async function publish(
     template = __template;
 
     const startComboScriptTime = Date.now();
-    
+
     Logger.info(`[publish] 开始处理组件库脚本`);
 
     const comboScriptText = await getComboScriptText(
@@ -128,8 +129,7 @@ export async function publish(
     return { ...result, fileId, envType, version };
   } catch (e) {
     Logger.error(
-      `[publish] pcpage publish error ${
-        e?.message || JSON.stringify(e, null, 2)
+      `[publish] pcpage publish error ${e?.message || JSON.stringify(e, null, 2)
       }`
     );
     throw e;

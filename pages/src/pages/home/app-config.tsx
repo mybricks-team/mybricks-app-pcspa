@@ -215,6 +215,81 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     }
   }
 
+  const pageConfigEditor = {
+    title: '页面',
+    items: [
+      {
+        title: '头(header)配置',
+        items: [
+          {
+            title: '标题(title)',
+            type: 'Text',
+            options: {
+              locale: true
+            },
+            value: {
+              get: (context) => {
+                return ctx.pageHeader.title
+              },
+              set: (context, v: any) => {
+                ctx.pageHeader.title = v
+              },
+            },
+          },
+          {
+            title: '图标(favicon)',
+            type: 'ImageSelector',
+            value: {
+              get: (context) => {
+                return ctx.pageHeader.favicon
+              },
+              set: (context, v: any) => {
+                ctx.pageHeader.favicon = v
+              },
+            },
+          },
+          {
+            title: '元信息(meta)',
+            type: 'array',
+            options: {
+              getTitle: ({ name, content }) => {
+                return name;
+              },
+              onAdd: () => {
+                const defaultMeta = {
+                  name: `author`,
+                  content: ``
+                };
+                return defaultMeta;
+              },
+              items: [
+                {
+                  title: 'name',
+                  type: 'Text',
+                  value: 'name'
+                },
+                {
+                  title: 'content',
+                  type: 'Textarea',
+                  value: 'content'
+                }
+              ]
+            },
+            description: '',
+            value: {
+              get() {
+                return ctx.pageHeader.meta
+              },
+              set(context, v) {
+                ctx.pageHeader.meta = v;
+              },
+            },
+          }
+        ]
+      }
+    ]
+  }
+
   const debugModeOptions =
     envList.length > 0
       ? [
@@ -785,6 +860,23 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             ],
           },
         ]
+        if (!ctx.pageHeader) {
+          ctx.pageHeader = {
+            title: ctx.fileName,
+            meta: [
+              {
+                name: 'viewport',
+                content: 'width=device-width, initial-scale=1.0'
+              },
+              {
+                name: 'referrer',
+                content: 'no-referrer'
+              },
+            ]
+          };
+        }
+        cate1.title = pageConfigEditor.title;
+        cate1.items = pageConfigEditor.items;
       },
       editorOptions: ctx.setting?.system.config?.isPureIntranet
         ? {
