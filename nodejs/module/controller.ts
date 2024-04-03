@@ -17,7 +17,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { getAppTypeFromTemplate } from "./tools/common";
 import { getAppConfig } from "./tools/get-app-config";
-import { generateCode } from "./tocode";
+import { generateToReactCode } from "@mybricks/to-code-react";
 
 import { Response } from "express";
 
@@ -104,7 +104,7 @@ export default class PcPageController {
     Logger.info(`[toCode] 开始`);
 
     try {
-      const zipFilePath = await generateCode(json)
+      const zipFilePath = await generateToReactCode(json)
       Logger.info(`[toCode] ${zipFilePath}`);
       res.setHeader("Content-Disposition", `attachment; filename=1`);
       res.setHeader("Content-Type", "application/zip");
