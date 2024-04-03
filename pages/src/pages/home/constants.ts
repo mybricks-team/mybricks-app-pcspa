@@ -73,7 +73,7 @@ export const GET_PAGE_CONFIG_EDITOR = (ctx) => {
                 description: 'HTML文档的元数据, 用于浏览器(如何显示内容或重新加载页面), 搜索引擎(关键词), 或其他 web 服务。',
                 options: {
                     getTitle: ({ type, key }) => {
-                        return `${type}: ${key}`;
+                        return `${type}=${key}`;
                     },
                     onAdd: () => {
                         const defaultMeta = {
