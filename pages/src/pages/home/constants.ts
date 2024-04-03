@@ -63,7 +63,6 @@ export const GET_PAGE_CONFIG_EDITOR = (ctx) => {
                         return ctx.pageHeader.favicon
                     },
                     set: (context, v: any) => {
-                        console.log(v, 'v')
                         ctx.pageHeader.favicon = v
                     },
                 },
