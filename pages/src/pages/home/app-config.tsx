@@ -358,13 +358,41 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         user: ctx.user,
         onUpload: async (file: File) => {
           return new Promise(async (resolve, reject) => {
+            const { manateeUserInfo, fileId } = ctx;
+            let uploadService = ctx.uploadService
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('folderPath', `/files/${fileId}`)
+
+            const useConfigService = !!uploadService
+
+            if (!useConfigService) {
+              uploadService = '/paas/api/flow/saveFile'
+            }
+
             try {
-              const res = await upload(`api/pcpage/upload`, file);
-              console.log(res, 'onUpload')
-              resolve(res);
-            } catch (e) {
-              message.error('上传图片失败!');
-              reject(e);
+              const res = await axios<any, any>({
+                url: uploadService,
+                method: 'post',
+                data: formData,
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                  ...manateeUserInfo,
+                },
+              })
+              const { data = {} } = res.data
+              const { url } = data
+              if (!url) {
+                reject(`没有返回图片地址`)
+              }
+              const staticUrl = /^http/.test(url)
+                ? url
+                : `${getDomainFromPath(uploadService)}${url}`
+              resolve({ url: staticUrl });
+              reject(`【图片上传出错】: ${message}`)
+            } catch (error) {
+              message.error(error.message)
+              reject(error)
             }
           })
         },
