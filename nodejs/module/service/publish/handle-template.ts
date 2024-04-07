@@ -60,7 +60,8 @@ export async function handleTemplate({
   });
 
   template = template
-    .replace(`--title--`, pageHeader.title)
+    .replace(`--title--`, pageHeader.title.zh_CN || pageHeader.title)
+    .replace(`"--title-i18n--"`, JSON.stringify(pageHeader.title))
     .replace(`--favicon--`, `<link rel="icon" href="${pageHeader.favicon}" type="image/x-icon"/>`)
     .replace(`--meta--`, metaInfo)
     .replace(`-- themes-style --`, themesStyleStr)

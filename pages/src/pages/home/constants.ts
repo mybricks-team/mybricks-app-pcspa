@@ -47,6 +47,9 @@ export const GET_PAGE_CONFIG_EDITOR = (ctx) => {
                         return ctx.pageHeader.title
                     },
                     set: (context, v: any) => {
+                        if (v?.id) {
+                            v.zh_CN = ctx.i18nLangContent[v.id]?.content?.['zh-CN']
+                        }
                         ctx.pageHeader.title = v
                     },
                 },
