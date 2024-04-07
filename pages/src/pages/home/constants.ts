@@ -6,30 +6,32 @@ export const GET_DEFAULT_PAGE_HEADER = (appData) => {
     return {
         title: appData.fileContent?.name,
         favicon: '',
-        meta: [
-            {
-                type: 'name',
-                key: 'viewport',
-                content: 'width=device-width, initial-scale=1.0'
-            },
-            {
-                type: 'name',
-                key: 'referrer',
-                content: 'no-referrer'
-            },
-            {
-                type: 'http-equiv',
-                key: 'X-UA-Compatible',
-                content: 'IE=edge'
-            },
-            {
-                type: 'http-equiv',
-                key: 'Access-Control-Allow-Origin',
-                content: '*'
-            },
-        ],
+        meta: [],
     }
 }
+
+export const DEFAULT_META = [
+    {
+        type: 'name',
+        key: 'viewport',
+        content: 'width=device-width, initial-scale=1.0'
+    },
+    {
+        type: 'name',
+        key: 'referrer',
+        content: 'no-referrer'
+    },
+    {
+        type: 'http-equiv',
+        key: 'X-UA-Compatible',
+        content: 'IE=edge'
+    },
+    {
+        type: 'http-equiv',
+        key: 'Access-Control-Allow-Origin',
+        content: '*'
+    },
+]
 
 export const GET_PAGE_CONFIG_EDITOR = (ctx) => {
     return {
