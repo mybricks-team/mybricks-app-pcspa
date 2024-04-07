@@ -8,6 +8,7 @@ const projectId = "--slot-project-id--";
 const executeEnv = "--executeEnv--";
 const envList = "--envList--";
 const i18nLangContent = "--i18nLangContent--";
+const titleI18n = "--title-i18n--";
 const runtimeUploadService = "--runtimeUploadService--";
 
 const getCustomHostFromUrl = () => {
@@ -27,6 +28,10 @@ const getCustomHostFromUrl = () => {
 }
 getCustomHostFromUrl()
 
+const getCurrentLocale = () => {
+  return navigator.language
+}
+
 const isEqual = (param1, param2) => {
   return param1 === param2
 }
@@ -34,7 +39,15 @@ const isEqual = (param1, param2) => {
 const root = ({ renderType, locale, runtime, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   const domainServicePath = '--domain-service-path--';//replace it
-
+  /**网页标题i18n处理 */
+  try {
+    if (titleI18n?.id !== undefined) {
+      document.title = i18nLangContent[titleI18n.id]?.content?.[getCurrentLocale()]
+    }
+  } catch (e) {
+    console.error('网页标题国际化处理失败, 失败原因: ', e);
+  }
+  // =========== 网页标题i18n处理 end ===============
   return renderUI(projectJson, {
     env: {
       runtime,

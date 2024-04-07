@@ -15,7 +15,7 @@ import { createFromIconfontCN } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
-import { USE_CUSTOM_HOST } from './constants'
+import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
 import { getLibsFromConfig } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
@@ -85,6 +85,7 @@ export default function MyDesigner({ appData: originAppData }) {
       },
       user: appData.user,
       fileName: appData.fileContent?.name,
+      pageHeader: appData.fileContent?.content?.pageHeader || GET_DEFAULT_PAGE_HEADER(appData),
       absoluteNamePath: appData.hierarchy.absoluteNamePath,
       fileId: appData.fileId,
       setting: appData.config || {},
@@ -121,7 +122,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon? },
+        param: { name?; shareType?; content?; icon?},
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
@@ -267,7 +268,7 @@ export default function MyDesigner({ appData: originAppData }) {
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ;(window as any).mybricks.SPADesigner &&
+        ; (window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -333,6 +334,7 @@ export default function MyDesigner({ appData: originAppData }) {
     json.hasPermissionFn = ctx.hasPermissionFn
     json.debugHasPermissionFn = ctx.debugHasPermissionFn
     json.fontJS = ctx.fontJS
+    json.pageHeader = ctx.pageHeader
 
     json.projectId = ctx.sdk.projectId
 
@@ -440,6 +442,7 @@ export default function MyDesigner({ appData: originAppData }) {
           ctx.i18nUsedIdList
         )
         json.operationList = operationList.current.reverse()
+        json.pageHeader = ctx.pageHeader
 
         await ctx.save(
           { content: JSON.stringify(json), name: ctx.fileName },
@@ -461,6 +464,7 @@ export default function MyDesigner({ appData: originAppData }) {
             // scripts: encodeURIComponent(scripts),
             comlibs: curComLibs,
             title: ctx.fileName,
+            pageHeader: ctx.pageHeader,
             publisherEmail: ctx.user.email,
             publisherName: ctx.user?.name,
             runtimeUploadService: ctx.runtimeUploadService,
@@ -875,7 +879,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
       if (libIndex !== -1) {
         curComponent =
           allComLibsRuntimeMap[libIndex][
-            component.namespace + '@' + component.version
+          component.namespace + '@' + component.version
           ]
       } else {
         libIndex = allComLibsRuntimeMap.findIndex((lib) =>
@@ -893,9 +897,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         }
         curComponent =
           allComLibsRuntimeMap[libIndex][
-            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-              key.startsWith(component.namespace)
-            )
+          Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+            key.startsWith(component.namespace)
+          )
           ]
       }
 

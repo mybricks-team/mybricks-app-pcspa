@@ -35,6 +35,7 @@ export async function publish(
       groupName,
       envList = [],
       i18nLangContent,
+      pageHeader,
       runtimeUploadService
     } = json.configuration;
 
@@ -66,7 +67,7 @@ export async function publish(
       fileId,
       envType,
       comlibs,
-      title,
+      pageHeader,
       envList,
       projectId,
       version,
