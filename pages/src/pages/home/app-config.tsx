@@ -1,5 +1,5 @@
 import React from 'react'
-import { message } from 'antd'
+import { message, Tooltip } from 'antd'
 import servicePlugin, {
   call as callConnectorHttp,
   mock as connectorHttpMock,
@@ -439,7 +439,14 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         modalActiveExtends: [
           {
             type: 'publish',
-            title: '下载',
+            title: <Tooltip
+              color='white'
+              title={<a
+                target='_blank'
+                href="https://docs.mybricks.world/docs/publish-integration/kjkj/">使用说明</a>}
+            >
+              下载
+            </Tooltip>,
             onClick({ fileId, type: envType, version }) {
               const loadend = message.loading(`版本 ${version} 下载中...`, 0)
               download(
@@ -1043,6 +1050,44 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               return {}
             }
           },
+        },
+        get uploadFile() {
+          return async (files) => {
+            if (!ctx.runtimeUploadService) {
+              message.warn('请先配置运行时上传接口')
+              return
+            }
+            // 创建FormData对象
+            const formData = new FormData();
+
+            // 添加文件到FormData对象
+            for (const file of files) {
+              formData.append('file', file);
+            }
+
+            try {
+              // 发送POST请求
+              const response = await fetch(ctx.runtimeUploadService, {
+                method: "POST",
+                body: formData
+              }).then(res => {
+                if (res.status !== 200 && res.status !== 201) {
+                  throw new Error(`上传失败！`)
+                }
+                return res.json()
+              })
+              console.log(`res,`, response)
+              return {
+                url: response?.data?.url,
+                name: files[0].name
+              }
+            } catch (error) {
+              message.error(`上传失败，请检查上传接口设置！`)
+              // 错误处理
+              console.error('文件上传失败', error);
+              return {}
+            }
+          }
         },
         get hasPermission() {
           return ({ permission, key }) => {

@@ -24,16 +24,14 @@ export default (props) => {
           <ConfigDesigner {...configContext} />
         </Collapse.Panel>
         {
-          !isInGroup && (
-            <>
-              <Collapse.Panel key={1} header="基础设置">
-                <ConfigBase {...configContext} />
-              </Collapse.Panel> 
-              <Collapse.Panel key={2} header="服务扩展">
-                <ConfigServer {...configContext} />
-              </Collapse.Panel>
-            </>
-          )
+          <>
+            {!isInGroup && <Collapse.Panel key={1} header="基础设置">
+              <ConfigBase {...configContext} />
+            </Collapse.Panel>}
+            <Collapse.Panel key={2} header="服务扩展">
+              <ConfigServer {...configContext} />
+            </Collapse.Panel>
+          </>
         }
         {/* {!isInGroup && <Collapse.Panel key={1} header="基础设置">
           <ConfigBase {...configContext} />

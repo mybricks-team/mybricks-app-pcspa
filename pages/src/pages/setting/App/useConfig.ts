@@ -9,6 +9,7 @@ export type TConfigProps<T = any> = {
   user: {
     email: string,
   },
+  options: any
 }
 
 export default <T = any>(namespace, defaultValue = {} as T, options = {}): TConfigProps<T> => {
@@ -54,5 +55,5 @@ export default <T = any>(namespace, defaultValue = {} as T, options = {}): TConf
   }, [config, updateConfig])
 
 
-  return { config, mergeUpdateConfig, updateConfig, loading, user }
+  return { config, mergeUpdateConfig, updateConfig, loading, user, options }
 }

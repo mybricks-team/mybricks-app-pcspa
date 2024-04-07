@@ -63,6 +63,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || '';
+  const runtimeUploadService = appConfig?.runtimeUploadServer?.uploadService || '';
 
   const [ctx, setCtx] = useState(() => {
     const envList = getMergedEnvList(appData, appConfig)
@@ -112,6 +113,7 @@ export default function MyDesigner({ appData: originAppData }) {
       versionApi: null,
       appConfig,
       uploadService,
+      runtimeUploadService,
       operable: false,
       isDebugMode: false,
       saveContent(content) {
@@ -341,7 +343,8 @@ export default function MyDesigner({ appData: originAppData }) {
       comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
       hasPermissionFn: ctx.hasPermissionFn,
       appConfig: JSON.stringify(appConfig),
-      i18nLangContent: ctx.i18nLangContent
+      i18nLangContent: ctx.i18nLangContent,
+      runtimeUploadService: ctx.runtimeUploadService
     })
 
     // 对象 => 拼接成路由参数
@@ -428,6 +431,7 @@ export default function MyDesigner({ appData: originAppData }) {
               pageHeader: ctx.pageHeader,
               publisherEmail: ctx.user.email,
               publisherName: ctx.user?.name,
+              runtimeUploadService: ctx.runtimeUploadService,
               projectId: ctx.sdk.projectId,
               envList: ctx.envList,
               i18nLangContent: i18nLangContentFilter(ctx.i18nLangContent, ctx.i18nUsedIdList),
@@ -571,35 +575,48 @@ export default function MyDesigner({ appData: originAppData }) {
       content: '出码中...',
       duration: 0,
     })
-    const toJSON = designerRef.current.toJSON({ withDiagrams: true });
-    fAxios({
-      method: 'post',
-      url: '/api/pcpage/toCode',
-      responseType: 'blob',
-      data: {
-        json: toJSON
-      }
-    }).then((response) => {
-      // // 创建一个URL指向blob响应数据
-      const url = window.URL.createObjectURL(new Blob([response]));
-      // 创建一个a标签用于触发下载
-      const link = document.createElement('a');
-      link.href = url;
-      // 设置下载后的文件名，如果服务器未指定，则可以在这里指定
-      link.setAttribute('download', '出码-react.zip'); // 注意: 该名称可以根据实际情况命名
-      // 将a标签添加到body，触发点击事件，然后移除
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      // 清理用完的URL对象
-      window.URL.revokeObjectURL(url);
-    })
-      .catch((error) => {
-        console.error("出码失败，报错信息:", error);
-        throw error;
-      }).finally(() => {
-        close()
-      });
+
+    let toJSON
+
+    try {
+      toJSON = designerRef.current.toJSON({ withDiagrams: true });
+    } catch (e) {
+      console.error("toJSON({ withDiagrams: true }) 报错: ", e)
+      message.error(`出码失败: toJSON({ withDiagrams: true }) 报错 ${e.message}`)
+      close()
+    }
+
+    if (toJSON) {
+      fAxios({
+        method: 'post',
+        url: '/api/pcpage/toCode',
+        responseType: 'blob',
+        data: {
+          json: toJSON
+        }
+      }).then((response) => {
+        // // 创建一个URL指向blob响应数据
+        const url = window.URL.createObjectURL(new Blob([response]));
+        // 创建一个a标签用于触发下载
+        const link = document.createElement('a');
+        link.href = url;
+        // 设置下载后的文件名，如果服务器未指定，则可以在这里指定
+        link.setAttribute('download', '出码-react.zip'); // 注意: 该名称可以根据实际情况命名
+        // 将a标签添加到body，触发点击事件，然后移除
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        // 清理用完的URL对象
+        window.URL.revokeObjectURL(url);
+      })
+        .catch((error) => {
+          console.error("出码失败，报错信息:", error);
+          message.error(`出码失败: ${error.message}`)
+          throw error;
+        }).finally(() => {
+          close()
+        });
+    }
   }
 
   return (

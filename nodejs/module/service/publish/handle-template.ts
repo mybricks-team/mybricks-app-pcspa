@@ -11,7 +11,8 @@ export async function handleTemplate({
   envList,
   projectId,
   version,
-  i18nLangContent
+  i18nLangContent,
+  runtimeUploadService
 }) {
   const themesStyleStr = genThemesStyleStr(json);
 
@@ -70,6 +71,7 @@ export async function handleTemplate({
     .replace(`"--executeEnv--"`, JSON.stringify(envType))
     .replace(`"--envList--"`, JSON.stringify(envList))
     .replace(`"--i18nLangContent--"`, JSON.stringify(i18nLangContent))
+    .replace(`"--runtimeUploadService--"`, JSON.stringify(runtimeUploadService))
     .replace(
       `"--slot-project-id--"`,
       projectId ? projectId : JSON.stringify(null)

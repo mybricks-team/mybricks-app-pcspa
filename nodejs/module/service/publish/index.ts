@@ -36,6 +36,7 @@ export async function publish(
       envList = [],
       i18nLangContent,
       pageHeader,
+      runtimeUploadService
     } = json.configuration;
 
     Reflect.deleteProperty(json, "configuration");
@@ -71,6 +72,7 @@ export async function publish(
       projectId,
       version,
       i18nLangContent,
+      runtimeUploadService
     });
     template = _template;
 
