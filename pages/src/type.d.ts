@@ -18,3 +18,9 @@ declare interface Window {
 declare type RenderWeb = {
   render: (json: Record<string, any> | string, opts: Record<string, any>) => any
 }
+
+declare const APP_NAME: 'react' | 'vue2' | 'vue3';
+
+declare const APP_NAME: string;
+
+declare const APP_VERSION: string;
