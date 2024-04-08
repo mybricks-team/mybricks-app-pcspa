@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Form, Input, ModalProps } from "antd";
+import { Form, Input } from "antd";
 import { TPublishEnv } from "./index";
 
 interface AppendModalProps

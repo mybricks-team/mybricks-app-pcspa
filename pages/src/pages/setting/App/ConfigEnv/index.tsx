@@ -20,8 +20,7 @@ export type TPublishEnv = {
   defaultApiPrePath: string;
   updateTime: string;
   user: any;
-  isEdit?: boolean; // 是否编辑中
-  isAppend?: boolean; // 是否新增
+  isAppend?: boolean;
 };
 
 export type TPublishConfig = {
@@ -33,21 +32,11 @@ export default ({ config, mergeUpdateConfig, user }: TConfigProps) => {
   const [envList, setEnvList] = useState<TPublishEnv[]>([]);
 
   useEffect(() => {
-    const nextEnvList = (publishEnvConfig?.envList || []).map(
-      (item) => ({
-        ...item,
-        isEdit: false,
-        isAppend: false,
-      })
-    );
-    setEnvList(nextEnvList);
+    const nextEnvList = publishEnvConfig?.envList || [];
+    setEnvList(nextEnvList.map((item) => ({ ...item, isAppend: false })));
   }, [config]);
 
   const onClickAdd = useCallback(() => {
-    if (envList.some((item) => item?.isEdit === true)) {
-      message.info("请先保存正在编辑中的环境");
-      return;
-    }
     setEnvList([
       ...envList,
       {
@@ -56,9 +45,8 @@ export default ({ config, mergeUpdateConfig, user }: TConfigProps) => {
         defaultApiPrePath: "",
         updateTime: "",
         user: {
-          email: user.email,
+          email: user?.email,
         },
-        isEdit: true,
         isAppend: true,
       },
     ]);
@@ -78,64 +66,6 @@ export default ({ config, mergeUpdateConfig, user }: TConfigProps) => {
     [config]
   );
 
-  const onOk = useCallback(
-    (publishEnv: TPublishEnv, isAppend: boolean, index: number) => {
-      if (!publishEnv?.name || !publishEnv?.title) {
-        message.info("请填写好必填项");
-        return;
-      }
-      const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-      const currentPublishEnv = {
-        ...publishEnv,
-        user: { email: user.email },
-        updateTime,
-        isEdit: false,
-      };
-      const newEnvList = [...envList];
-      if (!isAppend) {
-        newEnvList.splice(index, 1, currentPublishEnv);
-      } else {
-        if (
-          envList.find(
-            ({ name, title }) =>
-              name === publishEnv.name || title === publishEnv.title
-          )
-        ) {
-          message.info("该环境已存在");
-          return;
-        }
-        currentPublishEnv.isAppend = false;
-        newEnvList[newEnvList.length - 1] = currentPublishEnv; // 修改最后一个（新增的）
-      }
-
-      mergeUpdateConfig(createConfig(newEnvList));
-      setEnvList(newEnvList);
-    },
-    [envList, user]
-  );
-
-  const onCancel = useCallback(
-    (index: number, isAppend: boolean) => {
-      const newEnvList = [...envList];
-      if (isAppend) {
-        newEnvList.splice(index, 1);
-      } else {
-        newEnvList[index].isEdit = false;
-      }
-      setEnvList(newEnvList);
-    },
-    [envList]
-  );
-
-  const onEdit = useCallback(
-    (index: number) => {
-      const newEnvList = [...envList];
-      newEnvList[index].isEdit = true;
-      setEnvList(newEnvList);
-    },
-    [envList]
-  );
-
   const onDelete = useCallback(
     (index: number) => {
       const newEnvList = [...envList];
@@ -146,21 +76,27 @@ export default ({ config, mergeUpdateConfig, user }: TConfigProps) => {
     [envList]
   );
 
+  const update = useCallback(
+    (publishEnv: TPublishEnv, index: number) => {
+      const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+      const currentPublishEnv = {
+        ...publishEnv,
+        user: { email: user?.email },
+        updateTime,
+      };
+      const newEnvList = [...envList];
+      newEnvList[index] = currentPublishEnv;
+      mergeUpdateConfig(createConfig(newEnvList));
+    },
+    [envList]
+  );
+
   return (
     <>
       {envList.map((item, index) => {
-        const {
-          title = "",
-          name = "",
-          defaultApiPrePath = "",
-          updateTime,
-          user,
-          isEdit = false,
-          isAppend = false,
-        } = item;
-        let tempValue: TPublishEnv = item;
+        const { title = "", updateTime, user, isAppend = false } = item;
         const updateEnv = (newValue: TPublishEnv) => {
-          tempValue = newValue;
+          update(newValue, index);
         };
         return (
           <>
@@ -171,65 +107,20 @@ export default ({ config, mergeUpdateConfig, user }: TConfigProps) => {
                 fontWeight: "500",
               }}
               extra={
-                <>
-                  {isEdit ? (
-                    <>
-                      <Button
-                        type="link"
-                        icon={<EditOutlined />}
-                        onClick={() => onCancel(index, isAppend)}
-                      >
-                        取消
-                      </Button>
-                      <Button
-                        type="link"
-                        icon={<EditOutlined />}
-                        onClick={() => onOk(tempValue, isAppend, index)}
-                      >
-                        确认
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      type="link"
-                      icon={<EditOutlined />}
-                      onClick={() => onEdit(index)}
-                    >
-                      编辑
-                    </Button>
-                  )}
-                  <Popconfirm
-                    title={`确定删除环境 ${item.title} 吗？`}
-                    onConfirm={() => onDelete(index)}
-                    okText="确定"
-                    cancelText="再想想"
-                  >
-                    <Button type="link" icon={<DeleteOutlined />}>
-                      删除
-                    </Button>
-                  </Popconfirm>
-                </>
+                <Button
+                  type="link"
+                  icon={<DeleteOutlined />}
+                  onClick={() => onDelete(index)}
+                >
+                  删除
+                </Button>
               }
-            >
-              {!isEdit && (
-                <>
-                  <Descriptions.Item label="环境名称">
-                    {title}
-                  </Descriptions.Item>
-                  <Descriptions.Item label="环境标识">{name}</Descriptions.Item>
-                  <Descriptions.Item label="接口默认前缀">
-                    {defaultApiPrePath}
-                  </Descriptions.Item>
-                </>
-              )}
-            </Descriptions>
-            {isEdit && (
-              <EditForm
-                isAppend={isAppend}
-                publishEnv={item}
-                updateEnv={updateEnv}
-              />
-            )}
+            ></Descriptions>
+            <EditForm
+              publishEnv={item}
+              isAppend={isAppend}
+              updateEnv={updateEnv}
+            />
             <Typography.Paragraph
               type="secondary"
               style={{ textAlign: "right" }}

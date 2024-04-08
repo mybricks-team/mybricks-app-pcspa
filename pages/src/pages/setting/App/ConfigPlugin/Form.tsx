@@ -41,7 +41,7 @@ export default ({ isAppend, updatePlugin, plugin = {} }: AppendModalProps) => {
         rules={[{ required: true, message: "请填写插件代码中定义的name" }]}
         tooltip="插件的唯一标识，与代码中的name一致"
       >
-        <Input allowClear />
+        <Input allowClear disabled={!isAppend} />
       </Form.Item>
       <Form.Item
         label="中文名称"
