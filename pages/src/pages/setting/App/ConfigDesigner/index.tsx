@@ -20,20 +20,22 @@ export default (props: TConfigProps) => {
   }
 
   return (
-    <Form form={form} onFinish={onSubmit} style={{ marginTop: 12 }}>
-      <Form.Item
-        name="url"
-        label="链接"
-        tooltip="相对路径或CDN"
-      >
+    <Form
+      form={form}
+      onFinish={onSubmit}
+      style={{ marginTop: 12 }}
+      onValuesChange={(_, values) => onSubmit(values)}
+    >
+      <Form.Item name="url" label="链接" tooltip="相对路径或CDN">
         <Input placeholder={DESIGNER_STATIC_PATH} />
       </Form.Item>
-      <Form.Item style={{ textAlign: 'right' }}>
-        {Object.keys(designerConfig).length > 0 && <Meta description={`${designerConfig.user} 更新于 ${designerConfig.updateTime}`} />}
-        <Button type="primary" htmlType="submit">
-          保存
-        </Button>
-      </Form.Item>
+      {Object.keys(designerConfig).length > 0 && (
+        <Form.Item style={{ textAlign: "right" }}>
+          <Meta
+            description={`${designerConfig.user} 更新于 ${designerConfig.updateTime}`}
+          />
+        </Form.Item>
+      )}
     </Form>
   );
-}
+};
