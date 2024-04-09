@@ -165,8 +165,19 @@ export default function MyDesigner({ appData: originAppData }) {
   const operationList = useRef<any[]>([]);
 
   useLayoutEffect(() => {
-    getInitComLibs(appData).then(comlibs => setCtx(pre => ({...pre, comlibs })))
+    getInitComLibs(appData).then(comlibs => setCtx(pre => ({...pre, comlibs }))).finally(loadDesigner)
   }, [])
+
+  const loadDesigner = useCallback(() => {
+    if (designer) {
+      const script = document.createElement('script');
+      script.src = designer
+      document.head.appendChild(script);
+      script.onload = () => {
+        (window as any).mybricks.SPADesigner && setSPADesigner((window as any).mybricks.SPADesigner);
+      };
+    }
+  }, [designer])
 
   // 只有预览时 search 会携带 version 字段
   const isPreview = window.location.search.includes('version');
@@ -239,16 +250,16 @@ export default function MyDesigner({ appData: originAppData }) {
     })
   }, [])
 
-  useMemo(() => {
-    if (designer) {
-      const script = document.createElement('script');
-      script.src = designer
-      document.head.appendChild(script);
-      script.onload = () => {
-        (window as any).mybricks.SPADesigner && setSPADesigner((window as any).mybricks.SPADesigner);
-      };
-    }
-  }, [designer])
+  // useMemo(() => {
+  //   if (designer) {
+  //     const script = document.createElement('script');
+  //     script.src = designer
+  //     document.head.appendChild(script);
+  //     script.onload = () => {
+  //       (window as any).mybricks.SPADesigner && setSPADesigner((window as any).mybricks.SPADesigner);
+  //     };
+  //   }
+  // }, [designer])
 
   useEffect(() => {
     if (beforeunload) {
@@ -341,14 +352,14 @@ export default function MyDesigner({ appData: originAppData }) {
       directConnection: ctx.directConnection,
       debugMockConfig: ctx.debugMockConfig,
       envList: ctx.envList,
-      comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
+      comlibs: ctx.comlibs,
       hasPermissionFn: ctx.hasPermissionFn,
       appConfig: JSON.stringify(appConfig),
       i18nLangContent: ctx.i18nLangContent
     })
 
     window.open(`./preview.html?fileId=${ctx.fileId}`)
-  }, [appConfig])
+  }, [appConfig, ctx])
 
   const publish = useCallback(
     async (publishConfig) => {
@@ -415,7 +426,6 @@ export default function MyDesigner({ appData: originAppData }) {
           }
 
           const toJSON = isEncode ? btoa(encodeURIComponent(JSON.stringify(jsonParams))) : jsonParams
-
           const res: { data?: any, code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
             userId: ctx.user?.id,
             fileId: ctx.fileId,
@@ -461,7 +471,7 @@ export default function MyDesigner({ appData: originAppData }) {
             setPublishLoading(false)
           })
     },
-    [appData]
+    [appData, ctx]
   )
 
   const publishAndDownload = async (publishConfig) => {

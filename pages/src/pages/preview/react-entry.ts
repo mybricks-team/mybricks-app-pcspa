@@ -9,7 +9,7 @@ import '@/reset.less'
 
 const React = window.React;
 const ReactDOM = window.ReactDOM;
-const antd = window.antd;
+
 
 const fileId = getQueryString('fileId')
 const previewStorage = new PreviewStorage({ fileId })
@@ -69,12 +69,21 @@ const getCurrentLocale = () => {
   return navigator.language
 }
 
-function render(props) {
+const loadLocale = (locale="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js") => {
+  return requireScript(locale)
+}
+
+async function render(props) {
   const { container } = props;
   if (comlibs && Array.isArray(comlibs)) {
-    insertDeps(comlibs)
+    await insertDeps(comlibs)
+    await loadLocale()
+    const antd = window.antd;
     Promise.all(getRtComlibsFromConfigEdit(comlibs).map((t) => requireScript(t))).then(() => {
-      const antdLocalLib = antd?.locale[getAntdLocalName(getCurrentLocale())]?.default
+      const lang = getAntdLocalName(getCurrentLocale())
+      console.log(antd.locale)
+      const antdLocalLib = antd?.locale![lang].default
+
 
       reactRoot = ReactDOM.createRoot((container ?? document).querySelector('#root'));
 
@@ -82,7 +91,7 @@ function render(props) {
         antd.ConfigProvider,
         {
           // 如鬼没有就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
-          locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale())) ? undefined : (antdLocalLib || antd.locale['zh_CN'].default)
+          locale: [`'en_US'`, `en`].includes(lang) ? undefined : (antdLocalLib || antd.locale['zh_CN'].default)
         },
         renderUI({
           ...props, renderType: 'react', env: {

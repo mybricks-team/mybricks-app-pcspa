@@ -19,6 +19,7 @@ export async function localization({
   app_type,
   json,
   hasOldComLib,
+  comlibs
 }) {
   /** 是否本地化发布 */
   const needLocalization = await getCustomNeedLocalization();
@@ -85,7 +86,8 @@ export async function localization({
       needLocalization,
       json,
       origin,
-      app_type
+      comlibs,
+      app_type,
     );
     globalDeps = globalDeps.concat(_globalDeps || []);
     images = _images;
@@ -113,6 +115,7 @@ async function resourceLocalization(
   needLocalization: boolean,
   json: any,
   origin,
+  comlibs,
   type = "react"
 ) {
   const localPublicInfos = LocalPublic[type].map((info) => {
@@ -123,30 +126,34 @@ async function resourceLocalization(
     return res;
   });
 
-   let chunks = commonChunks[type].reduce((pre, cur) => {
-    if(cur.path.endsWith('.js')) {
-      pre += `\n<script src="${cur.path}" defer></script>`
+  let chunks = commonChunks[type].reduce((pre, cur) => {
+    if (cur.CDN.endsWith(".js")) {
+      pre += `\n<script src="${cur.CDN}"></script>`;
     }
-    if(cur.path.endsWith('.css')) {
-      pre += `\n<link rel="stylesheet" href="${cur.path}"/>`
+    if (cur.CDN.endsWith(".css")) {
+      pre += `\n<link rel="stylesheet" href="${cur.CDN}"/>`;
     }
     return pre;
-  }, '')
+  }, "");
 
-  const chunkAssets = (json.comlibs ?? []).filter(({id}) => id!=='_myself_').reduce((pre, cur) => {
-    const { urls } = cur.externals;
-    if(Array.isArray(urls) && urls.length) {
-      urls.forEach((url) => {
-        if(url.endsWith('.js')) {
-          pre += `\n<script src="${url}" defer></script>`
+  const chunkAssets = (comlibs ?? [])
+    .filter(({ id }) => id !== "_myself_")
+    .reduce((pre, cur) => {
+      (cur.externals ?? []).forEach((it) => {
+        const { urls } = it;
+        if (Array.isArray(urls) && urls.length) {
+          urls.forEach((url) => {
+            if (url.endsWith(".js")) {
+              pre += `\n<script src="${url}"></script>`;
+            }
+            if (url.endsWith(".css")) {
+              pre += `\n<link rel="stylesheet" href="${url}"/>`;
+            }
+          });
         }
-        if(url.endsWith('.css')) {
-          pre += `\n<link rel="stylesheet" href="${url}"/>`
-        }
-      })
-    }
-    return pre
-  }, chunks)
+      });
+      return pre;
+    }, chunks);
 
   const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
     switch (cur.tag) {

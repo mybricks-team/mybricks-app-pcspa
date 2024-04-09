@@ -43,10 +43,10 @@ function cssVariable(dumpJson) {
 
 cssVariable(dumpJson)
 
-const render = (props) => {
+const render = async (props) => {
     const { container } = props
     if (comlibs && Array.isArray(comlibs)) {
-        insertDeps(comlibs)
+        await insertDeps(comlibs)
         Promise.all(getRtComlibsFromConfigEdit(comlibs).map((t) => requireScript(t))).then(() => {
             vueApp = new Vue({
                 render: (h) => h(renderUI({ ...props, renderType: 'vue2' })),

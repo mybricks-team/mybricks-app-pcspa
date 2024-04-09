@@ -60,83 +60,97 @@ const getLibsFromConfig = (appData: Record<string, any>) => {
 const checkDeps = async (libs) => {
   for (let i = 0; i < libs.length; i++) {
     const lib = libs[i];
-    if ('externals' in lib || lib.id === "_myself_") continue;
+    if ("externals" in lib || lib.id === "_myself_") continue;
     try {
-      const material = await getLibExternals({ namespace: lib.namespace, version: lib.version });
+      const material = await getLibExternals({
+        namespace: lib.namespace,
+        version: lib.version,
+      });
       Object.assign(lib, material);
     } catch (error) {
-      console.error('获取物料依赖失败\n', error);
+      console.error("获取物料依赖失败\n", error);
     }
   }
   return libs;
-}
+};
 
-const getLibExternals = ({namespace, version}) => {
+const getLibExternals = ({ namespace, version }) => {
   return API.Material.getMaterialContent({
     namespace: namespace,
     version: version,
-    codeType: 'pure'
-  }).then(lib => {
+    codeType: "pure",
+  }).then((lib) => {
     const content = JSON.parse(lib.content);
     const externals = content![APP_TYPE]!.externals ?? content.externals;
     return {
       ...lib,
       ...content,
-      externals
-    }
-  })
-}
+      externals,
+    };
+  });
+};
 
 const createScript = (url: string) => {
-  if (document.querySelector(`script[src="${url}"]`)) return;
-  const script = document.createElement('script');
+  if (document.querySelector(`script[src="${url}"]`)) return Promise.resolve();
+  const script = document.createElement("script");
   script.src = url;
   script.defer = true;
-  document.body.appendChild(script);
-  return script;
-}
+  return new Promise((resolve, reject) => {
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+};
 
 const createLink = (url: string) => {
-  if (document.querySelector(`link[href="${url}"]`)) return;
-  const link = document.createElement('link');
+  if (document.querySelector(`link[href="${url}"]`)) return Promise.resolve();
+  const link = document.createElement("link");
   link.href = url;
-  link.rel = 'stylesheet';
-  document.head.appendChild(link);
-  return link;
-}
+  link.rel = "stylesheet";
+  return new Promise((resolve, reject) => {
+    link.onload = resolve;
+    link.onerror = reject;
+    document.head.appendChild(link);
+  });
+};
 
-const insertDeps = (libs) => {
-  for (let i = 0; i < libs.length; i++) {
-    const lib = libs[i];
-    if ('externals' in lib) {
-      insertExternal(lib)
-    }
-  }
-  return libs;
-}
- 
-
-const insertExternal = (lib) => {
-  const { library, urls } = lib.externals;
-  if(Array.isArray(urls) && urls.length) {
-    urls.forEach(url => {
-      if(url.endsWith('.js')){
-        if(library in window) return;
-        createScript(url);
-      }
-      if(url.endsWith('.css')){
-        createLink(url)
-      }
+const insertDeps = async (libs) => {
+  if (!libs.length) return libs;
+  await Promise.all(
+    libs.map((lib) => {
+      return "externals" in lib ? insertExternal(lib) : Promise.resolve();
     })
-  }
-  return lib
-}
+  );
+  return libs;
+};
 
-const composeAsync = (...fns) => async (arg) => fns.reduceRight(async (pre, fn) => fn(await pre), Promise.resolve(arg))
+const insertExternal = async (lib) => {
+  const p = [];
+  lib.externals.forEach((it) => {
+    const { library, urls } = it;
+    if (Array.isArray(urls) && urls.length) {
+      urls.forEach((url) => {
+        if (url.endsWith(".js")) {
+          if (library in window) return;
+          p.push(createScript(url));
+        }
+        if (url.endsWith(".css")) {
+          p.push(createLink(url));
+        }
+      });
+    }
+  });
+  await Promise.all(p);
+  return lib;
+};
 
-const getInitComLibs = composeAsync(insertDeps, checkDeps, getLibsFromConfig)
+const composeAsync =
+  (...fns) =>
+  async (arg) =>
+    fns.reduceRight(async (pre, fn) => fn(await pre), Promise.resolve(arg));
 
-const upgradeExternal = composeAsync(insertExternal, getLibExternals)
+const getInitComLibs = composeAsync(insertDeps, checkDeps, getLibsFromConfig);
 
+const upgradeExternal = composeAsync(insertExternal, getLibExternals);
 
 export { getInitComLibs, upgradeExternal, insertDeps };
