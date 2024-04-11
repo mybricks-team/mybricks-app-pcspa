@@ -63,7 +63,7 @@
     "@mybricks/plugin-connector-domain": "0.0.52",
     "@mybricks/plugin-connector-http": "1.2.12",
     "@mybricks/plugin-locale": "^1.0.2",
-    "@mybricks/plugin-note": "^0.0.4",
+    "@mybricks/plugin-note": "^0.0.6",
     "@mybricks/plugin-theme": "^0.0.45",
     "@mybricks/plugin-tools": "1.0.17",
     "@mybricks/sdk-for-app": "1.0.35",
