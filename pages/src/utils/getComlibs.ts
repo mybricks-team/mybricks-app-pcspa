@@ -129,7 +129,7 @@ const insertDeps = async (libs) => {
 
 const insertExternal = async (lib) => {
   const p = [];
-  lib.externals.forEach((it) => {
+  lib.externals?.forEach((it) => {
     const { library, urls } = it;
     if (Array.isArray(urls) && urls.length) {
       urls.forEach((url) => {
