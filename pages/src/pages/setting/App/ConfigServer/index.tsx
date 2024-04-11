@@ -5,39 +5,19 @@ import { _NAMESPACE_ } from "..";
 import dayjs from "dayjs";
 import { TConfigProps } from '../useConfig';
 import UploadConfig from './UploadConfig'
+import RuntimeUploadConfig from './RuntimeUploadConfig'
 import PublishApi from './PublishApi'
 // import PublishLocalize from '../ConfigBase/PublishLocalize';
 const { Meta } = Card;
 
 export default (props: TConfigProps) => {
-  const { config, mergeUpdateConfig, loading, user } = props
-  const [form] = Form.useForm();
-
-  const uploadConfig = config?.uploadServer || {}
-  useEffect(() => {
-    form.setFieldsValue(uploadConfig)
-  }, [uploadConfig])
-
-  const onSubmit = (values) => {
-    const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-    mergeUpdateConfig({
-      uploadServer: { ...values, updateTime, user: user?.email }
-    })
-  }
-
-  const onReset = () => {
-    const updateTime = dayjs(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-    mergeUpdateConfig({
-      uploadServer: { uploadService: '', updateTime, user: user?.email }
-    }).finally(() => {
-      form.resetFields()
-
-    })
-  }
+  const { config, mergeUpdateConfig, loading, user, options } = props
+  const isInGroup = options?.type === 'group'
 
   return <>
-    <UploadConfig {...props} />
-    <PublishApi {...props} />
+    {!isInGroup && <UploadConfig {...props} />}
+    <RuntimeUploadConfig {...props} />
+    {!isInGroup && <PublishApi {...props} />}
     {/* <PublishLocalize {...props} /> */}
   </>
 }

@@ -31,13 +31,11 @@ const render = (props) => {
   /** publish template style */
   root.style.width = '100%';
   root.style.height = '100%';
-  if (props?.canvasElement) {
-    antd.message?.config({
-      getContainer() {
-        return props?.canvasElement
-      },
-    })
-  }
+  antd.message?.config({
+    getContainer() {
+      return props?.canvasElement || root || document.body
+    },
+  })
   const antdLocalLib = antd?.locale[getAntdLocalName(getCurrentLocale())]?.default
 
 
@@ -55,6 +53,7 @@ const render = (props) => {
         },
         renderUI({
           ...props,
+          renderRoot: root,
           renderType: "react",
           locale: getCurrentLocale(),
           runtime: { onComplete: scheduleTask.addListen },
@@ -74,6 +73,7 @@ const render = (props) => {
         },
         renderUI({
           ...props,
+          renderRoot: root,
           renderType: "react",
           locale: getCurrentLocale(),
           runtime: { onComplete: scheduleTask.addListen },

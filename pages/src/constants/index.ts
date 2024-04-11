@@ -25,25 +25,6 @@ export const PC_NORMAL_COM_LIB = {
   rtJs: "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
   version: '1.2.72',
   legacy: true,
-  coms: "https://assets.mybricks.world/comlibs/mybricks.normal-pc/1.5.72/2024-04-09_16-50-37/rtCom.js",
-  externals: [
-    {
-      name: "@ant-design/icons",
-      library: "icons",
-      urls: [
-        "https://assets.mybricks.world/pkg/@ant-design/icons-4.7.0/index.umd.min.js",
-      ],
-    },
-    {
-      name: "antd",
-      library: "antd",
-      urls: [
-        "https://assets.mybricks.world/pkg/antd-4.21.6/antd.min.css",
-        "https://assets.mybricks.world/pkg/antd-4.21.6/antd.min.js",
-        "https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js",
-      ],
-    },
-  ],
 };
 
 export const CHARS_COM_LIB = {
@@ -71,4 +52,5 @@ export const MySelf_COM_LIB = {
   defined: true,
 };
 
-export const DESIGNER_STATIC_PATH = "./public/designer-spa/1.7.4/index.min.js";
+
+export const DESIGNER_STATIC_PATH = './public/designer-spa/2.2.6/index.min.js'

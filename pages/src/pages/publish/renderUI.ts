@@ -8,6 +8,8 @@ const projectId = "--slot-project-id--";
 const executeEnv = "--executeEnv--";
 const envList = "--envList--";
 const i18nLangContent = "--i18nLangContent--";
+const titleI18n = "--title-i18n--";
+const runtimeUploadService = "--runtimeUploadService--";
 
 const getCustomHostFromUrl = () => {
   try {
@@ -26,6 +28,10 @@ const getCustomHostFromUrl = () => {
 }
 getCustomHostFromUrl()
 
+const getCurrentLocale = () => {
+  return navigator.language
+}
+
 const isEqual = (param1, param2) => {
   return param1 === param2
 }
@@ -33,13 +39,21 @@ const isEqual = (param1, param2) => {
 const root = ({ renderType, locale, runtime, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   const domainServicePath = '--domain-service-path--';//replace it
-
+  /**网页标题i18n处理 */
+  try {
+    if (titleI18n?.id !== undefined) {
+      document.title = i18nLangContent[titleI18n.id]?.content?.[getCurrentLocale()]
+    }
+  } catch (e) {
+    console.error('网页标题国际化处理失败, 失败原因: ', e);
+  }
+  // =========== 网页标题i18n处理 end ===============
   return renderUI(projectJson, {
     env: {
       runtime,
       silent: true,
       showErrorNotification: false,
-      canvasElement: props?.canvasElement || props.container || document.body,
+      canvasElement: props?.canvasElement || props.container || props.renderRoot || document.body,
       i18n(title) {
         //多语言
         if (typeof title?.id === 'undefined') return title
@@ -230,7 +244,42 @@ const root = ({ renderType, locale, runtime, ...props }) => {
           return result;
         };
       },
-      // uploadFile: uploadApi,
+      get uploadFile() {
+        return async (files) => {
+          if (!runtimeUploadService) {
+            throw new Error('请先配置运行时上传接口')
+          }
+          // 创建FormData对象
+          const formData = new FormData();
+
+          // 添加文件到FormData对象
+          for (const file of files) {
+            formData.append('file', file);
+          }
+
+          try {
+            // 发送POST请求
+            const response = await fetch(runtimeUploadService, {
+              method: "POST",
+              body: formData
+            }).then(res => {
+              if (res.status !== 200 && res.status !== 201) {
+                throw new Error(`上传失败！`)
+              }
+              return res.json()
+            })
+
+            return {
+              url: response?.data?.url,
+              name: files[0].name
+            }
+          } catch (error) {
+            // 错误处理
+            console.error('文件上传失败', error);
+            throw new Error(`上传失败，请检查上传接口设置！`)
+          }
+        }
+      },
     },
   });
 };

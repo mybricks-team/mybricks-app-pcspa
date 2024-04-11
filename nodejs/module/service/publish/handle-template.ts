@@ -1,17 +1,41 @@
 import { Logger } from "@mybricks/rocker-commons";
 import { transform } from "../../transform";
 
+const DEFAULT_META = [
+  {
+    type: 'name',
+    key: 'viewport',
+    content: 'width=device-width, initial-scale=1.0'
+  },
+  {
+    type: 'name',
+    key: 'referrer',
+    content: 'no-referrer'
+  },
+  {
+    type: 'http-equiv',
+    key: 'X-UA-Compatible',
+    content: 'IE=edge'
+  },
+  {
+    type: 'http-equiv',
+    key: 'Access-Control-Allow-Origin',
+    content: '*'
+  },
+]
+
 export async function handleTemplate({
   json,
   template,
   fileId,
   envType,
   comlibs,
-  title,
+  pageHeader,
   envList,
   projectId,
   version,
-  i18nLangContent
+  i18nLangContent,
+  runtimeUploadService
 }) {
   const themesStyleStr = genThemesStyleStr(json);
 
@@ -51,15 +75,33 @@ export async function handleTemplate({
   // localeScript += `<script src="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>`;
 
   Logger.info("[publish] 开始模板替换");
+  let metaInfo = '';
+  const metaList = pageHeader.meta || [];
+
+  DEFAULT_META.forEach(meta => {
+    if (!metaList.find(m => m.type === meta.type && m.key === meta.key)) {
+      metaList.push(meta);
+    }
+  });
+  metaList.forEach(meta => {
+    if (meta.key && meta.content) {
+      metaInfo += `
+      <meta ${meta.type}="${meta.key}" content="${meta.content}" />`
+    }
+  });
 
   template = template
-    .replace(`--title--`, title)
+    .replace(`--title--`, pageHeader.title?.zh_CN || pageHeader.title)
+    .replace(`"--title-i18n--"`, JSON.stringify(pageHeader.title))
+    .replace(`--favicon--`, `<link rel="icon" href="${pageHeader.favicon}" type="image/x-icon"/>`)
+    .replace(`--meta--`, metaInfo)
     .replace(`-- themes-style --`, themesStyleStr)
     .replace(`-- comlib-rt --`, comLibRtScript)
     .replace(`"--projectJson--"`, JSON.stringify(transform(json)))
     .replace(`"--executeEnv--"`, JSON.stringify(envType))
     .replace(`"--envList--"`, JSON.stringify(envList))
     .replace(`"--i18nLangContent--"`, JSON.stringify(i18nLangContent))
+    .replace(`"--runtimeUploadService--"`, JSON.stringify(runtimeUploadService))
     .replace(
       `"--slot-project-id--"`,
       projectId ? projectId : JSON.stringify(null)

@@ -18,11 +18,11 @@ import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { unionBy } from 'lodash'
 import PublishModal, { EnumMode } from './components/PublishModal'
-import { createFromIconfontCN } from '@ant-design/icons';
-import { i18nLangContentFilter } from '../../utils/index';
+import { createFromIconfontCN } from '@ant-design/icons'
+import { i18nLangContentFilter } from '../../utils/index'
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
-import { USE_CUSTOM_HOST } from './constants'
+import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
 import { getInitComLibs } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
@@ -53,36 +53,46 @@ export default function MyDesigner({ appData: originAppData }) {
     let config = null
     try {
       const originConfig = appData.config[APP_NAME]?.config || {}
-      config = typeof originConfig === 'string' ? JSON.parse(originConfig) : originConfig
+      config =
+        typeof originConfig === 'string'
+          ? JSON.parse(originConfig)
+          : originConfig
     } catch (error) {
       console.error('get appConfig error', error)
     }
     return config || {}
   }, [appData.config[APP_NAME]?.config])
 
-  const designer = useMemo(() => appConfig.designer?.url || DESIGNER_STATIC_PATH, [appConfig]);
+  const designer = useMemo(
+    () => appConfig.designer?.url || DESIGNER_STATIC_PATH,
+    [appConfig]
+  )
 
   const { plugins = [] } = appConfig
-  const uploadService = appConfig?.uploadServer?.uploadService || '';
+  const uploadService = appConfig?.uploadServer?.uploadService || ''
+  const runtimeUploadService =
+    appConfig?.runtimeUploadServer?.uploadService || ''
 
   const [ctx, setCtx] = useState(() => {
     const envList = getMergedEnvList(appData, appConfig)
 
     const executeEnv = appData.fileContent?.content?.executeEnv || ''
 
-    const debugMode = executeEnv === USE_CUSTOM_HOST
-      ? EnumMode.CUSTOM
-      : envList.length > 0
-        ? EnumMode.ENV
-        : EnumMode.DEFAULT
+    const debugMode =
+      executeEnv === USE_CUSTOM_HOST
+        ? EnumMode.CUSTOM
+        : envList.length > 0
+          ? EnumMode.ENV
+          : EnumMode.DEFAULT
 
     return {
       sdk: {
         projectId: appData.projectId,
-        openUrl: appData.openUrl
+        openUrl: appData.openUrl,
       },
       user: appData.user,
       fileName: appData.fileContent?.name,
+      pageHeader: appData.fileContent?.content?.pageHeader || GET_DEFAULT_PAGE_HEADER(appData),
       absoluteNamePath: appData.hierarchy.absoluteNamePath,
       fileId: appData.fileId,
       setting: appData.config || {},
@@ -112,6 +122,7 @@ export default function MyDesigner({ appData: originAppData }) {
       versionApi: null,
       appConfig,
       uploadService,
+      runtimeUploadService,
       operable: false,
       isDebugMode: false,
       saveContent(content) {
@@ -126,43 +137,59 @@ export default function MyDesigner({ appData: originAppData }) {
         const settings = await getAppSetting()
         const isEncode = !!settings?.publishLocalizeConfig?.isEncode
 
-        await appData.save({
-          userId: ctx.user?.id,
-          fileId: ctx.fileId,
-          name,
-          shareType,
-          content: removeBadChar(content),
-          isEncode,
-          icon,
-        }).then(() => {
-          !skipMessage && message.success({ content: `保存完成`, key: msgSaveKey });
-          if (content) {
-            setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
-          }
-        }).catch(e => {
-          !skipMessage && message.error({ content: `保存失败：${e.message}`, key: msgSaveKey });
-          if (content) {
-            setSaveTip('保存失败')
-          }
-        }).finally(() => {
-          setSaveLoading(false)
-        })
-      }
+        await appData
+          .save({
+            userId: ctx.user?.id,
+            fileId: ctx.fileId,
+            name,
+            shareType,
+            content: removeBadChar(content),
+            isEncode,
+            icon,
+          })
+          .then(() => {
+            !skipMessage &&
+              message.success({ content: `保存完成`, key: msgSaveKey })
+            if (content) {
+              setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
+            }
+          })
+          .catch((e) => {
+            !skipMessage &&
+              message.error({
+                content: `保存失败：${e.message}`,
+                key: msgSaveKey,
+              })
+            if (content) {
+              setSaveTip('保存失败')
+            }
+          })
+          .finally(() => {
+            setSaveLoading(false)
+          })
+      },
     }
   })
   const publishingRef = useRef(false)
-  const designerRef = useRef<{ dump; toJSON; geoView; switchActivity; getPluginData, loadContent }>()
+  const designerRef = useRef<{
+    dump
+    toJSON
+    geoView
+    switchActivity
+    getPluginData
+    loadContent
+  }>()
   const [beforeunload, setBeforeunload] = useState(false)
   const [operable, setOperable] = useState(false)
   const [saveTip, setSaveTip] = useState('')
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
-  const [SPADesigner, setSPADesigner] = useState(null);
-  const [remotePlugins, setRemotePlugins] = useState(null);
+  const [SPADesigner, setSPADesigner] = useState(null)
+  const [remotePlugins, setRemotePlugins] = useState(null)
   const [publishModalVisible, setPublishModalVisible] = useState(false)
   const [latestComlibs, setLatestComlibs] = useState<[]>()
-  const [isDebugMode, setIsDebugMode] = useState(false);
-  const operationList = useRef<any[]>([]);
+  const [isDebugMode, setIsDebugMode] = useState(false)
+  const operationList = useRef<any[]>([])
 
   useLayoutEffect(() => {
     getInitComLibs(appData).then(comlibs => setCtx(pre => ({...pre, comlibs }))).finally(loadDesigner)
@@ -180,64 +207,71 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [designer])
 
   // 只有预览时 search 会携带 version 字段
-  const isPreview = window.location.search.includes('version');
+  const isPreview = window.location.search.includes('version')
 
   //页面刷新的时候，添加fontJS资源
   useEffect(() => {
     createFromIconfontCN({
       scriptUrl: ctx.fontJS, // 在 iconfont.cn 上生成
-    });
+    })
   }, [ctx.fontJS])
 
   useEffect(() => {
-    const needSearchComlibs = ctx.comlibs.filter(lib => lib.id !== "_myself_");
+    const needSearchComlibs = ctx.comlibs.filter((lib) => lib.id !== '_myself_')
     if (!!needSearchComlibs?.length) {
-      API.Material.getLatestComponentLibrarys(needSearchComlibs.map(lib => lib.namespace)).then((res: any) => {
-        const latestComlibs = (res || []).map(lib => ({ ...lib, ...JSON.parse(lib.content) }))
+      API.Material.getLatestComponentLibrarys(
+        needSearchComlibs.map((lib) => lib.namespace)
+      ).then((res: any) => {
+        const latestComlibs = (res || []).map((lib) => ({
+          ...lib,
+          ...JSON.parse(lib.content),
+        }))
         setLatestComlibs(latestComlibs)
       })
     } else {
-      setLatestComlibs([]);
+      setLatestComlibs([])
     }
-  }, [JSON.stringify(ctx.comlibs.map(lib => lib.namespace))])
+  }, [JSON.stringify(ctx.comlibs.map((lib) => lib.namespace))])
 
   useEffect(() => {
     fetchPlugins(plugins, {
       user: appData.user,
-      fileContent: appData.fileContent
-    }).then(setRemotePlugins);
-    console.log('应用数据:', appData);
+      fileContent: appData.fileContent,
+    }).then(setRemotePlugins)
+    console.log('应用数据:', appData)
   }, [])
 
   useEffect(() => {
     let designerSPAVerison = ''
-    const regex = /(\d+?\.\d+\.\d+)/g;
-    const matches = designer.match(regex);
+    const regex = /(\d+?\.\d+\.\d+)/g
+    const matches = designer.match(regex)
     if (matches) {
-      designerSPAVerison = matches[0];
+      designerSPAVerison = matches[0]
     }
     const appInfo = {
       app: {
         verison: APP_VERSION || '',
-        name: APP_NAME || ''
+        name: APP_NAME || '',
       },
       designerSPAVerison,
-      plugins: plugins.map(item => {
+      plugins: plugins.map((item) => {
         const { name, title, updateTime } = item || {}
         return {
           name,
           title,
-          updateTime
+          updateTime,
         }
       }),
-      comlibs: ctx.comlibs.filter(item => item.id !== "_myself_").map(item => {
-        const { id, namespace: name, version } = item || {}
-        return {
-          id,
-          name,
-          version
-        }
-      }),
+      comlibs: ctx.comlibs
+        .filter((item) => item.id !== '_myself_')
+        .map((item) => {
+          const { id, namespace: name, version } = item || {}
+          return {
+            id,
+            name,
+            version,
+          }
+        }),
     }
 
     // 简单判断本地环境，不上报数据
@@ -246,20 +280,9 @@ export default function MyDesigner({ appData: originAppData }) {
       jsonData: {
         type: 'appInfo',
         payload: appInfo,
-      }
+      },
     })
   }, [])
-
-  // useMemo(() => {
-  //   if (designer) {
-  //     const script = document.createElement('script');
-  //     script.src = designer
-  //     document.head.appendChild(script);
-  //     script.onload = () => {
-  //       (window as any).mybricks.SPADesigner && setSPADesigner((window as any).mybricks.SPADesigner);
-  //     };
-  //   }
-  // }, [designer])
 
   useEffect(() => {
     if (beforeunload) {
@@ -271,13 +294,13 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }, [beforeunload])
 
-  const onEdit = useCallback(info => {
+  const onEdit = useCallback((info) => {
     operationList.current.push({
       ...info,
       detail: info.title,
-      updateTime: moment()
-    });
-    setBeforeunload(true);
+      updateTime: moment(),
+    })
+    setBeforeunload(true)
   }, [])
 
   const handleSwitch2SaveVersion = useCallback(() => {
@@ -321,24 +344,27 @@ export default function MyDesigner({ appData: originAppData }) {
     json.hasPermissionFn = ctx.hasPermissionFn
     json.debugHasPermissionFn = ctx.debugHasPermissionFn
     json.fontJS = ctx.fontJS
+    json.pageHeader = ctx.pageHeader
 
-    json.projectId = ctx.sdk.projectId;
+    json.projectId = ctx.sdk.projectId
 
-    json.operationList = operationList.current.reverse();
+    json.operationList = operationList.current.reverse()
 
     await ctx.save({ name: ctx.fileName, content: JSON.stringify(json) })
 
-    operationList.current = [];
+    operationList.current = []
     setBeforeunload(false)
     // 保存缩略图
-    await API.App.getPreviewImage({ // Todo... name 中文乱码
+    await API.App.getPreviewImage({
+      // Todo... name 中文乱码
       element: designerRef.current?.geoView.canvasDom,
-    }).then(async (res) => {
-      await ctx.save({ icon: res }, true)
-    }).catch((err) => {
-      console.error(err)
     })
-
+      .then(async (res) => {
+        await ctx.save({ icon: res }, true)
+      })
+      .catch((err) => {
+        console.error(err)
+      })
   }, [isPreview])
 
   const preview = useCallback(() => {
@@ -355,11 +381,42 @@ export default function MyDesigner({ appData: originAppData }) {
       comlibs: ctx.comlibs,
       hasPermissionFn: ctx.hasPermissionFn,
       appConfig: JSON.stringify(appConfig),
-      i18nLangContent: ctx.i18nLangContent
+      i18nLangContent: ctx.i18nLangContent,
+      runtimeUploadService: ctx.runtimeUploadService,
     })
 
-    window.open(`./preview.html?fileId=${ctx.fileId}`)
-  }, [appConfig, ctx])
+    // 对象 => 拼接成路由参数
+    const objectToQueryString = (params: { [key: string]: any }): string => {
+      const queryParams: string[] = []
+
+      for (const key in params) {
+        if (params.hasOwnProperty(key)) {
+          const value = params[key]
+          // 对齐连接器 如果属性值是数组，则将每个元素转换为类似于 `a[]=b&a[]=c` 的形式
+          if (Array.isArray(value)) {
+            value.forEach((item: string) => {
+              queryParams.push(
+                `${encodeURIComponent(key)}[]=${encodeURIComponent(item)}`
+              )
+            })
+          }
+          // 如果属性值是字符串、数字或布尔值，则直接转换为 `key=value` 的形式
+          else if (['string', 'number', 'boolean'].includes(typeof value)) {
+            queryParams.push(
+              `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+            )
+          }
+        }
+      }
+
+      // 如果queryParams不为空，则在前面加上 &，否则返回空字符串
+      return queryParams.length > 0 ? `&${queryParams.join('&')}` : ''
+    }
+
+    window.open(
+      `./preview.html?fileId=${ctx.fileId}${objectToQueryString(ctx?.debugQuery || {})}`
+    )
+  }, [appConfig])
 
   const publish = useCallback(
     async (publishConfig) => {
@@ -376,120 +433,138 @@ export default function MyDesigner({ appData: originAppData }) {
         content: '发布中...',
         duration: 0,
       })
-        ; return (async () => {
-          /** 先保存 */
-          const json = designerRef.current?.dump();
+      return (async () => {
+        /** 先保存 */
+        const json = designerRef.current?.dump()
 
-          json.comlibs = ctx.comlibs
-          json.debugQuery = ctx.debugQuery
-          json.debugMockConfig = ctx.debugMockConfig
-          json.executeEnv = ctx.executeEnv
-          json.MYBRICKS_HOST = ctx.MYBRICKS_HOST
-          json.envList = ctx.envList
-          json.debugMainProps = ctx.debugMainProps
-          json.hasPermissionFn = ctx.hasPermissionFn
-          json.debugHasPermissionFn = ctx.debugHasPermissionFn
-          json.projectId = ctx.sdk.projectId;
-          json.i18nLangContent = i18nLangContentFilter(ctx.i18nLangContent, ctx.i18nUsedIdList)
-          json.operationList = operationList.current.reverse();
+        json.comlibs = ctx.comlibs
+        json.debugQuery = ctx.debugQuery
+        json.debugMockConfig = ctx.debugMockConfig
+        json.executeEnv = ctx.executeEnv
+        json.MYBRICKS_HOST = ctx.MYBRICKS_HOST
+        json.envList = ctx.envList
+        json.debugMainProps = ctx.debugMainProps
+        json.hasPermissionFn = ctx.hasPermissionFn
+        json.debugHasPermissionFn = ctx.debugHasPermissionFn
+        json.projectId = ctx.sdk.projectId
+        json.i18nLangContent = i18nLangContentFilter(
+          ctx.i18nLangContent,
+          ctx.i18nUsedIdList
+        )
+        json.operationList = operationList.current.reverse()
+        json.pageHeader = ctx.pageHeader
 
-          await ctx.save({ content: JSON.stringify(json), name: ctx.fileName }, true);
-          operationList.current = [];
-          setBeforeunload(false);
+        await ctx.save(
+          { content: JSON.stringify(json), name: ctx.fileName },
+          true
+        )
+        operationList.current = []
+        setBeforeunload(false)
 
-          const curToJSON = designerRef?.current?.toJSON();
+        const curToJSON = designerRef?.current?.toJSON()
 
-          const curComLibs = await genLazyloadComs(ctx.comlibs, curToJSON)
+        const curComLibs = await genLazyloadComs(ctx.comlibs, curToJSON)
 
-          const settings = await getAppSetting()
-          const isEncode = !!settings?.publishLocalizeConfig?.isEncode
+        const settings = await getAppSetting()
+        const isEncode = !!settings?.publishLocalizeConfig?.isEncode
 
-          const jsonParams = {
-            ...curToJSON,
-            configuration: {
-              // scripts: encodeURIComponent(scripts),
-              comlibs: curComLibs,
-              title: ctx.fileName,
-              publisherEmail: ctx.user.email,
-              publisherName: ctx.user?.name,
-              projectId: ctx.sdk.projectId,
-              envList: ctx.envList,
-              i18nLangContent: i18nLangContentFilter(ctx.i18nLangContent, ctx.i18nUsedIdList),
-              // 非模块下的页面直接发布到项目空间下
-              folderPath: '/app/pcpage',
-              fileName: `${ctx.fileId}.html`,
-              groupName: appData?.hierarchy?.groupName || '',
-              groupId: appData?.hierarchy?.groupId || 0,
-              appConfig,
-            },
-            hasPermissionFn: ctx.hasPermissionFn
-          }
+        const jsonParams = {
+          ...curToJSON,
+          configuration: {
+            // scripts: encodeURIComponent(scripts),
+            comlibs: curComLibs,
+            title: ctx.fileName,
+            pageHeader: ctx.pageHeader,
+            publisherEmail: ctx.user.email,
+            publisherName: ctx.user?.name,
+            runtimeUploadService: ctx.runtimeUploadService,
+            projectId: ctx.sdk.projectId,
+            envList: ctx.envList,
+            i18nLangContent: i18nLangContentFilter(
+              ctx.i18nLangContent,
+              ctx.i18nUsedIdList
+            ),
+            // 非模块下的页面直接发布到项目空间下
+            folderPath: '/app/pcpage',
+            fileName: `${ctx.fileId}.html`,
+            groupName: appData?.hierarchy?.groupName || '',
+            groupId: appData?.hierarchy?.groupId || 0,
+            appConfig,
+          },
+          hasPermissionFn: ctx.hasPermissionFn,
+        }
 
-          const toJSON = isEncode ? btoa(encodeURIComponent(JSON.stringify(jsonParams))) : jsonParams
-          const res: { data?: any, code: number, message: string } = await fAxios.post('/api/pcpage/publish', {
+        const toJSON = isEncode
+          ? btoa(encodeURIComponent(JSON.stringify(jsonParams)))
+          : jsonParams
+
+        const res: { data?: any; code: number; message: string } =
+          await fAxios.post('/api/pcpage/publish', {
             userId: ctx.user?.id,
             fileId: ctx.fileId,
             json: toJSON,
             envType,
-            commitInfo
+            commitInfo,
           })
 
-          if (res.code === 1) {
-            close()
-            message.success({
-              key: 'publish',
-              content: '发布成功',
-              duration: 2,
-            })
+        if (res.code === 1) {
+          close()
+          message.success({
+            key: 'publish',
+            content: '发布成功',
+            duration: 2,
+          })
 
-            designerRef.current?.switchActivity?.('@mybricks/plugins/version')
-            setTimeout(() => {
-              ctx?.versionApi?.switchAciveTab?.('publish', void 0)
-            }, 0)
-          } else {
-            close()
-            message.error({
-              content: res.message || '发布失败',
-              duration: 2,
-            })
-          }
+          designerRef.current?.switchActivity?.('@mybricks/plugins/version')
+          setTimeout(() => {
+            ctx?.versionApi?.switchAciveTab?.('publish', void 0)
+          }, 0)
+        } else {
+          close()
+          message.error({
+            content: res.message || '发布失败',
+            duration: 2,
+          })
+        }
 
+        setPublishLoading(false)
+
+        return res
+      })()
+        .catch((e) => {
+          console.error(e)
+          close()
+          message.error({
+            key: 'publish',
+            content: '网络错误，请稍后再试',
+            duration: 2,
+          })
+        })
+        .finally(() => {
+          publishingRef.current = false
           setPublishLoading(false)
-
-          return res;
-        })()
-          .catch((e) => {
-            console.error(e)
-            close()
-            message.error({
-              key: 'publish',
-              content: '网络错误，请稍后再试',
-              duration: 2,
-            })
-          }).finally(() => {
-            publishingRef.current = false
-            setPublishLoading(false)
-          })
+        })
     },
     [appData, ctx]
   )
 
   const publishAndDownload = async (publishConfig) => {
-
-    const res = await publish(publishConfig);
+    const res = await publish(publishConfig)
     if (res && res.code === 1 && res.data?.pib_id) {
-      const loadingEnd = message.loading('正在下载发布产物...', 0);
-      const { fileId, envType, version } = res.data;
-      let isSuccess = true;
+      const loadingEnd = message.loading('正在下载发布产物...', 0)
+      const { fileId, envType, version } = res.data
+      let isSuccess = true
       try {
-        await download(`api/pcpage/download-product/${fileId}/${envType}/${version}`);
+        await download(
+          `api/pcpage/download-product/${fileId}/${envType}/${version}`
+        )
       } catch (e) {
-        isSuccess = false;
-        message.error('下载发布产物失败!');
+        isSuccess = false
+        message.error('下载发布产物失败!')
       } finally {
-        loadingEnd();
+        loadingEnd()
       }
-      isSuccess && message.success('下载发布产物成功!');
+      isSuccess && message.success('下载发布产物成功!')
     }
   }
 
@@ -506,9 +581,9 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [])
 
   const onMessage = useCallback((type, msg) => {
-    message.destroy();
-    message[type](msg);
-  }, []);
+    message.destroy()
+    message[type](msg)
+  }, [])
 
   const onDebug = useCallback(() => {
     setIsDebugMode(true)
@@ -531,20 +606,27 @@ export default function MyDesigner({ appData: originAppData }) {
       // envList: ctx.envList,
       debugMainProps: ctx.debugMainProps,
       hasPermissionFn: ctx.hasPermissionFn,
-      debugHasPermissionFn: ctx.debugHasPermissionFn
+      debugHasPermissionFn: ctx.debugHasPermissionFn,
     }
     return json
   }, [JSON.stringify(ctx)])
 
   useEffect(() => {
-    const removeLocalProxy = proxLocalStorage(ctx.debugMockConfig?.localStorageMock)
-    const removeSessionProxy = proxSessionStorage(ctx.debugMockConfig?.sessionStorageMock)
+    const removeLocalProxy = proxLocalStorage(
+      ctx.debugMockConfig?.localStorageMock
+    )
+    const removeSessionProxy = proxSessionStorage(
+      ctx.debugMockConfig?.sessionStorageMock
+    )
 
     return () => {
       removeLocalProxy()
       removeSessionProxy()
     }
-  }, [ctx.debugMockConfig?.localStorageMock, ctx.debugMockConfig?.sessionStorageMock])
+  }, [
+    ctx.debugMockConfig?.localStorageMock,
+    ctx.debugMockConfig?.sessionStorageMock,
+  ])
 
   window.designerRef = designerRef
 
@@ -554,49 +636,69 @@ export default function MyDesigner({ appData: originAppData }) {
       content: '出码中...',
       duration: 0,
     })
-    const toJSON = designerRef.current.toJSON({withDiagrams:true});
-    fAxios({
-      method: 'post',
-      url: '/api/pcpage/toCode',
-      responseType: 'blob',
-      data: {
-        json: toJSON
-      }
-    }).then((response) => {
-      // // 创建一个URL指向blob响应数据
-      const url = window.URL.createObjectURL(new Blob([response]));
-      // 创建一个a标签用于触发下载
-      const link = document.createElement('a');
-      link.href = url;
-      // 设置下载后的文件名，如果服务器未指定，则可以在这里指定
-      link.setAttribute('download', '出码-react.zip'); // 注意: 该名称可以根据实际情况命名
-      // 将a标签添加到body，触发点击事件，然后移除
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      // 清理用完的URL对象
-      window.URL.revokeObjectURL(url);
-    })
-    .catch((error) => {
-      console.error("出码失败，报错信息:", error);
-      throw error;
-    }).finally(() => {
+
+    let toJSON
+
+    try {
+      toJSON = designerRef.current.toJSON({ withDiagrams: true })
+    } catch (e) {
+      console.error('toJSON({ withDiagrams: true }) 报错: ', e)
+      message.error(
+        `出码失败: toJSON({ withDiagrams: true }) 报错 ${e.message}`
+      )
       close()
-    });
+    }
+
+    if (toJSON) {
+      fAxios({
+        method: 'post',
+        url: '/api/pcpage/toCode',
+        responseType: 'blob',
+        data: {
+          json: toJSON,
+        },
+      })
+        .then((response) => {
+          // // 创建一个URL指向blob响应数据
+          const url = window.URL.createObjectURL(new Blob([response]))
+          // 创建一个a标签用于触发下载
+          const link = document.createElement('a')
+          link.href = url
+          // 设置下载后的文件名，如果服务器未指定，则可以在这里指定
+          link.setAttribute('download', '出码-react.zip') // 注意: 该名称可以根据实际情况命名
+          // 将a标签添加到body，触发点击事件，然后移除
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          // 清理用完的URL对象
+          window.URL.revokeObjectURL(url)
+        })
+        .catch((error) => {
+          console.error('出码失败，报错信息:', error)
+          message.error(`出码失败: ${error.message}`)
+          throw error
+        })
+        .finally(() => {
+          close()
+        })
+    }
   }
 
   return (
     <div className={`${css.view} fangzhou-theme`}>
       <Toolbar
         title={ctx.fileName}
-        updateInfo={<Toolbar.LastUpdate
-          content={saveTip}
-          onClick={handleSwitch2SaveVersion} />}
+        updateInfo={
+          <Toolbar.LastUpdate
+            content={saveTip}
+            onClick={handleSwitch2SaveVersion}
+          />
+        }
       >
         <Toolbar.Tips />
         {!isPreview && RenderLocker}
-        {
-          !isPreview && <>
+        {!isPreview && (
+          <>
             <Toolbar.Save
               disabled={!operable || isDebugMode}
               loading={saveLoading}
@@ -605,20 +707,20 @@ export default function MyDesigner({ appData: originAppData }) {
               }}
               dotTip={beforeunload}
             />
-            <Toolbar.Button disabled={isDebugMode} onClick={preview}>预览</Toolbar.Button>
+            <Toolbar.Button disabled={isDebugMode} onClick={preview}>
+              预览
+            </Toolbar.Button>
             <Toolbar.Button
               disabled={!operable || isDebugMode}
               loading={publishLoading}
               onClick={() => setPublishModalVisible(true)}
-            >发布</Toolbar.Button>
-            <Toolbar.Button
-              onClick={downloadCode}
             >
-              出码
+              发布
             </Toolbar.Button>
+            <Toolbar.Button onClick={downloadCode}>出码</Toolbar.Button>
           </>
-        }
-        <div className={`${isPreview ? css.toolbarWrapperPreview : ""}`}>
+        )}
+        <div className={`${isPreview ? css.toolbarWrapperPreview : ''}`}>
           <Toolbar.Tools
             onImport={async (value) => {
               try {
@@ -642,21 +744,32 @@ export default function MyDesigner({ appData: originAppData }) {
         </div>
       </Toolbar>
       <div className={css.designer}>
-        {SPADesigner && remotePlugins && latestComlibs && window?.mybricks?.createObservable && (
-          <>
-            <SPADesigner
-              ref={designerRef}
-              config={config(window?.mybricks?.createObservable(Object.assign(ctx, { latestComlibs })), appData, save, designerRef, remotePlugins)}
-              onEdit={onEdit}
-              onMessage={onMessage}
-              onDebug={onDebug}
-              _onError_={(ex: any) => {
-                console.error(ex);
-                onMessage('error', ex.message);
-              }}
-            />
-          </>
-        )}
+        {SPADesigner &&
+          remotePlugins &&
+          latestComlibs &&
+          window?.mybricks?.createObservable && (
+            <>
+              <SPADesigner
+                ref={designerRef}
+                config={config(
+                  window?.mybricks?.createObservable(
+                    Object.assign(ctx, { latestComlibs })
+                  ),
+                  appData,
+                  save,
+                  designerRef,
+                  remotePlugins
+                )}
+                onEdit={onEdit}
+                onMessage={onMessage}
+                onDebug={onDebug}
+                _onError_={(ex: any) => {
+                  console.error(ex)
+                  onMessage('error', ex.message)
+                }}
+              />
+            </>
+          )}
       </div>
       <PublishModal
         envList={ctx.envList}
@@ -678,12 +791,12 @@ export default function MyDesigner({ appData: originAppData }) {
 
 /**
  * @description 按需加载组件
- * @param comlibs 
- * @param toJSON 
- * @returns 
+ * @param comlibs
+ * @param toJSON
+ * @returns
  */
 const genLazyloadComs = async (comlibs, toJSON) => {
-  const curComLibs = JSON.parse(JSON.stringify(comlibs));
+  const curComLibs = JSON.parse(JSON.stringify(comlibs))
   const mySelfComMap = {}
   comlibs.forEach((comLib) => {
     if (comLib?.defined && Array.isArray(comLib.comAray)) {
@@ -691,7 +804,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         mySelfComMap[`${com.namespace}@${com.version}`] = true
       })
     }
-  });
+  })
 
   /**
    * 过滤掉 render-web 内置的组件
@@ -707,20 +820,23 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     'mybricks.core-comlib.defined-com',
     'mybricks.core-comlib.module',
     'mybricks.core-comlib.group',
-    'mybricks.core-comlib.selection'
-  ];
+    'mybricks.core-comlib.selection',
+  ]
 
   let definedComsDeps = []
   let modulesDeps = []
 
   if (toJSON.definedComs) {
-    Object.keys(toJSON.definedComs).forEach(key => {
-      definedComsDeps = [...definedComsDeps, ...toJSON.definedComs[key].json.deps]
+    Object.keys(toJSON.definedComs).forEach((key) => {
+      definedComsDeps = [
+        ...definedComsDeps,
+        ...toJSON.definedComs[key].json.deps,
+      ]
     })
   }
 
   if (toJSON.modules) {
-    Object.keys(toJSON.modules).forEach(key => {
+    Object.keys(toJSON.modules).forEach((key) => {
       modulesDeps = [...modulesDeps, ...toJSON.modules[key].json.deps]
     })
   }
@@ -740,53 +856,80 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     ...modulesDeps
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
-  ];
+  ]
 
   deps = deps.reduce((accumulator, current) => {
-    const existingObject = accumulator.find(obj => obj.namespace === current.namespace);
+    const existingObject = accumulator.find(
+      (obj) => obj.namespace === current.namespace
+    )
     if (!existingObject) {
-      accumulator.push(current);
+      accumulator.push(current)
     }
-    return accumulator;
-  }, []);
+    return accumulator
+  }, [])
 
   if (deps.length) {
-    const willFetchComLibs = curComLibs.filter(lib => !lib?.defined && lib.coms);
-    const allComLibsRuntimeMap = (await Promise.all(willFetchComLibs.map(lib => axios.get(lib.coms, { withCredentials: false }))))
-      .map(data => data.data);
-    const noThrowError = comlibs.some(lib => !lib.coms && !lib.defined);
+    const willFetchComLibs = curComLibs.filter(
+      (lib) => !lib?.defined && lib.coms
+    )
+    const allComLibsRuntimeMap = (
+      await Promise.all(
+        willFetchComLibs.map((lib) =>
+          axios.get(lib.coms, { withCredentials: false })
+        )
+      )
+    ).map((data) => data.data)
+    const noThrowError = comlibs.some((lib) => !lib.coms && !lib.defined)
 
-    deps.forEach(component => {
-      let libIndex = allComLibsRuntimeMap.findIndex(lib => lib[component.namespace + '@' + component.version]);
-      let curComponent = null;
+    deps.forEach((component) => {
+      let libIndex = allComLibsRuntimeMap.findIndex(
+        (lib) => lib[component.namespace + '@' + component.version]
+      )
+      let curComponent = null
       if (libIndex !== -1) {
-        curComponent = allComLibsRuntimeMap[libIndex][component.namespace + '@' + component.version];
+        curComponent =
+          allComLibsRuntimeMap[libIndex][
+          component.namespace + '@' + component.version
+          ]
       } else {
-        libIndex = allComLibsRuntimeMap.findIndex(lib => Object.keys(lib).find(key => key.startsWith(component.namespace)));
+        libIndex = allComLibsRuntimeMap.findIndex((lib) =>
+          Object.keys(lib).find((key) => key.startsWith(component.namespace))
+        )
 
         if (libIndex === -1) {
           if (noThrowError) {
-            return;
+            return
           } else {
-            throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+            throw new Error(
+              `找不到 ${component.namespace}@${component.version} 对应的组件资源`
+            )
           }
         }
-        curComponent = allComLibsRuntimeMap[libIndex][Object.keys(allComLibsRuntimeMap[libIndex]).find(key => key.startsWith(component.namespace))];
+        curComponent =
+          allComLibsRuntimeMap[libIndex][
+          Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+            key.startsWith(component.namespace)
+          )
+          ]
       }
 
       if (!curComponent) {
         if (noThrowError) {
-          return;
+          return
         } else {
-          throw new Error(`找不到 ${component.namespace}@${component.version} 对应的组件资源`);
+          throw new Error(
+            `找不到 ${component.namespace}@${component.version} 对应的组件资源`
+          )
         }
       }
 
       if (!willFetchComLibs[libIndex].componentRuntimeMap) {
-        willFetchComLibs[libIndex].componentRuntimeMap = {};
+        willFetchComLibs[libIndex].componentRuntimeMap = {}
       }
-      willFetchComLibs[libIndex].componentRuntimeMap[component.namespace + '@' + curComponent.version] = curComponent;
-    });
+      willFetchComLibs[libIndex].componentRuntimeMap[
+        component.namespace + '@' + curComponent.version
+      ] = curComponent
+    })
   }
 
   return curComLibs
@@ -796,11 +939,12 @@ const getMergedEnvList = (appData, appConfig) => {
   // 页面已有的环境信息
   const pageEnvlist = appData.fileContent?.content?.envList || []
   // 全局配置的环境信息
-  const configEnvlist = appConfig?.publishEnvConfig?.envList?.map(item => ({
-    title: item.title,
-    name: item.name,
-    value: item.defaultApiPrePath
-  })) || []
+  const configEnvlist =
+    appConfig?.publishEnvConfig?.envList?.map((item) => ({
+      title: item.title,
+      name: item.name,
+      value: item.defaultApiPrePath,
+    })) || []
 
   return unionBy([...pageEnvlist, ...configEnvlist], 'name')
 }

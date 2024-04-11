@@ -1,5 +1,5 @@
 import React from 'react'
-import { message } from 'antd'
+import { message, Tooltip } from 'antd'
 import servicePlugin, {
   call as callConnectorHttp,
   mock as connectorHttpMock,
@@ -11,7 +11,7 @@ import domainServicePlugin, {
 import versionPlugin from 'mybricks-plugin-version'
 import localePlugin from '@mybricks/plugin-locale'
 // import notePlugin from '../../../../../plugin-note'
-import notePlugin from 'mybricks-plugin-note'
+import notePlugin from '@mybricks/plugin-note'
 import { use as useTheme } from '@mybricks/plugin-theme'
 import { openFilePanel } from '@mybricks/sdk-for-app/ui'
 
@@ -23,12 +23,13 @@ import { runJs } from '../../utils/runJs'
 import axios from 'axios'
 import { shapeUrlByEnv } from '../../utils'
 import { EnumMode } from './components/PublishModal'
-import { USE_CUSTOM_HOST } from './constants'
+import { GET_DEFAULT_PAGE_HEADER, GET_PAGE_CONFIG_EDITOR, USE_CUSTOM_HOST } from './constants'
 import { fAxios } from '@/services/http'
 import { createFromIconfontCN } from '@ant-design/icons'
 import download from '@/utils/download'
 import upload from '@/utils/upload'
 import searchUser from '@/utils/searchUser'
+import { blobToBase64 } from '@/utils/blobToBase64'
 
 const defaultPermissionComments = `/**
 *
@@ -37,7 +38,7 @@ const defaultPermissionComments = `/**
 * }
 *
 * @param {object} props: Props
-* @return {boolean}
+* @return {boolean \\ { permission: boolean, type: "hide" | "hintLink", hintLinkUrl?: string, hintLinkTitle?: string }}
 */
 `
 
@@ -89,6 +90,20 @@ const injectUpload = (
 ) => {
   if (!!editConfig && !editConfig.upload) {
     editConfig.upload = async (files: Array<File>): Promise<Array<string>> => {
+
+      /**
+       * @description 图片上传支持返回Base64
+       */
+      if (editConfig.options?.useBase64) {
+        try {
+          const b64 = await blobToBase64(files[0]);
+          return [b64];
+        } catch (e) {
+          throw Error(`【图片转Base64出错】: ${e}`)
+        }
+      }
+      // =========== 图片上传支持返回Base64 end ===============
+
       const formData = new FormData()
       formData.append('file', files[0])
       formData.append('folderPath', `/files/${fileId}`)
@@ -154,7 +169,17 @@ const getExecuteEnvByMode = (debugMode, ctx, envList) => {
   }
 }
 
+// let renderUI;
+
 export default function (ctx, appData, save, designerRef, remotePlugins = []) {
+
+  // const script = document.createElement('script');
+  // script.src = 'http://localhost:9001/public/render-web/1.2.58/index.min.js'
+  // document.head.appendChild(script);
+  // script.onload = () => {
+  //   renderUI = window._mybricks_render_web.render;
+  // };
+
   const envList = ctx.envList
   // 获得环境信息映射表
   const envMap = [
@@ -333,13 +358,41 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         user: ctx.user,
         onUpload: async (file: File) => {
           return new Promise(async (resolve, reject) => {
+            const { manateeUserInfo, fileId } = ctx;
+            let uploadService = ctx.uploadService
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('folderPath', `/files/${fileId}`)
+
+            const useConfigService = !!uploadService
+
+            if (!useConfigService) {
+              uploadService = '/paas/api/flow/saveFile'
+            }
+
             try {
-              const res = await upload(`api/pcpage/upload`, file);
-              console.log(res, 'onUpload')
-              resolve(res);
-            } catch (e) {
-              message.error('上传图片失败!');
-              reject(e);
+              const res = await axios<any, any>({
+                url: uploadService,
+                method: 'post',
+                data: formData,
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                  ...manateeUserInfo,
+                },
+              })
+              const { data = {} } = res.data
+              const { url } = data
+              if (!url) {
+                reject(`没有返回图片地址`)
+              }
+              const staticUrl = /^http/.test(url)
+                ? url
+                : `${getDomainFromPath(uploadService)}${url}`
+              resolve({ url: staticUrl });
+              reject(`【图片上传出错】: ${message}`)
+            } catch (error) {
+              message.error(error.message)
+              reject(error)
             }
           })
         },
@@ -350,7 +403,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 keyword
               });
               const formatRes = (res || []).map(item => {
-                const { email, id, name, avatar = '/default_avatar.png' } = item;
+                const { email, id, name, avatar } = item;
                 return {
                   name: name ? `${name}(${email})` : email,
                   id,
@@ -414,7 +467,14 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         modalActiveExtends: [
           {
             type: 'publish',
-            title: '下载',
+            title: <Tooltip
+              color='white'
+              title={<a
+                target='_blank'
+                href="https://docs.mybricks.world/docs/publish-integration/kjkj/">使用说明</a>}
+            >
+              下载
+            </Tooltip>,
             onClick({ fileId, type: envType, version }) {
               const loadend = message.loading(`版本 ${version} 下载中...`, 0)
               download(
@@ -775,6 +835,12 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             ],
           },
         ]
+        if (!ctx.pageHeader) {
+          ctx.pageHeader = GET_DEFAULT_PAGE_HEADER(appData);
+        }
+        const pageConfigEditor = GET_PAGE_CONFIG_EDITOR(ctx);
+        cate1.title = pageConfigEditor.title;
+        cate1.items = pageConfigEditor.items;
       },
       editorOptions: ctx.setting?.system.config?.isPureIntranet
         ? {
@@ -1013,6 +1079,44 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             }
           },
         },
+        get uploadFile() {
+          return async (files) => {
+            if (!ctx.runtimeUploadService) {
+              message.warn('请先配置运行时上传接口')
+              return
+            }
+            // 创建FormData对象
+            const formData = new FormData();
+
+            // 添加文件到FormData对象
+            for (const file of files) {
+              formData.append('file', file);
+            }
+
+            try {
+              // 发送POST请求
+              const response = await fetch(ctx.runtimeUploadService, {
+                method: "POST",
+                body: formData
+              }).then(res => {
+                if (res.status !== 200 && res.status !== 201) {
+                  throw new Error(`上传失败！`)
+                }
+                return res.json()
+              })
+              console.log(`res,`, response)
+              return {
+                url: response?.data?.url,
+                name: files[0].name
+              }
+            } catch (error) {
+              message.error(`上传失败，请检查上传接口设置！`)
+              // 错误处理
+              console.error('文件上传失败', error);
+              return {}
+            }
+          }
+        },
         get hasPermission() {
           return ({ permission, key }) => {
             const hasPermissionFn = ctx?.hasPermissionFn
@@ -1037,38 +1141,23 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               return true
             }
 
-            let result: boolean
+            let result: (boolean | { permission: boolean })
 
             try {
-              result = runJs(decodeURIComponent(hasPermissionFn), [
-                { key: code },
-              ])
+              result = runJs(decodeURIComponent(hasPermissionFn), [{ key: code }])
 
-              if (typeof result !== 'boolean') {
+              if (typeof result !== 'boolean' && typeof result.permission !== 'boolean') {
                 result = true
                 designerRef.current?.console?.log.error(
                   '权限方法',
-                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(
-                    result
-                  )
-                  }`
+                  `权限方法返回值类型应为 Boolean 或者 { permission: Boolean } 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(result)}`
                 )
-
-                console.error(
-                  `权限方法返回值类型应为 Boolean 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(
-                    result
-                  )
-                  }`
-                )
+                console.error(`权限方法返回值类型应为 Boolean 或者 { permission: Boolean } 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(result)}`)
               }
             } catch (error) {
               result = true
-              designerRef.current?.console?.log.error(
-                '权限方法',
-                `${error.message}`
-              )
-              // ctx.console?.log.error('权限方法', `${ error.message }`)
-              console.error(`权限方法出错[Key] ${code}；`, error)
+              designerRef.current?.console?.log.error('权限方法', `${error.message}`)
+              console.error(`权限方法出错[Key] ${code};`, error)
             }
 
             return result
