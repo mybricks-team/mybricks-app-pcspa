@@ -10,7 +10,6 @@ import {
 } from "../../tools/localization";
 import LocalPublic from "../local-public";
 import { Logger } from "@mybricks/rocker-commons";
-import commonChunks from '../common-chunks'
 
 export async function localization({
   req,
@@ -126,7 +125,7 @@ async function resourceLocalization(
     return res;
   });
 
-  let chunks = commonChunks[type].reduce((pre, cur) => {
+  let chunks = LocalPublic[type].reduce((pre, cur) => {
     if (cur.CDN.endsWith(".js")) {
       pre += `\n<script src="${cur.CDN}"></script>`;
     }
