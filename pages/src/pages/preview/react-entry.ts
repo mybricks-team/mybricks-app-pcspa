@@ -69,15 +69,10 @@ const getCurrentLocale = () => {
   return navigator.language
 }
 
-const loadLocale = (locale="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js") => {
-  return requireScript(locale)
-}
-
 async function render(props) {
   const { container } = props;
   if (comlibs && Array.isArray(comlibs)) {
     await insertDeps(comlibs)
-    await loadLocale()
     const antd = window.antd;
     Promise.all(getRtComlibsFromConfigEdit(comlibs).map((t) => requireScript(t))).then(() => {
       const lang = getAntdLocalName(getCurrentLocale())

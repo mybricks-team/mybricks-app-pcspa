@@ -193,7 +193,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
   useLayoutEffect(() => {
     getInitComLibs(appData).then(comlibs => setCtx(pre => ({...pre, comlibs }))).finally(loadDesigner)
-  }, [])
+  }, [designer])
 
   const loadDesigner = useCallback(() => {
     if (designer) {
@@ -365,7 +365,7 @@ export default function MyDesigner({ appData: originAppData }) {
       .catch((err) => {
         console.error(err)
       })
-  }, [isPreview])
+  }, [isPreview, ctx])
 
   const preview = useCallback(() => {
     const json = designerRef.current?.toJSON()
@@ -416,7 +416,7 @@ export default function MyDesigner({ appData: originAppData }) {
     window.open(
       `./preview.html?fileId=${ctx.fileId}${objectToQueryString(ctx?.debugQuery || {})}`
     )
-  }, [appConfig])
+  }, [appConfig, ctx])
 
   const publish = useCallback(
     async (publishConfig) => {
