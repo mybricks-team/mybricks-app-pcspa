@@ -77,7 +77,7 @@ export const comLibAdderFunc = ctx => (targetComlib) => {
           }
           const addedComlib = await upgradeComlibByVersion(ctx, comlib)
           resolve(addedComlib)
-        }else {
+        } else {
           //新增
           const addedComlib = await addComlib(ctx, materials[0])
           resolve(addedComlib)
