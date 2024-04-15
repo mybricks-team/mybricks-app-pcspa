@@ -42,11 +42,11 @@ export default {
       path: "public/ant-design-icons@4.7.0.min.js",
       CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444248634.ant-design-icons_4.7.0_min.js",
     },
-    // {
-    //   tag: "script",
-    //   path: "public/ant-design-charts@1.3.5.min.js",
-    //   CDN: "//f2.beckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/ant-design/charts-1.3.5/charts.min.js",
-    // },
+    {
+      tag: "script",
+      path: "public/ant-design-charts@1.3.5.min.js",
+      CDN: "//f2.beckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/ant-design/charts-1.3.5/charts.min.js",
+    },
     {
       tag: "script",
       path: "public/plugin-http-connector/1.2.3/index.js",
