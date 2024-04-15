@@ -125,12 +125,12 @@ async function resourceLocalization(
     return res;
   });
 
-  let chunks = LocalPublic[type].reduce((pre, cur) => {
-    if (cur.CDN.endsWith(".js")) {
-      pre += `\n<script src="${cur.CDN}"></script>`;
+  let chunks = localPublicInfos.reduce((pre, cur) => {
+    if (cur.path.endsWith(".js")) {
+      pre += `\n<script src="${cur.path}"></script>`;
     }
-    if (cur.CDN.endsWith(".css")) {
-      pre += `\n<link rel="stylesheet" href="${cur.CDN}"/>`;
+    if (cur.path.endsWith(".css")) {
+      pre += `\n<link rel="stylesheet" href="${cur.path}"/>`;
     }
     return pre;
   }, "");
