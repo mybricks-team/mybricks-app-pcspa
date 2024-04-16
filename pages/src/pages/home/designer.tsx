@@ -1,4 +1,11 @@
-import React, { useRef, useMemo, useState, useEffect, useCallback } from 'react'
+import React, {
+  useRef,
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  useLayoutEffect
+} from 'react'
 import axios from 'axios'
 import { fAxios } from '../../services/http'
 import moment from 'moment'
@@ -16,7 +23,7 @@ import { i18nLangContentFilter } from '../../utils/index'
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
 import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
-import { getLibsFromConfig } from '../../utils/getComlibs'
+import { getInitComLibs } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
 
@@ -90,7 +97,7 @@ export default function MyDesigner({ appData: originAppData }) {
       fileId: appData.fileId,
       setting: appData.config || {},
       hasMaterialApp: appData.hasMaterialApp,
-      comlibs: getLibsFromConfig(appData),
+      comlibs: [],
       latestComlibs: [],
       debugQuery: appData.fileContent?.content?.debugQuery,
       executeEnv,
@@ -184,6 +191,21 @@ export default function MyDesigner({ appData: originAppData }) {
   const [isDebugMode, setIsDebugMode] = useState(false)
   const operationList = useRef<any[]>([])
 
+  useLayoutEffect(() => {
+    getInitComLibs(appData).then(comlibs => setCtx(pre => ({...pre, comlibs }))).finally(loadDesigner)
+  }, [designer])
+
+  const loadDesigner = useCallback(() => {
+    if (designer) {
+      const script = document.createElement('script');
+      script.src = designer
+      document.head.appendChild(script);
+      script.onload = () => {
+        (window as any).mybricks.SPADesigner && setSPADesigner((window as any).mybricks.SPADesigner);
+      };
+    }
+  }, [designer])
+
   // 只有预览时 search 会携带 version 字段
   const isPreview = window.location.search.includes('version')
 
@@ -261,18 +283,6 @@ export default function MyDesigner({ appData: originAppData }) {
       },
     })
   }, [])
-
-  useMemo(() => {
-    if (designer) {
-      const script = document.createElement('script')
-      script.src = designer
-      document.head.appendChild(script)
-      script.onload = () => {
-        ; (window as any).mybricks.SPADesigner &&
-          setSPADesigner((window as any).mybricks.SPADesigner)
-      }
-    }
-  }, [designer])
 
   useEffect(() => {
     if (beforeunload) {
@@ -355,7 +365,7 @@ export default function MyDesigner({ appData: originAppData }) {
       .catch((err) => {
         console.error(err)
       })
-  }, [isPreview])
+  }, [isPreview, ctx])
 
   const preview = useCallback(() => {
     const json = designerRef.current?.toJSON()
@@ -368,7 +378,7 @@ export default function MyDesigner({ appData: originAppData }) {
       directConnection: ctx.directConnection,
       debugMockConfig: ctx.debugMockConfig,
       envList: ctx.envList,
-      comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
+      comlibs: ctx.comlibs,
       hasPermissionFn: ctx.hasPermissionFn,
       appConfig: JSON.stringify(appConfig),
       i18nLangContent: ctx.i18nLangContent,
@@ -406,7 +416,7 @@ export default function MyDesigner({ appData: originAppData }) {
     window.open(
       `./preview.html?fileId=${ctx.fileId}${objectToQueryString(ctx?.debugQuery || {})}`
     )
-  }, [appConfig])
+  }, [appConfig, ctx])
 
   const publish = useCallback(
     async (publishConfig) => {
@@ -535,7 +545,7 @@ export default function MyDesigner({ appData: originAppData }) {
           setPublishLoading(false)
         })
     },
-    [appData]
+    [appData, ctx]
   )
 
   const publishAndDownload = async (publishConfig) => {

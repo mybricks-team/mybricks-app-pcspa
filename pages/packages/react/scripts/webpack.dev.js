@@ -58,6 +58,8 @@ module.exports = merge(common, {
       filename: 'preview.html',
       template: path.resolve(__dirname, '../templates/preview.html'),
       chunks: ['preview'],
+      inject: 'body',
+      scriptLoading: 'defer'
     }),
     new HtmlWebpackPlugin({
       filename: 'setting.html',

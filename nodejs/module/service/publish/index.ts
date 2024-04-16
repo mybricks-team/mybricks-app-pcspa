@@ -76,30 +76,31 @@ export async function publish(
     });
     template = _template;
 
+    Logger.info(`[publish] 开始处理组件库脚本`);
+
+    const startComboScriptTime = Date.now();
+
+    let comboScriptText = "",
+      componentModules = [];
+    if (needCombo) {
+      const combo = await getComboScriptText(comlibs, json, {
+        fileId,
+        noThrowError: hasOldComLib,
+        app_type,
+      });
+      comboScriptText = combo.scriptText;
+      componentModules = combo.componentModules;
+    }
+
+    Logger.info(`[publish] 处理组件库脚本完成，耗时：${(Date.now() - startComboScriptTime) / 1000}s`);
+
     /** 资源本地化 */
     const {
       globalDeps,
       images,
       template: __template,
-    } = await localization({ req, appConfig, template, app_type, json, hasOldComLib });
+    } = await localization({ req, appConfig, template, app_type, json, hasOldComLib, comlibs, componentModules });
     template = __template;
-
-    const startComboScriptTime = Date.now();
-
-    Logger.info(`[publish] 开始处理组件库脚本`);
-
-    const comboScriptText = await getComboScriptText(
-      comlibs,
-      json,
-      {
-        fileId,
-        noThrowError: hasOldComLib,
-        app_type,
-      },
-      needCombo
-    );
-
-    Logger.info(`[publish] 处理组件库脚本完成，耗时：${(Date.now() - startComboScriptTime) / 1000}s`);
 
     const params = {
       envType,

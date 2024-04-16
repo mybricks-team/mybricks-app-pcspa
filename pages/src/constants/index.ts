@@ -24,8 +24,8 @@ export const PC_NORMAL_COM_LIB = {
   editJs: "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
   rtJs: "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
   version: '1.2.72',
-  legacy: true
-}
+  legacy: true,
+};
 
 export const CHARS_COM_LIB = {
   id: "5952",
@@ -47,8 +47,8 @@ export const BASIC_COM_LIB = {
 
 export const MySelf_COM_LIB = {
   comAray: [],
-  id: '_myself_',
-  title: '我的组件',
+  id: "_myself_",
+  title: "我的组件",
   defined: true,
 };
 
