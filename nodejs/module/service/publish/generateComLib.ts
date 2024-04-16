@@ -177,7 +177,8 @@ export const generateComLib = async (
 
   Logger.info(`[publish] 组件内容获取完毕`);
 
-  return `
+  return {
+    scriptText: `
 		(function() {
 			let comlibList = window['__comlibs_rt_'];
 			if(!comlibList){
@@ -192,7 +193,9 @@ export const generateComLib = async (
 			});
 			${script}
 		})()
-	`;
+	`,
+    componentModules,
+  };
 };
 
 export async function generateComLibRT(
@@ -265,28 +268,21 @@ export async function generateComLibRT(
     return accumulator;
   }, []);
 
-  const scriptText = await generateComLib([...comlibs], deps, {
+  return await generateComLib([...comlibs], deps, {
     comLibId: fileId,
     noThrowError,
     appType: app_type,
   });
-  return scriptText;
 }
 
 export async function getComboScriptText(
   comlibs,
   json,
-  { fileId, noThrowError, app_type },
-  needCombo
+  { fileId, noThrowError, app_type }
 ) {
-  /** 生成 combo 组件库代码 */
-  if (needCombo) {
-    return await generateComLibRT(comlibs, json, {
-      fileId,
-      noThrowError,
-      app_type,
-    });
-  }
-
-  return "";
+  return await generateComLibRT(comlibs, json, {
+    fileId,
+    noThrowError,
+    app_type,
+  });
 }

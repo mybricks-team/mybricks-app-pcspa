@@ -18,7 +18,8 @@ export async function localization({
   app_type,
   json,
   hasOldComLib,
-  comlibs
+  comlibs,
+  componentModules
 }) {
   /** 是否本地化发布 */
   const needLocalization = await getCustomNeedLocalization();
@@ -86,7 +87,8 @@ export async function localization({
       json,
       origin,
       comlibs,
-      app_type,
+      componentModules,
+      app_type
     );
     globalDeps = globalDeps.concat(_globalDeps || []);
     images = _images;
@@ -115,6 +117,7 @@ async function resourceLocalization(
   json: any,
   origin,
   comlibs,
+  componentModules,
   type = "react"
 ) {
   const localPublicInfos = LocalPublic[type].map((info) => {
@@ -135,24 +138,25 @@ async function resourceLocalization(
     return pre;
   }, "");
 
-  const chunkAssets = (comlibs ?? [])
-    .filter(({ id }) => id !== "_myself_")
-    .reduce((pre, cur) => {
-      (cur.externals ?? []).forEach((it) => {
-        const { urls } = it;
-        if (Array.isArray(urls) && urls.length) {
-          urls.forEach((url) => {
-            if (url.endsWith(".js")) {
-              pre += `\n<script src="${url}"></script>`;
-            }
-            if (url.endsWith(".css")) {
-              pre += `\n<link rel="stylesheet" href="${url}"/>`;
-            }
-          });
-        }
-      });
-      return pre;
-    }, chunks);
+  const chunkAssets = filterComLibFromComponent(
+    (comlibs ?? []).filter(({ id }) => id !== "_myself_"),
+    componentModules
+  ).reduce((pre, cur) => {
+    (cur.externals ?? []).forEach((it) => {
+      const { urls } = it;
+      if (Array.isArray(urls) && urls.length) {
+        urls.forEach((url) => {
+          if (url.endsWith(".js")) {
+            pre += `\n<script src="${url}"></script>`;
+          }
+          if (url.endsWith(".css")) {
+            pre += `\n<link rel="stylesheet" href="${url}"/>`;
+          }
+        });
+      }
+    });
+    return pre;
+  }, chunks);
 
   const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
     switch (cur.tag) {
@@ -213,3 +217,36 @@ async function resourceLocalization(
 
   return { template, globalDeps, images: images.filter((img) => !!img) };
 }
+
+const filterComLibFromComponent = (comLib, componentModules) => {
+  return comLib.reduce((pre, cur) => {
+    const set = new Set([
+      ...(cur.deps ?? []).map((it) => `${it.namespace}@${it.version}`),
+    ]);
+    for (let i = 0; i < componentModules.length; i++) {
+      if (
+        set.has(
+          `${componentModules[i].namespace}@${componentModules[i].version}`
+        )
+      ) {
+        pre.push(cur);
+        break;
+      }
+    }
+    return pre;
+  }, []);
+};
+
+const scanComLib = (lib) => {
+  const queue = [...lib.comAray];
+  const set = new Set();
+  while (queue.length) {
+    const com = queue.shift();
+    if (com.comAray?.length) {
+      queue.push(...com.comAray);
+    } else {
+      set.add(`${com.namespace}@${com.version}`);
+    }
+  }
+  return set;
+};
