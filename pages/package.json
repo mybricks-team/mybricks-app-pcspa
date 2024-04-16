@@ -73,7 +73,7 @@
     "dayjs": "^1.11.3",
     "html-to-image": "^1.10.8",
     "lodash": "^4.17.21",
-    "mybricks-plugin-version": "0.0.20",
+    "mybricks-plugin-version": "0.0.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
