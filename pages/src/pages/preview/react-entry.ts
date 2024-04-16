@@ -58,7 +58,7 @@ let reactRoot
 
 const getAntdLocalName = (locale) => {
   const localeArr = locale.split('-');
-  if(localeArr.length <= 1) {
+  if (localeArr.length <= 1) {
     return locale
   }
   const lang = localeArr.pop()?.toUpperCase();
@@ -76,9 +76,8 @@ async function render(props) {
     const antd = window.antd;
     Promise.all(getRtComlibsFromConfigEdit(comlibs).map((t) => requireScript(t))).then(() => {
       const lang = getAntdLocalName(getCurrentLocale())
-      console.log(antd.locale)
-      const antdLocalLib = antd?.locale![lang].default
 
+      const antdLocalLib = antd?.locale![lang].default
 
       reactRoot = ReactDOM.createRoot((container ?? document).querySelector('#root'));
 
