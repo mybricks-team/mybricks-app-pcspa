@@ -8,10 +8,11 @@ import domainServicePlugin, {
   call as callDomainHttp,
 } from '@mybricks/plugin-connector-domain'
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
-import versionPlugin from 'mybricks-plugin-version'
+// import versionPlugin from 'mybricks-plugin-version'
+import versionPlugin from '../../../../../plugin-version/src'
 import localePlugin from '@mybricks/plugin-locale'
-// import notePlugin from '../../../../../plugin-note'
-import notePlugin from '@mybricks/plugin-note'
+import notePlugin from '../../../../../plugin-note'
+// import notePlugin from '@mybricks/plugin-note'
 import { use as useTheme } from '@mybricks/plugin-theme'
 import { openFilePanel } from '@mybricks/sdk-for-app/ui'
 
@@ -355,7 +356,6 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     plugins: [
       ...connetorPlugins,
       notePlugin({
-        user: ctx.user,
         onUpload: async (file: File) => {
           return new Promise(async (resolve, reject) => {
             const { manateeUserInfo, fileId } = ctx;
@@ -396,29 +396,91 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             }
           })
         },
-        onSearchUser: (keyword: string) => {
-          return new Promise(async (resolve, reject) => {
-            try {
-              const res = await searchUser(`api/pcpage/searchUser`, {
-                keyword
-              });
-              const formatRes = (res || []).map(item => {
-                const { email, id, name, avatar } = item;
-                return {
-                  name: name ? `${name}(${email})` : email,
-                  id,
-                  username: email,
-                  orgDisplayName: '',
-                  thumbnailAvatarUrl: avatar
-                }
-              })
-              resolve(formatRes);
-            } catch (e) {
-              message.error('搜索用户失败!');
-              reject('搜索用户失败!');
-            }
-          })
-        }
+        user: {
+          "id": 433562046943301,
+          "name": "朱琳-Mybricks",
+          "email": "linzhujlu@foxmail.com",
+          "licenseCode": null,
+          "createTime": "2023-05-10 10:48:29",
+          "updateTime": "2023-10-12 16:06:36",
+          "status": 1,
+          "role": 10,
+          "avatar": "/default_avatar.png",
+          "isAdmin": true,
+          "roleDescription": 1
+        },
+        onSearchUser: () => Promise.resolve([
+          {
+            "name": "zpq(charleszpq1995@gmail.com)",
+            "id": 486776985268293,
+            "username": "charleszpq1995@gmail.com",
+            "orgDisplayName": "",
+            "thumbnailAvatarUrl": "/default_avatar.png"
+          },
+          {
+            "name": "chemingjun@126.com",
+            "id": 486777246838853,
+            "username": "chemingjun@126.com",
+            "orgDisplayName": "",
+            "thumbnailAvatarUrl": "/default_avatar.png"
+          },
+          {
+            "name": "mybricks01(mybricks01)",
+            "id": 487158510784581,
+            "username": "mybricks01",
+            "orgDisplayName": "",
+            "thumbnailAvatarUrl": "/default_avatar.png"
+          },
+          {
+            "name": "唐小新(1302947749@qq.com)",
+            "id": 490199212912709,
+            "username": "1302947749@qq.com",
+            "orgDisplayName": "",
+            "thumbnailAvatarUrl": "/default_avatar.png"
+          },
+          {
+            "name": "Leon(15958651599@163.com)",
+            "id": 490542027329605,
+            "username": "15958651599@163.com",
+            "orgDisplayName": "",
+            "thumbnailAvatarUrl": "/default_avatar.png"
+          },
+          {
+            "name": "15958651599@163.com",
+            "id": 490542027337797,
+            "username": "15958651599@163.com",
+            "orgDisplayName": "",
+            "thumbnailAvatarUrl": "/default_avatar.png"
+          },
+          {
+            "name": "15958651599@163.com",
+            "id": 490542027341893,
+            "username": "15958651599@163.com",
+            "orgDisplayName": "",
+            "thumbnailAvatarUrl": "/default_avatar.png"
+          },
+          {
+            "name": "15958651599@163.com",
+            "id": 490542027456581,
+            "username": "15958651599@163.com",
+            "orgDisplayName": "",
+            "thumbnailAvatarUrl": "/default_avatar.png"
+          },
+          {
+            "name": "15958651599@163.com",
+            "id": 490542027460677,
+            "username": "15958651599@163.com",
+            "orgDisplayName": "",
+            "thumbnailAvatarUrl": "/default_avatar.png"
+          },
+          {
+            "name": "15958651599@163.com",
+            "id": 490542027464773,
+            "username": "15958651599@163.com",
+            "orgDisplayName": "",
+            "thumbnailAvatarUrl": "/default_avatar.png"
+          }
+        ])
       }),
       localePlugin({
         onPackLoad: ({ i18nLangContent }) => {

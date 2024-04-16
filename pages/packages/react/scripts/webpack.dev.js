@@ -26,17 +26,23 @@ module.exports = merge(common, {
     // open: `http://localhost:8001`,
     proxy: [
       {
-        context: ['/api/pcpage/toCode', '/api/pcpage/publish', '/api/pcpage/upload', '/api/pcpage/rollback', '/api/pcpage/download-product'],
-        // target: 'https://my.mybricks.world',
-        target: 'http://localhost:9002/mybricks-app-pcspa',
+        context: ['/api/pcpage/toCode', '/api/pcpage/publish', '/api/pcpage/upload', '/api/pcpage/rollback', '/api/pcpage/download-product', '/api/pcpage/searchUser'],
+        target: 'https://test.mybricks.world/',
+        // target: 'http://localhost:9002/mybricks-app-pcspa',
+        headers: {
+          cookie: 'Hm_lvt_d2ecca39b1c8b9e556bc0051744065bf=1707017080; Hm_lpvt_d2ecca39b1c8b9e556bc0051744065bf=1707124300; mybricks-login-user={"id":497330331922501,"email":"linzhujlu@foxmail.com","fingerprint":"d5ea529b605354f4401e9fd2e6cb9cd0"}'
+        },
         secure: false,
         changeOrigin: true,
       },
       {
         context: ['/'],
-        target: 'https://test.mybricks.world/',
+        // target: 'https://test.mybricks.world/',
         // target: 'http://dev.manateeai.com/',
-        // target: 'https://my.mybricks.world',
+        headers: {
+          cookie:'token=4799702de6cdf6f3bcfd399039a0e0ec; Hm_lvt_d2ecca39b1c8b9e556bc0051744065bf=1707017080; Hm_lpvt_d2ecca39b1c8b9e556bc0051744065bf=1707124300; mybricks-login-user={"id":433562046943301,"email":"linzhujlu@foxmail.com","fingerprint":"d5ea529b605354f4401e9fd2e6cb9cd0"}'
+        },
+        target: 'https://my.mybricks.world',
         // target: 'http://localhost:3100',
         secure: false,
         changeOrigin: true,
