@@ -137,41 +137,7 @@ async function resourceLocalization(
     return res;
   });
 
-  let chunks = localPublicInfos.reduce((pre, cur) => {
-    if (cur.path.endsWith(".js")) {
-      pre += `\n<script src="${cur.path}"></script>`;
-    }
-    if (cur.path.endsWith(".css")) {
-      pre += `\n<link rel="stylesheet" href="${cur.path}"/>`;
-    }
-    return pre;
-  }, "");
-
-  const chunkAssets = filterComLibFromComponent(
-    (comlibs ?? []).filter(({ id }) => id !== "_myself_"),
-    componentModules
-  ).reduce((pre, cur) => {
-    (cur.externals ?? []).forEach((it) => {
-      let { urls, library } = it;
-      const mybricksExternal = materialExternalInfos.find(
-        (it) => it.library.toLowerCase() === library.toLowerCase()
-      );
-      if (mybricksExternal) {
-        urls = mybricksExternal.path;
-      }
-      if (Array.isArray(urls) && urls.length) {
-        urls.forEach((url) => {
-          if (url.endsWith(".js")) {
-            pre += `\n<script src="${url}"></script>`;
-          }
-          if (url.endsWith(".css")) {
-            pre += `\n<link rel="stylesheet" href="${url}"/>`;
-          }
-        });
-      }
-    });
-    return pre;
-  }, chunks);
+  const chunkAssets = collectExternal(localPublicInfos, comlibs, componentModules, materialExternalInfos);
 
   const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
     switch (cur.tag) {
@@ -232,6 +198,48 @@ async function resourceLocalization(
 
   return { template, globalDeps, images: images.filter((img) => !!img) };
 }
+
+const collectExternal = (
+  common,
+  comlibs,
+  componentModules,
+  materialExternalInfos
+) => {
+  let set = new Set();
+  common.forEach((it) => {
+    if (it.path.endsWith(".js")) {
+      set.add(`<script src="${it.path}"></script>`);
+    }
+    if (it.path.endsWith(".css")) {
+      set.add(`<link rel="stylesheet" href="${it.path}"/>`);
+    }
+  });
+  filterComLibFromComponent(
+    (comlibs ?? []).filter(({ id }) => id !== "_myself_"),
+    componentModules
+  ).forEach((it) => {
+    (it.externals ?? []).forEach((it) => {
+      let { urls, library } = it;
+      const mybricksExternal = materialExternalInfos.find(
+        (it) => it.library.toLowerCase() === library.toLowerCase()
+      );
+      if (mybricksExternal) {
+        urls = mybricksExternal.path;
+      }
+      if (Array.isArray(urls) && urls.length) {
+        urls.forEach((url) => {
+          if (url.endsWith(".js")) {
+            set.add(`<script src="${url}"></script>`);
+          }
+          if (url.endsWith(".css")) {
+            set.add(`<link rel="stylesheet" href="${url}"/>`);
+          }
+        });
+      }
+    });
+  });
+  return [...set].join("\n");
+};
 
 const filterComLibFromComponent = (comLib, componentModules) => {
   return comLib.reduce((pre, cur) => {
