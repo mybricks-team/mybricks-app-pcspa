@@ -221,7 +221,7 @@ const collectExternal = (
     (it.externals ?? []).forEach((it) => {
       let { urls, library } = it;
       const mybricksExternal = materialExternalInfos.find(
-        (it) => it.library.toLowerCase() === library.toLowerCase()
+        (it) => it.library.toLowerCase() === library!.toLowerCase()
       );
       if (mybricksExternal) {
         urls = mybricksExternal.path;
