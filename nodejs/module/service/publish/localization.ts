@@ -10,6 +10,7 @@ import {
 } from "../../tools/localization";
 import LocalPublic from "../local-public";
 import { Logger } from "@mybricks/rocker-commons";
+import MaterialExternal from '../material-external'
 
 export async function localization({
   req,
@@ -128,6 +129,14 @@ async function resourceLocalization(
     return res;
   });
 
+  const materialExternalInfos = MaterialExternal[type].map((info) => {
+    const res = { ...info };
+    if (!needLocalization) {
+      res.path = res.CDN;
+    }
+    return res;
+  });
+
   let chunks = localPublicInfos.reduce((pre, cur) => {
     if (cur.path.endsWith(".js")) {
       pre += `\n<script src="${cur.path}"></script>`;
@@ -143,7 +152,13 @@ async function resourceLocalization(
     componentModules
   ).reduce((pre, cur) => {
     (cur.externals ?? []).forEach((it) => {
-      const { urls } = it;
+      let { urls, library } = it;
+      const mybricksExternal = materialExternalInfos.find(
+        (it) => it.library.toLowerCase() === library.toLowerCase()
+      );
+      if (mybricksExternal) {
+        urls = mybricksExternal.path;
+      }
       if (Array.isArray(urls) && urls.length) {
         urls.forEach((url) => {
           if (url.endsWith(".js")) {
@@ -225,6 +240,7 @@ const filterComLibFromComponent = (comLib, componentModules) => {
     ]);
     for (let i = 0; i < componentModules.length; i++) {
       if (
+        !set.size ||
         set.has(
           `${componentModules[i].namespace}@${componentModules[i].version}`
         )
