@@ -81,8 +81,8 @@ const checkDeps = async (libs) => {
 
 const getLibExternals = ({ namespace, version }) => {
   return API.Material.getMaterialContent({
-    namespace: namespace,
-    version: version,
+    namespace,
+    version,
     codeType: "pure",
   }).then((lib) => {
     const content = compatContent(lib.content);
