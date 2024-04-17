@@ -9,7 +9,7 @@ import API from "@mybricks/sdk-for-app/api";
 const legacyLibs =
   APP_TYPE === "react" ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : [];
 
-const compatContent = (content) => {
+export const compatContent = (content) => {
   content = JSON.parse(content);
   return content[APP_TYPE] ?? content;
 };

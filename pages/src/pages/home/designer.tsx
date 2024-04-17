@@ -23,7 +23,7 @@ import { i18nLangContentFilter } from '../../utils/index'
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
 import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
-import { getInitComLibs } from '../../utils/getComlibs'
+import { getInitComLibs, compatContent } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
 
@@ -226,7 +226,7 @@ export default function MyDesigner({ appData: originAppData }) {
       ).then((res: any) => {
         const latestComlibs = (res || []).map((lib) => ({
           ...lib,
-          ...JSON.parse(lib.content),
+          ...compatContent(lib.content),
         }))
         setLatestComlibs(latestComlibs)
       })
