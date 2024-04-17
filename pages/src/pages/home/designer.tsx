@@ -181,6 +181,8 @@ export default function MyDesigner({ appData: originAppData }) {
   }>()
   const [beforeunload, setBeforeunload] = useState(false)
   const [operable, setOperable] = useState(false)
+  const operableRef = useRef(operable);
+  operableRef.current = operable;
   const [saveTip, setSaveTip] = useState('')
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
@@ -192,7 +194,7 @@ export default function MyDesigner({ appData: originAppData }) {
   const operationList = useRef<any[]>([])
 
   useLayoutEffect(() => {
-    getInitComLibs(appData).then(comlibs => setCtx(pre => ({...pre, comlibs }))).finally(loadDesigner)
+    getInitComLibs(appData).then(comlibs => setCtx(pre => ({ ...pre, comlibs }))).finally(loadDesigner)
   }, [designer])
 
   const loadDesigner = useCallback(() => {
@@ -315,7 +317,7 @@ export default function MyDesigner({ appData: originAppData }) {
       message.warn('请回到编辑页面，再进行保存')
       return
     }
-    if (!ctx.operable) {
+    if (!operableRef.current) {
       message.warn('请先点击右上角个人头像上锁获取页面编辑权限')
       return
     }
