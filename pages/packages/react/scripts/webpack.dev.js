@@ -26,7 +26,14 @@ module.exports = merge(common, {
     // open: `http://localhost:8001`,
     proxy: [
       {
-        context: ['/api/pcpage/toCode', '/api/pcpage/publish', '/api/pcpage/upload', '/api/pcpage/rollback', '/api/pcpage/download-product'],
+        context: [
+          '/api/pcpage/toCode',
+          '/api/pcpage/publishToCom',
+          // '/api/pcpage/publish',
+          '/api/pcpage/upload',
+          '/api/pcpage/rollback',
+          '/api/pcpage/download-product',
+        ],
         // target: 'https://my.mybricks.world',
         target: 'http://localhost:9002/mybricks-app-pcspa',
         secure: false,
@@ -41,7 +48,7 @@ module.exports = merge(common, {
         secure: false,
         changeOrigin: true,
       },
-    ]
+    ],
   },
   plugins: [
     new WebpackBar(),
@@ -49,10 +56,16 @@ module.exports = merge(common, {
       filename: 'index.html',
       chunks: ['index'],
       templateContent: ({ htmlWebpackPlugin }) => {
-        let content = fs.readFileSync(path.resolve(__dirname, '../templates/index.html'), 'utf-8')
-        content = content.replace('<!-- _APP_CONFIG_ -->', `<script>const _APP_CONFIG_ = {namespace: '${appInfo.name}'}</script>`)
+        let content = fs.readFileSync(
+          path.resolve(__dirname, '../templates/index.html'),
+          'utf-8'
+        )
+        content = content.replace(
+          '<!-- _APP_CONFIG_ -->',
+          `<script>const _APP_CONFIG_ = {namespace: '${appInfo.name}'}</script>`
+        )
         return content
-      }
+      },
     }),
     new HtmlWebpackPlugin({
       filename: 'preview.html',
@@ -70,6 +83,6 @@ module.exports = merge(common, {
       filename: 'groupSetting.html',
       template: path.resolve(__dirname, '../templates/groupSetting.html'),
       chunks: ['groupSetting'],
-    })
-  ]
+    }),
+  ],
 })

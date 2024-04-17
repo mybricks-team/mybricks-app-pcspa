@@ -4,7 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  useLayoutEffect
+  useLayoutEffect,
 } from 'react'
 import axios from 'axios'
 import { fAxios } from '../../services/http'
@@ -92,7 +92,9 @@ export default function MyDesigner({ appData: originAppData }) {
       },
       user: appData.user,
       fileName: appData.fileContent?.name,
-      pageHeader: appData.fileContent?.content?.pageHeader || GET_DEFAULT_PAGE_HEADER(appData),
+      pageHeader:
+        appData.fileContent?.content?.pageHeader ||
+        GET_DEFAULT_PAGE_HEADER(appData),
       absoluteNamePath: appData.hierarchy.absoluteNamePath,
       fileId: appData.fileId,
       setting: appData.config || {},
@@ -129,7 +131,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon?},
+        param: { name?; shareType?; content?; icon? },
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
@@ -192,17 +194,20 @@ export default function MyDesigner({ appData: originAppData }) {
   const operationList = useRef<any[]>([])
 
   useLayoutEffect(() => {
-    getInitComLibs(appData).then(comlibs => setCtx(pre => ({...pre, comlibs }))).finally(loadDesigner)
+    getInitComLibs(appData)
+      .then((comlibs) => setCtx((pre) => ({ ...pre, comlibs })))
+      .finally(loadDesigner)
   }, [designer])
 
   const loadDesigner = useCallback(() => {
     if (designer) {
-      const script = document.createElement('script');
+      const script = document.createElement('script')
       script.src = designer
-      document.head.appendChild(script);
+      document.head.appendChild(script)
       script.onload = () => {
-        (window as any).mybricks.SPADesigner && setSPADesigner((window as any).mybricks.SPADesigner);
-      };
+        ;(window as any).mybricks.SPADesigner &&
+          setSPADesigner((window as any).mybricks.SPADesigner)
+      }
     }
   }, [designer])
 
@@ -498,38 +503,69 @@ export default function MyDesigner({ appData: originAppData }) {
           ? btoa(encodeURIComponent(JSON.stringify(jsonParams)))
           : jsonParams
 
-        const res: { data?: any; code: number; message: string } =
-          await fAxios.post('/api/pcpage/publish', {
+        // const res: { data?: any; code: number; message: string } =
+        // await fAxios.post('/api/pcpage/publish', {
+        //   userId: ctx.user?.id,
+        //   fileId: ctx.fileId,
+        //   json: toJSON,
+        //   envType,
+        //   commitInfo,
+        // })
+
+        const response = await axios({
+          method: 'post',
+          url: '/api/pcpage/publishToCom',
+          responseType: 'blob',
+          data: {
             userId: ctx.user?.id,
             fileId: ctx.fileId,
             json: toJSON,
             envType,
             commitInfo,
-          })
+          },
+        })
+        const [_, fileName] = (
+          response.headers['content-disposition'] || ''
+        ).split('filename=')
+        // // 创建一个URL指向blob响应数据
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        // 创建一个a标签用于触发下载
+        const link = document.createElement('a')
+        link.href = url
+        // 设置下载后的文件名，如果服务器未指定，则可以在这里指定
+        link.setAttribute('download', decodeURIComponent(fileName)) // 注意: 该名称可以根据实际情况命名
+        // 将a标签添加到body，触发点击事件，然后移除
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        // 清理用完的URL对象
+        window.URL.revokeObjectURL(url)
 
-        if (res.code === 1) {
-          close()
-          message.success({
-            key: 'publish',
-            content: '发布成功',
-            duration: 2,
-          })
+        // if (res.code === 1) {
+        //   close()
+        //   message.success({
+        //     key: 'publish',
+        //     content: '发布成功',
+        //     duration: 2,
+        //   })
 
-          designerRef.current?.switchActivity?.('@mybricks/plugins/version')
-          setTimeout(() => {
-            ctx?.versionApi?.switchAciveTab?.('publish', void 0)
-          }, 0)
-        } else {
-          close()
-          message.error({
-            content: res.message || '发布失败',
-            duration: 2,
-          })
-        }
+        //   designerRef.current?.switchActivity?.('@mybricks/plugins/version')
+        //   setTimeout(() => {
+        //     ctx?.versionApi?.switchAciveTab?.('publish', void 0)
+        //   }, 0)
+        // } else {
+        //   close()
+        //   message.error({
+        //     content: res.message || '发布失败',
+        //     duration: 2,
+        //   })
+        // }
 
         setPublishLoading(false)
 
-        return res
+        return response
+
+        // return res
       })()
         .catch((e) => {
           console.error(e)
@@ -541,6 +577,7 @@ export default function MyDesigner({ appData: originAppData }) {
           })
         })
         .finally(() => {
+          close()
           publishingRef.current = false
           setPublishLoading(false)
         })
@@ -717,6 +754,7 @@ export default function MyDesigner({ appData: originAppData }) {
             >
               发布
             </Toolbar.Button>
+            {/* <Toolbar.Button onClick={downloadCode}>发布成组件</Toolbar.Button> */}
             <Toolbar.Button onClick={downloadCode}>出码</Toolbar.Button>
           </>
         )}
@@ -889,7 +927,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
       if (libIndex !== -1) {
         curComponent =
           allComLibsRuntimeMap[libIndex][
-          component.namespace + '@' + component.version
+            component.namespace + '@' + component.version
           ]
       } else {
         libIndex = allComLibsRuntimeMap.findIndex((lib) =>
@@ -907,9 +945,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         }
         curComponent =
           allComLibsRuntimeMap[libIndex][
-          Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-            key.startsWith(component.namespace)
-          )
+            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+              key.startsWith(component.namespace)
+            )
           ]
       }
 

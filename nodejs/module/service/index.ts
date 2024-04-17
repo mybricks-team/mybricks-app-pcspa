@@ -4,11 +4,16 @@ import { searchUser } from "./seachUser";
 import { upload } from "./upload";
 import { rollback } from "./rollback";
 import { downloadProduct } from "./download-product";
+import publishToCom from './publishToComService'
 
 @Injectable()
 export default class PcPageService {
   async publish(req, { json, userId, fileId, envType, commitInfo, appConfig }) {
     return await publish(req, { json, userId, fileId, envType, commitInfo, appConfig });
+  }
+
+  async publishToCom(res: any, { json, userId, fileId, envType, commitInfo, appConfig }) {
+    return await publishToCom(res, { json, userId, fileId, envType, commitInfo, appConfig })
   }
 
   async upload(req, { file }, { groupId = "" } = {}) {

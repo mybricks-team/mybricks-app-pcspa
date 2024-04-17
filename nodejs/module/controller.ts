@@ -99,6 +99,68 @@ export default class PcPageController {
     }
   }
 
+  @Post("/publishToCom")
+  async publishToCom(
+    @Body("userId") userId: string,
+    @Body("fileId") fileId: number,
+    @Body("json") json: any,
+    @Body("envType") envType: string,
+    @Body("commitInfo") commitInfo: string,
+    @Res() res: Response
+  ) {
+    if (!isDefined(json) || !isDefined(userId) || !isDefined(fileId)) {
+      return { code: 0, message: "参数 json、userId、fileId 不能为空" };
+    }
+
+    try {
+      Logger.info("[publishToCom] 调用发布接口");
+      const startTime = Date.now();
+
+      const appConfig = await getAppConfig();
+      const isEncode = !!appConfig?.publishLocalizeConfig?.isEncode;
+
+      Logger.info(`[publishToCom] 获取编码状态 isEncode ${isEncode}`);
+
+      const jsonTransform = isEncode
+        ? JSON.parse(
+          decodeURIComponent(
+            Buffer.from(
+              typeof json === "string" ? json : JSON.stringify(json),
+              "base64"
+            ).toString()
+          )
+        )
+        : json;
+
+      const result = await this.service.publishToCom(res, {
+        json: jsonTransform,
+        userId,
+        fileId,
+        envType,
+        commitInfo,
+        appConfig,
+      });
+
+      Logger.info("[publishToCom] 发布成功！");
+      Logger.info(
+        `[publishToCom] 发布时长：${String((Date.now() - startTime) / 1000)}s`
+      );
+
+      res.on('finish', () => {
+        Logger.info(`[publishToCom] finish`);
+        fs.unlink(result.zipFilePath, () => {
+          Logger.info(`[publishToCom] delete`);
+        })
+      })
+    } catch (error) {
+      Logger.error("[publishToCom] 发布失败: ", error);
+      return {
+        code: -1,
+        message: error.message || "发布失败",
+      };
+    }
+  }
+
   @Post("/toCode")
   async toCode(@Body("json") json: any, @Res() res: Response) {
     Logger.info(`[toCode] 开始`);
@@ -110,7 +172,7 @@ export default class PcPageController {
       res.setHeader("Content-Type", "application/zip");
       fs.createReadStream(zipFilePath).pipe(res);
       Logger.info(`[toCode] setHeader`);
-  
+
       res.on('finish', () => {
         Logger.info(`[toCode] finish`);
         fs.unlink(zipFilePath, () => {

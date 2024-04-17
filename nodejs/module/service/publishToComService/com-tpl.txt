@@ -1,0 +1,31 @@
+import React from 'react'
+import ReactDOM from 'react-dom'
+import Renderer from '@mybricks/renderer-pcspa'
+import {--coms--} from '@mybricks/comlib-pc-normal'
+
+const json = '--json--'
+const executeEnv = '--executeEnv--'
+const envList = '--envList--'
+const i18nLangContent = '--i18nLangContent--'
+
+const getCurrentLocale = () => {
+  // 当前语言
+  return navigator.language
+}
+
+export function RendererDemo() {
+  return (
+    <div>
+      <Renderer
+        json={json}
+        comDefs={--comDefs--}
+        config={{
+          executeEnv,
+          envList,
+          i18nLangContent,
+          locale: getCurrentLocale(),
+        }}
+      />
+    </div>
+  )
+}
