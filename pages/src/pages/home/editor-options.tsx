@@ -98,7 +98,13 @@ export const DESIGN_MATERIAL_EDITOR_OPTIONS = (ctx) => {
             }).then((res) => {
               return Object.fromEntries(
                 res.list
-                  .map((item: { title: string; preview_img: string }) => [item.title, item.preview_img])
+                  .map((item: { namespace: string; title: string; preview_img: string }) => [
+                    item.namespace,
+                    {
+                      title: item.title,
+                      svg: item.preview_img,
+                    },
+                  ])
                   .filter((item: any) => item[1])
               );
             });
