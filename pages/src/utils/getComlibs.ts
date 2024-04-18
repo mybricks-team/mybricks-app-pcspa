@@ -62,6 +62,18 @@ const getLibsFromConfig = (appData: Record<string, any>) => {
   }
 };
 
+export const getLatestComLib = async (comlibs) => {
+  const latestComlibs = await API.Material.getLatestComponentLibrarys(
+    comlibs.filter((lib) => lib.id !== "_myself_").map((lib) => lib.namespace)
+  ).then((libs: Array<any>) =>
+    (libs ?? []).map((lib) => ({
+      ...lib,
+      ...compatContent(lib.content),
+    }))
+  );
+  return { comlibs, latestComlibs };
+};
+
 const checkDeps = async (libs) => {
   for (let i = 0; i < libs.length; i++) {
     const lib = libs[i];
@@ -152,7 +164,12 @@ const composeAsync =
   async (arg) =>
     fns.reduceRight(async (pre, fn) => fn(await pre), Promise.resolve(arg));
 
-const getInitComLibs = composeAsync(insertDeps, checkDeps, getLibsFromConfig);
+const getInitComLibs = composeAsync(
+  getLatestComLib,
+  insertDeps,
+  checkDeps,
+  getLibsFromConfig
+);
 
 const upgradeExternal = composeAsync(insertExternal, getLibExternals);
 

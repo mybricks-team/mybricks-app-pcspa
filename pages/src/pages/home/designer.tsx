@@ -14,7 +14,6 @@ import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
 import { fetchPlugins, removeBadChar } from '../../utils'
-import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { unionBy } from 'lodash'
 import PublishModal, { EnumMode } from './components/PublishModal'
@@ -23,7 +22,7 @@ import { i18nLangContentFilter } from '../../utils/index'
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
 import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
-import { getInitComLibs, compatContent } from '../../utils/getComlibs'
+import { getInitComLibs } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
 
@@ -189,13 +188,16 @@ export default function MyDesigner({ appData: originAppData }) {
   const [SPADesigner, setSPADesigner] = useState(null)
   const [remotePlugins, setRemotePlugins] = useState(null)
   const [publishModalVisible, setPublishModalVisible] = useState(false)
-  const [latestComlibs, setLatestComlibs] = useState<[]>()
   const [isDebugMode, setIsDebugMode] = useState(false)
   const operationList = useRef<any[]>([])
 
   useLayoutEffect(() => {
-    getInitComLibs(appData).then(comlibs => setCtx(pre => ({ ...pre, comlibs }))).finally(loadDesigner)
-  }, [designer])
+    getInitComLibs(appData)
+      .then(async ({ comlibs, latestComlibs }) => {
+        setCtx((pre) => ({ ...pre, comlibs, latestComlibs }));
+      })
+      .finally(loadDesigner);
+  }, [designer]);
 
   const loadDesigner = useCallback(() => {
     if (designer) {
@@ -218,22 +220,6 @@ export default function MyDesigner({ appData: originAppData }) {
     })
   }, [ctx.fontJS])
 
-  useEffect(() => {
-    const needSearchComlibs = ctx.comlibs.filter((lib) => lib.id !== '_myself_')
-    if (!!needSearchComlibs?.length) {
-      API.Material.getLatestComponentLibrarys(
-        needSearchComlibs.map((lib) => lib.namespace)
-      ).then((res: any) => {
-        const latestComlibs = (res || []).map((lib) => ({
-          ...lib,
-          ...compatContent(lib.content),
-        }))
-        setLatestComlibs(latestComlibs)
-      })
-    } else {
-      setLatestComlibs([])
-    }
-  }, [JSON.stringify(ctx.comlibs.map((lib) => lib.namespace))])
 
   useEffect(() => {
     fetchPlugins(plugins, {
@@ -748,14 +734,13 @@ export default function MyDesigner({ appData: originAppData }) {
       <div className={css.designer}>
         {SPADesigner &&
           remotePlugins &&
-          latestComlibs &&
           window?.mybricks?.createObservable && (
             <>
               <SPADesigner
                 ref={designerRef}
                 config={config(
                   window?.mybricks?.createObservable(
-                    Object.assign(ctx, { latestComlibs })
+                    ctx
                   ),
                   appData,
                   save,
