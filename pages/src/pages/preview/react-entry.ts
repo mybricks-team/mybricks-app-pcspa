@@ -3,11 +3,13 @@ import { getQueryString, requireScript } from '@/utils'
 import { PreviewStorage } from '@/utils/previewStorage'
 import { call as callDomainHttp } from '@mybricks/plugin-connector-domain';
 import renderUI from './renderUI'
+import { getRtComlibsFromConfigEdit } from '../../utils/comlib'
+import { insertDeps } from '../../utils/getComlibs'
 import '@/reset.less'
 
 const React = window.React;
 const ReactDOM = window.ReactDOM;
-const antd = window.antd;
+
 
 const fileId = getQueryString('fileId')
 const previewStorage = new PreviewStorage({ fileId })
@@ -20,7 +22,7 @@ if (!dumpJson) {
 
 if (!comlibs) {
   console.warn('数据错误: 组件库缺失')
-  comlibs = [PC_NORMAL_COM_LIB.rtJs, CHARS_COM_LIB.rtJs, BASIC_COM_LIB.rtJs]
+  comlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
 }
 
 function cssVariable(dumpJson) {
@@ -56,7 +58,7 @@ let reactRoot
 
 const getAntdLocalName = (locale) => {
   const localeArr = locale.split('-');
-  if(localeArr.length <= 1) {
+  if (localeArr.length <= 1) {
     return locale
   }
   const lang = localeArr.pop()?.toUpperCase();
@@ -67,11 +69,15 @@ const getCurrentLocale = () => {
   return navigator.language
 }
 
-function render(props) {
+async function render(props) {
   const { container } = props;
   if (comlibs && Array.isArray(comlibs)) {
-    Promise.all(comlibs.map((t) => requireScript(t))).then(() => {
-      const antdLocalLib = antd?.locale[getAntdLocalName(getCurrentLocale())]?.default
+    await insertDeps(comlibs)
+    const antd = window.antd;
+    Promise.all(getRtComlibsFromConfigEdit(comlibs).map((t) => requireScript(t))).then(() => {
+      const lang = getAntdLocalName(getCurrentLocale())
+
+      const antdLocalLib = antd?.locale![lang].default
 
       reactRoot = ReactDOM.createRoot((container ?? document).querySelector('#root'));
 
@@ -79,7 +85,7 @@ function render(props) {
         antd.ConfigProvider,
         {
           // 如鬼没有就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
-          locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale())) ? undefined : (antdLocalLib || antd.locale['zh_CN'].default)
+          locale: [`'en_US'`, `en`].includes(lang) ? undefined : (antdLocalLib || antd.locale['zh_CN'].default)
         },
         renderUI({
           ...props, renderType: 'react', env: {

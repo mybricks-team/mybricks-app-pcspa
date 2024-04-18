@@ -1,4 +1,11 @@
-import React, { useRef, useMemo, useState, useEffect, useCallback } from 'react'
+import React, {
+  useRef,
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  useLayoutEffect
+} from 'react'
 import axios from 'axios'
 import { fAxios } from '../../services/http'
 import moment from 'moment'
@@ -7,7 +14,6 @@ import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
 import { fetchPlugins, removeBadChar } from '../../utils'
-import { getRtComlibsFromConfigEdit } from './../../utils/comlib'
 import { PreviewStorage } from './../../utils/previewStorage'
 import { unionBy } from 'lodash'
 import PublishModal, { EnumMode } from './components/PublishModal'
@@ -16,7 +22,7 @@ import { i18nLangContentFilter } from '../../utils/index'
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
 import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
-import { getLibsFromConfig } from '../../utils/getComlibs'
+import { getInitComLibs } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
 
@@ -90,7 +96,7 @@ export default function MyDesigner({ appData: originAppData }) {
       fileId: appData.fileId,
       setting: appData.config || {},
       hasMaterialApp: appData.hasMaterialApp,
-      comlibs: getLibsFromConfig(appData),
+      comlibs: [],
       latestComlibs: [],
       debugQuery: appData.fileContent?.content?.debugQuery,
       executeEnv,
@@ -174,15 +180,35 @@ export default function MyDesigner({ appData: originAppData }) {
   }>()
   const [beforeunload, setBeforeunload] = useState(false)
   const [operable, setOperable] = useState(false)
+  const operableRef = useRef(operable);
+  operableRef.current = operable;
   const [saveTip, setSaveTip] = useState('')
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
   const [SPADesigner, setSPADesigner] = useState(null)
   const [remotePlugins, setRemotePlugins] = useState(null)
   const [publishModalVisible, setPublishModalVisible] = useState(false)
-  const [latestComlibs, setLatestComlibs] = useState<[]>()
   const [isDebugMode, setIsDebugMode] = useState(false)
   const operationList = useRef<any[]>([])
+
+  useLayoutEffect(() => {
+    getInitComLibs(appData)
+      .then(async ({ comlibs, latestComlibs }) => {
+        setCtx((pre) => ({ ...pre, comlibs, latestComlibs }));
+      })
+      .finally(loadDesigner);
+  }, [designer]);
+
+  const loadDesigner = useCallback(() => {
+    if (designer) {
+      const script = document.createElement('script');
+      script.src = designer
+      document.head.appendChild(script);
+      script.onload = () => {
+        (window as any).mybricks.SPADesigner && setSPADesigner((window as any).mybricks.SPADesigner);
+      };
+    }
+  }, [designer])
 
   // 只有预览时 search 会携带 version 字段
   const isPreview = window.location.search.includes('version')
@@ -194,22 +220,6 @@ export default function MyDesigner({ appData: originAppData }) {
     })
   }, [ctx.fontJS])
 
-  useEffect(() => {
-    const needSearchComlibs = ctx.comlibs.filter((lib) => lib.id !== '_myself_')
-    if (!!needSearchComlibs?.length) {
-      API.Material.getLatestComponentLibrarys(
-        needSearchComlibs.map((lib) => lib.namespace)
-      ).then((res: any) => {
-        const latestComlibs = (res || []).map((lib) => ({
-          ...lib,
-          ...JSON.parse(lib.content),
-        }))
-        setLatestComlibs(latestComlibs)
-      })
-    } else {
-      setLatestComlibs([])
-    }
-  }, [JSON.stringify(ctx.comlibs.map((lib) => lib.namespace))])
 
   useEffect(() => {
     fetchPlugins(plugins, {
@@ -262,18 +272,6 @@ export default function MyDesigner({ appData: originAppData }) {
     })
   }, [])
 
-  useMemo(() => {
-    if (designer) {
-      const script = document.createElement('script')
-      script.src = designer
-      document.head.appendChild(script)
-      script.onload = () => {
-        ; (window as any).mybricks.SPADesigner &&
-          setSPADesigner((window as any).mybricks.SPADesigner)
-      }
-    }
-  }, [designer])
-
   useEffect(() => {
     if (beforeunload) {
       window.onbeforeunload = () => {
@@ -305,7 +303,7 @@ export default function MyDesigner({ appData: originAppData }) {
       message.warn('请回到编辑页面，再进行保存')
       return
     }
-    if (!ctx.operable) {
+    if (!operableRef.current) {
       message.warn('请先点击右上角个人头像上锁获取页面编辑权限')
       return
     }
@@ -355,7 +353,7 @@ export default function MyDesigner({ appData: originAppData }) {
       .catch((err) => {
         console.error(err)
       })
-  }, [isPreview])
+  }, [isPreview, ctx])
 
   const preview = useCallback(() => {
     const json = designerRef.current?.toJSON()
@@ -368,7 +366,7 @@ export default function MyDesigner({ appData: originAppData }) {
       directConnection: ctx.directConnection,
       debugMockConfig: ctx.debugMockConfig,
       envList: ctx.envList,
-      comlibs: getRtComlibsFromConfigEdit(ctx.comlibs),
+      comlibs: ctx.comlibs,
       hasPermissionFn: ctx.hasPermissionFn,
       appConfig: JSON.stringify(appConfig),
       i18nLangContent: ctx.i18nLangContent,
@@ -406,7 +404,7 @@ export default function MyDesigner({ appData: originAppData }) {
     window.open(
       `./preview.html?fileId=${ctx.fileId}${objectToQueryString(ctx?.debugQuery || {})}`
     )
-  }, [appConfig])
+  }, [appConfig, ctx])
 
   const publish = useCallback(
     async (publishConfig) => {
@@ -535,7 +533,7 @@ export default function MyDesigner({ appData: originAppData }) {
           setPublishLoading(false)
         })
     },
-    [appData]
+    [appData, ctx]
   )
 
   const publishAndDownload = async (publishConfig) => {
@@ -736,14 +734,13 @@ export default function MyDesigner({ appData: originAppData }) {
       <div className={css.designer}>
         {SPADesigner &&
           remotePlugins &&
-          latestComlibs &&
           window?.mybricks?.createObservable && (
             <>
               <SPADesigner
                 ref={designerRef}
                 config={config(
                   window?.mybricks?.createObservable(
-                    Object.assign(ctx, { latestComlibs })
+                    ctx
                   ),
                   appData,
                   save,

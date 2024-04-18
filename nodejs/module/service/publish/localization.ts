@@ -10,6 +10,7 @@ import {
 } from "../../tools/localization";
 import LocalPublic from "../local-public";
 import { Logger } from "@mybricks/rocker-commons";
+import MaterialExternal from '../material-external'
 
 export async function localization({
   req,
@@ -18,6 +19,8 @@ export async function localization({
   app_type,
   json,
   hasOldComLib,
+  comlibs,
+  componentModules
 }) {
   /** 是否本地化发布 */
   const needLocalization = await getCustomNeedLocalization();
@@ -84,6 +87,8 @@ export async function localization({
       needLocalization,
       json,
       origin,
+      comlibs,
+      componentModules,
       app_type
     );
     globalDeps = globalDeps.concat(_globalDeps || []);
@@ -112,6 +117,8 @@ async function resourceLocalization(
   needLocalization: boolean,
   json: any,
   origin,
+  comlibs,
+  componentModules,
   type = "react"
 ) {
   const localPublicInfos = LocalPublic[type].map((info) => {
@@ -121,6 +128,16 @@ async function resourceLocalization(
     }
     return res;
   });
+
+  const materialExternalInfos = MaterialExternal[type].map((info) => {
+    const res = { ...info };
+    if (!needLocalization) {
+      res.path = res.CDN;
+    }
+    return res;
+  });
+
+  const chunkAssets = collectExternal(localPublicInfos, comlibs, componentModules, materialExternalInfos);
 
   const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
     switch (cur.tag) {
@@ -134,7 +151,7 @@ async function resourceLocalization(
     return pre;
   }, "");
 
-  template = template.replace("-- public --", publicHtmlStr);
+  template = template.replace("-- public --", chunkAssets);
 
   Logger.info(`[localPublicInfos] 发布资源 ${localPublicInfos}`);
 
@@ -181,3 +198,79 @@ async function resourceLocalization(
 
   return { template, globalDeps, images: images.filter((img) => !!img) };
 }
+
+const collectExternal = (
+  common,
+  comlibs,
+  componentModules,
+  materialExternalInfos
+) => {
+  let set = new Set();
+  common.forEach((it) => {
+    if (it.path.endsWith(".js")) {
+      set.add(`<script src="${it.path}"></script>`);
+    }
+    if (it.path.endsWith(".css")) {
+      set.add(`<link rel="stylesheet" href="${it.path}"/>`);
+    }
+  });
+  filterComLibFromComponent(
+    (comlibs ?? []).filter(({ id }) => id !== "_myself_"),
+    componentModules
+  ).forEach((it) => {
+    (it.externals ?? []).forEach((it) => {
+      let { urls, library } = it;
+      const mybricksExternal = materialExternalInfos.find(
+        (it) => it.library.toLowerCase() === library!.toLowerCase()
+      );
+      if (mybricksExternal) {
+        urls = mybricksExternal.path;
+      }
+      if (Array.isArray(urls) && urls.length) {
+        urls.forEach((url) => {
+          if (url.endsWith(".js")) {
+            set.add(`<script src="${url}"></script>`);
+          }
+          if (url.endsWith(".css")) {
+            set.add(`<link rel="stylesheet" href="${url}"/>`);
+          }
+        });
+      }
+    });
+  });
+  return [...set].join("\n");
+};
+
+const filterComLibFromComponent = (comLib, componentModules) => {
+  return comLib.reduce((pre, cur) => {
+    const set = new Set([
+      ...(cur.deps ?? []).map((it) => `${it.namespace}@${it.version}`),
+    ]);
+    for (let i = 0; i < componentModules.length; i++) {
+      if (
+        !set.size ||
+        set.has(
+          `${componentModules[i].namespace}@${componentModules[i].version}`
+        )
+      ) {
+        pre.push(cur);
+        break;
+      }
+    }
+    return pre;
+  }, []);
+};
+
+const scanComLib = (lib) => {
+  const queue = [...lib.comAray];
+  const set = new Set();
+  while (queue.length) {
+    const com = queue.shift();
+    if (com.comAray?.length) {
+      queue.push(...com.comAray);
+    } else {
+      set.add(`${com.namespace}@${com.version}`);
+    }
+  }
+  return set;
+};

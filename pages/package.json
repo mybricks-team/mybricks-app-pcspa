@@ -63,7 +63,7 @@
     "@mybricks/plugin-connector-domain": "0.0.52",
     "@mybricks/plugin-connector-http": "1.2.12",
     "@mybricks/plugin-locale": "^1.0.2",
-    "@mybricks/plugin-note": "^0.0.6",
+    "@mybricks/plugin-note": "^0.0.7",
     "@mybricks/plugin-theme": "^0.0.45",
     "@mybricks/plugin-tools": "1.0.17",
     "@mybricks/sdk-for-app": "1.0.36",
@@ -73,7 +73,7 @@
     "dayjs": "^1.11.3",
     "html-to-image": "^1.10.8",
     "lodash": "^4.17.21",
-    "mybricks-plugin-version": "0.0.20",
+    "mybricks-plugin-version": "0.0.22",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
