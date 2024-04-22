@@ -26,6 +26,7 @@ import upload from '@/utils/upload'
 import searchUser from '@/utils/searchUser'
 import { blobToBase64 } from '@/utils/blobToBase64'
 import { DESIGN_MATERIAL_EDITOR_OPTIONS, mergeEditorOptions, PURE_INTERNET_EDITOR_OPTIONS } from "./editor-options";
+import { render as renderUI  } from '@mybricks/render-web';
 
 const defaultPermissionComments = `/**
 *
@@ -156,15 +157,7 @@ const getExecuteEnvByMode = (debugMode, ctx, envList) => {
   }
 };
 
-// let renderUI;
-
 export default function (ctx, appData, save, designerRef, remotePlugins = []) {
-  // const script = document.createElement('script');
-  // script.src = 'http://localhost:9001/public/render-web/1.2.58/index.min.js'
-  // document.head.appendChild(script);
-  // script.onload = () => {
-  //   renderUI = window._mybricks_render_web.render;
-  // };
 
   const envList = ctx.envList;
   // 获得环境信息映射表
@@ -210,13 +203,13 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
   const debugModeOptions =
     envList.length > 0
       ? [
-          { label: "选择环境", value: EnumMode.ENV },
-          { label: "自定义域名", value: EnumMode.CUSTOM },
-        ]
+        { label: "选择环境", value: EnumMode.ENV },
+        { label: "自定义域名", value: EnumMode.CUSTOM },
+      ]
       : [
-          { label: "默认", value: EnumMode.DEFAULT },
-          { label: "自定义域名", value: EnumMode.CUSTOM },
-        ];
+        { label: "默认", value: EnumMode.DEFAULT },
+        { label: "自定义域名", value: EnumMode.CUSTOM },
+      ];
 
   const adder: Array<{
     type: string;
@@ -224,20 +217,20 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     inputs?: { id: string; title: string; schema: Record<string, string> }[];
     template?: Record<string, any>;
   }> = [
-    {
-      type: "normal",
-      title: "页面",
-      inputs: [
-        {
-          id: "open",
-          title: "打开",
-          schema: {
-            type: "any",
+      {
+        type: "normal",
+        title: "页面",
+        inputs: [
+          {
+            id: "open",
+            title: "打开",
+            schema: {
+              type: "any",
+            },
           },
-        },
-      ],
-    },
-  ];
+        ],
+      },
+    ];
   if (isReact) {
     adder.push(
       ...[
@@ -281,29 +274,29 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       isPrivatization: ctx.setting?.system.config?.isPureIntranet === true,
       addActions: domainApp
         ? [
-            {
-              type: "http-sql",
-              title: "领域接口",
-              noUseInnerEdit: true,
-              getTitle: (item) => {
-                return item.content?.domainServiceMap ? item.content.title : `${item.content.title || ""}(未选择)`;
-              },
-              render: (props) => {
-                return (
-                  <CollaborationHttp
-                    {...props}
-                    openFileSelector={() =>
-                      openFilePanel({
-                        allowedFileExtNames: ["domain"],
-                        parentId: ctx.sdk.projectId,
-                        fileId: ctx.fileId,
-                      })
-                    }
-                  />
-                );
-              },
+          {
+            type: "http-sql",
+            title: "领域接口",
+            noUseInnerEdit: true,
+            getTitle: (item) => {
+              return item.content?.domainServiceMap ? item.content.title : `${item.content.title || ""}(未选择)`;
             },
-          ]
+            render: (props) => {
+              return (
+                <CollaborationHttp
+                  {...props}
+                  openFileSelector={() =>
+                    openFilePanel({
+                      allowedFileExtNames: ["domain"],
+                      parentId: ctx.sdk.projectId,
+                      fileId: ctx.fileId,
+                    })
+                  }
+                />
+              );
+            },
+          },
+        ]
         : void 0,
     }),
   ];
@@ -321,9 +314,9 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     );
   }
   return {
-    // debugger(json, opts) {
-    //   return renderUI(json, opts)
-    // },
+    debugger(json, opts) {
+      return renderUI(json, opts)
+    },
     shortcuts: {
       "ctrl+s": [save],
     },
@@ -461,8 +454,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     ],
     ...(ctx.hasMaterialApp
       ? {
-          comLibAdder: comLibAdderFunc(ctx),
-        }
+        comLibAdder: comLibAdderFunc(ctx),
+      }
       : {}),
     comLibLoader: comlibLoaderFunc(ctx),
     pageContentLoader() {
@@ -511,7 +504,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         )
         return
       },
-      items({}, cate0, cate1, cate2) {
+      items({ }, cate0, cate1, cate2) {
         cate0.title = `项目`;
         cate0.items = [
           {
