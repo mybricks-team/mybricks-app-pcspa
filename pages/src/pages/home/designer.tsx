@@ -133,6 +133,8 @@ export default function MyDesigner({ appData: originAppData }) {
       ) {
         const { name, shareType, content, icon } = param
 
+        const operationListStr = JSON.stringify(operationList.current.reverse())
+
         const settings = await getAppSetting()
         const isEncode = !!settings?.publishLocalizeConfig?.isEncode
 
@@ -145,10 +147,12 @@ export default function MyDesigner({ appData: originAppData }) {
             content: removeBadChar(content),
             isEncode,
             icon,
+            operationList: operationListStr
           })
           .then(() => {
             !skipMessage &&
               message.success({ content: `保存完成`, key: msgSaveKey })
+            operationList.current = []
             if (content) {
               setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
             }
@@ -336,11 +340,11 @@ export default function MyDesigner({ appData: originAppData }) {
 
     json.projectId = ctx.sdk.projectId
 
-    json.operationList = operationList.current.reverse()
+    await ctx.save({
+      name: ctx.fileName,
+      content: JSON.stringify(json),
+    })
 
-    await ctx.save({ name: ctx.fileName, content: JSON.stringify(json) })
-
-    operationList.current = []
     setBeforeunload(false)
     // 保存缩略图
     await API.App.getPreviewImage({
@@ -439,14 +443,15 @@ export default function MyDesigner({ appData: originAppData }) {
           ctx.i18nLangContent,
           ctx.i18nUsedIdList
         )
-        json.operationList = operationList.current.reverse()
         json.pageHeader = ctx.pageHeader
 
         await ctx.save(
-          { content: JSON.stringify(json), name: ctx.fileName },
+          {
+            content: JSON.stringify(json),
+            name: ctx.fileName,
+          },
           true
         )
-        operationList.current = []
         setBeforeunload(false)
 
         const curToJSON = designerRef?.current?.toJSON()
