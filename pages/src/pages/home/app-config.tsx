@@ -314,9 +314,9 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     );
   }
   return {
-    debugger(json, opts) {
-      return renderUI(json, opts)
-    },
+    // debugger(json, opts) {
+    //   return renderUI(json, opts)
+    // },
     shortcuts: {
       "ctrl+s": [save],
     },
