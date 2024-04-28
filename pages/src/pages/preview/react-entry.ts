@@ -77,7 +77,7 @@ async function render(props) {
     Promise.all(getRtComlibsFromConfigEdit(comlibs).map((t) => requireScript(t))).then(() => {
       const lang = getAntdLocalName(getCurrentLocale())
 
-      const antdLocalLib = antd?.locale![lang].default
+      const antdLocalLib = antd?.locale?.[lang]?.default || antd.locale['zh_CN'].default
 
       reactRoot = ReactDOM.createRoot((container ?? document).querySelector('#root'));
 
@@ -85,7 +85,7 @@ async function render(props) {
         antd.ConfigProvider,
         {
           // 如鬼没有就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
-          locale: [`'en_US'`, `en`].includes(lang) ? undefined : (antdLocalLib || antd.locale['zh_CN'].default)
+          locale: [`'en_US'`, `en`].includes(lang) ? undefined : antdLocalLib
         },
         renderUI({
           ...props, renderType: 'react', env: {
