@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { publish } from "./publish";
+// import { publish } from "./publish";
+import publish from './publishEntry';
 import { searchUser } from "./seachUser";
 import { upload } from "./upload";
 import { rollback } from "./rollback";
@@ -8,7 +9,8 @@ import { downloadProduct } from "./download-product";
 @Injectable()
 export default class PcPageService {
   async publish(req, { json, userId, fileId, envType, commitInfo, appConfig }) {
-    return await publish(req, { json, userId, fileId, envType, commitInfo, appConfig });
+    // return await publish(req, { json, userId, fileId, envType, commitInfo, appConfig });
+    return await publish({ req, json, userId, envType, fileId, commitInfo, appConfig })
   }
 
   async upload(req, { file }, { groupId = "" } = {}) {

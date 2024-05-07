@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import { Logger } from "@mybricks/rocker-commons";
 import { decompressGzipToObject } from "../tools/zip";
-import { publishPush } from "./publish/push";
-import { saveRollbackData } from "./publish/save-rollback-data";
+import { publishPush } from "./publishEntry/push";
+import { saveRollbackData } from "./publishEntry/saveRollbackData";
 
 export async function rollback(
   req: any,
