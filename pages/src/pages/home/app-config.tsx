@@ -23,11 +23,7 @@ import { runJs } from '../../utils/runJs'
 import axios from 'axios'
 import { shapeUrlByEnv } from '../../utils'
 import { EnumMode } from './components/PublishModal'
-import {
-  GET_DEFAULT_PAGE_HEADER,
-  GET_PAGE_CONFIG_EDITOR,
-  USE_CUSTOM_HOST,
-} from './constants'
+import { GET_DEFAULT_PAGE_HEADER, GET_PAGE_CONFIG_EDITOR, USE_CUSTOM_HOST } from './constants'
 import { fAxios } from '@/services/http'
 import { createFromIconfontCN } from '@ant-design/icons'
 import download from '@/utils/download'
@@ -104,13 +100,14 @@ const injectUpload = (
 ) => {
   if (!!editConfig && !editConfig.upload) {
     editConfig.upload = async (files: Array<File>): Promise<Array<string>> => {
+
       /**
        * @description 图片上传支持返回Base64
        */
       if (editConfig.options?.useBase64) {
         try {
-          const b64 = await blobToBase64(files[0])
-          return [b64]
+          const b64 = await blobToBase64(files[0]);
+          return [b64];
         } catch (e) {
           throw Error(`【图片转Base64出错】: ${e}`)
         }
@@ -182,7 +179,17 @@ const getExecuteEnvByMode = (debugMode, ctx, envList) => {
   }
 }
 
+// let renderUI;
+
 export default function (ctx, appData, save, designerRef, remotePlugins = []) {
+
+  // const script = document.createElement('script');
+  // script.src = 'http://localhost:9001/public/render-web/1.2.58/index.min.js'
+  // document.head.appendChild(script);
+  // script.onload = () => {
+  //   renderUI = window._mybricks_render_web.render;
+  // };
+
   const envList = ctx.envList
   // 获得环境信息映射表
   const envMap = [
@@ -357,7 +364,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         user: ctx.user,
         onUpload: async (file: File) => {
           return new Promise(async (resolve, reject) => {
-            const { manateeUserInfo, fileId } = ctx
+            const { manateeUserInfo, fileId } = ctx;
             let uploadService = ctx.uploadService
             const formData = new FormData()
             formData.append('file', file)
@@ -387,7 +394,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               const staticUrl = /^http/.test(url)
                 ? url
                 : `${getDomainFromPath(uploadService)}${url}`
-              resolve({ url: staticUrl })
+              resolve({ url: staticUrl });
               reject(`【图片上传出错】: ${message}`)
             } catch (error) {
               message.error(error.message)
@@ -399,26 +406,25 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           return new Promise(async (resolve, reject) => {
             try {
               const res = await searchUser(`api/pcpage/searchUser`, {
-                keyword,
-              })
-              // @ts-ignore
-              const formatRes = (res || []).map((item) => {
-                const { email, id, name, avatar } = item
+                keyword
+              });
+              const formatRes = (res || []).map(item => {
+                const { email, id, name, avatar } = item;
                 return {
                   name: name ? `${name}(${email})` : email,
                   id,
                   username: email,
                   orgDisplayName: '',
-                  thumbnailAvatarUrl: avatar,
+                  thumbnailAvatarUrl: avatar
                 }
               })
-              resolve(formatRes)
+              resolve(formatRes);
             } catch (e) {
-              message.error('搜索用户失败!')
-              reject('搜索用户失败!')
+              message.error('搜索用户失败!');
+              reject('搜索用户失败!');
             }
           })
-        },
+        }
       }),
       localePlugin({
         defaultPackLink: '/mybricks-app-pcspa/public/i18n-example.json',
@@ -452,12 +458,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             const finish = message.loading('正在回滚...', 0)
             const res: { code: number; message: string } = await fAxios.post(
               '/api/pcpage/rollback',
-              {
-                filePath: pubAssetFilePath,
-                nowVersion,
-                type,
-                fileId,
-              }
+              { filePath: pubAssetFilePath, nowVersion, type, fileId }
             )
             finish()
 
@@ -473,21 +474,14 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         modalActiveExtends: [
           {
             type: 'publish',
-            title: (
-              <Tooltip
-                color="white"
-                title={
-                  <a
-                    target="_blank"
-                    href="https://docs.mybricks.world/docs/publish-integration/kjkj/"
-                  >
-                    使用说明
-                  </a>
-                }
-              >
-                下载
-              </Tooltip>
-            ),
+            title: <Tooltip
+              color='white'
+              title={<a
+                target='_blank'
+                href="https://docs.mybricks.world/docs/publish-integration/kjkj/">使用说明</a>}
+            >
+              下载
+            </Tooltip>,
             onClick({ fileId, type: envType, version }) {
               const loadend = message.loading(`版本 ${version} 下载中...`, 0)
               download(
@@ -871,69 +865,106 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           },
         ]
         if (!ctx.pageHeader) {
-          ctx.pageHeader = GET_DEFAULT_PAGE_HEADER(appData)
+          ctx.pageHeader = GET_DEFAULT_PAGE_HEADER(appData);
         }
-        const pageConfigEditor = GET_PAGE_CONFIG_EDITOR(ctx)
-        cate1.title = pageConfigEditor.title
-        cate1.items = pageConfigEditor.items
-
-        cate2.title = `出码`
-        cate2.items = [
-          {
-            title: '出码组件名',
-            type: 'text',
-            description: '需要大驼峰命名，如: TestCom',
-            value: {
-              get: () => {
-                return ctx.componentName
-              },
-              set: (_: any, componentName: string) => {
-                if (componentName && !isValidPascalCase(componentName)) {
-                  message.error('出码组件名需要大驼峰命名，如: TestCom')
-                } else {
-                  ctx.componentName = componentName
-                }
-              },
+        const pageConfigEditor = GET_PAGE_CONFIG_EDITOR(ctx);
+        cate1.title = pageConfigEditor.title;
+        cate1.items = pageConfigEditor.items;
+      },
+      editorOptions: ctx.setting?.system.config?.isPureIntranet
+        ? {
+          expression: {
+            CDN: {
+              codemirror:
+                '/mfs/editor_assets/codemirror/codemirror_1.0.13_index.min.js',
             },
           },
-          // {
-          //   title: '静态资源是否上传CDN',
-          //   description: '使用此功能前，需先配置上传接口',
-          //   type: 'switch',
-          //   value: {
-          //     get: () => {
-          //       return ctx.staticResourceToCDN
-          //     },
-          //     set: (_: any, staticResourceToCDN: boolean) => {
-          //       ctx.staticResourceToCDN = staticResourceToCDN
-          //     },
-          //   },
-          // },
-          () => {
-            const [value, setValue] = useState<OutCodeDirListType>([]);
-            useEffect(() => {
-              getLocalData().then(localData => {
-                setValue(localData.outCodeDirList || [])
-              });
-            }, [])
-            return <OutCodeDirList
-              constantContext={ctx}
-              variableContext={ctx}
-              handleContext={{ ...ctx, handleSaveButtonClick: save, getToJson: () => designerRef.current.toJSON({ onlyDiff: true }) }}
-              value={value}
-              onChange={value => {
-                setLocalData({ outCodeDirList: value })
-                setValue(value)
-              }}
-            />
+          richtext: {
+            CDN: {
+              tinymce:
+                '/mfs/editor_assets/richText/tinymce/5.7.1/tinymce.min.js',
+              language: '/mfs/editor_assets/richText/tinymce/5.7.1/zh_CN.js',
+            },
           },
-        ]
-      },
-      editorOptions: mergeEditorOptions([
-        !!ctx.setting?.system.config?.isPureIntranet &&
-        PURE_INTERNET_EDITOR_OPTIONS,
-        DESIGN_MATERIAL_EDITOR_OPTIONS(ctx),
-      ]),
+          align: {
+            CDN: {
+              left: '/mfs/editor_assets/align/left.defc4a63ebe8ea7d.svg',
+              rowCenter:
+                '/mfs/editor_assets/align/center.c284343a9ff9672a.svg',
+              right: '/mfs/editor_assets/align/right.a7763b38b84b5894.svg',
+              top: '/mfs/editor_assets/align/top.98906024d52b69de.svg',
+              columnCenter:
+                '/mfs/editor_assets/align/center.100376f4ade480cd.svg',
+              bottom: '/mfs/editor_assets/align/bottom.6ee532067ed440ca.svg',
+              column:
+                '/mfs/editor_assets/align/column-space-between.31d560c0e611198f.svg',
+              row: '/mfs/editor_assets/align/row-space-between.ead5cd660c0f1c33.svg',
+            },
+          },
+          array: {
+            CDN: {
+              sortableHoc:
+                '/mfs/editor_assets/react-sortable/react-sortable-hoc-2.0.0_index.umd.min.js',
+            },
+          },
+          expcode: {
+            CDN: {
+              prettier: {
+                standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
+              },
+              eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+              paths: {
+                vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
+              },
+              monacoLoader:
+                '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+            },
+          },
+          csseditor: {
+            CDN: {
+              prettier: {
+                standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
+              },
+              eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+              paths: {
+                vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
+              },
+              monacoLoader:
+                '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+            },
+          },
+          stylenew: {
+            CDN: {
+              prettier: {
+                standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
+              },
+              eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+              paths: {
+                vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
+              },
+              monacoLoader:
+                '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+            },
+          },
+          code: {
+            CDN: {
+              prettier: {
+                standalone: '/mfs/editor_assets/prettier/2.6.2/standalone.js',
+                babel: '/mfs/editor_assets/prettier/2.6.2/parser-babel.js',
+              },
+              eslint: '/mfs/editor_assets/eslint/8.15.0/eslint.js',
+              paths: {
+                vs: '/mfs/editor_assets/monaco-editor/0.33.0/min/vs',
+              },
+              monacoLoader:
+                '/mfs/editor_assets/monaco-editor/0.33.0/min/vs/loader.min.js',
+            },
+          },
+        }
+        : undefined,
     },
     com: {
       env: {
@@ -1084,19 +1115,19 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               return
             }
             // 创建FormData对象
-            const formData = new FormData()
+            const formData = new FormData();
 
             // 添加文件到FormData对象
             for (const file of files) {
-              formData.append('file', file)
+              formData.append('file', file);
             }
 
             try {
               // 发送POST请求
               const response = await fetch(ctx.runtimeUploadService, {
-                method: 'POST',
-                body: formData,
-              }).then((res) => {
+                method: "POST",
+                body: formData
+              }).then(res => {
                 if (res.status !== 200 && res.status !== 201) {
                   throw new Error(`上传失败！`)
                 }
@@ -1105,12 +1136,12 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               console.log(`res,`, response)
               return {
                 url: response?.data?.url,
-                name: files[0].name,
+                name: files[0].name
               }
             } catch (error) {
               message.error(`上传失败，请检查上传接口设置！`)
               // 错误处理
-              console.error('文件上传失败', error)
+              console.error('文件上传失败', error);
               return {}
             }
           }
@@ -1139,12 +1170,10 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               return true
             }
 
-            let result: boolean | { permission: boolean }
+            let result: (boolean | { permission: boolean })
 
             try {
-              result = runJs(decodeURIComponent(hasPermissionFn), [
-                { key: code },
-              ])
+              result = runJs(decodeURIComponent(hasPermissionFn), [{ key: code }])
 
               if (
                 typeof result !== 'boolean' &&
@@ -1155,16 +1184,11 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   '权限方法',
                   `权限方法返回值类型应为 Boolean 或者 { permission: Boolean } 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(result)}`
                 )
-                console.error(
-                  `权限方法返回值类型应为 Boolean 或者 { permission: Boolean } 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(result)}`
-                )
+                console.error(`权限方法返回值类型应为 Boolean 或者 { permission: Boolean } 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(result)}`)
               }
             } catch (error) {
               result = true
-              designerRef.current?.console?.log.error(
-                '权限方法',
-                `${error.message}`
-              )
+              designerRef.current?.console?.log.error('权限方法', `${error.message}`)
               console.error(`权限方法出错[Key] ${code};`, error)
             }
 

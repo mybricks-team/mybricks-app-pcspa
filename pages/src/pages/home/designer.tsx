@@ -207,6 +207,7 @@ export default function MyDesigner({ appData: originAppData }) {
       .then(async ({ comlibs, latestComlibs }) => {
         const newComlibs = ctx.debugComlib ? replaceComlib(comlibs, comlibDebugUtils.get()) : comlibs
         setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
+        // setCtx((pre) => ({ ...pre, comlibs: ['http://localhost:20000/comlib.js'], latestComlibs }));
       })
       .finally(loadDesigner)
   }, [designer])
