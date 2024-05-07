@@ -77,7 +77,7 @@ export const getLatestComLib = async (comlibs) => {
 const checkDeps = async (libs) => {
   for (let i = 0; i < libs.length; i++) {
     const lib = libs[i];
-    if ("externals" in lib || lib.id === "_myself_") continue;
+    if (typeof lib === 'string' || "externals" in lib || lib.id === "_myself_") continue;
     try {
       const material = await getLibExternals({
         namespace: lib.namespace,
@@ -133,7 +133,7 @@ const insertDeps = async (libs) => {
   if (!libs.length) return libs;
   await Promise.all(
     libs.map((lib) => {
-      return "externals" in lib ? insertExternal(lib) : Promise.resolve();
+      return (typeof lib === 'object' && "externals" in lib) ? insertExternal(lib) : Promise.resolve();
     })
   );
   return libs;
@@ -161,8 +161,8 @@ const insertExternal = async (lib) => {
 
 const composeAsync =
   (...fns) =>
-  async (arg) =>
-    fns.reduceRight(async (pre, fn) => fn(await pre), Promise.resolve(arg));
+    async (arg) =>
+      fns.reduceRight(async (pre, fn) => fn(await pre), Promise.resolve(arg));
 
 const getInitComLibs = composeAsync(
   getLatestComLib,
