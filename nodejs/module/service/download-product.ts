@@ -8,7 +8,6 @@ import {
 import { Response } from "express";
 import * as os from "os";
 import * as mkdirp from "mkdirp";
-import { rimrafSync } from "rimraf";
 import publiAssets from './local-public'
 
 const path = require("path");
@@ -46,7 +45,7 @@ export async function downloadProduct(
 
     // 创建临时文件夹
     const tempDir = path.join(os.tmpdir(), fileName);
-    rimrafSync(tempDir);
+    require('child_process').execSync(`rm -rf ${tempDir}`);
     mkdirp.sync(tempDir);
     Logger.info("[downloadProduct] 开始生成下载文件...");
 
