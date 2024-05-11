@@ -45,7 +45,7 @@ export async function downloadProduct(
 
     // 创建临时文件夹
     const tempDir = path.join(os.tmpdir(), fileName);
-    require('child_process').execSync(`rm -rf ${tempDir}`);
+    fs.rmSync(tempDir, { recursive: true });
     mkdirp.sync(tempDir);
     Logger.info("[downloadProduct] 开始生成下载文件...");
 
