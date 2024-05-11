@@ -82,11 +82,11 @@ export default (ctx) => (libDesc) => {
   const getSelfComponents = () => {
     return mySelfLib?.comAray.filter(com => isObject(com))
   }
-  
+
   // const LATEST_COMLIBS = cloneDeep(ctx.latestComlibs || []);
 
-  return new Promise(async(resolve, reject) => {
-    ;(async () => {
+  return new Promise(async (resolve, reject) => {
+    ; (async () => {
       /** 带加载命令，如：新增组件、更新组件、更新组件库 */
       if (libDesc?.cmd) {
         const { cmd, libId, comNamespace } = libDesc
@@ -141,14 +141,14 @@ export default (ctx) => (libDesc) => {
             break;
           case 'addCom':
             ctx.sdk.openUrl({
-	            url: 'MYBRICKS://mybricks-material/materialSelectorPage',
-	            params: {
-		            defaultSelected: getSelfComponents(),
-		            userId: ctx.user?.id,
-		            combo: true,
+              url: 'MYBRICKS://mybricks-material/materialSelectorPage',
+              params: {
+                defaultSelected: getSelfComponents(),
+                userId: ctx.user?.id,
+                combo: true,
                 tags: [APP_TYPE]
-	            },
-	            onSuccess: ({ materials, updatedMaterials }) => {
+              },
+              onSuccess: ({ materials, updatedMaterials }) => {
                 const newComponents = addSelfLibComponents(materials)
                 getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
                   resolve({
@@ -158,16 +158,16 @@ export default (ctx) => (libDesc) => {
                     comAray: newComlib?.comAray || []
                   })
                 })
-	            }
-            })            
-            
+              }
+            })
+
             break
           case 'deleteComLib':
-            deleteComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace})
+            deleteComlib(ctx, { ...libDesc, namespace: libDesc?.libNamespace })
             resolve(true);
             break
           case 'upgradeComLib':
-            const upgradedComlib = await upgradeLatestComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace, id: libId});
+            const upgradedComlib = await upgradeLatestComlib(ctx, { ...libDesc, namespace: libDesc?.libNamespace, id: libId });
             return resolve(upgradedComlib)
           default:
             break
@@ -187,21 +187,21 @@ export default (ctx) => (libDesc) => {
       /** 不带命令，增加、更新组件库，新增时comLibAdder resolve的组件库会带到libDesc来 */
       if (libDesc?.editJs) {
         const material = ctx.comlibs.find(lib => lib.namespace === libDesc?.libNamespace)
-        if(material){
+        if (material) {
           //upgrade
           const comlib = {
-            ...material, 
+            ...material,
             ...libDesc
           }
-          const addedComlib = await upgradeComlibByVersion(ctx, {...comlib, namespace: comlib?.libNamespace, id: libDesc?.libId})
+          const addedComlib = await upgradeComlibByVersion(ctx, { ...comlib, namespace: comlib?.libNamespace, id: libDesc?.libId })
           return resolve(addedComlib)
-        }else{
+        } else {
           //新增
-          const addedComlib = await addComlib(ctx, {...libDesc, namespace: libDesc?.libNamespace, id: libDesc?.libId})
+          const addedComlib = await addComlib(ctx, { ...libDesc, namespace: libDesc?.libNamespace, id: libDesc?.libId })
           return resolve(addedComlib)
         }
       }
 
-    })().catch(() => {})
+    })().catch(() => { })
   })
 }

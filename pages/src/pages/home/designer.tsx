@@ -4,7 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  useLayoutEffect
+  useLayoutEffect,
 } from 'react'
 import axios from 'axios'
 import { fAxios } from '../../services/http'
@@ -91,7 +91,9 @@ export default function MyDesigner({ appData: originAppData }) {
       },
       user: appData.user,
       fileName: appData.fileContent?.name,
-      pageHeader: appData.fileContent?.content?.pageHeader || GET_DEFAULT_PAGE_HEADER(appData),
+      pageHeader:
+        appData.fileContent?.content?.pageHeader ||
+        GET_DEFAULT_PAGE_HEADER(appData),
       absoluteNamePath: appData.hierarchy.absoluteNamePath,
       fileId: appData.fileId,
       setting: appData.config || {},
@@ -128,7 +130,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon?},
+        param: { name?; shareType?; content?; icon? },
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
@@ -147,7 +149,7 @@ export default function MyDesigner({ appData: originAppData }) {
             content: removeBadChar(content),
             isEncode,
             icon,
-            operationList: operationListStr
+            operationList: operationListStr,
           })
           .then(() => {
             !skipMessage &&
@@ -184,8 +186,8 @@ export default function MyDesigner({ appData: originAppData }) {
   }>()
   const [beforeunload, setBeforeunload] = useState(false)
   const [operable, setOperable] = useState(false)
-  const operableRef = useRef(operable);
-  operableRef.current = operable;
+  const operableRef = useRef(operable)
+  operableRef.current = operable
   const [saveTip, setSaveTip] = useState('')
   const [saveLoading, setSaveLoading] = useState(false)
   const [publishLoading, setPublishLoading] = useState(false)
@@ -198,19 +200,20 @@ export default function MyDesigner({ appData: originAppData }) {
   useLayoutEffect(() => {
     getInitComLibs(appData)
       .then(async ({ comlibs, latestComlibs }) => {
-        setCtx((pre) => ({ ...pre, comlibs, latestComlibs }));
+        setCtx((pre) => ({ ...pre, comlibs, latestComlibs }))
       })
-      .finally(loadDesigner);
-  }, [designer]);
+      .finally(loadDesigner)
+  }, [designer])
 
   const loadDesigner = useCallback(() => {
     if (designer) {
-      const script = document.createElement('script');
+      const script = document.createElement('script')
       script.src = designer
-      document.head.appendChild(script);
+      document.head.appendChild(script)
       script.onload = () => {
-        (window as any).mybricks.SPADesigner && setSPADesigner((window as any).mybricks.SPADesigner);
-      };
+        ;(window as any).mybricks.SPADesigner &&
+          setSPADesigner((window as any).mybricks.SPADesigner)
+      }
     }
   }, [designer])
 
@@ -223,7 +226,6 @@ export default function MyDesigner({ appData: originAppData }) {
       scriptUrl: ctx.fontJS, // 在 iconfont.cn 上生成
     })
   }, [ctx.fontJS])
-
 
   useEffect(() => {
     fetchPlugins(plugins, {
@@ -737,31 +739,27 @@ export default function MyDesigner({ appData: originAppData }) {
         </div>
       </Toolbar>
       <div className={css.designer}>
-        {SPADesigner &&
-          remotePlugins &&
-          window?.mybricks?.createObservable && (
-            <>
-              <SPADesigner
-                ref={designerRef}
-                config={config(
-                  window?.mybricks?.createObservable(
-                    ctx
-                  ),
-                  appData,
-                  save,
-                  designerRef,
-                  remotePlugins
-                )}
-                onEdit={onEdit}
-                onMessage={onMessage}
-                onDebug={onDebug}
-                _onError_={(ex: any) => {
-                  console.error(ex)
-                  onMessage('error', ex.message)
-                }}
-              />
-            </>
-          )}
+        {SPADesigner && remotePlugins && window?.mybricks?.createObservable && (
+          <>
+            <SPADesigner
+              ref={designerRef}
+              config={config(
+                window?.mybricks?.createObservable(ctx),
+                appData,
+                save,
+                designerRef,
+                remotePlugins
+              )}
+              onEdit={onEdit}
+              onMessage={onMessage}
+              onDebug={onDebug}
+              _onError_={(ex: any) => {
+                console.error(ex)
+                onMessage('error', ex.message)
+              }}
+            />
+          </>
+        )}
       </div>
       <PublishModal
         envList={ctx.envList}
@@ -790,10 +788,28 @@ export default function MyDesigner({ appData: originAppData }) {
 const genLazyloadComs = async (comlibs, toJSON) => {
   const curComLibs = JSON.parse(JSON.stringify(comlibs))
   const mySelfComMap = {}
+  let cloudDeps = []
+
   comlibs.forEach((comLib) => {
     if (comLib?.defined && Array.isArray(comLib.comAray)) {
       comLib.comAray.forEach((com) => {
         mySelfComMap[`${com.namespace}@${com.version}`] = true
+      })
+    }
+  })
+
+  // 解析云组件依赖项
+  window['__comlibs_edit_'].forEach((comLib) => {
+    if (comLib?.defined && Array.isArray(comLib.comAray)) {
+      comLib.comAray.forEach((com) => {
+        if (com?.title === '云组件依赖') {
+          cloudDeps = com.comAray.map((item) => {
+            return {
+              namespace: item.namespace,
+              verison: item.version,
+            }
+          })
+        }
       })
     }
   })
@@ -848,6 +864,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     ...modulesDeps
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
+    ...cloudDeps
+      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ]
 
   deps = deps.reduce((accumulator, current) => {
@@ -864,6 +883,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     const willFetchComLibs = curComLibs.filter(
       (lib) => !lib?.defined && lib.coms
     )
+
     const allComLibsRuntimeMap = (
       await Promise.all(
         willFetchComLibs.map((lib) =>
@@ -871,6 +891,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         )
       )
     ).map((data) => data.data)
+
     const noThrowError = comlibs.some((lib) => !lib.coms && !lib.defined)
 
     deps.forEach((component) => {
@@ -881,7 +902,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
       if (libIndex !== -1) {
         curComponent =
           allComLibsRuntimeMap[libIndex][
-          component.namespace + '@' + component.version
+            component.namespace + '@' + component.version
           ]
       } else {
         libIndex = allComLibsRuntimeMap.findIndex((lib) =>
@@ -899,9 +920,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         }
         curComponent =
           allComLibsRuntimeMap[libIndex][
-          Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-            key.startsWith(component.namespace)
-          )
+            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+              key.startsWith(component.namespace)
+            )
           ]
       }
 
