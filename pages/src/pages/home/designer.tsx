@@ -793,7 +793,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
   comlibs.forEach((comLib) => {
     if (comLib?.defined && Array.isArray(comLib.comAray)) {
       comLib.comAray.forEach((com) => {
-        mySelfComMap[`${com.namespace}@${com.version}`] = true
+        mySelfComMap[`${com.namespace}`] = true
       })
     }
   })
@@ -852,17 +852,17 @@ const genLazyloadComs = async (comlibs, toJSON) => {
   let deps = [
     ...(toJSON.scenes || [])
       .reduce((pre, scene) => [...pre, ...scene.deps], [])
-      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !mySelfComMap[`${item.namespace}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
     ...(toJSON.global?.fxFrames || [])
       .reduce((pre, fx) => [...pre, ...fx.deps], [])
-      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !mySelfComMap[`${item.namespace}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
     ...definedComsDeps
-      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !mySelfComMap[`${item.namespace}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
     ...modulesDeps
-      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      .filter((item) => !mySelfComMap[`${item.namespace}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
     ...cloudDeps
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])

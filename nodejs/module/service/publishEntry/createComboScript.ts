@@ -105,7 +105,7 @@ export const generateComLib = async (
             return;
           } else {
             throw new Error(
-              `找不到 ${component.namespace}@${component.version} 对应的组件资源`
+              `1-找不到 ${component.namespace}@${component.version} 对应的组件资源`
             );
           }
         }
@@ -122,7 +122,7 @@ export const generateComLib = async (
           return;
         } else {
           throw new Error(
-            `找不到 ${component.namespace}@${component.version} 对应的组件资源`
+            `2-找不到 ${component.namespace}@${component.version} 对应的组件资源`
           );
         }
       }
