@@ -4,7 +4,7 @@ export default async function download(url: string) {
   return await fetch(url)
     .then((response) => {
       const disposition = response.headers.get("Content-Disposition");
-      const match = disposition.match(/filename=(.+)/);
+      const match = disposition && disposition.match(/filename=(.+)/);
       fileName = match ? match[1] : "defaultFileName";
 
       if (!response.ok) {
