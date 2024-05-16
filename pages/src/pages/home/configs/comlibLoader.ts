@@ -1,38 +1,39 @@
-import { isNumber, isObject, cloneDeep } from 'lodash'
-import { Modal, message } from 'antd'
-import { MaterialService } from './../../../services'
-import { MaterialComlib } from './../../../types'
-import { ComboComlibURL, getMySelfLibComsFromUrl, getComlibsByNamespaceAndVersion } from './../../../utils/comlib'
-import { initMaterials } from './initMaterials'
-import { addComlib } from './addComlib'
-import { upgradeLatestComlib, upgradeComlibByVersion } from './upgradeComlib'
-import { deleteComlib } from './deleteComlib'
+import { isNumber, isObject, cloneDeep } from "lodash";
+import { Modal, message } from "antd";
+import { getMaterialMiddleOfficeMaterialSchema, MaterialService } from "./../../../services";
+import { MaterialComlib } from "./../../../types";
+import { ComboComlibURL, getMySelfLibComsFromUrl, getComlibsByNamespaceAndVersion } from "./../../../utils/comlib";
+import { initMaterials } from "./initMaterials";
+import { addComlib } from "./addComlib";
+import { upgradeLatestComlib, upgradeComlibByVersion } from "./upgradeComlib";
+import { deleteComlib } from "./deleteComlib";
+import { getQueryString } from "@/utils";
+import { fAxios } from "@/services/http";
 
 const init = () => {
-  if (!window['__comlibs_edit_']) {
-    window['__comlibs_edit_'] = []
+  if (!window["__comlibs_edit_"]) {
+    window["__comlibs_edit_"] = [];
   }
 
-  if (!window['__comlibs_rt_']) {
-    window['__comlibs_rt_'] = window['__comlibs_edit_']
+  if (!window["__comlibs_rt_"]) {
+    window["__comlibs_rt_"] = window["__comlibs_edit_"];
   }
 
-  if (!window['CloudComponentDependentComponents']) {
-    window['CloudComponentDependentComponents'] = {}
+  if (!window["CloudComponentDependentComponents"]) {
+    window["CloudComponentDependentComponents"] = {};
   }
-}
+};
 
-const MySelfId = '_myself_';
-
+const MySelfId = "_myself_";
 
 export default (ctx) => (libDesc) => {
   init();
 
-  const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId)
+  const mySelfLib = ctx?.comlibs.find((t) => t?.id === MySelfId);
 
-  const addSelfLibComponents = (components => {
-    components.forEach(component => {
-      const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId)
+  const addSelfLibComponents = (components) => {
+    components.forEach((component) => {
+      const mySelfLib = ctx?.comlibs.find((t) => t?.id === MySelfId);
       const index = mySelfLib.comAray.findIndex((item) => item.namespace === component.namespace);
 
       /** 当前组件已经存在 */
@@ -49,159 +50,183 @@ export default (ctx) => (libDesc) => {
           version: component.version,
         });
       }
-    })
+    });
 
-    return mySelfLib.comAray
-  })
+    return mySelfLib.comAray;
+  };
 
   const removeSelfLibComponents = (comNamespaces) => {
-    const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId)
-    comNamespaces.forEach(comNamespace => {
+    const mySelfLib = ctx?.comlibs.find((t) => t?.id === MySelfId);
+    comNamespaces.forEach((comNamespace) => {
       const removeIdx = mySelfLib?.comAray?.findIndex?.((item) => {
         return item.namespace === comNamespace;
       });
       mySelfLib.comAray.splice(removeIdx, 1);
-    })
-  }
+    });
+  };
 
   const updateSelfLibComponent = (component) => {
-    const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId)
+    const mySelfLib = ctx?.comlibs.find((t) => t?.id === MySelfId);
     if (!component?.namespace || !component?.version) {
-      return mySelfLib.comAray
+      return mySelfLib.comAray;
     }
 
-    mySelfLib.comAray.forEach(com => {
+    mySelfLib.comAray.forEach((com) => {
       if (com.namespace === component?.namespace) {
-        com.version = component.version
+        com.version = component.version;
       }
-    })
+    });
 
-    return mySelfLib.comAray
-  }
+    return mySelfLib.comAray;
+  };
 
   const getSelfComponents = () => {
-    return mySelfLib?.comAray.filter(com => isObject(com))
-  }
+    return mySelfLib?.comAray.filter((com) => isObject(com));
+  };
 
   // const LATEST_COMLIBS = cloneDeep(ctx.latestComlibs || []);
 
   return new Promise(async (resolve, reject) => {
-    ; (async () => {
+    (async () => {
       /** 带加载命令，如：新增组件、更新组件、更新组件库 */
       if (libDesc?.cmd) {
-        const { cmd, libId, comNamespace } = libDesc
-        const comlib = window['__comlibs_edit_'].find((lib) => lib.id === libId)
+        const { cmd, libId, comNamespace } = libDesc;
+        const comlib = window["__comlibs_edit_"].find((lib) => lib.id === libId);
 
-        let index = -1
-        let com
+        let index = -1;
+        let com;
         switch (cmd) {
-          case 'upgradeCom':
-            const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId) ?? [];
-            const curCom = mySelfLib.comAray?.find(com => com.namespace === comNamespace);
+          case "upgradeCom":
+            const mySelfLib = ctx?.comlibs.find((t) => t?.id === MySelfId) ?? [];
+            const curCom = mySelfLib.comAray?.find((com) => com.namespace === comNamespace);
             ctx.sdk.openUrl({
-              url: 'MYBRICKS://mybricks-material/materialSelectorPage',
+              url: "MYBRICKS://mybricks-material/materialSelectorPage",
               params: {
                 defaultSelected: getSelfComponents(),
                 curUpgradeMaterial: curCom,
                 userId: ctx.user?.id,
                 combo: true,
-                tags: [APP_TYPE]
+                tags: [APP_TYPE],
               },
               onSuccess: ({ materials, updatedMaterials }) => {
-                const newComponents = addSelfLibComponents(materials)
+                const newComponents = addSelfLibComponents(materials);
                 getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
                   resolve({
-                    id: '_myself_',
-                    title: '我的组件',
+                    id: "_myself_",
+                    title: "我的组件",
                     defined: true,
-                    comAray: newComlib?.comAray || []
-                  })
-                })
-              }
-            })
+                    comAray: newComlib?.comAray || [],
+                  });
+                });
+              },
+            });
             break;
-          case 'deleteCom': /** 需要resolve一个comlib对象 */
+          case "deleteCom" /** 需要resolve一个comlib对象 */:
             index = comlib.comAray.findIndex((com) => com.namespace === comNamespace);
 
             if (index !== -1) {
               com = comlib.comAray[index];
               Modal.confirm({
-                className: 'fangzhou-theme',
-                okText: '确定',
-                cancelText: '取消',
+                className: "fangzhou-theme",
+                okText: "确定",
+                cancelText: "取消",
                 centered: true,
                 title: `请确认是否删除组件“${com.title}”，当前操作不可逆！`,
                 getContainer: () => document.body,
                 onOk() {
-                  removeSelfLibComponents([comNamespace])
-                  resolve(ctx?.comlibs.find(t => t?.id === MySelfId));
+                  removeSelfLibComponents([comNamespace]);
+                  resolve(ctx?.comlibs.find((t) => t?.id === MySelfId));
                 },
               });
             }
             break;
-          case 'addCom':
+          case "addCom":
             ctx.sdk.openUrl({
-              url: 'MYBRICKS://mybricks-material/materialSelectorPage',
+              url: "MYBRICKS://mybricks-material/materialSelectorPage",
               params: {
                 defaultSelected: getSelfComponents(),
                 userId: ctx.user?.id,
                 combo: true,
-                tags: [APP_TYPE]
+                tags: [APP_TYPE],
               },
               onSuccess: ({ materials, updatedMaterials }) => {
-                const newComponents = addSelfLibComponents(materials)
+                const newComponents = addSelfLibComponents(materials);
                 getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
                   resolve({
-                    id: '_myself_',
-                    title: '我的组件',
+                    id: "_myself_",
+                    title: "我的组件",
                     defined: true,
-                    comAray: newComlib?.comAray || []
-                  })
-                })
-              }
-            })
+                    comAray: newComlib?.comAray || [],
+                  });
+                });
+              },
+            });
 
-            break
-          case 'deleteComLib':
-            deleteComlib(ctx, { ...libDesc, namespace: libDesc?.libNamespace })
+            break;
+          case "deleteComLib":
+            deleteComlib(ctx, { ...libDesc, namespace: libDesc?.libNamespace });
             resolve(true);
-            break
-          case 'upgradeComLib':
-            const upgradedComlib = await upgradeLatestComlib(ctx, { ...libDesc, namespace: libDesc?.libNamespace, id: libId });
-            return resolve(upgradedComlib)
+            break;
+          case "upgradeComLib":
+            const upgradedComlib = await upgradeLatestComlib(ctx, {
+              ...libDesc,
+              namespace: libDesc?.libNamespace,
+              id: libId,
+            });
+            return resolve(upgradedComlib);
           default:
-            break
+            break;
         }
-        return
+        return;
       }
 
       /** 不带命令，且描述为空，即页面初始化，加载组件及组件库 */
-      if (!libDesc) { // 此处加载报错，会导致引擎一直处于加载中
+      if (!libDesc) {
+        // 此处加载报错，会导致引擎一直处于加载中
         try {
           const comlibs = await initMaterials(ctx);
-          return resolve(comlibs)
+          try {
+            const materialId = getQueryString("material_id");
+            const materialSchema = await getMaterialMiddleOfficeMaterialSchema(materialId);
+            const result = new Function(`${decodeURIComponent(materialSchema.content.editor)}return {default:comDef}`)()
+            if (result.default) {
+              const myselfComlib = comlibs.find((lib) => lib.id === MySelfId);
+              myselfComlib.comAray.push(result.default);
+              console.log(result.default);
+            }
+          } catch (error) {
+            console.error(error);
+          }
+          return resolve(comlibs);
         } catch (e) {
-          console.error(e)
+          console.error(e);
         }
       }
       /** 不带命令，增加、更新组件库，新增时comLibAdder resolve的组件库会带到libDesc来 */
       if (libDesc?.editJs) {
-        const material = ctx.comlibs.find(lib => lib.namespace === libDesc?.libNamespace)
+        const material = ctx.comlibs.find((lib) => lib.namespace === libDesc?.libNamespace);
         if (material) {
           //upgrade
           const comlib = {
             ...material,
-            ...libDesc
-          }
-          const addedComlib = await upgradeComlibByVersion(ctx, { ...comlib, namespace: comlib?.libNamespace, id: libDesc?.libId })
-          return resolve(addedComlib)
+            ...libDesc,
+          };
+          const addedComlib = await upgradeComlibByVersion(ctx, {
+            ...comlib,
+            namespace: comlib?.libNamespace,
+            id: libDesc?.libId,
+          });
+          return resolve(addedComlib);
         } else {
           //新增
-          const addedComlib = await addComlib(ctx, { ...libDesc, namespace: libDesc?.libNamespace, id: libDesc?.libId })
-          return resolve(addedComlib)
+          const addedComlib = await addComlib(ctx, {
+            ...libDesc,
+            namespace: libDesc?.libNamespace,
+            id: libDesc?.libId,
+          });
+          return resolve(addedComlib);
         }
       }
-
-    })().catch(() => { })
-  })
-}
+    })().catch(() => {});
+  });
+};
