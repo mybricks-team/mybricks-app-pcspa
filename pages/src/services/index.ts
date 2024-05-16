@@ -76,7 +76,7 @@ export const VersionService = {
 };
 
 export const getMaterialMiddleOfficeMaterialSchema = async (materialVersionId: string) => {
-  const response = await fAxios.get(`https://components-staging.staging.kuaishou.com/api/website/material/detail`, {
+  const response = await fAxios.get(`https://components.corp.kuaishou.com/api/website/material/detail`, {
     params: {
       id: materialVersionId,
     },
