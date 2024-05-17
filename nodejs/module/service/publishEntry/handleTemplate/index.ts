@@ -30,12 +30,11 @@ const handleTemplate: TProcessor = async (ctx) => {
     const themesStyleStr = genThemesStyleStr(ctx.json);
 
     let comLibRtScript = "";
-    let needCombo = false;
     let hasOldComLib = false;
     //语言包
     let localeScript = "";
-    const { fileId, envType, json, version, configuration } = ctx
-    const { projectId, comlibs, title, envList, i18nLangContent, runtimeUploadService, pageHeader } = configuration || {}
+    const { fileId, envType, json, version, configuration, comboScriptText } = ctx
+    const { projectId, comlibs, folderPath, envList, i18nLangContent, runtimeUploadService, pageHeader } = configuration || {}
 
     comlibs.forEach((lib) => {
         /** 旧组件库，未带组件 runtime 描述文件 */
@@ -47,14 +46,15 @@ const handleTemplate: TProcessor = async (ctx) => {
 
     const comlibRtName = `${fileId}-${envType}-${version}.js`;
     /** 需要聚合的组件资源 */
-    if (
-        comlibs.find((lib) => lib?.defined)?.comAray?.length ||
-        comlibs.find((lib) => lib.componentRuntimeMap || !lib.legacy)
-    ) {
-        comLibRtScript += `<script src="./${comlibRtName}"></script>`;
-        needCombo = true;
+    if (ctx.needCombo) {
+        if (Array.isArray(comboScriptText)) {
+            comboScriptText.forEach(item => {
+                comLibRtScript += `<script src="/mfs${folderPath}/${item.name}"></script>\n`;
+            })
+        } else {
+            comLibRtScript += `<script src="./${comlibRtName}"></script>`;
+        }
     }
-
     let domainServicePath = '/api/system/domain/run';
     if (projectId) {
         // 项目下发布prod环境发布才调用线上接口，否则都是测试接口
@@ -105,10 +105,8 @@ const handleTemplate: TProcessor = async (ctx) => {
 
     Logger.info("[publish] 模板替换完成");
 
-    ctx.needCombo = needCombo
     ctx.hasOldComLib = hasOldComLib
     ctx.comlibRtName = comlibRtName
-
 }
 
 export default handleTemplate

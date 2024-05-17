@@ -11,8 +11,8 @@ const publish = async (ctx: TContext) => {
 
     await comboProcess(
         initParam,
-        handleTemplate,
         createComboScript,
+        handleTemplate,
         localization,
         pushProcessor,
         saveRoll,

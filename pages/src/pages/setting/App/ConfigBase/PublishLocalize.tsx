@@ -24,6 +24,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         ...publishLocalizeConfig,
         [fieldName]: !!values[fieldName],
         isEncode: !!values.isEncode,
+        enableSplitCom: !!values.enableSplitCom,
         updateTime,
         user: user?.email
       }
@@ -44,6 +45,14 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         name="isEncode"
         label="数据编码"
         tooltip="开启后对保存、发布的数据进行编码，避免防火墙错误拦截"
+        valuePropName="checked"
+      >
+        <Switch />
+      </Form.Item>
+      <Form.Item
+        name="enableSplitCom"
+        label="开启组件库分包"
+        tooltip="开启后每个组件作为单独的js文件进行加载，提高加载速度，不同项目间可以共享同样的组件js文件。"
         valuePropName="checked"
       >
         <Switch />

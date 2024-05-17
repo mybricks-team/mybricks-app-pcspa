@@ -177,24 +177,24 @@ export const generateComLib = async (
   }
 
   Logger.info(`[publish] 组件内容获取完毕`);
-
+  const scriptText = `
+  (function() {
+    let comlibList = window['__comlibs_rt_'];
+    if(!comlibList){
+      comlibList = window['__comlibs_rt_'] = [];
+    }
+    let comAray = [];
+    comlibList.push({
+      id: '${comLibId}',
+      title: '页面${comLibId}的组件库',
+      comAray,
+      defined: true,
+    });
+    ${script}
+  })()
+`
   return {
-    scriptText: `
-		(function() {
-			let comlibList = window['__comlibs_rt_'];
-			if(!comlibList){
-				comlibList = window['__comlibs_rt_'] = [];
-			}
-			let comAray = [];
-			comlibList.push({
-				id: '${comLibId}',
-				title: '页面${comLibId}的组件库',
-				comAray,
-				defined: true,
-			});
-			${script}
-		})()
-	`,
+    scriptText,
     componentModules,
   };
 };
@@ -202,7 +202,7 @@ export const generateComLib = async (
 export async function generateComLibRT(
   comlibs,
   json,
-  { fileId, noThrowError, app_type }
+  { fileId, noThrowError, app_type, enableSplitCom }
 ) {
   const mySelfComMap: Record<string, boolean> = {};
   comlibs.forEach((comlib) => {
@@ -269,26 +269,53 @@ export async function generateComLibRT(
     return accumulator;
   }, []);
 
-  return await generateComLib([...comlibs], deps, {
-    comLibId: fileId,
-    noThrowError,
-    appType: app_type,
-  });
+  return enableSplitCom ? Promise.all(deps.map(async item => {
+    const res = await generateComLib([...comlibs], [item], {
+      comLibId: fileId,
+      noThrowError,
+      appType: app_type,
+    });
+    const { namespace, version } = item
+    return { componentModules: res.componentModules, content: res.scriptText, name: `${namespace}-${version}.js` }
+  }))
+    : generateComLib([...comlibs], deps, {
+      comLibId: fileId,
+      noThrowError,
+      appType: app_type,
+    });
 }
 
 
 export async function createComboScript(ctx: TContext) {
-  const { json, fileId, hasOldComLib, app_type } = ctx
+  const { json, fileId, hasOldComLib, app_type, configuration } = ctx
   const { comlibs } = ctx.configuration
+  if (
+    comlibs.find((lib) => lib?.defined)?.comAray?.length ||
+    comlibs.find((lib) => lib.componentRuntimeMap || !lib.legacy)
+  ) {
+    ctx.needCombo = true
+  }
+
   /** 生成 combo 组件库代码 */
   if (ctx.needCombo) {
-    const { scriptText, componentModules } = await generateComLibRT(comlibs, json, {
+    const res = await generateComLibRT(comlibs, json, {
       fileId,
       noThrowError: hasOldComLib,
       app_type,
+      enableSplitCom: configuration?.enableSplitCom
     });
-    ctx.comboScriptText = scriptText
-    ctx.componentModules = componentModules
+    ctx.comboScriptText = Array.isArray(res) ? res.map(item => ({
+      content: item.content,
+      name: item.name
+    })) : res.scriptText
+
+    ctx.componentModules = Array.isArray(res) ? res.reduce((list, item) => {
+      item.componentModules.forEach(com => {
+        if (list.some(l => l.namespace === com.namespace && l.version === com.version)) return
+        list.push(com)
+      })
+      return list
+    }, []) : res.componentModules
   } else {
     ctx.comboScriptText = ''
     ctx.componentModules = []

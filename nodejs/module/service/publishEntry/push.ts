@@ -43,6 +43,7 @@ export const pushProcessor: TProcessor = async (ctx) => {
         comlibRtName,
         fileName,
         userId,
+        origin: ctx.req.headers.origin
     };
     await publishPush(params, ctx.version, true)
 }
@@ -76,6 +77,7 @@ export async function publishPush(
         comlibRtName,
         fileName,
         userId,
+        origin
     } = params;
 
     let uploadfolderPath;
@@ -168,12 +170,25 @@ export async function publishPush(
 
             if (needCombo) {
                 Logger.info("[publish] 正在尝试上传 needCombo...");
-                await API.Upload.staticServer({
-                    content: comboScriptText || '',
-                    folderPath: uploadfolderPath,
-                    fileName: comlibRtName,
-                    noHash: true
-                });
+                Array.isArray(comboScriptText)
+                    ? Promise.all(comboScriptText.map(async item => {
+                        const { content, name } = item
+                        const exist = await checkStaticFile(origin, folderPath, name)
+                        if (!exist) {
+                            return API.Upload.staticServer({
+                                content,
+                                folderPath: folderPath,
+                                fileName: name,
+                                noHash: true
+                            })
+                        }
+                    }))
+                    : await API.Upload.staticServer({
+                        content: comboScriptText || '',
+                        folderPath: uploadfolderPath,
+                        fileName: comlibRtName,
+                        noHash: true
+                    });
                 Logger.info("[publish] needCombo 上传成功！");
             }
 
@@ -280,12 +295,14 @@ async function customPublish(params) {
             json: JSON.stringify(json),
             html: template,
             js: needCombo
-                ? [
-                    {
-                        name: `${fileId}-${envType}-${version}.js`,
-                        content: comboScriptText,
-                    },
-                ]
+                ? Array.isArray(comboScriptText)
+                    ? comboScriptText
+                    : [
+                        {
+                            name: `${fileId}-${envType}-${version}.js`,
+                            content: comboScriptText,
+                        },
+                    ]
                 : [],
             permissions,
             images,
@@ -318,4 +335,16 @@ async function customPublish(params) {
     }
 
     return data;
+}
+
+
+async function checkStaticFile(origin, forlder, fileName) {
+    const url = `${origin}/mfs${forlder}/${fileName}`
+    const res = await axios
+        .get(url)
+        .then((res) => true)
+        .catch((e) => {
+            return false
+        });
+    return res;
 }

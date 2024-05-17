@@ -18,7 +18,13 @@ type TContext = {
     hasOldComLib?: boolean,
     comlibRtName?: string,
     app_type?: string,
-    comboScriptText?: string
+    comboScriptText?: string | Array<{
+        content: string, name: string, componentModules: Array<{
+            namespace: string,
+            version: string,
+            [key: string]: any
+        }>
+    }>
     componentModules?: Array<{
         namespace: string,
         version: string,
@@ -45,6 +51,7 @@ type TConfiguration = {
     groupId: number,
     groupName: string,
     envList: string[],
+    enableSplitCom: boolean,
     i18nLangContent: any,
     runtimeUploadService: string,
     pageHeader: {
