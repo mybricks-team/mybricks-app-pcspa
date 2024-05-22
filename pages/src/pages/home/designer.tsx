@@ -41,6 +41,7 @@ const getAppSetting = async () => {
 }
 
 export default function MyDesigner({ appData: originAppData }) {
+  window.fileId = originAppData.fileId;
   const appData = useMemo(() => {
     let data = { ...originAppData }
     // 防止触发originAppData.fileContent的getter计算
@@ -120,6 +121,8 @@ export default function MyDesigner({ appData: originAppData }) {
       debugMainProps: appData.fileContent?.content?.debugMainProps,
       hasPermissionFn: appData.fileContent?.content?.hasPermissionFn,
       debugHasPermissionFn: appData.fileContent?.content?.debugHasPermissionFn,
+      componentName: appData.fileContent.content.componentName,
+      staticResourceToCDN: appData.fileContent.content.staticResourceToCDN,
       versionApi: null,
       appConfig,
       uploadService,
@@ -130,7 +133,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon? },
+        param: { name?; shareType?; content?; icon?},
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
@@ -211,7 +214,7 @@ export default function MyDesigner({ appData: originAppData }) {
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ;(window as any).mybricks.SPADesigner &&
+        ; (window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -337,6 +340,8 @@ export default function MyDesigner({ appData: originAppData }) {
     json.debugMainProps = ctx.debugMainProps
     json.hasPermissionFn = ctx.hasPermissionFn
     json.debugHasPermissionFn = ctx.debugHasPermissionFn
+    json.componentName = ctx.componentName
+    json.staticResourceToCDN = ctx.staticResourceToCDN
     json.fontJS = ctx.fontJS
     json.pageHeader = ctx.pageHeader
 
@@ -440,6 +445,8 @@ export default function MyDesigner({ appData: originAppData }) {
         json.debugMainProps = ctx.debugMainProps
         json.hasPermissionFn = ctx.hasPermissionFn
         json.debugHasPermissionFn = ctx.debugHasPermissionFn
+        json.componentName = ctx.componentName
+        json.staticResourceToCDN = ctx.staticResourceToCDN
         json.projectId = ctx.sdk.projectId
         json.i18nLangContent = i18nLangContentFilter(
           ctx.i18nLangContent,
@@ -602,6 +609,8 @@ export default function MyDesigner({ appData: originAppData }) {
       debugMainProps: ctx.debugMainProps,
       hasPermissionFn: ctx.hasPermissionFn,
       debugHasPermissionFn: ctx.debugHasPermissionFn,
+      componentName: ctx.componentName,
+      staticResourceToCDN: ctx.staticResourceToCDN,
     }
     return json
   }, [JSON.stringify(ctx)])
@@ -653,7 +662,7 @@ export default function MyDesigner({ appData: originAppData }) {
           json: toJSON,
         },
       })
-        .then((response) => {
+        .then((response: any) => {
           // // 创建一个URL指向blob响应数据
           const url = window.URL.createObjectURL(new Blob([response]))
           // 创建一个a标签用于触发下载
@@ -712,7 +721,7 @@ export default function MyDesigner({ appData: originAppData }) {
             >
               发布
             </Toolbar.Button>
-            <Toolbar.Button onClick={downloadCode}>出码</Toolbar.Button>
+            {/* <Toolbar.Button onClick={downloadCode}>出码</Toolbar.Button> */}
           </>
         )}
         <div className={`${isPreview ? css.toolbarWrapperPreview : ''}`}>
@@ -907,7 +916,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
       if (libIndex !== -1) {
         curComponent =
           allComLibsRuntimeMap[libIndex][
-            component.namespace + '@' + component.version
+          component.namespace + '@' + component.version
           ]
       } else {
         libIndex = allComLibsRuntimeMap.findIndex((lib) =>
@@ -925,9 +934,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         }
         curComponent =
           allComLibsRuntimeMap[libIndex][
-            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-              key.startsWith(component.namespace)
-            )
+          Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+            key.startsWith(component.namespace)
+          )
           ]
       }
 

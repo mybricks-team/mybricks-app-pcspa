@@ -233,6 +233,86 @@ export default class PcPageController {
 
   // 	return res.code !== 1 ? { code: 0, message: res.error } : { code: 1, data: { bundle: res.data, ext_name: 'html' } };
   // }
+
+  @Post("/publishToCom")
+  async publishToCom(
+    @Body("userId") userId: string,
+    @Body("fileId") fileId: number,
+    @Body("componentName") componentName: string,
+    @Body("json") json: any,
+    @Body("envType") envType: string,
+    @Body("toLocalType") toLocalType: string,
+    @Body("staticResourceToCDN") staticResourceToCDN: boolean,
+    @Req() req: any
+  ) {
+    if (!isDefined(json) || !isDefined(userId) || !isDefined(fileId)) {
+      return { code: 0, message: "参数 json、userId、fileId 不能为空" };
+    }
+    const referer = req.headers.referer || req.headers.referrer;
+    Logger.info(`The referer is: ${referer}`);
+
+    const url = new URL(referer);
+    const hostname = url.origin;
+    Logger.info(`The hostname from the referer is: ${hostname}`);
+
+    try {
+      Logger.info("[publishToCom] 调用发布接口");
+      const startTime = Date.now();
+
+      // const appConfig = await getAppConfig();
+      // const isEncode = !!appConfig?.publishLocalizeConfig?.isEncode;
+      const isEncode = false
+      Logger.info(`[publishToCom] 获取编码状态 isEncode ${isEncode}`);
+
+      const jsonTransform = isEncode
+        ? JSON.parse(
+          decodeURIComponent(
+            Buffer.from(
+              typeof json === "string" ? json : JSON.stringify(json),
+              "base64"
+            ).toString()
+          )
+        )
+        : json;
+      Logger.info(`[publishToCom] jsonTransform finish`);
+
+      const code = await this.service.publishToCom({
+        hostname,
+        toLocalType,
+        json: jsonTransform,
+        userId,
+        fileId,
+        componentName,
+        envType,
+        origin: req.headers.origin,
+        staticResourceToCDN,
+      });
+
+      Logger.info("[publishToCom] 发布成功！");
+      Logger.info(
+        `[publishToCom] 发布时长：${String((Date.now() - startTime) / 1000)}s`
+      );
+
+      return {
+        code: 1,
+        data: code,
+        message: "success",
+      };
+      // res.on('finish', () => {
+      //   Logger.info(`[publishToCom] finish`);
+      //   fs.unlink(result.zipFilePath, () => {
+      //     Logger.info(`[publishToCom] delete`);
+      //   })
+      // })
+    } catch (error: any) {
+      console.error("[publishToCom] 出码失败: ", error)
+      Logger.error("[publishToCom] 出码失败: ", error);
+      return {
+        code: -1,
+        message: error.message || "出码失败",
+      };
+    }
+  }
 }
 
 export function isDefined(v: any) {

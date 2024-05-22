@@ -1,0 +1,35 @@
+--imageImportStr--
+function processingStringsFromJSON(obj: Record<string, any>, handle: (str: string) => string) {
+  function explore(obj: Record<string, any>) {
+    for (let key in obj) {
+      if (Object.hasOwn(obj, key)) {
+        switch (typeof obj[key]) {
+          case 'string':
+            obj[key] = handle(obj[key]);
+            break;
+          case 'object':
+            explore(obj[key]);
+            break;
+          default:
+        }
+      }
+    }
+  }
+  explore(obj);
+}
+
+const imgUrlMap: Record<string, string> = --imageUrlMap--;
+function replaceDynamicImportImg(toJSON: any) {
+  const regex = /^url\(([\w\W]*)\)/;
+  processingStringsFromJSON(toJSON, str => {
+    if (str.startsWith("/mfs/files")) {
+      const fileName = str?.split('/').slice(-1)[0];
+      return imgUrlMap[fileName]
+    } else if (str.startsWith("url(/mfs/files")) {
+      const url = str.match(regex)?.[1];
+      const fileName = url?.split('/').slice(-1)[0];
+      return url ? `url(${imgUrlMap[fileName!]})` : str;
+    }
+    return str;
+  })
+}

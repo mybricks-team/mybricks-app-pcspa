@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { message, Tooltip } from 'antd'
 import servicePlugin, {
   call as callConnectorHttp,
@@ -40,6 +40,9 @@ import {
   PURE_INTERNET_EDITOR_OPTIONS,
 } from './editor-options'
 // import { render as renderUI  } from '@mybricks/render-web';
+import { isValidPascalCase } from './utils'
+import OutCodeDirList, { OutCodeDirListType } from './components/out-code-dir-list'
+import { getLocalData, setLocalData } from './utils/fileSystemHandle'
 
 const defaultPermissionComments = `/**
 *
@@ -232,13 +235,13 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
   const debugModeOptions =
     envList.length > 0
       ? [
-          { label: '选择环境', value: EnumMode.ENV },
-          { label: '自定义域名', value: EnumMode.CUSTOM },
-        ]
+        { label: '选择环境', value: EnumMode.ENV },
+        { label: '自定义域名', value: EnumMode.CUSTOM },
+      ]
       : [
-          { label: '默认', value: EnumMode.DEFAULT },
-          { label: '自定义域名', value: EnumMode.CUSTOM },
-        ]
+        { label: '默认', value: EnumMode.DEFAULT },
+        { label: '自定义域名', value: EnumMode.CUSTOM },
+      ]
 
   const adder: Array<{
     type: string
@@ -246,20 +249,20 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     inputs?: { id: string; title: string; schema: Record<string, string> }[]
     template?: Record<string, any>
   }> = [
-    {
-      type: 'normal',
-      title: '页面',
-      inputs: [
-        {
-          id: 'open',
-          title: '打开',
-          schema: {
-            type: 'any',
+      {
+        type: 'normal',
+        title: '页面',
+        inputs: [
+          {
+            id: 'open',
+            title: '打开',
+            schema: {
+              type: 'any',
+            },
           },
-        },
-      ],
-    },
-  ]
+        ],
+      },
+    ]
   if (isReact) {
     adder.push(
       ...[
@@ -303,31 +306,31 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       isPrivatization: ctx.setting?.system.config?.isPureIntranet === true,
       addActions: domainApp
         ? [
-            {
-              type: 'http-sql',
-              title: '领域接口',
-              noUseInnerEdit: true,
-              getTitle: (item) => {
-                return item.content?.domainServiceMap
-                  ? item.content.title
-                  : `${item.content.title || ''}(未选择)`
-              },
-              render: (props) => {
-                return (
-                  <CollaborationHttp
-                    {...props}
-                    openFileSelector={() =>
-                      openFilePanel({
-                        allowedFileExtNames: ['domain'],
-                        parentId: ctx.sdk.projectId,
-                        fileId: ctx.fileId,
-                      })
-                    }
-                  />
-                )
-              },
+          {
+            type: 'http-sql',
+            title: '领域接口',
+            noUseInnerEdit: true,
+            getTitle: (item) => {
+              return item.content?.domainServiceMap
+                ? item.content.title
+                : `${item.content.title || ''}(未选择)`
             },
-          ]
+            render: (props) => {
+              return (
+                <CollaborationHttp
+                  {...props}
+                  openFileSelector={() =>
+                    openFilePanel({
+                      allowedFileExtNames: ['domain'],
+                      parentId: ctx.sdk.projectId,
+                      fileId: ctx.fileId,
+                    })
+                  }
+                />
+              )
+            },
+          },
+        ]
         : void 0,
     }),
   ]
@@ -401,6 +404,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               const res = await searchUser(`api/pcpage/searchUser`, {
                 keyword,
               })
+              // @ts-ignore
               const formatRes = (res || []).map((item) => {
                 const { email, id, name, avatar } = item
                 return {
@@ -500,8 +504,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     ],
     ...(ctx.hasMaterialApp
       ? {
-          comLibAdder: comLibAdderFunc(ctx),
-        }
+        comLibAdder: comLibAdderFunc(ctx),
+      }
       : {}),
     comLibLoader: comlibLoaderFunc(ctx),
     pageContentLoader() {
@@ -550,7 +554,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         )
         return
       },
-      items({}, cate0, cate1, cate2) {
+      items({ }, cate0, cate1, cate2) {
         cate0.title = `项目`
         cate0.items = [
           {
@@ -603,7 +607,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   get() {
                     return decodeURIComponent(
                       ctx?.hasPermissionFn ||
-                        encodeURIComponent(defaultPermissionFn)
+                      encodeURIComponent(defaultPermissionFn)
                     )
                   },
                   set(context, v: string) {
@@ -852,10 +856,62 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         const pageConfigEditor = GET_PAGE_CONFIG_EDITOR(ctx)
         cate1.title = pageConfigEditor.title
         cate1.items = pageConfigEditor.items
+
+        cate2.title = `出码`
+        cate2.items = [
+          {
+            title: '出码组件名',
+            type: 'text',
+            description: '需要大驼峰命名，如: TestCom',
+            value: {
+              get: () => {
+                return ctx.componentName
+              },
+              set: (_: any, componentName: string) => {
+                if (componentName && !isValidPascalCase(componentName)) {
+                  message.error('出码组件名需要大驼峰命名，如: TestCom')
+                } else {
+                  ctx.componentName = componentName
+                }
+              },
+            },
+          },
+          // {
+          //   title: '静态资源是否上传CDN',
+          //   description: '使用此功能前，需先配置上传接口',
+          //   type: 'switch',
+          //   value: {
+          //     get: () => {
+          //       return ctx.staticResourceToCDN
+          //     },
+          //     set: (_: any, staticResourceToCDN: boolean) => {
+          //       ctx.staticResourceToCDN = staticResourceToCDN
+          //     },
+          //   },
+          // },
+          () => {
+            const [value, setValue] = useState<OutCodeDirListType>([]);
+            useEffect(() => {
+              getLocalData().then(localData => {
+                setValue(localData.outCodeDirList || [])
+              });
+            }, [])
+            return <OutCodeDirList
+              constantContext={ctx}
+              variableContext={ctx}
+              handleContext={{ ...ctx, handleSaveButtonClick: save, getToJson: () => designerRef.current.toJSON({ onlyDiff: true }) }}
+              value={value}
+              onChange={value => {
+                setLocalData({ outCodeDirList: value })
+                setValue(value)
+              }}
+            />
+          },
+        ]
       },
       editorOptions: mergeEditorOptions([
         !!ctx.setting?.system.config?.isPureIntranet &&
-          PURE_INTERNET_EDITOR_OPTIONS,
+        PURE_INTERNET_EDITOR_OPTIONS,
         DESIGN_MATERIAL_EDITOR_OPTIONS(ctx),
       ]),
     },
@@ -889,7 +945,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         callDomainModel(domainModel, type, params) {
           return callDomainHttp(domainModel, params, { action: type } as any)
         },
-        callConnector(connector, params, connectorConfig = {}) {
+        callConnector(connector, params, connectorConfig: any = {}) {
           const plugin = designerRef.current?.getPlugin(connector.connectorName)
           if (
             ctx.executeEnv === USE_CUSTOM_HOST &&
@@ -1072,7 +1128,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
 
               if (
                 typeof result !== 'boolean' &&
-                typeof result.permission !== 'boolean'
+                typeof result?.permission !== 'boolean'
               ) {
                 result = true
                 designerRef.current?.console?.log.error(

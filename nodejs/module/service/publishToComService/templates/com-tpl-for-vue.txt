@@ -1,0 +1,45 @@
+<template>
+  <Renderer
+    v-bind="$attrs"
+    :props="{ ...m_childProps,--defineTplProps-- }"
+    :config="m_config"
+    :json="m_json"
+    :comDefs="m_comDefs"
+  />
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+import RendererComponent from '@mybricks/renderer-pc/toVue'
+import { toJSON, config } from './config'
+-- components-imports --
+
+export default defineComponent({
+  props: {
+    --props--
+  },
+  components: {
+    Renderer: RendererComponent
+  },
+  emits: {
+    --emitsArr--
+  },
+  defineExpose: --defineExposeArr--,
+  setup(props, ctx) {
+    return {
+      m_childProps: {
+        --setupPropsStr--
+      },
+      m_config: config,
+      m_json: toJSON,
+      m_comDefs: --comDefs--
+    }
+  },
+})
+
+</script>
+
+<style>
+@import 'antd/dist/antd.css';
+
+</style>
