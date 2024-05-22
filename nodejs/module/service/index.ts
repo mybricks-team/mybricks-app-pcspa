@@ -5,6 +5,7 @@ import { searchUser } from "./seachUser";
 import { upload } from "./upload";
 import { rollback } from "./rollback";
 import { downloadProduct } from "./download-product";
+import publishToCom from "./publishToComService";
 
 @Injectable()
 export default class PcPageService {
@@ -34,5 +35,11 @@ export default class PcPageService {
     params: { fileId: number; envType: string; version: string }
   ) {
     return await downloadProduct(res, params);
+  }
+
+  async publishToCom(params: any) {
+    const { json, userId, envType, fileId, componentName, hostname, toLocalType, origin, staticResourceToCDN } = params
+
+    return await publishToCom({ json, userId, envType, fileId, componentName, hostname, toLocalType, origin, staticResourceToCDN })
   }
 }

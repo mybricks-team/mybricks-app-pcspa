@@ -13,6 +13,10 @@ declare interface Window {
   ReactDOM: ReactDOM;
   antd: any;
   pluginConnectorDomain: Function
+  showDirectoryPicker: Function
+  fileId: string
+  designerRef: any
+  mybricks: any
 }
 
 declare type RenderWeb = {

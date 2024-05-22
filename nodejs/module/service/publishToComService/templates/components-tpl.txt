@@ -1,0 +1,9 @@
+import { Component } from '@mybricks/renderer-pc'
+
+--importComponents--
+
+export const comDefs = {
+--componentsMap--
+}
+
+--componentsExport--
