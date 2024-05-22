@@ -4,7 +4,7 @@ import { Logger } from "@mybricks/rocker-commons";
 import API from "@mybricks/sdk-for-app/api";
 
 import { transform } from './tools/transform'
-import { genTemplateForVue, genTemplateForVueReadme } from './genTemplateForVue'
+import { genTemplateForVue, genTemplateForVueIndex, genTemplateForVueReadme } from './genTemplateForVue'
 import { genConfig } from './genConfig'
 import { Scene, ToJSON } from "./type";
 import { analysisConfigInputsTS, analysisNormalInputsTS, analysisOutputsTS } from "./tools/utils";
@@ -299,6 +299,13 @@ export default async function publishToCom(params: {
   let configTemplate = genConfig(genConfigProps)
   Logger.info(`[publishToCom] 替换config模板中的变量完成`)
 
+  let vueIndexTemplate = '';
+  if (toLocalType === 'vue') {
+    Logger.info(`[publishToCom] 开始替换vue-index模板中的变量...`)
+    vueIndexTemplate = genTemplateForVueIndex({ componentName })
+    Logger.info(`[publishToCom] 替换vue-index模板中的变量完成`)
+  }
+
   Logger.info(`[publishToCom] 开始替换README模板中的变量...`)
   let readmeTemplate = '';
   if (toLocalType === 'vue') { readmeTemplate = genTemplateForVueReadme({ componentName, sourceLink }) }
@@ -341,6 +348,7 @@ export default async function publishToCom(params: {
 
   return {
     index: curTemplate,
+    vueIndex: vueIndexTemplate,
     config: configTemplate,
     readme: readmeTemplate,
     staticResources: staticResources,

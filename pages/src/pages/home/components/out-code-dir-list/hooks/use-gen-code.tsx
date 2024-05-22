@@ -148,11 +148,12 @@ const useGenCode = ({
 
       if (!content) { message.error(`出码失败!`); return; };
 
-      const indexName = options.toLocalType === 'vue' ? `index.vue` : `index.tsx`;
+      const indexName = options.toLocalType === 'vue' ? `${options.componentName}.vue` : `index.tsx`;
 
       await writeFile(targetDirHandle, indexName, content.index);
       await writeFile(targetDirHandle, 'config.ts', content.config);
       await writeFile(targetDirHandle, 'README.md', content.readme);
+      if(options.toLocalType === 'vue') { await writeFile(targetDirHandle, 'index.ts', content.vueIndex); }
       if (!options.staticResourceToCDN && content.staticResources?.length) {
         const assetsDirHandle = await targetDirHandle.getDirectoryHandle('assets', { create: true });
         for (const staticResource of content.staticResources) {

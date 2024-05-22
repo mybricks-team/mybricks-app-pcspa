@@ -205,6 +205,16 @@ function genTemplateForVue(params: any) {
   return template
 }
 
+function genTemplateForVueIndex({ componentName }: { componentName: string }) {
+  const tplFilePath = path.resolve(__dirname, "./templates/com-tpl-for-vue-index.txt");
+
+  let template = fs.readFileSync(tplFilePath, "utf8");
+
+  template = template.replace(/--componentName--/g, componentName);
+
+  return template;
+}
+
 function genTemplateForVueReadme({ componentName, sourceLink }: { componentName: string, sourceLink: string }) {
   const tplFilePath = path.resolve(__dirname, "./templates/readme-for-vue.txt");
 
@@ -220,5 +230,6 @@ function genTemplateForVueReadme({ componentName, sourceLink }: { componentName:
 
 export {
   genTemplateForVue,
+  genTemplateForVueIndex,
   genTemplateForVueReadme
 }

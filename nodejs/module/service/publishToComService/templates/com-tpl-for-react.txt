@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import React from 'react'
 import { Renderer, Slot, Canvas, Module } from '@mybricks/renderer-pc'
 import { toJSON, config, comDefs, --components-imports-- } from './config'
 import 'antd/dist/antd.css'
