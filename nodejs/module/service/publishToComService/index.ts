@@ -149,6 +149,34 @@ const collectModuleCom = (coms: any, comlibDeps: any[]) => {
   }
 }
 
+/** 解析主题插件 */
+const getThemesInnerHtml = (toJSON) => {
+  let innerHTML = '';
+  const themes = toJSON.plugins?.['@mybricks/plugins/theme/use']?.themes
+  if (Array.isArray(themes)) {
+    themes.forEach(({ content }) => {
+      const variables = content?.variables
+
+      if (Array.isArray(variables)) {
+        let rootHTML = ''
+
+        variables.forEach(({ configs }) => {
+          if (Array.isArray(configs)) {
+            configs.forEach(({ key, value }) => {
+              rootHTML = rootHTML + `${key}: ${value};\n`
+            })
+          }
+        })
+
+        innerHTML = innerHTML + `:root {\n${rootHTML}}`
+      }
+    })
+    Reflect.deleteProperty(toJSON.plugins, "@mybricks/plugins/theme/use")
+  }
+
+  return innerHTML
+}
+
 export default async function publishToCom(params: {
   json: ToJSON & { configuration: any };
   userId: string;
@@ -285,7 +313,8 @@ export default async function publishToCom(params: {
     genConfigProps.exportStr = `export const comDefs = {${componentsTemplate.componentsMapStr}};${componentsTemplate.componentsExportStr}`;
     genConfigProps.styleStr = `const styleTag = document.createElement('style')
     styleTag.id = "${fileId}";
-    styleTag.innerHTML = \`${
+    styleTag.innerHTML = \`${getThemesInnerHtml(transformJson)}
+    ${
       // @ts-ignore
       await prettier.format(getStyleInnerHtml(transformJson), {
         parser: 'css',      // 使用babel-ts解析器，支持TSX格式

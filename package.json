@@ -28,7 +28,7 @@
   "dependencies": {
     "@babel/standalone": "^7.22.17",
     "@mybricks/render-types": "^0.0.1",
-    "@mybricks/render-utils": "^0.0.17",
+    "@mybricks/render-utils": "^0.0.19",
     "@mybricks/rocker-dao": "^0.0.6",
     "@mybricks/sdk-for-app": "1.0.38",
     "@mybricks/to-code-react": "^0.0.4",
