@@ -798,18 +798,23 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     }
   })
 
-  // 解析云组件依赖项
+  /**
+   * 解析云组件依赖项，以 deps 字段为准
+   */
   window['__comlibs_edit_'].forEach((comLib) => {
     if (comLib?.defined && Array.isArray(comLib.comAray)) {
       comLib.comAray.forEach((com) => {
-        if (com?.title === '云组件依赖') {
-          cloudDeps = com.comAray.map((item) => {
-            return {
-              namespace: item.namespace,
-              verison: item.version,
-            }
-          })
+        if (com?.deps && Array.isArray(com.deps)) {
+          cloudDeps = [...cloudDeps, ...com.deps]
         }
+        // if (com?.title === '云组件依赖') {
+        //   cloudDeps = com.comAray.map((item) => {
+        //     return {
+        //       namespace: item.namespace,
+        //       verison: item.version,
+        //     }
+        //   })
+        // }
       })
     }
   })
