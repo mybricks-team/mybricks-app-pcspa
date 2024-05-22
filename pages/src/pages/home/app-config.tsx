@@ -1128,7 +1128,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
 
               if (
                 typeof result !== 'boolean' &&
-                typeof result.permission !== 'boolean'
+                typeof result?.permission !== 'boolean'
               ) {
                 result = true
                 designerRef.current?.console?.log.error(

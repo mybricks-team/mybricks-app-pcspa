@@ -135,6 +135,7 @@ function OutCodeDirItem(props: {
         configuration: { comLibs: variableContext.comlibs },
       }
     },
+    hasPermissionFn: variableContext.hasPermissionFn,
   })
 
   const [confirmForm] = Form.useForm();

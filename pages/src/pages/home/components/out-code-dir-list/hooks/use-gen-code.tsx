@@ -18,6 +18,7 @@ interface Props {
       comLibs: any[]
     }
   }
+  hasPermissionFn: string
 }
 
 function stringToArrayBuffer(str: string) {
@@ -49,6 +50,7 @@ const useGenCode = ({
   save,
   contextInfo,
   getParam,
+  hasPermissionFn
 }: Props) => {
   const [localSaveLoading, setLocalSaveLoading] = useState(false)
 
@@ -89,7 +91,7 @@ const useGenCode = ({
           fileId: contextInfo.fileId,
           componentName: componentName,
           envType: 'test',
-          json: jsonParams,
+          json: { ...jsonParams, hasPermissionFn },
           staticResourceToCDN,
         },
       }).then((res: any) => {
@@ -153,7 +155,7 @@ const useGenCode = ({
       await writeFile(targetDirHandle, indexName, content.index);
       await writeFile(targetDirHandle, 'config.ts', content.config);
       await writeFile(targetDirHandle, 'README.md', content.readme);
-      if(options.toLocalType === 'vue') { await writeFile(targetDirHandle, 'index.ts', content.vueIndex); }
+      if (options.toLocalType === 'vue') { await writeFile(targetDirHandle, 'index.ts', content.vueIndex); }
       if (!options.staticResourceToCDN && content.staticResources?.length) {
         const assetsDirHandle = await targetDirHandle.getDirectoryHandle('assets', { create: true });
         for (const staticResource of content.staticResources) {
