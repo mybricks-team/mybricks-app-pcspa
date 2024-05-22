@@ -50,7 +50,7 @@ const useGenCode = ({
   save,
   contextInfo,
   getParam,
-  hasPermissionFn
+  hasPermissionFn,
 }: Props) => {
   const [localSaveLoading, setLocalSaveLoading] = useState(false)
 
@@ -91,7 +91,10 @@ const useGenCode = ({
           fileId: contextInfo.fileId,
           componentName: componentName,
           envType: 'test',
-          json: { ...jsonParams, hasPermissionFn },
+          json: {
+            ...jsonParams,
+            hasPermissionFn,
+          },
           staticResourceToCDN,
         },
       }).then((res: any) => {

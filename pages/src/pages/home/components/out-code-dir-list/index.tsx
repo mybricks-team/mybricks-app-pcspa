@@ -4,6 +4,7 @@ import { Button, Select, Popconfirm, Tooltip, Modal, Form, Input, Typography, me
 import css from './index.less';
 import useGenCode from './hooks/use-gen-code';
 import { deleteFileSystemDirectoryHandleMemo, getFileSystemDirectoryHandle, getLocalData, setLocalData } from '../../utils/fileSystemHandle';
+import { i18nLangContentFilter } from '@/utils';
 
 export type OutCodeDirItemType = { type: 'vue' | 'react', dirname: string, id: string, description?: string, isNew?: boolean }
 export type OutCodeDirListType = OutCodeDirItemType[];
@@ -132,7 +133,10 @@ function OutCodeDirItem(props: {
     getParam: () => {
       return {
         ...handleContext.getToJson?.(true),
-        configuration: { comLibs: variableContext.comlibs },
+        configuration: {
+          comLibs: variableContext.comlibs,
+          i18nLangContent: i18nLangContentFilter(variableContext.i18nLangContent, variableContext.i18nUsedIdList)
+        },
       }
     },
     hasPermissionFn: variableContext.hasPermissionFn,
