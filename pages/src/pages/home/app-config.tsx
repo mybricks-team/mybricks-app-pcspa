@@ -424,6 +424,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         },
       }),
       localePlugin({
+        defaultPackLink: '/mybricks-app-pcspa/public/i18n-example.json',
         onPackLoad: ({ i18nLangContent }) => {
           ctx.i18nLangContent = i18nLangContent
         },
