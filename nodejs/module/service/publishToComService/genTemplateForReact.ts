@@ -197,8 +197,7 @@ function genUiCode({ json, namespaceToComDefs }: any) {
     // 引擎返回的，干嘛用的这是
     Reflect.deleteProperty(slotStyle, "zoom");
 
-    // 解决子元素marginTop导致的外边距塌陷
-    slotStyle.overflow = "hidden";
+    slotStyle.overflow = root ? (showType === "module" ? "hidden" : "hidden auto") : "hidden";
 
     return slotStyle;
   }
