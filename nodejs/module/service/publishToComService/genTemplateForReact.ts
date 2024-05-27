@@ -143,12 +143,12 @@ function genUiCode({ json, namespaceToComDefs }: any) {
   // TODO:之后没有这一步了
   function getSlotStyle(slot: any, root?: boolean) {
     const {
-      style: { layout, ...otherStyle },
+      style: { layout, position, ...otherStyle },
       type,
       showType,
     } = slot;
     const slotStyle = {
-      position: "relative",
+      position: ["smart"].includes(position) ? "relative" : position,
       ...otherStyle,
     };
     // 判断布局方式
@@ -165,6 +165,8 @@ function genUiCode({ json, namespaceToComDefs }: any) {
       Reflect.deleteProperty(slotStyle, "flexWrap");
       Reflect.deleteProperty(slotStyle, "alignItems");
       Reflect.deleteProperty(slotStyle, "justifyContent");
+      Reflect.deleteProperty(slotStyle, "flexDirection");
+      Reflect.deleteProperty(slotStyle, "display");
     }
 
     if (showType === "module" || type === "module") {
@@ -196,6 +198,8 @@ function genUiCode({ json, namespaceToComDefs }: any) {
     Reflect.deleteProperty(slotStyle, "left");
     // 引擎返回的，干嘛用的这是
     Reflect.deleteProperty(slotStyle, "zoom");
+    // 编辑器带来的脏数组...
+    Reflect.deleteProperty(slotStyle, "paddingType")
 
     slotStyle.overflow = root ? (showType === "module" ? "hidden" : "hidden auto") : "hidden";
 
