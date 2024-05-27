@@ -44,7 +44,7 @@ function genUiCode({ json, namespaceToComDefs }: any) {
         modulesCode =
           modulesCode +
           `/** ${title} */
-        function Module0({ id }: ModuleProps) {
+        function Module${index}({ id }: ModuleProps) {
           return (
             <Module id="${moduleId}" comId={id}>
               ${getBaeJsonCode(json, false)}
