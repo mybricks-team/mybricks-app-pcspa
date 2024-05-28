@@ -242,7 +242,7 @@ export async function generateComLibRT(
       .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
     ...modulesDeps
-      .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
+      // .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ];
 
