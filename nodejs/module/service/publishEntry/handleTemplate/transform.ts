@@ -67,23 +67,60 @@ const transformCodeByBabel = (
   return res;
 };
 
-const transformScene = (scene: Record<string, any>) => {
-  if (scene.refs) {
-    const tempObj = scene.refs;
-    (Object.keys(scene.refs) || []).forEach((key) => {
-      const namespace = tempObj?.[key]?.def?.namespace;
-      if (
-        namespace &&
-        NeedTransformCom.includes(namespace) &&
-        typeof tempObj?.[key]?.model?.data?.fns === "string"
-      ) {
-        tempObj[key].model.data.fns = transformCodeByBabel(
-          tempObj[key].model.data.fns,
-          `${tempObj[key].title}(${tempObj[key].id})`
-        );
-      }
-    });
+const transformComItem = (comItem) => {
+  const namespace = comItem?.def?.namespace;
+  if (
+    namespace &&
+    NeedTransformCom.includes(namespace) &&
+    typeof comItem?.model?.data?.fns === "string"
+  ) {
+    comItem.model.data.fns = transformCodeByBabel(
+      comItem.model.data.fns,
+      `【${comItem.title ?? comItem.id}】—— JS计算编译失败，`
+    );
+  } else if (["mybricks.normal-pc.custom-render", "mybricks.normal-pc-chart.line"].includes(namespace)) {
+    const parserOptions = {
+      presets: ['env', 'react'],
+      plugins: [
+        ['proposal-decorators', { legacy: true }],
+        'proposal-class-properties',
+        [
+          'transform-typescript',
+          {
+            isTSX: true
+          }
+        ]
+      ]
+    };
+    comItem.model.data.componentCode = transformCodeByBabel(
+      comItem.model.data.componentCode,
+      `【${comItem.title ?? comItem.id}】—— 自定义渲染编译失败，`,
+      false,
+      parserOptions
+    );
   }
+}
+
+const transformScene = (scene: Record<string, any>) => {
+  /**
+   * refs 字段已经遗弃
+   */
+  // if (scene.refs) {
+  //   const tempObj = scene.refs;
+  //   (Object.keys(scene.refs) || []).forEach((key) => {
+  //     const namespace = tempObj?.[key]?.def?.namespace;
+  //     if (
+  //       namespace &&
+  //       NeedTransformCom.includes(namespace) &&
+  //       typeof tempObj?.[key]?.model?.data?.fns === "string"
+  //     ) {
+  //       tempObj[key].model.data.fns = transformCodeByBabel(
+  //         tempObj[key].model.data.fns,
+  //         `${tempObj[key].title}(${tempObj[key].id})`
+  //       );
+  //     }
+  //   });
+  // }
   if (scene.coms) {
     const tempObj = scene.coms;
     (Object.keys(tempObj) || []).forEach((key) => {
@@ -148,10 +185,12 @@ const transform = (json: Record<string, any>) => {
   Logger.info("[publish] transform start");
 
   transformGlobalFx(json)
+
   json.hasPermissionFn = transformCodeByBabel(
     decodeURIComponent(json.hasPermissionFn),
     "全局方法-权限校验"
   );
+
   Object.keys(json.plugins).forEach((pluginName) => {
     if (NeedTransformPlugin.includes(pluginName)) {
       json.plugins[pluginName] = json.plugins[pluginName].map((service) => ({
@@ -163,8 +202,18 @@ const transform = (json: Record<string, any>) => {
       }));
     }
   });
-  json.scenes = (json.scenes || []).map(transformScene);
-  
+
+  json.scenes = (json.scenes || []).map((scene) => {
+    return transformScene(scene)
+  });
+
+  Object.keys(json.modules || []).forEach(modulesId => {
+    Object.keys(json.modules[modulesId].json.coms || []).forEach(comId => {
+      const com = json.modules[modulesId].json.coms[comId]
+      transformComItem(com)
+    })
+  })
+
   Logger.info("[publish] transform finish");
 
   return json;
