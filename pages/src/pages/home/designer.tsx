@@ -69,6 +69,8 @@ export default function MyDesigner({ appData: originAppData }) {
     [appConfig]
   )
 
+  console.log('appConfig.designer?.url', appConfig.designer?.url)
+
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || ''
   const runtimeUploadService =
