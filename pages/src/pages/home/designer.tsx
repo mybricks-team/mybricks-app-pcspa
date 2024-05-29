@@ -41,7 +41,7 @@ const getAppSetting = async () => {
 }
 
 export default function MyDesigner({ appData: originAppData }) {
-  window.fileId = originAppData.fileId;
+  window.fileId = originAppData.fileId
   const appData = useMemo(() => {
     let data = { ...originAppData }
     // 防止触发originAppData.fileContent的getter计算
@@ -133,7 +133,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon?},
+        param: { name?; shareType?; content?; icon? },
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
@@ -214,7 +214,7 @@ export default function MyDesigner({ appData: originAppData }) {
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ; (window as any).mybricks.SPADesigner &&
+        ;(window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -634,59 +634,59 @@ export default function MyDesigner({ appData: originAppData }) {
 
   window.designerRef = designerRef
 
-  const downloadCode = async () => {
-    const close = message.loading({
-      key: 'toCode',
-      content: '出码中...',
-      duration: 0,
-    })
+  // const downloadCode = async () => {
+  //   const close = message.loading({
+  //     key: 'toCode',
+  //     content: '出码中...',
+  //     duration: 0,
+  //   })
 
-    let toJSON
+  //   let toJSON
 
-    try {
-      toJSON = designerRef.current.toJSON({ withDiagrams: true })
-    } catch (e) {
-      console.error('toJSON({ withDiagrams: true }) 报错: ', e)
-      message.error(
-        `出码失败: toJSON({ withDiagrams: true }) 报错 ${e.message}`
-      )
-      close()
-    }
+  //   try {
+  //     toJSON = designerRef.current.toJSON({ withDiagrams: true })
+  //   } catch (e) {
+  //     console.error('toJSON({ withDiagrams: true }) 报错: ', e)
+  //     message.error(
+  //       `出码失败: toJSON({ withDiagrams: true }) 报错 ${e.message}`
+  //     )
+  //     close()
+  //   }
 
-    if (toJSON) {
-      fAxios({
-        method: 'post',
-        url: '/api/pcpage/toCode',
-        responseType: 'blob',
-        data: {
-          json: toJSON,
-        },
-      })
-        .then((response: any) => {
-          // // 创建一个URL指向blob响应数据
-          const url = window.URL.createObjectURL(new Blob([response]))
-          // 创建一个a标签用于触发下载
-          const link = document.createElement('a')
-          link.href = url
-          // 设置下载后的文件名，如果服务器未指定，则可以在这里指定
-          link.setAttribute('download', '出码-react.zip') // 注意: 该名称可以根据实际情况命名
-          // 将a标签添加到body，触发点击事件，然后移除
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-          // 清理用完的URL对象
-          window.URL.revokeObjectURL(url)
-        })
-        .catch((error) => {
-          console.error('出码失败，报错信息:', error)
-          message.error(`出码失败: ${error.message}`)
-          throw error
-        })
-        .finally(() => {
-          close()
-        })
-    }
-  }
+  //   if (toJSON) {
+  //     fAxios({
+  //       method: 'post',
+  //       url: '/api/pcpage/toCode',
+  //       responseType: 'blob',
+  //       data: {
+  //         json: toJSON,
+  //       },
+  //     })
+  //       .then((response: any) => {
+  //         // // 创建一个URL指向blob响应数据
+  //         const url = window.URL.createObjectURL(new Blob([response]))
+  //         // 创建一个a标签用于触发下载
+  //         const link = document.createElement('a')
+  //         link.href = url
+  //         // 设置下载后的文件名，如果服务器未指定，则可以在这里指定
+  //         link.setAttribute('download', '出码-react.zip') // 注意: 该名称可以根据实际情况命名
+  //         // 将a标签添加到body，触发点击事件，然后移除
+  //         document.body.appendChild(link)
+  //         link.click()
+  //         document.body.removeChild(link)
+  //         // 清理用完的URL对象
+  //         window.URL.revokeObjectURL(url)
+  //       })
+  //       .catch((error) => {
+  //         console.error('出码失败，报错信息:', error)
+  //         message.error(`出码失败: ${error.message}`)
+  //         throw error
+  //       })
+  //       .finally(() => {
+  //         close()
+  //       })
+  //   }
+  // }
 
   return (
     <div className={`${css.view} fangzhou-theme`}>
@@ -857,15 +857,29 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     })
   }
 
-  if (toJSON.modules) {
-    Object.keys(toJSON.modules).forEach((key) => {
-      modulesDeps = [...modulesDeps, ...toJSON.modules[key].json.deps]
-    })
-  }
+  // if (toJSON.modules) {
+  //   Object.keys(toJSON.modules).forEach((key) => {
+  //     modulesDeps = [...modulesDeps, ...toJSON.modules[key].json.deps]
+  //   })
+  // }
+
+  const scenesDeps = (toJSON.scenes || []).reduce(
+    (pre, scene) => [...pre, ...scene.deps],
+    []
+  )
+
+  scenesDeps.forEach((item) => {
+    if (item.moduleId) {
+      // 如果是模块，且存在 moduleId
+      modulesDeps = [
+        ...modulesDeps,
+        ...toJSON?.modules[item.moduleId].json.deps,
+      ]
+    }
+  })
 
   let deps = [
-    ...(toJSON.scenes || [])
-      .reduce((pre, scene) => [...pre, ...scene.deps], [])
+    ...scenesDeps
       .filter((item) => !mySelfComMap[`${item.namespace}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
     ...(toJSON.global?.fxFrames || [])
@@ -916,7 +930,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
       if (libIndex !== -1) {
         curComponent =
           allComLibsRuntimeMap[libIndex][
-          component.namespace + '@' + component.version
+            component.namespace + '@' + component.version
           ]
       } else {
         libIndex = allComLibsRuntimeMap.findIndex((lib) =>
@@ -934,9 +948,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         }
         curComponent =
           allComLibsRuntimeMap[libIndex][
-          Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-            key.startsWith(component.namespace)
-          )
+            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+              key.startsWith(component.namespace)
+            )
           ]
       }
 
@@ -958,6 +972,8 @@ const genLazyloadComs = async (comlibs, toJSON) => {
       ] = curComponent
     })
   }
+
+  console.log('alldeps', deps)
 
   return curComLibs
 }

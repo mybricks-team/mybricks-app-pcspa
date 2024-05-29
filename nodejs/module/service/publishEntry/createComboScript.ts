@@ -224,16 +224,28 @@ export async function generateComLibRT(
       ];
     });
   }
+  const scenesDeps = (json.scenes || []).reduce(
+    (pre, scene) => [...pre, ...scene.deps],
+    []
+  )
+  scenesDeps.forEach((item) => {
+    if (item.moduleId) {
+      // 如果是模块，且存在 moduleId
+      modulesDeps = [
+        ...modulesDeps,
+        ...json?.modules[item.moduleId].json.deps,
+      ]
+    }
+  })
 
-  if (json.modules) {
-    Object.keys(json.modules).forEach((key) => {
-      modulesDeps = [...modulesDeps, ...json.modules[key].json.deps];
-    });
-  }
+  // if (json.modules) {
+  //   Object.keys(json.modules).forEach((key) => {
+  //     modulesDeps = [...modulesDeps, ...json.modules[key].json.deps];
+  //   });
+  // }
 
   let deps = [
-    ...(json.scenes || [])
-      .reduce((pre, scene) => [...pre, ...scene.deps], [])
+    ...scenesDeps
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
     ...(json.global?.fxFrames || [])
       .reduce((pre, fx) => [...pre, ...fx.deps], [])
@@ -245,7 +257,6 @@ export async function generateComLibRT(
       // .filter((item) => !mySelfComMap[`${item.namespace}@${item.version}`])
       .filter((item) => !ignoreNamespaces.includes(item.namespace)),
   ];
-
 
 
   const cloudNamespaceList = Object.keys(mySelfComMap);
