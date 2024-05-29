@@ -27,6 +27,7 @@ import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
 
 import css from './app.less'
+import { checkIfDebugComlib, comlibDebugUtils, replaceComlib } from './utils/comlibDebug'
 
 const msgSaveKey = 'save'
 
@@ -129,6 +130,7 @@ export default function MyDesigner({ appData: originAppData }) {
       runtimeUploadService,
       operable: false,
       isDebugMode: false,
+      debugComlib: checkIfDebugComlib(),
       saveContent(content) {
         ctx.save({ content })
       },
@@ -203,7 +205,8 @@ export default function MyDesigner({ appData: originAppData }) {
   useLayoutEffect(() => {
     getInitComLibs(appData)
       .then(async ({ comlibs, latestComlibs }) => {
-        setCtx((pre) => ({ ...pre, comlibs, latestComlibs }))
+        const newComlibs = ctx.debugComlib ? replaceComlib(comlibs, comlibDebugUtils.get()) : comlibs
+        setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
       })
       .finally(loadDesigner)
   }, [designer])

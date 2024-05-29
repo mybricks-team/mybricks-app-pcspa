@@ -43,6 +43,7 @@ import {
 import { isValidPascalCase } from './utils'
 import OutCodeDirList, { OutCodeDirListType } from './components/out-code-dir-list'
 import { getLocalData, setLocalData } from './utils/fileSystemHandle'
+import { comlibDebugUtils } from './utils/comlibDebug'
 
 const defaultPermissionComments = `/**
 *
@@ -214,10 +215,6 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         displayType: 'button',
         addTip: '添加',
         title: title,
-        // option: [
-        //   { label: 'Cookie', value: 'Cookie' },
-        //   { label: 'trace-context', value: 'trace-context' },
-        // ]
       },
       description: description,
       value: {
@@ -828,6 +825,28 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 'sessionStorage模拟',
                 '调试模式下，sessionStorage模拟'
               ),
+              {
+                title: '调试组件库',
+                type: 'mapCheckbox',
+                ifVisible({ data }) {
+                  return ctx.debugComlib;
+                },
+                options: {
+                  kType: 'auto',
+                  displayType: 'button',
+                  addTip: '添加',
+                  title: '调试组件库',
+                },
+                value: {
+                  get() {
+                    return comlibDebugUtils.get()
+                  },
+                  //每个字段的数据结构为{ key, value, checked }
+                  set(context, v) {
+                    comlibDebugUtils.set(v)
+                  },
+                },
+              }
             ],
           },
           {
