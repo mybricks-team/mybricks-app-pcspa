@@ -231,10 +231,18 @@ export async function generateComLibRT(
   scenesDeps.forEach((item) => {
     if (item.moduleId) {
       // 如果是模块，且存在 moduleId
-      modulesDeps = [
-        ...modulesDeps,
-        ...json?.modules[item.moduleId].json.deps,
-      ]
+      const module = json?.modules[item.moduleId]
+
+      if (module) {
+        modulesDeps = [
+          ...modulesDeps,
+          ...module?.json.deps,
+        ]
+
+      } else {
+        Logger.info(`[publish] 模块 ID ${item.moduleId} 不存在，数据可能存在错误`);
+      }
+
     }
   })
 

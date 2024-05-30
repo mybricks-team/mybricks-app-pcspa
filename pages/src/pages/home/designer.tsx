@@ -27,7 +27,11 @@ import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
 
 import css from './app.less'
-import { checkIfDebugComlib, comlibDebugUtils, replaceComlib } from './utils/comlibDebug'
+import {
+  checkIfDebugComlib,
+  comlibDebugUtils,
+  replaceComlib,
+} from './utils/comlibDebug'
 
 const msgSaveKey = 'save'
 
@@ -205,7 +209,9 @@ export default function MyDesigner({ appData: originAppData }) {
   useLayoutEffect(() => {
     getInitComLibs(appData)
       .then(async ({ comlibs, latestComlibs }) => {
-        const newComlibs = ctx.debugComlib ? replaceComlib(comlibs, comlibDebugUtils.get()) : comlibs
+        const newComlibs = ctx.debugComlib
+          ? replaceComlib(comlibs, comlibDebugUtils.get())
+          : comlibs
         setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
       })
       .finally(loadDesigner)
@@ -874,10 +880,16 @@ const genLazyloadComs = async (comlibs, toJSON) => {
   scenesDeps.forEach((item) => {
     if (item.moduleId) {
       // 如果是模块，且存在 moduleId
-      modulesDeps = [
-        ...modulesDeps,
-        ...toJSON?.modules[item.moduleId].json.deps,
-      ]
+
+      const module = toJSON?.modules[item.moduleId]
+
+      if (module) {
+        modulesDeps = [...modulesDeps, ...module?.json.deps]
+      } else {
+        console.warn(
+          `[MyBicks PC Warn]：模块 ID ${item.moduleId} 不存在，数据可能存在错误`
+        )
+      }
     }
   })
 
@@ -975,8 +987,6 @@ const genLazyloadComs = async (comlibs, toJSON) => {
       ] = curComponent
     })
   }
-
-  console.log('alldeps', deps)
 
   return curComLibs
 }
