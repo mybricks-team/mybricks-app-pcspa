@@ -58,9 +58,9 @@ const transformCodeByBabel = (
     res = Babel.transform(temp, parserOptions).code;
     res = encodeURIComponent(`(function() { var _RTFN_; \n${res}\n; return _RTFN_; })()`)
   } catch (e) {
-    console.info(e);
+    Logger.info(`[publish] ${e.message}`)
     if (tips) {
-      throw new Error(`${decodeURIComponent(code)}\n${tips}代码存在错误，请检查！！！`);
+      throw new Error(`${tips}代码存在错误，请检查！！！`);
     }
     return code;
   }
