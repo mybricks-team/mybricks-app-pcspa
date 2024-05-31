@@ -95,6 +95,7 @@ export default class PcPageController {
       return {
         code: -1,
         message: error.message || "发布失败",
+        errorDetailMessage: error.errorDetailMessage,
       };
     }
   }
@@ -110,7 +111,7 @@ export default class PcPageController {
       res.setHeader("Content-Type", "application/zip");
       fs.createReadStream(zipFilePath).pipe(res);
       Logger.info(`[toCode] setHeader`);
-  
+
       res.on('finish', () => {
         Logger.info(`[toCode] finish`);
         fs.unlink(zipFilePath, () => {

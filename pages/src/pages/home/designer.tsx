@@ -9,7 +9,7 @@ import React, {
 import axios from 'axios'
 import { fAxios } from '../../services/http'
 import moment from 'moment'
-import { message } from 'antd'
+import { message, Modal } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
@@ -139,7 +139,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon? },
+        param: { name?; shareType?; content?; icon?},
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
@@ -223,7 +223,7 @@ export default function MyDesigner({ appData: originAppData }) {
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ;(window as any).mybricks.SPADesigner &&
+        ; (window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -509,7 +509,7 @@ export default function MyDesigner({ appData: originAppData }) {
           ? btoa(encodeURIComponent(JSON.stringify(jsonParams)))
           : jsonParams
 
-        const res: { data?: any; code: number; message: string } =
+        const res: { data?: any; code: number; message: string, errorDetailMessage?: string } =
           await fAxios.post('/api/pcpage/publish', {
             userId: ctx.user?.id,
             fileId: ctx.fileId,
@@ -532,10 +532,19 @@ export default function MyDesigner({ appData: originAppData }) {
           }, 0)
         } else {
           close()
+          console.log(`res JD==> `, res);
           message.error({
             content: res.message || '发布失败',
             duration: 2,
           })
+          if (res.errorDetailMessage) {
+            Modal.confirm({
+              title: '详细报错信息',
+              width: 800,
+              content: <pre>{res.errorDetailMessage}</pre>,
+              okCancel: false,
+            })
+          }
         }
 
         setPublishLoading(false)
@@ -945,7 +954,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
       if (libIndex !== -1) {
         curComponent =
           allComLibsRuntimeMap[libIndex][
-            component.namespace + '@' + component.version
+          component.namespace + '@' + component.version
           ]
       } else {
         libIndex = allComLibsRuntimeMap.findIndex((lib) =>
@@ -963,9 +972,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         }
         curComponent =
           allComLibsRuntimeMap[libIndex][
-            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-              key.startsWith(component.namespace)
-            )
+          Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+            key.startsWith(component.namespace)
+          )
           ]
       }
 

@@ -1,4 +1,5 @@
 import { Logger } from '@mybricks/rocker-commons';
+import EnhancedError from '../../../../module/tools/enhanced-error';
 const Babel = require("@babel/standalone");
 
 const NeedTransformCom = [
@@ -58,9 +59,10 @@ const transformCodeByBabel = (
     res = Babel.transform(temp, parserOptions).code;
     res = encodeURIComponent(`(function() { var _RTFN_; \n${res}\n; return _RTFN_; })()`)
   } catch (e) {
+    Logger.info(`[publish] ${tips}代码存在错误，请检查！！！`)
     Logger.info(`[publish] ${e.message}`)
     if (tips) {
-      throw new Error(`${tips}代码存在错误，请检查！！！`);
+      throw new EnhancedError(`${tips}代码存在错误，请检查！！！`, { errorDetailMessage: e.message });
     }
     return code;
   }
