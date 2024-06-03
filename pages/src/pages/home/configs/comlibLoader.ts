@@ -139,6 +139,7 @@ export default (ctx) => (libDesc) => {
               });
             }
             break;
+          // 引擎 3.3.0 废弃 addCom 命令，改为 addUICom 和 addJSCom
           case 'addCom':
             ctx.sdk.openUrl({
               url: 'MYBRICKS://mybricks-material/materialSelectorPage',
@@ -161,7 +162,53 @@ export default (ctx) => (libDesc) => {
               }
             })
 
-            break
+            break;
+          case 'addUICom':
+            ctx.sdk.openUrl({
+              url: 'MYBRICKS://mybricks-material/materialSelectorPage',
+              params: {
+                defaultSelected: getSelfComponents(),
+                userId: ctx.user?.id,
+                combo: true,
+                tags: [APP_TYPE]
+              },
+              onSuccess: ({ materials, updatedMaterials }) => {
+                const newComponents = addSelfLibComponents(materials)
+                getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
+                  resolve({
+                    id: '_myself_',
+                    title: '我的组件',
+                    defined: true,
+                    comAray: newComlib?.comAray || []
+                  })
+                })
+              }
+            })
+
+            break;
+          case 'addJSCom':
+            ctx.sdk.openUrl({
+              url: 'MYBRICKS://mybricks-material/materialSelectorPage',
+              params: {
+                defaultSelected: getSelfComponents(),
+                userId: ctx.user?.id,
+                combo: true,
+                tags: ['js']
+              },
+              onSuccess: ({ materials, updatedMaterials }) => {
+                const newComponents = addSelfLibComponents(materials)
+                getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
+                  resolve({
+                    id: '_myself_',
+                    title: '我的组件',
+                    defined: true,
+                    comAray: newComlib?.comAray || []
+                  })
+                })
+              }
+            })
+
+            break;
           case 'deleteComLib':
             deleteComlib(ctx, { ...libDesc, namespace: libDesc?.libNamespace })
             resolve(true);
