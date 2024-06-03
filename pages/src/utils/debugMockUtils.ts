@@ -1,8 +1,9 @@
 const originalLocalGetItem = localStorage.getItem;
-export const proxLocalStorage = (mockData = []) => {
-    const data = getCheckedMockDataMap(mockData)
-    localStorage.getItem = function(key) {
-        if(key in data) {
+export const proxLocalStorage = (mockConfig = []) => {
+    localStorage.getItem = function (key) {
+        const mockData = mockConfig?.localStorageMock
+        const data = getCheckedMockDataMap(mockData)
+        if (key in data) {
             return data[key]
         }
         return originalLocalGetItem.apply(this, arguments);
@@ -14,10 +15,11 @@ export const proxLocalStorage = (mockData = []) => {
 }
 
 const originSessionGetItem = sessionStorage.getItem
-export const proxSessionStorage = (mockData = []) => {
-    const data = getCheckedMockDataMap(mockData)
-    sessionStorage.getItem = function(key) {
-        if(key in data) {
+export const proxSessionStorage = (mockConfig = {}) => {
+    sessionStorage.getItem = function (key) {
+        const mockData = mockConfig?.sessionStorageMock
+        const data = getCheckedMockDataMap(mockData)
+        if (key in data) {
             return data[key]
         }
         return originSessionGetItem.apply(this, arguments);
@@ -31,7 +33,7 @@ export const proxSessionStorage = (mockData = []) => {
 export const getCheckedMockDataMap = (originMockDate) => {
     return originMockDate.reduce((res, item) => {
         const { key, value, checked } = item
-        if(checked) {
+        if (checked) {
             res[key] = value
         }
         return res

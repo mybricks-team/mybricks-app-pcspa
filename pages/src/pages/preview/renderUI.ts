@@ -30,8 +30,8 @@ const {
 } = previewStorage.getPreviewPageData();
 
 
-proxLocalStorage(debugMockConfig?.localStorageMock)
-proxSessionStorage(debugMockConfig?.sessionStorageMock)
+proxLocalStorage(debugMockConfig)
+proxSessionStorage(debugMockConfig)
 const root = ({ renderType, env, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   if (!renderUI) {

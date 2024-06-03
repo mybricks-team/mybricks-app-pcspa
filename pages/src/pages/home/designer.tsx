@@ -634,12 +634,8 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [JSON.stringify(ctx)])
 
   useEffect(() => {
-    const removeLocalProxy = proxLocalStorage(
-      ctx.debugMockConfig?.localStorageMock
-    )
-    const removeSessionProxy = proxSessionStorage(
-      ctx.debugMockConfig?.sessionStorageMock
-    )
+    const removeLocalProxy = proxLocalStorage(ctx.debugMockConfig)
+    const removeSessionProxy = proxSessionStorage(ctx.debugMockConfig)
 
     return () => {
       removeLocalProxy()
