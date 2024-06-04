@@ -136,6 +136,8 @@ export default (ctx) => (libDesc) => {
                   removeSelfLibComponents([comNamespace])
                   resolve(ctx?.comlibs.find(t => t?.id === MySelfId));
                 },
+                wrapClassName: 'z-index-10000',
+                maskStyle: { zIndex: 10000 },
               });
             }
             break;
