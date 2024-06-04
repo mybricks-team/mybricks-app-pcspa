@@ -36,7 +36,7 @@ const isEqual = (param1, param2) => {
   return param1 === param2
 }
 
-const root = ({ renderType, locale, runtime, ...props }) => {
+const root = ({ renderType, locale, runtime, extVars, extCallConnector, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   const domainServicePath = '--domain-service-path--';//replace it
   /**网页标题i18n处理 */
@@ -63,6 +63,7 @@ const root = ({ renderType, locale, runtime, ...props }) => {
       get vars() {
         // 环境变量
         return {
+          ...(extVars?.customVars || {}),
           get getExecuteEnv() {
             return () => executeEnv;
           },
@@ -94,6 +95,8 @@ const root = ({ renderType, locale, runtime, ...props }) => {
             };
           },
           get getRouter() {
+            if (extVars?.getRouter) return extVars.getRouter();
+
             const isUri = (url) => {
               return /^http[s]?:\/\/([\w\-\.]+)+[\w-]*([\w\-\.\/\?%&=]+)?$/gi.test(
                 url
@@ -191,7 +194,7 @@ const root = ({ renderType, locale, runtime, ...props }) => {
                   }
                 }
                 : (options) => {
-                  return {
+                  const mergedOptions = {
                     ...options,
                     url: shapeUrlByEnv(
                       envList,
@@ -199,7 +202,9 @@ const root = ({ renderType, locale, runtime, ...props }) => {
                       options.url,
                       MYBRICKS_HOST
                     ),
-                  };
+                  }
+                  if (extCallConnector?.before) return extCallConnector.before(mergedOptions);
+                  return mergedOptions;
                 },
             })
             : Promise.reject("接口不存在，请检查连接器插件中接口配置");
