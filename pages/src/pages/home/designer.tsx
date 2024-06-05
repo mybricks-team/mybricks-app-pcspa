@@ -65,7 +65,7 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [appData.config[APP_NAME]?.config])
 
   const designer = useMemo(
-    () => appConfig.designer?.url || DESIGNER_STATIC_PATH,
+    () =>  appConfig.designer?.url || DESIGNER_STATIC_PATH ,//'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.3.6/index.min.js',// appConfig.designer?.url || DESIGNER_STATIC_PATH,
     [appConfig]
   )
 
@@ -208,8 +208,8 @@ export default function MyDesigner({ appData: originAppData }) {
     getInitComLibs(appData)
       .then(async ({ comlibs, latestComlibs }) => {
         const newComlibs = ctx.debugComlib ? replaceComlib(comlibs, comlibDebugUtils.get()) : comlibs
-        setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
-        // setCtx((pre) => ({ ...pre, comlibs: ['http://localhost:20000/comlib.js'], latestComlibs }));
+        // setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
+        setCtx((pre) => ({ ...pre, comlibs: ['http://localhost:20000/comlib.js'], latestComlibs }));
       })
       .finally(loadDesigner)
   }, [designer])

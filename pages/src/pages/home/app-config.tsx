@@ -10,8 +10,9 @@ import domainServicePlugin, {
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from 'mybricks-plugin-version'
 import localePlugin from '@mybricks/plugin-locale'
-// import notePlugin from '../../../../../plugin-note'
-import notePlugin from '/Users/wufan12/eccom/plugin-note/src/index.tsx'
+import notePlugin from '../../../../../plugin-note'
+// import notePlugin from '/Users/wufan12/eccom/plugin-note/src/index.tsx'
+import array from '../../../../../editors-pc-common/src/array'
 
 // import notePlugin from '@mybricks/plugin-note'
 import { use as useTheme } from '@mybricks/plugin-theme'
@@ -163,6 +164,26 @@ const injectUpload = (
   }
 }
 
+function typeCheck(variable: any, type: string): boolean {
+  const typeMap: {
+    [key: string]: string;
+  } = {
+    NULL: '[object Null]',
+    ARRAY: '[object Array]',
+    OBJECT: '[object Object]',
+    STRING: '[object String]',
+    NUMBER: '[object Number]',
+    BOOLEAN: '[object Boolean]',
+    FUNCTION: '[object Function]',
+    FORMDATA: '[object FormData]',
+    UNDEFINED: '[object Undefined]',
+  };
+  const checkType = /^\[.*\]$/.test(type) ? type : typeMap[type.toUpperCase()];
+
+  return Object.prototype.toString.call(variable) === checkType;
+}
+
+
 const CUSTOM_HOST_TITLE = `自定义域名`
 const DOMAIN_APP_NAMESPACE = 'mybricks-domain'
 
@@ -307,6 +328,36 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     return `zh`
   }
 
+  const editorAppenderFn = (editConfig) => {
+    const editorsMap = {
+      ARRAY: array,
+      // IMAGESELECTOR: imageSelector,
+      // STYLE: styleEditor
+    };
+
+    let editor;
+    try {
+      editor = editorsMap[editConfig.type.toUpperCase()] || editConfig.render;
+    } catch (err) {
+      console.error(err);
+    }
+
+    // inject(editConfig);
+
+    if (typeCheck(editor, 'function')) {
+      return editor({
+        editConfig,
+        projectData: ctx.projectData,
+        userName: ctx.user.userId,
+      });
+    }
+
+    if (typeCheck(editor, 'object') && typeCheck(editor.render, 'function')) {
+      return editor;
+    }
+
+    return;
+  };
   const connetorPlugins: any[] = [
     servicePlugin({
       isPrivatization: ctx.setting?.system.config?.isPureIntranet === true,
@@ -546,7 +597,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           ctx.manateeUserInfo,
           ctx.fileId
         )
-        return
+        // return
+        return editorAppenderFn(editConfig)
       },
       items({ }, cate0, cate1, cate2) {
         cate0.title = `项目`
