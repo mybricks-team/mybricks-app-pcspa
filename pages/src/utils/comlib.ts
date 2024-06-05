@@ -266,7 +266,7 @@ export const getMySelfLibComsFromUrl = (url) => {
         window['__comlibs_edit_'].splice(lastComIndex, 1);
       }
       setTimeout(() => resolveSelfLibStyle(styles), 1500);
-      console.log('加载', window['__comlibs_edit_'])
+      // console.log('加载', window['__comlibs_edit_'])
       resolve(window['__comlibs_edit_'][firstComIdx]);
     })
   })
