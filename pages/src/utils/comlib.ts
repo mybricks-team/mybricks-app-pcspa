@@ -1,5 +1,5 @@
 
-import { ComlibEditUrl, ComlibRtUrl, PC_COMMON_MAP } from './../constants'
+import { PC_COMMON_MAP } from './../constants'
 /** 组件库、组件相关utils */
 
 
@@ -82,31 +82,31 @@ export function myRequire(arr, onError): Promise<{ styles: any }> {
     arr.forEach(function (req_item, index, arr) {
       const script = createScript(req_item, index)
       document.body.appendChild(script)
-      // getScriptStyle(req_item);
-      ;(function (script) {
-        script.onerror = (err) => {
-          REQ_TOTAL++
-          onError(err)
-          if (REQ_TOTAL == REQLEN) {
-            document.head.appendChild = _headAppendChild
-            // document.head.insertBefore = _headInsertBefore
+        // getScriptStyle(req_item);
+        ; (function (script) {
+          script.onerror = (err) => {
+            REQ_TOTAL++
+            onError(err)
+            if (REQ_TOTAL == REQLEN) {
+              document.head.appendChild = _headAppendChild
+              // document.head.insertBefore = _headInsertBefore
+            }
           }
-        }
-        script.onload = function () {
-          REQ_TOTAL++
-          const script_index = script.getAttribute('index')
-          EXP_ARR[script_index] = this
+          script.onload = function () {
+            REQ_TOTAL++
+            const script_index = script.getAttribute('index')
+            EXP_ARR[script_index] = this
 
-          if (REQ_TOTAL == REQLEN) {
-            // resolve(EXP_ARR)
-            resolve({ styles })
-            removeStylesBySubstring('mybricks_')
-            // callback && callback.apply(this, EXP_ARR);
-            document.head.appendChild = _headAppendChild
-            // document.head.insertBefore = _headInsertBefore
+            if (REQ_TOTAL == REQLEN) {
+              // resolve(EXP_ARR)
+              resolve({ styles })
+              removeStylesBySubstring('mybricks_')
+              // callback && callback.apply(this, EXP_ARR);
+              document.head.appendChild = _headAppendChild
+              // document.head.insertBefore = _headInsertBefore
+            }
           }
-        }
-      })(script)
+        })(script)
     })
   })
 }
@@ -125,7 +125,7 @@ function removeStylesBySubstring(substring) {
   });
 }
 
-export const MySelfId = '_myself_';
+const MY_SELF_ID = '_myself_';
 
 export const isCloundModuleComboUrl = (url) => {
   if (!url || typeof url !== 'string') {
@@ -141,7 +141,7 @@ export const getRtComlibsFromEdit = (comlibs) => {
       return PC_COMMON_MAP[comlib]
     }
 
-    if (comlib?.id === MySelfId) {
+    if (comlib?.id === MY_SELF_ID) {
       const comboComlib = new ComboComlibURL()
       comboComlib.setComponents(JSON.parse(JSON.stringify(comlib?.comAray)))
       return comboComlib.toRtUrl()
@@ -157,7 +157,7 @@ export const getRtComlibsFromEdit = (comlibs) => {
 
 export const getRtComlibsFromConfigEdit = (comlibs = []) => {
   return comlibs.map(lib => {
-    if (lib?.id === MySelfId) {
+    if (lib?.id === MY_SELF_ID) {
       const comboComlib = new ComboComlibURL()
       comboComlib.setComponents(JSON.parse(JSON.stringify(lib?.comAray)))
       return comboComlib.toRtUrl()
@@ -236,8 +236,8 @@ export class ComboComlibURL {
 
 
 export const getMySelfLibComsFromUrl = (url) => {
-  
-  if(url?.split('components=')?.[1]?.length === 0) {
+
+  if (url?.split('components=')?.[1]?.length === 0) {
     window['__comlibs_edit_'].unshift({
       comAray: [],
       id: '_myself_',
@@ -251,13 +251,13 @@ export const getMySelfLibComsFromUrl = (url) => {
   return new Promise((resolve, reject) => {
     myRequire([url], () => {
       reject(new Error('加载我的组件失败'))
-    }).then(({styles}) => {
+    }).then(({ styles }) => {
       /** 添加之后会有多组件存储于__comlibs_edit_需要合并下 */
       const firstComIdx = window['__comlibs_edit_'].findIndex(
-        (lib) => lib.id === MySelfId,
+        (lib) => lib.id === MY_SELF_ID,
       );
       const lastComIndex = window['__comlibs_edit_'].findLastIndex(
-        (lib) => lib.id === MySelfId,
+        (lib) => lib.id === MY_SELF_ID,
       );
       if (firstComIdx !== lastComIndex) {
         window['__comlibs_edit_'][firstComIdx].comAray = [
@@ -266,6 +266,7 @@ export const getMySelfLibComsFromUrl = (url) => {
         window['__comlibs_edit_'].splice(lastComIndex, 1);
       }
       setTimeout(() => resolveSelfLibStyle(styles), 1500);
+      console.log('加载', window['__comlibs_edit_'])
       resolve(window['__comlibs_edit_'][firstComIdx]);
     })
   })

@@ -1,8 +1,8 @@
-import { isNumber, isObject, cloneDeep } from 'lodash'
+import isObject from 'lodash/isObject'
 import { Modal, message } from 'antd'
-import { MaterialService } from './../../../services'
-import { MaterialComlib } from './../../../types'
-import { ComboComlibURL, getMySelfLibComsFromUrl, getComlibsByNamespaceAndVersion } from './../../../utils/comlib'
+// import { MaterialService } from './../../../services'
+// import { MaterialComlib } from './../../../types'
+import { getComlibsByNamespaceAndVersion } from './../../../utils/comlib'
 import { initMaterials } from './initMaterials'
 import { addComlib } from './addComlib'
 import { upgradeLatestComlib, upgradeComlibByVersion } from './upgradeComlib'
@@ -22,17 +22,17 @@ const init = () => {
   }
 }
 
-const MySelfId = '_myself_';
+const MY_SELF_ID = '_myself_';
 
 
 export default (ctx) => (libDesc) => {
   init();
 
-  const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId)
+  const mySelfLib = ctx?.comlibs.find(t => t?.id === MY_SELF_ID)
 
   const addSelfLibComponents = (components => {
     components.forEach(component => {
-      const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId)
+      const mySelfLib = ctx?.comlibs.find(t => t?.id === MY_SELF_ID)
       const index = mySelfLib.comAray.findIndex((item) => item.namespace === component.namespace);
 
       /** 当前组件已经存在 */
@@ -55,7 +55,7 @@ export default (ctx) => (libDesc) => {
   })
 
   const removeSelfLibComponents = (comNamespaces) => {
-    const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId)
+    let mySelfLib = ctx?.comlibs.find(t => t?.id === MY_SELF_ID)
     comNamespaces.forEach(comNamespace => {
       const removeIdx = mySelfLib?.comAray?.findIndex?.((item) => {
         return item.namespace === comNamespace;
@@ -64,20 +64,20 @@ export default (ctx) => (libDesc) => {
     })
   }
 
-  const updateSelfLibComponent = (component) => {
-    const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId)
-    if (!component?.namespace || !component?.version) {
-      return mySelfLib.comAray
-    }
+  // const updateSelfLibComponent = (component) => {
+  //   const mySelfLib = ctx?.comlibs.find(t => t?.id === MY_SELF_ID)
+  //   if (!component?.namespace || !component?.version) {
+  //     return mySelfLib.comAray
+  //   }
 
-    mySelfLib.comAray.forEach(com => {
-      if (com.namespace === component?.namespace) {
-        com.version = component.version
-      }
-    })
+  //   mySelfLib.comAray.forEach(com => {
+  //     if (com.namespace === component?.namespace) {
+  //       com.version = component.version
+  //     }
+  //   })
 
-    return mySelfLib.comAray
-  }
+  //   return mySelfLib.comAray
+  // }
 
   const getSelfComponents = () => {
     return mySelfLib?.comAray.filter(com => isObject(com))
@@ -94,10 +94,12 @@ export default (ctx) => (libDesc) => {
 
         let index = -1
         let com
+
         switch (cmd) {
           case 'upgradeCom':
-            const mySelfLib = ctx?.comlibs.find(t => t?.id === MySelfId) ?? [];
+            const mySelfLib = ctx?.comlibs.find(t => t?.id === MY_SELF_ID) ?? [];
             const curCom = mySelfLib.comAray?.find(com => com.namespace === comNamespace);
+
             ctx.sdk.openUrl({
               url: 'MYBRICKS://mybricks-material/materialSelectorPage',
               params: {
@@ -107,16 +109,26 @@ export default (ctx) => (libDesc) => {
                 combo: true,
                 tags: [APP_TYPE]
               },
-              onSuccess: ({ materials, updatedMaterials }) => {
+              onSuccess: (params) => {
+                const { materials, updatedMaterials } = params
                 const newComponents = addSelfLibComponents(materials)
+
                 getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
+                  const curMaterial = updatedMaterials[0]
+                  const curComInfo = newComlib?.comAray.find(item => item.namespace === curMaterial?.namespace)
+
                   resolve({
                     id: '_myself_',
                     title: '我的组件',
                     defined: true,
                     comAray: newComlib?.comAray || []
                   })
+                  message.success(`${curComInfo ? `【${curComInfo.title}】` : ''} 组件 版本：${curMaterial.version} 更新成功`)
+                }).catch(e => {
+                  message.error('更新失败')
+                  console.warn(`[MyBricks PC Warn]: ${comNamespace} 更新失败`)
                 })
+
               }
             })
             break;
@@ -134,7 +146,11 @@ export default (ctx) => (libDesc) => {
                 getContainer: () => document.body,
                 onOk() {
                   removeSelfLibComponents([comNamespace])
-                  resolve(ctx?.comlibs.find(t => t?.id === MySelfId));
+                  resolve(ctx?.comlibs.find(t => t?.id === MY_SELF_ID));
+                  // console.log('123返回', ctx?.comlibs.find(t => t?.id === MY_SELF_ID))
+                  // const mySelf = ctx?.comlibs.find(t => t?.id === MY_SELF_ID)
+                  // mySelf.comAray = [...mySelf.comAray]
+                  // resolve({ ...mySelf });
                 },
                 wrapClassName: 'z-index-10000',
                 maskStyle: { zIndex: 10000 },
@@ -177,6 +193,7 @@ export default (ctx) => (libDesc) => {
               onSuccess: ({ materials, updatedMaterials }) => {
                 const newComponents = addSelfLibComponents(materials)
                 getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
+                  console.log(newComlib)
                   resolve({
                     id: '_myself_',
                     title: '我的组件',

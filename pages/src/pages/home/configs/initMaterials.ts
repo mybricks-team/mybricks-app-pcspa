@@ -2,13 +2,13 @@ import { compareVersions } from "compare-versions";
 import { getComlibsByNamespaceAndVersion } from "../../../utils/comlib";
 import { myRequire } from "../../../utils/comlib";
 
-const MySelfId = "_myself_";
+const MY_SELF_ID = "_myself_";
 const ComLib_Edit = "__comlibs_edit_";
 
 export const initMaterials = async (ctx: Record<string, any>) => {
   const { comlibs, hasMaterialApp, latestComlibs } = ctx;
-  const myselfLib = comlibs.find((lib) => lib?.id === MySelfId);
-  const libs = comlibs.filter((lib) => lib?.id !== MySelfId);
+  const myselfLib = comlibs.find((lib) => lib?.id === MY_SELF_ID);
+  const libs = comlibs.filter((lib) => lib?.id !== MY_SELF_ID);
 
   if (myselfLib && hasMaterialApp) {
     await getComlibsByNamespaceAndVersion(myselfLib?.comAray);

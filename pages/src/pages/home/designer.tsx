@@ -15,7 +15,7 @@ import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
 import { fetchPlugins, removeBadChar } from '../../utils'
 import { PreviewStorage } from './../../utils/previewStorage'
-import { unionBy } from 'lodash'
+import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
 import { createFromIconfontCN } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
@@ -139,7 +139,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon?},
+        param: { name?; shareType?; content?; icon? },
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
@@ -223,7 +223,7 @@ export default function MyDesigner({ appData: originAppData }) {
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ; (window as any).mybricks.SPADesigner &&
+        ;(window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -509,14 +509,18 @@ export default function MyDesigner({ appData: originAppData }) {
           ? btoa(encodeURIComponent(JSON.stringify(jsonParams)))
           : jsonParams
 
-        const res: { data?: any; code: number; message: string, errorDetailMessage?: string } =
-          await fAxios.post('/api/pcpage/publish', {
-            userId: ctx.user?.id,
-            fileId: ctx.fileId,
-            json: toJSON,
-            envType,
-            commitInfo,
-          })
+        const res: {
+          data?: any
+          code: number
+          message: string
+          errorDetailMessage?: string
+        } = await fAxios.post('/api/pcpage/publish', {
+          userId: ctx.user?.id,
+          fileId: ctx.fileId,
+          json: toJSON,
+          envType,
+          commitInfo,
+        })
 
         if (res.code === 1) {
           close()
@@ -532,7 +536,7 @@ export default function MyDesigner({ appData: originAppData }) {
           }, 0)
         } else {
           close()
-          console.log(`res JD==> `, res);
+          console.log(`res JD==> `, res)
           message.error({
             content: res.message || '发布失败',
             duration: 2,
@@ -950,7 +954,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
       if (libIndex !== -1) {
         curComponent =
           allComLibsRuntimeMap[libIndex][
-          component.namespace + '@' + component.version
+            component.namespace + '@' + component.version
           ]
       } else {
         libIndex = allComLibsRuntimeMap.findIndex((lib) =>
@@ -968,9 +972,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         }
         curComponent =
           allComLibsRuntimeMap[libIndex][
-          Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-            key.startsWith(component.namespace)
-          )
+            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+              key.startsWith(component.namespace)
+            )
           ]
       }
 
