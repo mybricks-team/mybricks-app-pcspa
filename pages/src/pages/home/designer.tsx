@@ -64,12 +64,13 @@ export default function MyDesigner({ appData: originAppData }) {
     return config || {}
   }, [appData.config[APP_NAME]?.config])
 
+  // 连接器地址url
   const designer = useMemo(
-    () =>  appConfig.designer?.url || DESIGNER_STATIC_PATH ,//'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.3.6/index.min.js',// appConfig.designer?.url || DESIGNER_STATIC_PATH,
+    () => DESIGNER_STATIC_PATH, //appConfig.designer?.url || DESIGNER_STATIC_PATH ,//'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.3.6/index.min.js',// appConfig.designer?.url || DESIGNER_STATIC_PATH,
     [appConfig]
   )
 
-  console.log('appConfig.designer?.url', appConfig.designer?.url)
+  // console.log('appConfig.designer?.url', appConfig.designer?.url)
 
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || ''
@@ -208,6 +209,7 @@ export default function MyDesigner({ appData: originAppData }) {
     getInitComLibs(appData)
       .then(async ({ comlibs, latestComlibs }) => {
         const newComlibs = ctx.debugComlib ? replaceComlib(comlibs, comlibDebugUtils.get()) : comlibs
+        debugger
         // setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
         setCtx((pre) => ({ ...pre, comlibs: ['http://localhost:20000/comlib.js'], latestComlibs }));
       })
@@ -226,7 +228,7 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }, [designer])
 
-  // 只有预览时 search 会携带 version 字段
+  // 只有预览时 search 会携带 version 字段, 预览保存记录
   const isPreview = window.location.search.includes('version')
 
   //页面刷新的时候，添加fontJS资源

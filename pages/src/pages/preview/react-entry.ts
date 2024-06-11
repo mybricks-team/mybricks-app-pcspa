@@ -25,6 +25,7 @@ if (!comlibs) {
   comlibs = [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
 }
 
+// debugger
 function cssVariable(dumpJson) {
   const themes = dumpJson?.plugins?.['@mybricks/plugins/theme/use']?.themes
   if (Array.isArray(themes)) {

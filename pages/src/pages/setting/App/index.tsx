@@ -16,7 +16,7 @@ export default (props) => {
   const configContext = useConfig(_NAMESPACE_, {}, options)
 
   const isInGroup = options?.type === 'group'
-
+  // PC页面应用配置，设置=》PC页面 =》面板内容
   return (
     <Spin spinning={configContext.loading}>
       <Collapse style={{ padding: 24 }} className={style.wrapper} defaultActiveKey={[0, 1, 2, 3, 4]}>

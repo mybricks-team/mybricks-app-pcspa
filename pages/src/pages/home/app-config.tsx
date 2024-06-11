@@ -597,8 +597,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           ctx.manateeUserInfo,
           ctx.fileId
         )
-        // return
-        return editorAppenderFn(editConfig)
+        return
+        // return editorAppenderFn(editConfig)
       },
       items({ }, cate0, cate1, cate2) {
         cate0.title = `项目`

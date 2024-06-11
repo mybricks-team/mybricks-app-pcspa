@@ -53,5 +53,5 @@ export const MySelf_COM_LIB = {
 };
 
 
-export const DESIGNER_STATIC_PATH = 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.2.2/index.min.js' // './public/designer-spa/3.2.0/index.min.js'
+export const DESIGNER_STATIC_PATH = 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.4.53/index.min.js' // './public/designer-spa/3.2.0/index.min.js'
 // export const DESIGNER_STATIC_PATH =  'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.2.2/index.min.js'// './public/designer-spa/2.11.4/index.min.js' //  './public/designer-spa/2.9.0/index.min.js'
