@@ -17,6 +17,7 @@ declare interface Window {
   fileId: string
   designerRef: any
   mybricks: any
+  importDump: Function
 }
 
 declare type RenderWeb = {

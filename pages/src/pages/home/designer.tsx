@@ -650,6 +650,20 @@ export default function MyDesigner({ appData: originAppData }) {
     ctx.debugMockConfig?.sessionStorageMock,
   ])
 
+  const importDump = async (value) => {
+    try {
+      const { content, pageConfig } = JSON.parse(value)
+      Object.assign(ctx, pageConfig ?? {})
+      await designerRef.current.loadContent(content)
+      await save()
+      location.reload()
+    } catch (e) {
+      message.error(e)
+      console.error(e)
+    }
+  }
+
+  window.importDump = importDump
   window.designerRef = designerRef
 
   // const downloadCode = async () => {
@@ -744,18 +758,7 @@ export default function MyDesigner({ appData: originAppData }) {
         )}
         <div className={`${isPreview ? css.toolbarWrapperPreview : ''}`}>
           <Toolbar.Tools
-            onImport={async (value) => {
-              try {
-                const { content, pageConfig } = JSON.parse(value)
-                Object.assign(ctx, pageConfig ?? {})
-                await designerRef.current.loadContent(content)
-                await save()
-                location.reload()
-              } catch (e) {
-                message.error(e)
-                console.error(e)
-              }
-            }}
+            onImport={importDump}
             getExportDumpJSON={() => {
               return getDumpJson()
             }}
