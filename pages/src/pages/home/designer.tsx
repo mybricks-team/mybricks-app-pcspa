@@ -54,6 +54,9 @@ export default function MyDesigner({ appData: originAppData }) {
     return data
   }, [originAppData])
 
+  // 查看特定版本或者指定为预览态时，展示预览态
+  const isPreview = window.location.search.includes('version') || appData.isPreview;
+
   const appConfig = useMemo(() => {
     let config = null
     try {
@@ -91,6 +94,7 @@ export default function MyDesigner({ appData: originAppData }) {
           : EnumMode.DEFAULT
 
     return {
+      isPreview,
       sdk: {
         projectId: appData.projectId,
         openUrl: appData.openUrl,
@@ -228,9 +232,6 @@ export default function MyDesigner({ appData: originAppData }) {
       }
     }
   }, [designer])
-
-  // 只有预览时 search 会携带 version 字段
-  const isPreview = window.location.search.includes('version')
 
   //页面刷新的时候，添加fontJS资源
   useEffect(() => {
@@ -536,7 +537,6 @@ export default function MyDesigner({ appData: originAppData }) {
           }, 0)
         } else {
           close()
-          console.log(`res JD==> `, res)
           message.error({
             content: res.message || '发布失败',
             duration: 2,
@@ -655,8 +655,6 @@ export default function MyDesigner({ appData: originAppData }) {
       const { content, pageConfig } = JSON.parse(value)
       Object.assign(ctx, pageConfig ?? {})
       await designerRef.current.loadContent(content)
-      await save()
-      location.reload()
     } catch (e) {
       message.error(e)
       console.error(e)
@@ -665,6 +663,24 @@ export default function MyDesigner({ appData: originAppData }) {
 
   window.importDump = importDump
   window.designerRef = designerRef
+
+  async function designerIsComplete() {
+    return new Promise((resolve) => {
+      const intervalId = setInterval(() => {
+        if (document.getElementById('_mybricks-geo-webview_')) {
+          resolve(true);
+          clearInterval(intervalId);
+        }
+      }, 100)
+    })
+  }
+ 
+  /** 通知父页面渲染完成 */
+  useEffect(() => {
+    designerIsComplete().then(() => {
+      window.parent.postMessage({ type: 'RENDER_COMPLETE' }, '*');
+    })
+  }, []);
 
   // const downloadCode = async () => {
   //   const close = message.loading({
@@ -758,7 +774,11 @@ export default function MyDesigner({ appData: originAppData }) {
         )}
         <div className={`${isPreview ? css.toolbarWrapperPreview : ''}`}>
           <Toolbar.Tools
-            onImport={importDump}
+            onImport={async (dump) => {
+              await importDump(dump)
+              await save()
+              location.reload()
+            }}
             getExportDumpJSON={() => {
               return getDumpJson()
             }}

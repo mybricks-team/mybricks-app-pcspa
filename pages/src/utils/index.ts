@@ -367,3 +367,15 @@ export const i18nLangContentFilter = (content, list) => {
   })
   return newContent;
 }
+
+export function parseQueryString(key?: string) {
+  const search = window.location.search;
+  if (!search) return key ? '' : {};
+  const params = search.substring(1).split('&').reduce((params, keyValue) => {
+    const [key, value] = keyValue.split('=');
+    params[decodeURIComponent(key)] = decodeURIComponent(value);
+    return params;
+  }, {});
+  if (key) return params[key] || '';
+  return params;
+}

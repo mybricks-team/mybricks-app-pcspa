@@ -431,7 +431,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       }),
       ...remotePlugins,
       useTheme({ sdk: appData }),
-      versionPlugin({
+      ...(ctx.isPreview ? [] : [versionPlugin({
         user: ctx.user,
         file: appData.fileContent || {},
         disabled: ctx.disabled,
@@ -498,7 +498,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             },
           },
         ],
-      }),
+      }),])
     ],
     ...(ctx.hasMaterialApp
       ? {
