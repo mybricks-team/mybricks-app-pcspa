@@ -27,6 +27,7 @@ const getLibsFromConfig = (appData: Record<string, any>) => {
         libs.push({ ...lib, ...content });
       }
     });
+    console.log('getLibsFromConfig ', appData?.defaultComlibs, libs)
   } else {
     libs.push(...legacyLibs);
   }
@@ -36,6 +37,7 @@ const getLibsFromConfig = (appData: Record<string, any>) => {
       (lib) => typeof lib === "string"
     )
   ) {
+    // debugger
     //initial or cdn legacy
     const myselfLib =
       appData.fileContent?.content?.comlibs?.find(
@@ -58,6 +60,7 @@ const getLibsFromConfig = (appData: Record<string, any>) => {
       }
       return lib;
     });
+    // debugger
     return libs;
   }
 };

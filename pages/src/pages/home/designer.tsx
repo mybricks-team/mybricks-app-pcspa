@@ -208,8 +208,9 @@ export default function MyDesigner({ appData: originAppData }) {
   useLayoutEffect(() => {
     getInitComLibs(appData)
       .then(async ({ comlibs, latestComlibs }) => {
+        console.log('get iNit', comlibs)
         const newComlibs = ctx.debugComlib ? replaceComlib(comlibs, comlibDebugUtils.get()) : comlibs
-        debugger
+        // debugger
         // setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
         setCtx((pre) => ({ ...pre, comlibs: ['http://localhost:20000/comlib.js'], latestComlibs }));
       })
