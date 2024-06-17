@@ -56,6 +56,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         antdLocaleLinks: values.antdLocaleLinks || [],
         localeGetMethod: values.localeGetMethod || EnumLocale.DEFAULT,
         localStorageKey: values.localStorageKey || '',
+        defaultI18nLink: values.defaultI18nLink || '',
         updateTime,
         user: user?.email
       }
@@ -64,6 +65,14 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
 
   return <>
     <Form form={form} style={{ marginTop: 12 }}>
+      <Form.Item
+        name='defaultI18nLink'
+        label="默认语言包地址"
+        labelCol={{ span: 5 }}
+        wrapperCol={{ span: 20 }}
+      >
+        <Input placeholder='请输入默认的语言包地址' />
+      </Form.Item>
       <Form.Item
         name='localeGetMethod'
         label="语言获取方式"
