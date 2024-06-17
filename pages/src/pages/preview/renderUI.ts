@@ -32,7 +32,7 @@ const {
 
 proxLocalStorage(debugMockConfig)
 proxSessionStorage(debugMockConfig)
-const root = ({ renderType, env, ...props }) => {
+const root = ({ renderType, locale, env, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   if (!renderUI) {
     throw Error(`找不到${renderType}渲染器`);
@@ -55,7 +55,7 @@ const root = ({ renderType, env, ...props }) => {
       i18n(title) {
         //多语言
         if (typeof title?.id === 'undefined') return title
-        return i18nLangContent[title.id]?.content?.[env.locale] || JSON.stringify(title)
+        return i18nLangContent[title.id]?.content?.[locale] || JSON.stringify(title)
       },
       /** 调用领域模型 */
       callDomainModel(domainModel, type, params) {
@@ -122,7 +122,7 @@ const root = ({ renderType, env, ...props }) => {
       },
       vars: {
         get locale() {
-          return env.locale;
+          return locale;
         },
         get getExecuteEnv() {
           return () => executeEnv;

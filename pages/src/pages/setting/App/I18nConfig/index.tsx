@@ -2,8 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Form, Input, Card, Button } from 'antd'
 import { _NAMESPACE_ } from "..";
 import { TConfigProps } from '../useConfig';
-import PublishLocalize from './PublishLocalize';
-
+import I18nConfig from './config';
 
 export default (props: TConfigProps) => {
   const { config, mergeUpdateConfig } = props
@@ -16,6 +15,6 @@ export default (props: TConfigProps) => {
   }, [uploadConfig])
 
   return <>
-    <PublishLocalize {...props} />
+    <I18nConfig {...props} />
   </>
 }

@@ -44,6 +44,7 @@ import { isValidPascalCase } from './utils'
 import OutCodeDirList, { OutCodeDirListType } from './components/out-code-dir-list'
 import { getLocalData, setLocalData } from './utils/fileSystemHandle'
 import { comlibDebugUtils } from './utils/comlibDebug'
+import { EnumLocale, getLocaleLang } from '../setting/App/I18nConfig/utils'
 
 const defaultPermissionComments = `/**
 *
@@ -295,7 +296,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
   }
 
   const getCurrentLocale = () => {
-    return `zh`
+    return getLocaleLang(ctx?.appConfig?.localeConfig)
   }
 
   const connetorPlugins: any[] = [

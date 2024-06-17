@@ -36,6 +36,7 @@ type TJson = {
 
 type TConfiguration = {
     title: string,
+    appConfig: any,
     comlibs: any[],
     projectId: string,
     fileName: string,

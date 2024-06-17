@@ -1,6 +1,7 @@
 const originalLocalGetItem = localStorage.getItem;
 export const proxLocalStorage = (mockConfig = []) => {
     localStorage.getItem = function (key) {
+
         const mockData = mockConfig?.localStorageMock
         const data = getCheckedMockDataMap(mockData)
         if (key in data) {

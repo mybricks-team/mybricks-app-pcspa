@@ -1,6 +1,7 @@
 import renderUI from './renderUI'
 import '@/reset.less'
 import { scheduleTaskListen } from '../../utils/scheduleTask'
+import { getLocaleLang } from '../setting/App/I18nConfig/utils';
 
 const React = window.React;
 const ReactDOM = window.ReactDOM;
@@ -9,6 +10,7 @@ const antd = window.antd;
 let reactRoot
 let useReactRender = false
 const scheduleTask = scheduleTaskListen()
+const localeConfig = "--locale-config--";
 
 const getAntdLocalName = (locale) => {
   const localeArr = locale.split('-');
@@ -20,7 +22,8 @@ const getAntdLocalName = (locale) => {
 }
 
 const getCurrentLocale = () => {
-  return navigator.language
+  // return navigator.language
+  return getLocaleLang(localeConfig as any)
 }
 
 
@@ -36,49 +39,33 @@ const render = (props) => {
       return props?.canvasElement || root || document.body
     },
   })
-  const antdLocalLib = antd?.locale[getAntdLocalName(getCurrentLocale())]?.default
+  const antdLangName = getAntdLocalName(getCurrentLocale())
+  const antdLocalLib = antd?.locales?.[antdLangName] || (Object.values(antd?.locales || {}))?.find(item => item.locale === getCurrentLocale()) || antd.locale['zh_CN'].default
 
-
+  const reactNode = React.createElement(
+    antd.ConfigProvider,
+    {
+      // 如鬼哦没有因为就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
+      locale: [`en_US`, `en`].includes(antdLangName)
+        ? undefined
+        : antdLocalLib
+    },
+    renderUI({
+      ...props,
+      renderRoot: root,
+      renderType: "react",
+      locale: getCurrentLocale(),
+      runtime: { onComplete: scheduleTask.addListen },
+    })
+  )
   if (!useReactRender) {
     reactRoot = ReactDOM.createRoot(root);
 
-    reactRoot.render(
-      React.createElement(
-        antd.ConfigProvider,
-        {
-          // 如鬼哦没有因为就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
-          locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale()))
-            ? undefined
-            : antdLocalLib || antd.locale["zh_CN"].default,
-        },
-        renderUI({
-          ...props,
-          renderRoot: root,
-          renderType: "react",
-          locale: getCurrentLocale(),
-          runtime: { onComplete: scheduleTask.addListen },
-        })
-      )
-    );
+    reactRoot.render(reactNode);
   } else {
 
     ReactDOM.render(
-      React.createElement(
-        antd.ConfigProvider,
-        {
-          // 如鬼哦没有因为就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
-          locale: [`'en_US'`, `en`].includes(getAntdLocalName(getCurrentLocale()))
-            ? undefined
-            : antdLocalLib || antd.locale["zh_CN"].default,
-        },
-        renderUI({
-          ...props,
-          renderRoot: root,
-          renderType: "react",
-          locale: getCurrentLocale(),
-          runtime: { onComplete: scheduleTask.addListen },
-        })
-      ),
+      reactNode,
       root
     )
   }

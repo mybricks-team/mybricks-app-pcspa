@@ -8,8 +8,10 @@ import ConfigPlugin from './ConfigPlugin'
 import ConfigBase from './ConfigBase'
 import ConfigDesigner from './ConfigDesigner'
 export const _NAMESPACE_ = APP_NAME
-import style from './app.less'
 import { Collapse, Spin } from 'antd'
+import I18nConfig from './I18nConfig'
+
+import style from './app.less'
 
 export default (props) => {
   const { options = {} } = props
@@ -28,7 +30,10 @@ export default (props) => {
             {!isInGroup && <Collapse.Panel key={1} header="基础设置">
               <ConfigBase {...configContext} />
             </Collapse.Panel>}
-            <Collapse.Panel key={2} header="服务扩展">
+            {isInGroup && <Collapse.Panel key={2} header="多语言配置">
+              <I18nConfig {...configContext} />
+            </Collapse.Panel>}
+            <Collapse.Panel key={3} header="服务扩展">
               <ConfigServer {...configContext} />
             </Collapse.Panel>
           </>
@@ -39,10 +44,10 @@ export default (props) => {
         {!isInGroup && <Collapse.Panel key={2} header="服务扩展">
           <ConfigServer {...configContext} />
         </Collapse.Panel>} */}
-        <Collapse.Panel key={3} header="发布环境">
+        <Collapse.Panel key={4} header="发布环境">
           <ConfigEnv {...configContext} />
         </Collapse.Panel>
-        {!isInGroup && <Collapse.Panel key={4} header="插件扩展">
+        {!isInGroup && <Collapse.Panel key={5} header="插件扩展">
           <ConfigPlugin {...configContext} />
         </Collapse.Panel>}
       </Collapse>

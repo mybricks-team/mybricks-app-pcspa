@@ -6,6 +6,7 @@ import renderUI from './renderUI'
 import { getRtComlibsFromConfigEdit } from '../../utils/comlib'
 import { insertDeps } from '../../utils/getComlibs'
 import '@/reset.less'
+import { getLocaleLang } from '../setting/App/I18nConfig/utils';
 
 const React = window.React;
 const ReactDOM = window.ReactDOM;
@@ -14,7 +15,7 @@ const ReactDOM = window.ReactDOM;
 const fileId = getQueryString('fileId')
 const previewStorage = new PreviewStorage({ fileId })
 
-let { dumpJson, comlibs } = previewStorage.getPreviewPageData()
+let { dumpJson, comlibs, appConfig } = previewStorage.getPreviewPageData()
 
 if (!dumpJson) {
   throw new Error('数据错误：项目数据缺失')
@@ -66,18 +67,19 @@ const getAntdLocalName = (locale) => {
 }
 
 const getCurrentLocale = () => {
-  return navigator.language
+  // return navigator.language
+  return getLocaleLang(appConfig?.localeConfig)
 }
 
 async function render(props) {
   const { container } = props;
   if (comlibs && Array.isArray(comlibs)) {
     await insertDeps(comlibs)
-    const antd = window.antd;
     Promise.all(getRtComlibsFromConfigEdit(comlibs).map((t) => requireScript(t))).then(() => {
+      const antd = window.antd;
       const lang = getAntdLocalName(getCurrentLocale())
 
-      const antdLocalLib = antd?.locale?.[lang]?.default || antd.locale['zh_CN'].default
+      const antdLocalLib = antd?.locales?.[lang] || (Object.values(antd?.locales || {}))?.find(item => item.locale === getCurrentLocale()) || antd.locale['zh_CN'].default
 
       reactRoot = ReactDOM.createRoot((container ?? document).querySelector('#root'));
 
@@ -85,14 +87,13 @@ async function render(props) {
         antd.ConfigProvider,
         {
           // 如鬼没有就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
-          locale: [`'en_US'`, `en`].includes(lang) ? undefined : antdLocalLib
+          locale: [`en_US`, `en`].includes(lang) ? undefined : antdLocalLib
         },
         renderUI({
-          ...props, renderType: 'react', env: {
+          ...props, renderType: 'react', locale: getCurrentLocale(), env: {
             callDomainModel(domainModel, type, params) {
               return callDomainHttp(domainModel, params, { action: type } as any);
-            },
-            locale: getCurrentLocale()
+            }
           }
         })
       ));

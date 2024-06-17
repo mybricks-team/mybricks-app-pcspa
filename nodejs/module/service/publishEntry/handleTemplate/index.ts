@@ -63,6 +63,11 @@ const handleTemplate: TProcessor = async (ctx) => {
         }
     }
 
+    let antdLocale = ''
+    if (Array.isArray(configuration?.appConfig?.localeConfig?.antdLocaleLinks) && configuration?.appConfig?.localeConfig?.antdLocaleLinks.length > 0) {
+        antdLocale = configuration?.appConfig?.localeConfig?.antdLocaleLinks.map(item => `<script src="${item}"></script>`).join('\n')
+    }
+
     //语言包资源, 可以按需添加其他语言
     // localeScript += `<script src="https://f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js"></script>`;
 
@@ -93,6 +98,8 @@ const handleTemplate: TProcessor = async (ctx) => {
         .replace(`-- comlib-rt --`, comLibRtScript)
         .replace(`"--projectJson--"`, JSON.stringify(transform(json)))
         .replace(`"--executeEnv--"`, JSON.stringify(envType))
+        .replace(`-- antd-locale --`, antdLocale)
+        .replace(`"--locale-config--"`, JSON.stringify(configuration?.appConfig?.localeConfig || {}))
         .replace(`"--envList--"`, JSON.stringify(envList))
         .replace(`"--i18nLangContent--"`, JSON.stringify(i18nLangContent))
         .replace(`"--runtimeUploadService--"`, JSON.stringify(runtimeUploadService))
