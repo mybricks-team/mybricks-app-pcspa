@@ -170,32 +170,51 @@ const root = ({ renderType, locale, env, ...props }) => {
       get hasPermission() {
         return ({ permission, key }) => {
           if (!hasPermissionFn) {
-            return true;
+            return true
           }
 
-          const code = permission?.register?.code || key;
+          // 编辑权限配置为”无“时，不需要进行权限校验
+          if (permission?.type === 'none') {
+            return true
+          }
 
-          let result;
+          const code = permission?.register?.code || key
+
+          // 如果没有权限编码，不需要校验
+          if (code === undefined) {
+            return true
+          }
+
+          let result: boolean | { permission: boolean }
 
           try {
             result = runJs(decodeURIComponent(hasPermissionFn), [
               { key: code },
-            ]);
+            ])
 
-            if (typeof result !== "boolean") {
-              result = true;
+            if (
+              typeof result !== 'boolean' &&
+              typeof result?.permission !== 'boolean'
+            ) {
+              result = true
               console.warn(
-                `权限方法返回值类型应为 Boolean 请检查，[key] ${code}; [返回值] type: ${typeof result}; value: ${JSON.stringify(
-                  result
-                )}`
-              );
+                '权限方法',
+                `权限方法返回值类型应为 Boolean 或者 { permission: Boolean } 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(result)}`
+              )
+              console.error(
+                `权限方法返回值类型应为 Boolean 或者 { permission: Boolean } 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(result)}`
+              )
             }
           } catch (error) {
-            result = true;
-            console.error(`权限方法出错 [key] ${code}；`, error);
+            result = true
+            console.warn(
+              '权限方法',
+              `${error.message}`
+            )
+            console.error(`权限方法出错[Key] ${code};`, error)
           }
 
-          return result;
+          return result
         };
       },
       get uploadFile() {
