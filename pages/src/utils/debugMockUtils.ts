@@ -31,8 +31,8 @@ export const proxSessionStorage = (mockConfig = {}) => {
     }
 }
 
-export const getCheckedMockDataMap = (originMockDate) => {
-    return originMockDate.reduce((res, item) => {
+export const getCheckedMockDataMap = (originMockData = []) => {
+    return originMockData.reduce((res, item) => {
         const { key, value, checked } = item
         if (checked) {
             res[key] = value

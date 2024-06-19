@@ -958,8 +958,9 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           const i18nLangContent = ctx.i18nLangContent || {}
           // 搭建页面使用中文
           return (
-            i18nLangContent[title?.id]?.content?.[getCurrentLocale()] ||
-            JSON.stringify(title)
+            i18nLangContent[title?.id]?.content?.[getCurrentLocale()]
+            || i18nLangContent[title?.id]?.content?.['zh-CN']
+            || JSON.stringify(title)
           )
         },
         /** 调用领域模型 */

@@ -57,7 +57,9 @@ const root = ({ renderType, locale, runtime, extVars, extCallConnector, ...props
       i18n(title) {
         //多语言
         if (typeof title?.id === 'undefined') return title
-        return i18nLangContent[title.id]?.content?.[locale] || JSON.stringify(title)
+        return i18nLangContent[title.id]?.content?.[locale]
+          || i18nLangContent[title.id]?.content?.[`zh-CN`]
+          || JSON.stringify(title)
         //return title;
       },
       get vars() {

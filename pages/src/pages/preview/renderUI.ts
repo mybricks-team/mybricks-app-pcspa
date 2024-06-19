@@ -55,7 +55,9 @@ const root = ({ renderType, locale, env, ...props }) => {
       i18n(title) {
         //多语言
         if (typeof title?.id === 'undefined') return title
-        return i18nLangContent[title.id]?.content?.[locale] || JSON.stringify(title)
+        return i18nLangContent[title.id]?.content?.[locale]
+          || i18nLangContent[title.id]?.content?.[`zh-CN`]
+          || JSON.stringify(title)
       },
       /** 调用领域模型 */
       callDomainModel(domainModel, type, params) {
