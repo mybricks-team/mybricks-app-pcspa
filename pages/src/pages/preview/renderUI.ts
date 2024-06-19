@@ -129,6 +129,9 @@ const root = ({ renderType, locale, env, ...props }) => {
         get getExecuteEnv() {
           return () => executeEnv;
         },
+        get getI18nContent() {
+          return () => (i18nLangContent || {})
+        },
         getQuery: () => parseQuery(location.search),
         get getProps() {
           return () => {

@@ -217,6 +217,12 @@ export default function MyDesigner({ appData: originAppData }) {
           ? replaceComlib(comlibs, comlibDebugUtils.get())
           : comlibs
         setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
+        // setCtx((pre) => ({
+        //   ...pre, comlibs: [
+        //     `http://localhost:20000/comlib.js`,
+        //     `http://localhost:20001/comlib.js`
+        //   ], latestComlibs
+        // }))
       })
       .finally(loadDesigner)
   }, [designer])
@@ -674,7 +680,7 @@ export default function MyDesigner({ appData: originAppData }) {
       }, 100)
     })
   }
- 
+
   /** 通知父页面渲染完成 */
   useEffect(() => {
     designerIsComplete().then(() => {

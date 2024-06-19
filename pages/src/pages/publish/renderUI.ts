@@ -69,6 +69,9 @@ const root = ({ renderType, locale, runtime, extVars, extCallConnector, ...props
           get getExecuteEnv() {
             return () => executeEnv;
           },
+          get getI18nContent() {
+            return () => (i18nLangContent || {})
+          },
           get getQuery() {
             return () => {
               return parseQuery(location.search);

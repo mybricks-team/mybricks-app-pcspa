@@ -1042,8 +1042,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
           get getExecuteEnv() {
             return () => ctx.executeEnv
           },
-          get i18nLangContent() {
-            return ctx.i18nLangContent || {}
+          get getI18nContent() {
+            return () => (ctx.i18nLangContent || {})
           },
           get locale() {
             return getCurrentLocale()
