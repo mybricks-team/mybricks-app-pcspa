@@ -49,8 +49,15 @@ export default function MyDesigner({ appData: originAppData }) {
   window.fileId = originAppData.fileId
   const appData = useMemo(() => {
     let data = { ...originAppData }
+    const urlParams = new URLSearchParams(window.location.search);
+    const previewTemplateId = urlParams.get('preview-template-id');
     // 防止触发originAppData.fileContent的getter计算
-    data.fileContent = { ...data.fileContent }
+    if (previewTemplateId) {
+      const dumpJson = JSON.parse(localStorage.getItem(`generate-page-dump-${previewTemplateId}`))
+      data.fileContent = { content: { content: dumpJson.content, ...dumpJson.pageConfig } }
+    } else {
+      data.fileContent = { ...data.fileContent }
+    }
     return data
   }, [originAppData])
 
