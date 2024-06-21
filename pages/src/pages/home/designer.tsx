@@ -191,6 +191,9 @@ export default function MyDesigner({ appData: originAppData }) {
           })
           .finally(() => {
             setSaveLoading(false)
+            setTimeout(() => {
+              message.destroy(msgSaveKey)
+            }, 3000);
           })
       },
     }
