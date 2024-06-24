@@ -991,8 +991,6 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         callConnector(connector, params, connectorConfig: any = {}) {
           const plugin = designerRef.current?.getPlugin(connector.connectorName)
 
-          console.log('useProxy', !ctx.directConnection)
-
           if (
             ctx.executeEnv === USE_CUSTOM_HOST &&
             !ctx.MYBRICKS_HOST.default
