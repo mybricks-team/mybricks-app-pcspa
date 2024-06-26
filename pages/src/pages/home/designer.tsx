@@ -449,7 +449,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
     // 保存缩略图
     // if (ctx.useAutoPreviewImage) {
-    saveFileImage(canvasDom, ctx.save)
+    // saveFileImage(canvasDom, ctx.save)
     // }
   }, [isPreview, ctx])
 
