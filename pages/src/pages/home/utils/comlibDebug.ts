@@ -3,7 +3,19 @@ const DEBUG_LOCAL_KEY = `DEBUG_LOCAL_KEY`
 export const comlibDebugUtils = {
   get() {
     const res = localStorage.getItem(DEBUG_LOCAL_KEY) || "[]"
-    return JSON.parse(res)
+    let comlib = JSON.parse(res)
+    if (!Array.isArray(comlib) || comlib.length === 0) {
+      comlib = [{
+        key: 'mybricks.normal-pc',
+        value: ' http://localhost:20000/comlib.js',
+        checked: false,
+      }, {
+        key: 'mmybricks.basic-comlib',
+        value: ' http://localhost:20001/comlib.js',
+        checked: false,
+      }]
+    }
+    return comlib
   },
   set(val) {
     localStorage.setItem(DEBUG_LOCAL_KEY, JSON.stringify(val))
@@ -11,7 +23,7 @@ export const comlibDebugUtils = {
 }
 
 export const checkIfDebugComlib = () => {
-  return window.location.search.indexOf(`debugComlib`) !== -1
+  return window.location.search.indexOf(`debug`) !== -1
 }
 
 export const replaceComlib = (originComlibs: any[], targetComlibs: any[]) => {

@@ -78,10 +78,7 @@ export default function MyDesigner({ appData: originAppData }) {
     return config || {}
   }, [appData.config[APP_NAME]?.config])
 
-  const designer = useMemo(
-    () => appConfig.designer?.url || DESIGNER_STATIC_PATH,
-    [appConfig]
-  )
+
 
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || ''
@@ -145,7 +142,7 @@ export default function MyDesigner({ appData: originAppData }) {
       runtimeUploadService,
       operable: false,
       isDebugMode: false,
-      debugComlib: checkIfDebugComlib(),
+      debug: checkIfDebugComlib(),
       saveContent(content) {
         ctx.save({ content })
       },
@@ -220,19 +217,34 @@ export default function MyDesigner({ appData: originAppData }) {
   const [isDebugMode, setIsDebugMode] = useState(false)
   const operationList = useRef<any[]>([])
 
+  const designer = useMemo(
+    () => {
+      if (ctx.debug && localStorage.getItem("__DEBUG_DESIGNER__")) {
+        return localStorage.getItem("__DEBUG_DESIGNER__")
+      }
+      return appConfig.designer?.url || DESIGNER_STATIC_PATH
+    },
+    [appConfig]
+  )
+
+  // const designer = (ctx.debug && localStorage.getItem("__DEBUG_DESIGNER__"))
+  // ? localStorage.getItem("__DEBUG_DESIGNER__")
+  // : appConfig.designer?.url || DESIGNER_STATIC_PATH
+
+
   useLayoutEffect(() => {
     getInitComLibs(appData)
       .then(async ({ comlibs, latestComlibs }) => {
-        const newComlibs = ctx.debugComlib
+        const newComlibs = ctx.debug
           ? replaceComlib(comlibs, comlibDebugUtils.get())
           : comlibs
-        setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
-        // setCtx((pre) => ({
-        //   ...pre, comlibs: [
-        //     `http://localhost:20000/comlib.js`,
-        //     `http://localhost:20001/comlib.js`
-        //   ], latestComlibs
-        // }))
+        // setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
+        setCtx((pre) => ({
+          ...pre, comlibs: [
+            `http://localhost:20000/comlib.js`,
+            `http://localhost:20001/comlib.js`
+          ], latestComlibs
+        }))
       })
       .finally(loadDesigner)
   }, [designer])
