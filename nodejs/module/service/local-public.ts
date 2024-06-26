@@ -14,23 +14,23 @@ export default {
     },
     {
       tag: "link",
-      path: "public/antd/antd@4.21.6.variable.min.css",
-      CDN: "//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/antd.variable.min.css",
+      path: "public/antd/antd@4.15.3.min.css",
+      CDN: "//cdnjs.cloudflare.com/ajax/libs/antd/4.15.3/antd.min.css",
     },
     {
       tag: "script",
-      path: "public/react@18.0.0.production.min.js",
-      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690446345009.react.18.0.0.production.min.js",
+      path: "public/react@17.0.2.production.min.js",
+      CDN: "//cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js",
     },
     {
       tag: "script",
-      path: "public/react-dom@18.0.0.production.min.js",
-      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443341846.umd_react-dom.production.min.js",
+      path: "public/react-dom@17.0.2.production.min.js",
+      CDN: "//cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js",
     },
     {
       tag: "script",
-      path: "public/antd/antd@4.21.6.min.js",
-      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444184854.4.21.6_antd.min.js",
+      path: "public/antd/antd@4.15.3.min.js",
+      CDN: "//cdnjs.cloudflare.com/ajax/libs/antd/4.15.3/antd.min.js",
     },
     {
       tag: "script",

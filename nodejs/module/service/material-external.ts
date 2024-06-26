@@ -3,15 +3,15 @@ export default {
     {
       name: "antd",
       library: "antd",
-      version: "4.21.6",
+      version: "4.15.3",
       path: [
-        "public/antd/antd@4.21.6.variable.min.css",
-        "public/antd/antd@4.21.6.min.js",
+        "public/antd/antd@4.15.3.min.css",
+        "public/antd/antd@4.15.3.min.js",
         "public/antd/locale/zh_CN.js",
       ],
       CDN: [
-        "//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/antd.variable.min.css",
-        "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444184854.4.21.6_antd.min.js",
+        "//cdnjs.cloudflare.com/ajax/libs/antd/4.15.3/antd.min.css",
+        "//cdnjs.cloudflare.com/ajax/libs/antd/4.15.3/antd.min.js",
         "//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js",
       ],
     },

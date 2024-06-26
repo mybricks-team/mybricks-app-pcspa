@@ -58,12 +58,10 @@ const render = (props) => {
       runtime: { onComplete: scheduleTask.addListen },
     })
   )
-  if (!useReactRender) {
+  if (!useReactRender && ReactDOM.createRoot) {
     reactRoot = ReactDOM.createRoot(root);
-
     reactRoot.render(reactNode);
   } else {
-
     ReactDOM.render(
       reactNode,
       root
