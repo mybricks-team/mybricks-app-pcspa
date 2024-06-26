@@ -10,7 +10,8 @@ import axios from 'axios'
 import { fAxios } from '../../services/http'
 import moment from 'moment'
 import { message, Modal } from 'antd'
-import API from '@mybricks/sdk-for-app/api'
+// import API from '@mybricks/sdk-for-app/api'
+import API from '../../../../../sdk-for-app/src/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
 import { fetchPlugins, removeBadChar } from '../../utils'
@@ -25,6 +26,11 @@ import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
 import { getInitComLibs } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
+import {
+  getMybricksStudioDB,
+  initialSaveFileContent,
+  addVersionContent,
+} from './utils/saveContent'
 
 import css from './app.less'
 import {
@@ -47,14 +53,19 @@ const getAppSetting = async () => {
 
 export default function MyDesigner({ appData: originAppData }) {
   window.fileId = originAppData.fileId
+
   const appData = useMemo(() => {
     let data = { ...originAppData }
-    const urlParams = new URLSearchParams(window.location.search);
-    const previewTemplateId = urlParams.get('preview-template-id');
+    const urlParams = new URLSearchParams(window.location.search)
+    const previewTemplateId = urlParams.get('preview-template-id')
     // 防止触发originAppData.fileContent的getter计算
     if (previewTemplateId) {
-      const dumpJson = JSON.parse(localStorage.getItem(`generate-page-dump-${previewTemplateId}`))
-      data.fileContent = { content: { content: dumpJson.content, ...dumpJson.pageConfig } }
+      const dumpJson = JSON.parse(
+        localStorage.getItem(`generate-page-dump-${previewTemplateId}`)
+      )
+      data.fileContent = {
+        content: { content: dumpJson.content, ...dumpJson.pageConfig },
+      }
     } else {
       data.fileContent = { ...data.fileContent }
     }
@@ -62,7 +73,8 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [originAppData])
 
   // 查看特定版本或者指定为预览态时，展示预览态
-  const isPreview = window.location.search.includes('version') || appData.isPreview;
+  const isPreview =
+    window.location.search.includes('version') || appData.isPreview
 
   const appConfig = useMemo(() => {
     let config = null
@@ -77,8 +89,6 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return config || {}
   }, [appData.config[APP_NAME]?.config])
-
-
 
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || ''
@@ -97,6 +107,8 @@ export default function MyDesigner({ appData: originAppData }) {
           ? EnumMode.ENV
           : EnumMode.DEFAULT
 
+    const fileContent = appData.fileContent?.content
+
     return {
       isPreview,
       sdk: {
@@ -110,6 +122,7 @@ export default function MyDesigner({ appData: originAppData }) {
         GET_DEFAULT_PAGE_HEADER(appData),
       absoluteNamePath: appData.hierarchy.absoluteNamePath,
       fileId: appData.fileId,
+      version: appData.fileContent.version,
       setting: appData.config || {},
       hasMaterialApp: appData.hasMaterialApp,
       comlibs: [],
@@ -134,6 +147,10 @@ export default function MyDesigner({ appData: originAppData }) {
       debugMainProps: appData.fileContent?.content?.debugMainProps,
       hasPermissionFn: appData.fileContent?.content?.hasPermissionFn,
       debugHasPermissionFn: appData.fileContent?.content?.debugHasPermissionFn,
+      // useAutoPreviewImage:
+      //   typeof fileContent.useAutoPreviewImage === 'undefined'
+      //     ? true
+      //     : fileContent.useAutoPreviewImage,
       componentName: appData.fileContent.content.componentName,
       staticResourceToCDN: appData.fileContent.content.staticResourceToCDN,
       versionApi: null,
@@ -147,7 +164,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon?},
+        param: { name?; shareType?; content?; icon? },
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
@@ -156,6 +173,8 @@ export default function MyDesigner({ appData: originAppData }) {
 
         const settings = await getAppSetting()
         const isEncode = !!settings?.publishLocalizeConfig?.isEncode
+
+        let httpStartTime = new Date().getTime()
 
         await appData
           .save({
@@ -169,9 +188,11 @@ export default function MyDesigner({ appData: originAppData }) {
             operationList: operationListStr,
           })
           .then(() => {
-            !skipMessage &&
-              message.success({ content: `保存完成`, key: msgSaveKey })
+            // !skipMessage &&
+            //   message.success({ content: `保存完成`, key: msgSaveKey })
+
             operationList.current = []
+
             if (content) {
               setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
             }
@@ -182,20 +203,29 @@ export default function MyDesigner({ appData: originAppData }) {
                 content: `保存失败：${e.message}`,
                 key: msgSaveKey,
               })
+
             if (content) {
               setSaveTip('保存失败')
             }
           })
           .finally(() => {
-            setSaveLoading(false)
+            // setSaveLoading(false)
+            if (!skipMessage) {
+              console.log(
+                `保存接口耗时 ${(new Date().getTime() - httpStartTime) / 1000}s`
+              )
+            }
+
             setTimeout(() => {
               message.destroy(msgSaveKey)
-            }, 3000);
+            }, 3000)
           })
       },
     }
   })
+
   const publishingRef = useRef(false)
+
   const designerRef = useRef<{
     dump
     toJSON
@@ -216,21 +246,18 @@ export default function MyDesigner({ appData: originAppData }) {
   const [publishModalVisible, setPublishModalVisible] = useState(false)
   const [isDebugMode, setIsDebugMode] = useState(false)
   const operationList = useRef<any[]>([])
+  const fileDBRef = useRef(null)
 
-  const designer = useMemo(
-    () => {
-      if (ctx.debug && localStorage.getItem("__DEBUG_DESIGNER__")) {
-        return localStorage.getItem("__DEBUG_DESIGNER__")
-      }
-      return appConfig.designer?.url || DESIGNER_STATIC_PATH
-    },
-    [appConfig]
-  )
+  const designer = useMemo(() => {
+    if (ctx.debug && localStorage.getItem('__DEBUG_DESIGNER__')) {
+      return localStorage.getItem('__DEBUG_DESIGNER__')
+    }
+    return appConfig.designer?.url || DESIGNER_STATIC_PATH
+  }, [appConfig])
 
   // const designer = (ctx.debug && localStorage.getItem("__DEBUG_DESIGNER__"))
   // ? localStorage.getItem("__DEBUG_DESIGNER__")
   // : appConfig.designer?.url || DESIGNER_STATIC_PATH
-
 
   useLayoutEffect(() => {
     getInitComLibs(appData)
@@ -249,13 +276,19 @@ export default function MyDesigner({ appData: originAppData }) {
       .finally(loadDesigner)
   }, [designer])
 
+  useEffect(() => {
+    getMybricksStudioDB().then(async (r) => {
+      fileDBRef.current = r
+    })
+  }, [])
+
   const loadDesigner = useCallback(() => {
     if (designer) {
       const script = document.createElement('script')
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ; (window as any).mybricks.SPADesigner &&
+        ;(window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -321,7 +354,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
   useEffect(() => {
     if (beforeunload) {
-      window.onbeforeunload = () => {
+      window.onbeforeunload = (e) => {
         return true
       }
     } else {
@@ -361,13 +394,17 @@ export default function MyDesigner({ appData: originAppData }) {
 
     setSaveLoading(true)
 
-    message.loading({
-      key: msgSaveKey,
-      content: '保存中..',
-      duration: 0,
-    })
+    setSaveTip('正在保存中...')
+
+    // message.loading({
+    //   key: msgSaveKey,
+    //   content: '保存中..',
+    //   duration: 0,
+    // })
     //保存
     const json = designerRef.current?.dump()
+    const canvasDom = designerRef.current?.geoView.canvasDom
+
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
     json.debugMockConfig = ctx.debugMockConfig
@@ -382,26 +419,38 @@ export default function MyDesigner({ appData: originAppData }) {
     json.staticResourceToCDN = ctx.staticResourceToCDN
     json.fontJS = ctx.fontJS
     json.pageHeader = ctx.pageHeader
+    // json.useAutoPreviewImage = ctx.useAutoPreviewImage
 
     json.projectId = ctx.sdk.projectId
 
-    await ctx.save({
-      name: ctx.fileName,
-      content: JSON.stringify(json),
+    await addVersionContent({
+      fileId: ctx.fileId,
+      json,
+      version: ctx.version,
+      fileDBRef,
     })
 
-    setBeforeunload(false)
+    // message.success({ content: `保存完成`, key: msgSaveKey })
+
+    setSaveLoading(false)
+
+    try {
+      await initialSaveFileContent(fileDBRef, ctx)
+      setBeforeunload(false)
+    } catch (e) {
+      console.error(e)
+      message.error('保存失败，请联系管理员')
+    }
+
+    // await ctx.save({
+    //   name: ctx.fileName,
+    //   content: JSON.stringify(json),
+    // })
+
     // 保存缩略图
-    await API.App.getPreviewImage({
-      // Todo... name 中文乱码
-      element: designerRef.current?.geoView.canvasDom,
-    })
-      .then(async (res) => {
-        await ctx.save({ icon: res }, true)
-      })
-      .catch((err) => {
-        console.error(err)
-      })
+    // if (ctx.useAutoPreviewImage) {
+    saveFileImage(canvasDom, ctx.save)
+    // }
   }, [isPreview, ctx])
 
   const preview = useCallback(() => {
@@ -696,8 +745,8 @@ export default function MyDesigner({ appData: originAppData }) {
     return new Promise((resolve) => {
       const intervalId = setInterval(() => {
         if (document.getElementById('_mybricks-geo-webview_')) {
-          resolve(true);
-          clearInterval(intervalId);
+          resolve(true)
+          clearInterval(intervalId)
         }
       }, 100)
     })
@@ -706,9 +755,9 @@ export default function MyDesigner({ appData: originAppData }) {
   /** 通知父页面渲染完成 */
   useEffect(() => {
     designerIsComplete().then(() => {
-      window.parent.postMessage({ type: 'RENDER_COMPLETE' }, '*');
+      window.parent.postMessage({ type: 'RENDER_COMPLETE' }, '*')
     })
-  }, []);
+  }, [])
 
   // const downloadCode = async () => {
   //   const close = message.loading({
@@ -764,6 +813,36 @@ export default function MyDesigner({ appData: originAppData }) {
   //   }
   // }
 
+  const TrueDesigner = useMemo(() => {
+    return (
+      SPADesigner &&
+      remotePlugins &&
+      window?.mybricks?.createObservable && (
+        <>
+          <SPADesigner
+            ref={designerRef}
+            config={config(
+              window?.mybricks?.createObservable(ctx),
+              appData,
+              save,
+              designerRef,
+              remotePlugins,
+              fileDBRef,
+              setBeforeunload
+            )}
+            onEdit={onEdit}
+            onMessage={onMessage}
+            onDebug={onDebug}
+            _onError_={(ex: any) => {
+              console.error(ex)
+              onMessage('error', ex.message)
+            }}
+          />
+        </>
+      )
+    )
+  }, [SPADesigner, remotePlugins, window?.mybricks?.createObservable])
+
   return (
     <div className={`${css.view} fangzhou-theme`}>
       <Toolbar
@@ -797,7 +876,6 @@ export default function MyDesigner({ appData: originAppData }) {
             >
               发布
             </Toolbar.Button>
-            {/* <Toolbar.Button onClick={downloadCode}>出码</Toolbar.Button> */}
           </>
         )}
         <div className={`${isPreview ? css.toolbarWrapperPreview : ''}`}>
@@ -816,29 +894,7 @@ export default function MyDesigner({ appData: originAppData }) {
           />
         </div>
       </Toolbar>
-      <div className={css.designer}>
-        {SPADesigner && remotePlugins && window?.mybricks?.createObservable && (
-          <>
-            <SPADesigner
-              ref={designerRef}
-              config={config(
-                window?.mybricks?.createObservable(ctx),
-                appData,
-                save,
-                designerRef,
-                remotePlugins
-              )}
-              onEdit={onEdit}
-              onMessage={onMessage}
-              onDebug={onDebug}
-              _onError_={(ex: any) => {
-                console.error(ex)
-                onMessage('error', ex.message)
-              }}
-            />
-          </>
-        )}
-      </div>
+      <div className={css.designer}>{TrueDesigner}</div>
       <PublishModal
         envList={ctx.envList}
         projectId={ctx.sdk.projectId}
@@ -1005,7 +1061,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
       if (libIndex !== -1) {
         curComponent =
           allComLibsRuntimeMap[libIndex][
-          component.namespace + '@' + component.version
+            component.namespace + '@' + component.version
           ]
       } else {
         libIndex = allComLibsRuntimeMap.findIndex((lib) =>
@@ -1023,9 +1079,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         }
         curComponent =
           allComLibsRuntimeMap[libIndex][
-          Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-            key.startsWith(component.namespace)
-          )
+            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+              key.startsWith(component.namespace)
+            )
           ]
       }
 
@@ -1063,4 +1119,27 @@ const getMergedEnvList = (appData, appConfig) => {
     })) || []
 
   return unionBy([...pageEnvlist, ...configEnvlist], 'name')
+}
+/**
+ * @description 页面截图
+ * Todo ... 大页面会造成卡顿
+ *  */
+const saveFileImage = (canvasDom, save) => {
+  let startImageTime = new Date().getTime()
+  console.log('开始截图')
+
+  API.App.getPreviewImage({
+    // Todo... name 中文乱码
+    element: canvasDom,
+  })
+    .then(async (res) => {
+      console.log(`截图完成 ${(new Date().getTime() - startImageTime) / 1000}s`)
+      await save({ icon: res }, true)
+      console.log(
+        `截图保存完成 ${(new Date().getTime() - startImageTime) / 1000}s`
+      )
+    })
+    .catch((err) => {
+      console.error(err)
+    })
 }

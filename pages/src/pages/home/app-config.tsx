@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { message, Tooltip } from 'antd'
+import { message, Tooltip, Modal, Descriptions } from 'antd'
+import { ExclamationCircleOutlined } from '@ant-design/icons'
+import moment from 'moment'
+
 import servicePlugin, {
   call as callConnectorHttp,
   mock as connectorHttpMock,
@@ -48,6 +51,10 @@ import { getLocalData, setLocalData } from './utils/fileSystemHandle'
 import { comlibDebugUtils } from './utils/comlibDebug'
 import { EnumLocale, getLocaleLang } from '../setting/App/I18nConfig/utils'
 
+import { compareVersionLatest } from './utils/saveContent'
+
+const { confirm } = Modal
+
 const defaultPermissionComments = `/**
 *
 * interface Props {
@@ -63,30 +70,30 @@ const defaultPermissionFn = `export default function ({ key }) {
   return true
 }
 `
-const getComs = () => {
-  const comDefs = {}
-  const regAry = (comAray) => {
-    comAray.forEach((comDef) => {
-      if (comDef.comAray) {
-        regAry(comDef.comAray)
-      } else {
-        comDefs[`${comDef.namespace}-${comDef.version}`] = comDef
-      }
-    })
-  }
+// const getComs = () => {
+//   const comDefs = {}
+//   const regAry = (comAray) => {
+//     comAray.forEach((comDef) => {
+//       if (comDef.comAray) {
+//         regAry(comDef.comAray)
+//       } else {
+//         comDefs[`${comDef.namespace}-${comDef.version}`] = comDef
+//       }
+//     })
+//   }
 
-  const comlibs = [
-    ...(window['__comlibs_edit_'] || []),
-    ...(window['__comlibs_rt_'] || []),
-  ]
-  comlibs.forEach((lib) => {
-    const comAray = lib.comAray
-    if (comAray && Array.isArray(comAray)) {
-      regAry(comAray)
-    }
-  })
-  return comDefs
-}
+//   const comlibs = [
+//     ...(window['__comlibs_edit_'] || []),
+//     ...(window['__comlibs_rt_'] || []),
+//   ]
+//   comlibs.forEach((lib) => {
+//     const comAray = lib.comAray
+//     if (comAray && Array.isArray(comAray)) {
+//       regAry(comAray)
+//     }
+//   })
+//   return comDefs
+// }
 
 const getDomainFromPath = (path: string) => {
   if (!path) return path
@@ -185,7 +192,15 @@ const getExecuteEnvByMode = (debugMode, ctx, envList) => {
   }
 }
 
-export default function (ctx, appData, save, designerRef, remotePlugins = []) {
+export default function (
+  ctx,
+  appData,
+  save,
+  designerRef,
+  remotePlugins = [],
+  fileDBRef,
+  setBeforeunload
+) {
   const envList = ctx.envList
   // 获得环境信息映射表
   const envMap = [
@@ -235,13 +250,13 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
   const debugModeOptions =
     envList.length > 0
       ? [
-        { label: '选择环境', value: EnumMode.ENV },
-        { label: '自定义域名', value: EnumMode.CUSTOM },
-      ]
+          { label: '选择环境', value: EnumMode.ENV },
+          { label: '自定义域名', value: EnumMode.CUSTOM },
+        ]
       : [
-        { label: '默认', value: EnumMode.DEFAULT },
-        { label: '自定义域名', value: EnumMode.CUSTOM },
-      ]
+          { label: '默认', value: EnumMode.DEFAULT },
+          { label: '自定义域名', value: EnumMode.CUSTOM },
+        ]
 
   const adder: Array<{
     type: string
@@ -250,20 +265,20 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     outputs?: { id: string; title: string; schema: Record<string, string> }[]
     template?: Record<string, any>
   }> = [
-      {
-        type: 'normal',
-        title: '页面',
-        inputs: [
-          {
-            id: 'open',
-            title: '打开',
-            schema: {
-              type: 'any',
-            },
+    {
+      type: 'normal',
+      title: '页面',
+      inputs: [
+        {
+          id: 'open',
+          title: '打开',
+          schema: {
+            type: 'any',
           },
-        ],
-      },
-    ]
+        },
+      ],
+    },
+  ]
   if (isReact) {
     adder.push(
       ...[
@@ -318,8 +333,8 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
               schema: {
                 type: 'any',
               },
-            }
-          ]
+            },
+          ],
         },
       ]
     )
@@ -334,31 +349,31 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       isPrivatization: ctx.setting?.system.config?.isPureIntranet === true,
       addActions: domainApp
         ? [
-          {
-            type: 'http-sql',
-            title: '领域接口',
-            noUseInnerEdit: true,
-            getTitle: (item) => {
-              return item.content?.domainServiceMap
-                ? item.content.title
-                : `${item.content.title || ''}(未选择)`
+            {
+              type: 'http-sql',
+              title: '领域接口',
+              noUseInnerEdit: true,
+              getTitle: (item) => {
+                return item.content?.domainServiceMap
+                  ? item.content.title
+                  : `${item.content.title || ''}(未选择)`
+              },
+              render: (props) => {
+                return (
+                  <CollaborationHttp
+                    {...props}
+                    openFileSelector={() =>
+                      openFilePanel({
+                        allowedFileExtNames: ['domain'],
+                        parentId: ctx.sdk.projectId,
+                        fileId: ctx.fileId,
+                      })
+                    }
+                  />
+                )
+              },
             },
-            render: (props) => {
-              return (
-                <CollaborationHttp
-                  {...props}
-                  openFileSelector={() =>
-                    openFilePanel({
-                      allowedFileExtNames: ['domain'],
-                      parentId: ctx.sdk.projectId,
-                      fileId: ctx.fileId,
-                    })
-                  }
-                />
-              )
-            },
-          },
-        ]
+          ]
         : void 0,
     }),
   ]
@@ -467,93 +482,130 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       ...(ctx.isPreview
         ? []
         : [
-          versionPlugin({
-            user: ctx.user,
-            file: appData.fileContent || {},
-            disabled: ctx.disabled,
-            needSavePreview: true,
-            needPublishRevert: true,
-            envMap,
-            onInit: (versionApi) => {
-              ctx.versionApi = versionApi
-            },
-            onRevert: async (params: {
-              pubAssetFilePath: string
-              nowVersion: string
-              fileId: number
-              type: string
-            }) => {
-              const { fileId, nowVersion, pubAssetFilePath, type } = params
-              try {
-                const finish = message.loading('正在回滚...', 0)
-                const res: { code: number; message: string } =
-                  await fAxios.post('/api/pcpage/rollback', {
-                    filePath: pubAssetFilePath,
-                    nowVersion,
-                    type,
-                    fileId,
-                  })
-                finish()
+            versionPlugin({
+              user: ctx.user,
+              file: appData.fileContent || {},
+              disabled: ctx.disabled,
+              needSavePreview: true,
+              needPublishRevert: true,
+              envMap,
+              onInit: (versionApi) => {
+                ctx.versionApi = versionApi
+              },
+              onRevert: async (params: {
+                pubAssetFilePath: string
+                nowVersion: string
+                fileId: number
+                type: string
+              }) => {
+                const { fileId, nowVersion, pubAssetFilePath, type } = params
+                try {
+                  const finish = message.loading('正在回滚...', 0)
+                  const res: { code: number; message: string } =
+                    await fAxios.post('/api/pcpage/rollback', {
+                      filePath: pubAssetFilePath,
+                      nowVersion,
+                      type,
+                      fileId,
+                    })
+                  finish()
 
-                if (res.code === 1) {
-                  message.success(res.message)
-                } else {
+                  if (res.code === 1) {
+                    message.success(res.message)
+                  } else {
+                    message.error('回滚失败！')
+                  }
+                } catch (e) {
                   message.error('回滚失败！')
                 }
-              } catch (e) {
-                message.error('回滚失败！')
-              }
-            },
-            modalActiveExtends: [
-              {
-                type: 'publish',
-                title: (
-                  <Tooltip
-                    color="white"
-                    title={
-                      <a
-                        target="_blank"
-                        href="https://docs.mybricks.world/docs/publish-integration/kjkj/"
-                      >
-                        使用说明
-                      </a>
-                    }
-                  >
-                    下载
-                  </Tooltip>
-                ),
-                onClick({ fileId, type: envType, version }) {
-                  const loadend = message.loading(
-                    `版本 ${version} 下载中...`,
-                    0
-                  )
-                  download(
-                    `api/pcpage/download-product/${fileId}/${envType}/${version}`
-                  ).finally(() => {
-                    loadend()
-                  })
-                },
               },
-            ],
-          }),
-        ]),
+              modalActiveExtends: [
+                {
+                  type: 'publish',
+                  title: (
+                    <Tooltip
+                      color="white"
+                      title={
+                        <a
+                          target="_blank"
+                          href="https://docs.mybricks.world/docs/publish-integration/kjkj/"
+                        >
+                          使用说明
+                        </a>
+                      }
+                    >
+                      下载
+                    </Tooltip>
+                  ),
+                  onClick({ fileId, type: envType, version }) {
+                    const loadend = message.loading(
+                      `版本 ${version} 下载中...`,
+                      0
+                    )
+                    download(
+                      `api/pcpage/download-product/${fileId}/${envType}/${version}`
+                    ).finally(() => {
+                      loadend()
+                    })
+                  },
+                },
+              ],
+            }),
+          ]),
     ],
     ...(ctx.hasMaterialApp
       ? {
-        comLibAdder: comLibAdderFunc(ctx),
-      }
+          comLibAdder: comLibAdderFunc(ctx),
+        }
       : {}),
     comLibLoader: comlibLoaderFunc(ctx),
     pageContentLoader() {
       //加载页面内容
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         const content = appData.fileContent?.content || {}
+        let curContent = { ...content }
+
+        const list = await fileDBRef.current.get(appData.fileId)
+
+        // todo 冗余代码
+        if (list.length > 0) {
+          const item = list[0]
+          if (
+            compareVersionLatest(item.version, appData.fileContent.version) ===
+            1
+          ) {
+            confirm({
+              title: '存在未保存的内容，是否恢复？',
+              icon: <ExclamationCircleOutlined />,
+              okText: '确认',
+              cancelText: '取消',
+              content: `内容暂存时间：${moment.unix(item.createTime / 1000).format('YYYY-MM-DD HH:mm:ss')}`,
+              onOk() {
+                curContent = { ...item.data }
+                setBeforeunload(true)
+                delete curContent.comlibs
+
+                resolve(curContent)
+              },
+              onCancel() {
+                delete curContent.comlibs
+
+                resolve(curContent)
+              },
+            })
+          } else {
+            delete curContent.comlibs
+
+            resolve(curContent)
+          }
+        } else {
+          delete curContent.comlibs
+
+          resolve(curContent)
+        }
 
         // 避免修改原始数据
-        const _content = { ...content }
-        delete _content.comlibs
-
-        resolve(_content)
+        // const curContent = { ...content }
       })
     },
     toplView: {
@@ -590,7 +642,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
         )
         return
       },
-      items({ }, cate0, cate1, cate2) {
+      items({}, cate0, cate1, cate2) {
         cate0.title = `项目`
         cate0.items = [
           {
@@ -625,6 +677,20 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   },
                 },
               },
+              // {
+              //   title: '自动截图',
+              //   type: 'Switch',
+              //   description:
+              //     '开始时保存会自动生成文件预览图，大型页面中可能会有性能问题，此时可以关闭此功能',
+              //   value: {
+              //     get: (context) => {
+              //       return ctx.useAutoPreviewImage
+              //     },
+              //     set: (context, v: any) => {
+              //       ctx.useAutoPreviewImage = v
+              //     },
+              //   },
+              // },
             ],
           },
           {
@@ -643,7 +709,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                   get() {
                     return decodeURIComponent(
                       ctx?.hasPermissionFn ||
-                      encodeURIComponent(defaultPermissionFn)
+                        encodeURIComponent(defaultPermissionFn)
                     )
                   },
                   set(context, v: string) {
@@ -894,19 +960,19 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
                 title: '调试引擎',
                 type: 'text',
                 options: {
-                  placeholder: '请输入引擎地址'
+                  placeholder: '请输入引擎地址',
                 },
                 ifVisible({ data }) {
                   return ctx.debug
                 },
                 value: {
                   get() {
-                    const res = localStorage.getItem("__DEBUG_DESIGNER__") || ""
+                    const res = localStorage.getItem('__DEBUG_DESIGNER__') || ''
                     return res
                   },
                   set(context, val) {
-                    localStorage.setItem("__DEBUG_DESIGNER__", val)
-                  }
+                    localStorage.setItem('__DEBUG_DESIGNER__', val)
+                  },
                 },
               },
             ],
@@ -1000,7 +1066,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
       },
       editorOptions: mergeEditorOptions([
         !!ctx.setting?.system.config?.isPureIntranet &&
-        PURE_INTERNET_EDITOR_OPTIONS,
+          PURE_INTERNET_EDITOR_OPTIONS,
         DESIGN_MATERIAL_EDITOR_OPTIONS(ctx),
       ]),
     },
