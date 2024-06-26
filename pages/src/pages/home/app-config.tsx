@@ -247,6 +247,7 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
     type: string
     title: string
     inputs?: { id: string; title: string; schema: Record<string, string> }[]
+    outputs?: { id: string; title: string; schema: Record<string, string> }[]
     template?: Record<string, any>
   }> = [
     {
@@ -292,6 +293,33 @@ export default function (ctx, appData, save, designerRef, remotePlugins = []) {
             deletable: false,
             asRoot: true,
           },
+        },
+        {
+          type: 'normal',
+          title: '静默打印',
+          template: {
+            namespace: 'mybricks.normal-pc.silent-print',
+            deletable: false,
+            asRoot: true,
+          },
+          inputs: [
+            {
+              id: 'print',
+              title: '打印',
+              schema: {
+                type: 'any',
+              },
+            },
+          ],
+          outputs: [
+            {
+              id: 'printed',
+              title: '打印完成',
+              schema: {
+                type: 'any',
+              },
+            }
+          ]
         },
       ]
     )
