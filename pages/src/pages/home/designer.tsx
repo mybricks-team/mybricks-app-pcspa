@@ -238,13 +238,13 @@ export default function MyDesigner({ appData: originAppData }) {
         const newComlibs = ctx.debug
           ? replaceComlib(comlibs, comlibDebugUtils.get())
           : comlibs
-        // setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
-        setCtx((pre) => ({
-          ...pre, comlibs: [
-            `http://localhost:20000/comlib.js`,
-            `http://localhost:20001/comlib.js`
-          ], latestComlibs
-        }))
+        setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
+        // setCtx((pre) => ({
+        //   ...pre, comlibs: [
+        //     `http://localhost:20000/comlib.js`,
+        //     `http://localhost:20001/comlib.js`
+        //   ], latestComlibs
+        // }))
       })
       .finally(loadDesigner)
   }, [designer])
