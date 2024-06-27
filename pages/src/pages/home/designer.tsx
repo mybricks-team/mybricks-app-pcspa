@@ -403,7 +403,7 @@ export default function MyDesigner({ appData: originAppData }) {
     // })
     //保存
     const json = designerRef.current?.dump()
-    const canvasDom = designerRef.current?.geoView.canvasDom
+    // const canvasDom = designerRef.current?.geoView.canvasDom
 
     json.comlibs = ctx.comlibs
     json.debugQuery = ctx.debugQuery
