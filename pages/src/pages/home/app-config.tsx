@@ -694,7 +694,7 @@ export default function (
             ],
           },
           {
-            title: '全局方法',
+            title: '全局配置',
             items: [
               {
                 title: '权限校验',
@@ -714,6 +714,24 @@ export default function (
                   },
                   set(context, v: string) {
                     ctx.hasPermissionFn = encodeURIComponent(v)
+                  },
+                },
+              },
+              {
+                title: '多语言包加载模式',
+                type: 'Radio',
+                description:
+                  '页面发布后加载多语言包的模式，【按需加载】只会加载页面中用到的语料，【全量加载】加载语言包中全量语料',
+                options: [
+                  { label: '按需加载', value: 'lazy' },
+                  { label: '全量加载', value: 'full' },
+                ],
+                value: {
+                  get() {
+                    return ctx?.i18nLangContentType
+                  },
+                  set(context, v: string) {
+                    ctx.i18nLangContentType = v
                   },
                 },
               },
@@ -1181,7 +1199,9 @@ export default function (
             return () => ctx.executeEnv
           },
           get getI18nContent() {
-            return () => ctx.i18nLangContent || {}
+            return () => {
+              return ctx.i18nLangContent || {}
+            }
           },
           get locale() {
             return getCurrentLocale()

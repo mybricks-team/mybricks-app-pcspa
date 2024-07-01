@@ -130,6 +130,8 @@ export default function MyDesigner({ appData: originAppData }) {
       debugQuery: appData.fileContent?.content?.debugQuery,
       executeEnv,
       envList,
+      i18nLangContentType:
+        appData.fileContent?.content?.i18nLangContentType || 'lazy',
       i18nLangContent: {},
       i18nUsedIdList: [],
       debugMode,
@@ -419,6 +421,7 @@ export default function MyDesigner({ appData: originAppData }) {
     json.staticResourceToCDN = ctx.staticResourceToCDN
     json.fontJS = ctx.fontJS
     json.pageHeader = ctx.pageHeader
+    json.i18nLangContentType = ctx.i18nLangContentType
     // json.useAutoPreviewImage = ctx.useAutoPreviewImage
 
     json.projectId = ctx.sdk.projectId
@@ -523,6 +526,11 @@ export default function MyDesigner({ appData: originAppData }) {
         /** 先保存 */
         const json = designerRef.current?.dump()
 
+        const i18nLangContent =
+          ctx.i18nLangContentType === 'full'
+            ? ctx.i18nLangContent
+            : i18nLangContentFilter(ctx.i18nLangContent, ctx.i18nUsedIdList)
+
         json.comlibs = ctx.comlibs
         json.debugQuery = ctx.debugQuery
         json.debugMockConfig = ctx.debugMockConfig
@@ -535,10 +543,8 @@ export default function MyDesigner({ appData: originAppData }) {
         json.componentName = ctx.componentName
         json.staticResourceToCDN = ctx.staticResourceToCDN
         json.projectId = ctx.sdk.projectId
-        json.i18nLangContent = i18nLangContentFilter(
-          ctx.i18nLangContent,
-          ctx.i18nUsedIdList
-        )
+        json.i18nLangContent = i18nLangContent
+
         json.pageHeader = ctx.pageHeader
 
         await ctx.save(
@@ -569,10 +575,7 @@ export default function MyDesigner({ appData: originAppData }) {
             runtimeUploadService: ctx.runtimeUploadService,
             projectId: ctx.sdk.projectId,
             envList: ctx.envList,
-            i18nLangContent: i18nLangContentFilter(
-              ctx.i18nLangContent,
-              ctx.i18nUsedIdList
-            ),
+            i18nLangContent,
             // 非模块下的页面直接发布到项目空间下
             folderPath: '/app/pcpage',
             fileName: `${ctx.fileId}.html`,
