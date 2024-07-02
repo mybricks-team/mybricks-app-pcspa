@@ -136,7 +136,7 @@ async function resourceLocalization(
     return res;
   });
 
-  const chunkAssets = collectExternal(localPublicInfos, comlibs, componentModules, materialExternalInfos);
+    const { chunkAssets, pathArr } = collectExternal(localPublicInfos, comlibs, componentModules, materialExternalInfos);
 
   const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
     switch (cur.tag) {
@@ -152,20 +152,18 @@ async function resourceLocalization(
 
   template = template.replace("-- public --", chunkAssets);
 
-  Logger.info(`[localPublicInfos] 发布资源 ${localPublicInfos}`);
+    Logger.info(`[publish] 发布资源 ${localPublicInfos}`);
+    Logger.info(`[publish] 发布资源 ${materialExternalInfos}`);
 
-  let globalDeps: ILocalizationInfo[] = null;
-  if (needLocalization) {
-    // 获取所有本地化需要除了图片以外的信息，这些信息目前存储在相对位置
-    globalDeps = await Promise.all(
-      localPublicInfos.map((info) =>
-        getLocalizationInfoByLocal(
-          info.path,
-          info.path.split("/").slice(0, -1).join("/")
-        )
-      )
-    );
-  }
+    let globalDeps: ILocalizationInfo[] = null;
+    if (needLocalization) {
+        // 获取所有本地化需要除了图片以外的信息，这些信息目前存储在相对位置
+        globalDeps = await Promise.all(
+            pathArr.map((path) =>
+                getLocalizationInfoByLocal(path, path.split("/").slice(0, -1).join("/"))
+            )
+        );
+    }
 
   // 模板中所有的图片资源
   const imageURLs = analysisAllImageUrl(template, json, origin);
@@ -204,40 +202,48 @@ const collectExternal = (
   componentModules,
   materialExternalInfos
 ) => {
-  let set = new Set();
-  common.forEach((it) => {
-    if (it.path.endsWith(".js")) {
-      set.add(`<script src="${it.path}"></script>`);
-    }
-    if (it.path.endsWith(".css")) {
-      set.add(`<link rel="stylesheet" href="${it.path}"/>`);
-    }
-  });
-  filterComLibFromComponent(
-    (comlibs ?? []).filter(({ id }) => id !== "_myself_"),
-    componentModules
-  ).forEach((it) => {
-    (it.externals ?? []).forEach((it) => {
-      let { urls, library } = it;
-      const mybricksExternal = materialExternalInfos.find(
-        (it) => it.library.toLowerCase() === library!.toLowerCase()
-      );
-      if (mybricksExternal) {
-        urls = mybricksExternal.path;
-      }
-      if (Array.isArray(urls) && urls.length) {
-        urls.forEach((url) => {
-          if (url.endsWith(".js")) {
-            set.add(`<script src="${url}"></script>`);
-          }
-          if (url.endsWith(".css")) {
-            set.add(`<link rel="stylesheet" href="${url}"/>`);
-          }
-        });
-      }
+    let htmlStrSet = new Set();
+    let pathSet = new Set<string>();
+    common.forEach((it) => {
+        if (it.path.endsWith(".js")) {
+            htmlStrSet.add(`<script src="${it.path}"></script>`);
+            pathSet.add(it.path);
+        }
+        if (it.path.endsWith(".css")) {
+            htmlStrSet.add(`<link rel="stylesheet" href="${it.path}"/>`);
+            pathSet.add(it.path);
+        }
     });
-  });
-  return [...set].join("\n");
+    filterComLibFromComponent(
+        (comlibs ?? []).filter(({ id }) => id !== "_myself_"),
+        componentModules
+    ).forEach((it) => {
+        (it.externals ?? []).forEach((it) => {
+            let { urls, library } = it;
+            const mybricksExternal = materialExternalInfos.find(
+                (it) => it.library.toLowerCase() === library!.toLowerCase()
+            );
+            if (mybricksExternal) {
+                urls = mybricksExternal.path;
+            }
+            if (Array.isArray(urls) && urls.length) {
+                urls.forEach((url) => {
+                    if (url.endsWith(".js")) {
+                        htmlStrSet.add(`<script src="${url}"></script>`);
+                        pathSet.add(url);
+                    }
+                    if (url.endsWith(".css")) {
+                        htmlStrSet.add(`<link rel="stylesheet" href="${url}"/>`);
+                        pathSet.add(url);
+                    }
+                });
+            }
+        });
+    });
+    return {
+        chunkAssets: [...htmlStrSet].join("\n"),
+        pathArr: [...pathSet],
+    }
 };
 
 const filterComLibFromComponent = (comLib, componentModules) => {
