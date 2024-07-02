@@ -546,6 +546,7 @@ export default function MyDesigner({ appData: originAppData }) {
         json.staticResourceToCDN = ctx.staticResourceToCDN
         json.projectId = ctx.sdk.projectId
         json.i18nLangContent = i18nLangContent
+        json.i18nLangContentType = ctx.i18nLangContentType
 
         json.pageHeader = ctx.pageHeader
 
