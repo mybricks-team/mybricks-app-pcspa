@@ -221,7 +221,10 @@ const addVersionContent = async (params: { fileId, version, fileDBRef, json }) =
 
   const newVerison = getNextVerison(version)
 
-  return await fileDBRef.current.add(fileId, json, newVerison)
+  // 处理某些情况下 导致 indexDB 存储数据报错问题
+  const newJson = JSON.parse(JSON.stringify(json))
+
+  return await fileDBRef.current.add(fileId, newJson, newVerison)
 }
 
 const getNextVerison = (version, max = 100) => {

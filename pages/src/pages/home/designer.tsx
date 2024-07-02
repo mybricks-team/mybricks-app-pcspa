@@ -426,22 +426,24 @@ export default function MyDesigner({ appData: originAppData }) {
 
     json.projectId = ctx.sdk.projectId
 
-    await addVersionContent({
-      fileId: ctx.fileId,
-      json,
-      version: ctx.version,
-      fileDBRef,
-    })
-
-    // message.success({ content: `保存完成`, key: msgSaveKey })
-
-    setSaveLoading(false)
-
     try {
+      await addVersionContent({
+        fileId: ctx.fileId,
+        json,
+        version: ctx.version,
+        fileDBRef,
+      })
+
+      // message.success({ content: `保存完成`, key: msgSaveKey })
+
+      setSaveLoading(false)
+
       await initialSaveFileContent(fileDBRef, ctx)
       setBeforeunload(false)
     } catch (e) {
+      setSaveLoading(false)
       console.error(e)
+      setSaveTip('保存失败，请联系管理员')
       message.error('保存失败，请联系管理员')
     }
 
