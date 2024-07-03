@@ -43,6 +43,7 @@ module.exports = {
   externals: [
     {
       axios: 'axios',
+      "@mybricks/rxui": "rxui",
       react: {
         commonjs: 'react',
         commonjs2: 'react',
