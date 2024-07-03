@@ -24,6 +24,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         ...publishLocalizeConfig,
         [fieldName]: !!values[fieldName],
         isEncode: !!values.isEncode,
+        enableCompatible: !!values.enableCompatible,
         updateTime,
         user: user?.email
       }
@@ -44,6 +45,14 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         name="isEncode"
         label="数据编码"
         tooltip="开启后对保存、发布的数据进行编码，避免防火墙错误拦截"
+        valuePropName="checked"
+      >
+        <Switch />
+      </Form.Item>
+      <Form.Item
+        name="enableCompatible"
+        label="兼容低版本浏览器"
+        tooltip="开启后对发布后的产物开启兼容模式，兼容IE11和火狐52版本"
         valuePropName="checked"
       >
         <Switch />
