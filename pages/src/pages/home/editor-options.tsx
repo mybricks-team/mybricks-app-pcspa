@@ -10,6 +10,7 @@ export const PURE_INTERNET_EDITOR_OPTIONS = {
   richtext: {
     CDN: {
       tinymce: "/mfs/editor_assets/richText/tinymce/5.7.1/tinymce.min.js",
+      indent2emPluginCDN: "/mfs/editor_assets/richText/tinymce/5.7.1/plugins/indent2em/plugin.js",
       language: "/mfs/editor_assets/richText/tinymce/5.7.1/zh_CN.js",
     },
   },
