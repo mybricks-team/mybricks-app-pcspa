@@ -4,6 +4,8 @@ import { fAxios as axios } from "@/services/http";
 import { setLocalData, getLocalData } from '../../../utils/fileSystemHandle'
 import { Modal } from 'antd';
 
+export const isHttps = window.location.protocol === 'https:'
+
 interface Props {
   save: (...args: any) => Promise<any>
   contextInfo: {
@@ -80,7 +82,9 @@ const useGenCode = ({
       close()
     }
 
-    if (jsonParams) {
+    if (!jsonParams) return;
+
+    if (isHttps) {
       return await axios({
         method: 'post',
         timeout: 60 * 1000,
@@ -102,11 +106,37 @@ const useGenCode = ({
         if (code !== 1) { throw new Error(msg); }
         return data
       }).finally(() => { close(); })
+    } else {
+      return await axios({
+        method: 'post',
+        timeout: 60 * 1000,
+        url: '/api/pcpage/publishToComDownload',
+        responseType: 'blob', // 指定响应的数据类型为 blob
+        headers: { 'Content-Type': 'application/json' },
+        data: {
+          toLocalType,
+          userId: contextInfo.userId,
+          fileId: contextInfo.fileId,
+          componentName: componentName,
+          envType: 'test',
+          json: jsonParams,
+          staticResourceToCDN,
+        },
+      }).then((response: any) => {
+        const url = window.URL.createObjectURL(new Blob([response]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${componentName}.zip`); // 设置下载的文件名
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }).finally(() => { close(); })
     }
   }
 
   const saveCodeToLocal = async (
-    baseDirHandle: FileSystemDirectoryHandle,
+    baseDirHandle: FileSystemDirectoryHandle | undefined,
     options: {
       componentName: string,
       toLocalType: 'react' | 'vue',
@@ -119,6 +149,8 @@ const useGenCode = ({
     try {
       setLocalSaveLoading(true)
       await save()
+
+      if (!baseDirHandle) return await genCode(options);
 
       const dirName = options.componentName || contextInfo.fileName;
 

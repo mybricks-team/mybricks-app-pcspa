@@ -20,6 +20,11 @@ import { getAppConfig } from "./tools/get-app-config";
 import { generateToReactCode } from "@mybricks/to-code-react";
 
 import { Response } from "express";
+import * as os from "os";
+import * as mkdirp from "mkdirp";
+import { rimrafSync } from 'rimraf'
+
+const archiver = require("archiver");
 
 const pkg = require("../../package.json");
 const template = fs.readFileSync(
@@ -312,6 +317,129 @@ export default class PcPageController {
         code: -1,
         message: error.message || "出码失败",
       };
+    }
+  }
+
+
+  @Post("/publishToComDownload")
+  async publishToComDownload(
+    @Body("userId") userId: string,
+    @Body("fileId") fileId: number,
+    @Body("componentName") componentName: string,
+    @Body("json") json: any,
+    @Body("envType") envType: string,
+    @Body("toLocalType") toLocalType: string,
+    @Body("staticResourceToCDN") staticResourceToCDN: boolean,
+    @Req() req: any,
+    @Res() res: any
+  ) {
+    if (!isDefined(json) || !isDefined(userId) || !isDefined(fileId) || !isDefined(componentName)) {
+      return res.status(500).json({
+        code: 0,
+        message: "参数 json、userId、fileId、componentName 不能为空"
+      });
+    }
+    const referer = req.headers.referer || req.headers.referrer;
+    Logger.info(`The referer is: ${referer}`);
+
+    const url = new URL(referer);
+    const hostname = url.origin;
+    Logger.info(`The hostname from the referer is: ${hostname}`);
+
+    try {
+      Logger.info("publishToComDownload 调用发布接口");
+      const startTime = Date.now();
+
+      // const appConfig = await getAppConfig();
+      // const isEncode = !!appConfig?.publishLocalizeConfig?.isEncode;
+      const isEncode = false
+      Logger.info(`publishToComDownload 获取编码状态 isEncode ${isEncode}`);
+
+      const jsonTransform = isEncode
+        ? JSON.parse(
+          decodeURIComponent(
+            Buffer.from(
+              typeof json === "string" ? json : JSON.stringify(json),
+              "base64"
+            ).toString()
+          )
+        )
+        : json;
+      Logger.info(`publishToComDownload jsonTransform finish`);
+
+      const code = await this.service.publishToCom({
+        hostname,
+        toLocalType,
+        json: jsonTransform,
+        userId,
+        fileId,
+        componentName,
+        envType,
+        origin: req.headers.origin,
+        staticResourceToCDN,
+      });
+
+      const fileName = componentName;
+      const zipName = `${fileName}.zip`;
+      // 创建临时文件夹
+      const tempDir = path.join(os.tmpdir(), fileName);
+      rimrafSync(tempDir);
+      mkdirp.sync(tempDir);
+      Logger.info("[publishToComDownload] 开始生成下载文件...");
+
+      // 创建文件
+      const createFile = (folderPath: string, name: string, content: string | NodeJS.ArrayBufferView) => {
+        const indexHtmlDir = path.join(tempDir, folderPath);
+        mkdirp.sync(indexHtmlDir);
+        fs.writeFileSync(path.join(indexHtmlDir, name), content);
+      };
+
+      if (!code) { throw new Error('code is null'); }
+
+      const indexName = toLocalType === 'vue' ? `${componentName}.vue` : `index.tsx`;
+
+      createFile('/', indexName, code.index);
+      createFile('/', 'config.ts', code.config);
+      createFile('/', 'README.md', code.readme);
+      if (toLocalType === 'vue') { createFile('/', 'index.ts', code.vueIndex); }
+      if (!staticResourceToCDN && code.staticResources?.length) {
+        for (const staticResource of code.staticResources) {
+          // @ts-expect-error 此处已确定走的不是 CDN, 一定会有 .content 属性
+          createFile('assets/', staticResource.filename, Buffer.from(staticResource.content, 'base64'));
+        }
+      }
+
+      // 创建zip文件并写入文件
+      const zipFilePath = path.join(os.tmpdir(), zipName);
+      const output = fs.createWriteStream(zipFilePath);
+      const archive = archiver("zip", { zlib: { level: 9 } });
+      archive.pipe(output);
+      archive.directory(tempDir, false);
+      await archive.finalize();
+
+      // 发送zip文件给客户端
+      res.setHeader("Content-Disposition", `attachment; filename=${zipName}`);
+      res.setHeader("Content-Type", "application/zip");
+      fs.createReadStream(zipFilePath).pipe(res);
+
+
+      Logger.info("publishToComDownload 发布成功！");
+      Logger.info(
+        `publishToComDownload 发布时长：${String((Date.now() - startTime) / 1000)}s`
+      );
+
+      return {
+        code: 1,
+        data: '',
+        message: "success",
+      };
+    } catch (error: any) {
+      console.error("publishToComDownload 出码失败: ", error)
+      Logger.error("publishToComDownload 出码失败: ", error);
+      res.status(500).json({
+        code: -1,
+        message: error.message || "出码失败",
+      });
     }
   }
 }

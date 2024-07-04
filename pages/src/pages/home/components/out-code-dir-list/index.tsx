@@ -13,6 +13,8 @@ type ConstantContext = any;
 type HandleContext = any;
 type VariableContext = any;
 
+export const isHttps = window.location.protocol === 'https:'
+
 async function createOutCodeDirItem(variableContext: VariableContext, constantContext: ConstantContext, form: FormInstance) {
   const id = uuid();
   return await new Promise<OutCodeDirItemType>((res, rej) => {
@@ -27,9 +29,13 @@ async function createOutCodeDirItem(variableContext: VariableContext, constantCo
             tooltip='用于区分同名文件夹（由于浏览器安全策略，无法拿到本地文件系统的真实路径，因此无法直接显示出码文件夹路径，只能通过标签区分）'>
             <Input placeholder="请输入出码文件夹标签" />
           </Form.Item>
-          <Form.Item name='dirname' label='文件夹路径' rules={[{ required: true, message: '出码文件夹路径不能为空' }]}>
-            <OutCodeDirCheck id={id} variableContext={variableContext} constantContext={constantContext} />
-          </Form.Item>
+          {
+            isHttps
+              ? <Form.Item name='dirname' label='文件夹路径' rules={[{ required: true, message: '出码文件夹路径不能为空' }]}>
+                <OutCodeDirCheck id={id} variableContext={variableContext} constantContext={constantContext} />
+              </Form.Item>
+              : <Form.Item label='文件夹路径'>由于浏览器安全策略, 非 https 无法直接访问本地文件系统, 所以会以下载的方式进行出码, 无需配置出码文件夹路径</Form.Item>
+          }
           <Form.Item name='type' label='出码类型' rules={[{ required: true, message: '出码类型不能为空' }]}>
             <Select options={[{ label: 'Vue3', value: 'vue' }, { label: 'React', value: 'react' }]} />
           </Form.Item>
@@ -142,14 +148,22 @@ function OutCodeDirItem(props: {
     hasPermissionFn: variableContext.hasPermissionFn,
   })
 
+  const codeToLocal = async (handle?: FileSystemDirectoryHandle) => {
+    await saveCodeToLocal(handle, {
+      componentName: variableContext.componentName!,
+      staticResourceToCDN: !!variableContext.staticResourceToCDN,
+      toLocalType: value.type,
+      loadingMessage: isHttps ? `正在出码到文件夹: ${value.dirname} ...` : `正在下载到本地...`,
+      fileId: constantContext.fileId,
+      id: value.id,
+    });
+  }
+
   const [confirmForm] = Form.useForm();
+
   /** 出码到本地 */
   const genComToLocal = async () => {
     try {
-      const handleId = `${constantContext.fileId}-${value.id}`;
-      const handle = await getFileSystemDirectoryHandle(handleId, {
-        notExistMessage: `检测到原目录(${value.dirname})已被删除、移动、重命名或者权限失效，请重新选择、授权工作目录`
-      });
       if (!variableContext.componentName) {
         await new Promise((res, rej) => {
           Modal.confirm({
@@ -185,18 +199,15 @@ function OutCodeDirItem(props: {
           })
         })
       }
+      if (!isHttps) return await codeToLocal();
+      const handleId = `${constantContext.fileId}-${value.id}`;
+      const handle = await getFileSystemDirectoryHandle(handleId, {
+        notExistMessage: `检测到原目录(${value.dirname})已被删除、移动、重命名或者权限失效，请重新选择、授权工作目录`
+      });
       onChange({ ...value, dirname: handle.name });
       forceUpdate();
-      if (handle) {
-        await saveCodeToLocal(handle, {
-          componentName: variableContext.componentName!,
-          staticResourceToCDN: !!variableContext.staticResourceToCDN,
-          toLocalType: value.type,
-          loadingMessage: `正在出码到文件夹: ${value.dirname} ...`,
-          fileId: constantContext.fileId,
-          id: value.id,
-        });
-      } else { console.warn(`FileHandle 获取失败`, handle); }
+      if (handle) { await codeToLocal(handle) }
+      else { console.warn(`FileHandle 获取失败`, handle); }
     } catch (e) {
       message.error('出码失败，请联系管理员')
       console.log(e)
@@ -247,7 +258,11 @@ function OutCodeDirItem(props: {
         {/* <DownloadOutlined style={{ cursor: 'pointer' }} onClick={() => !outCodeLoading && genComToLocal()} /> */}
         <Button style={{ padding: 0, fontSize: 12, fontWeight: 500 }} size='small' loading={outCodeLoading} type='text' onClick={() => !outCodeLoading && genComToLocal()}>下载</Button>
         <Popconfirm
-          title="确定要删除此出码文件夹吗? (添加出码文件夹需重新授权)"
+          title={
+            isHttps
+              ? "确定要删除此出码文件夹吗? (添加出码文件夹需重新授权)"
+              : "确定要删除此出码类型吗? "
+          }
           onConfirm={() => handleDelete()}
           okText="确定"
           cancelText="取消"
@@ -255,10 +270,14 @@ function OutCodeDirItem(props: {
           <Button style={{ padding: 0, fontSize: 12, fontWeight: 500 }} size='small' type='text'>删除</Button>
         </Popconfirm>
       </div>
-      <div style={{ marginTop: 8 }}>
-        <OutCodeDirCheck id={value.id} variableContext={variableContext} constantContext={constantContext}
-          value={value.dirname} onChange={(dirname) => { onChange({ ...value, dirname }); }} />
-      </div>
+      {
+        isHttps
+          ? <div style={{ marginTop: 8 }}>
+            <OutCodeDirCheck id={value.id} variableContext={variableContext} constantContext={constantContext}
+              value={value.dirname} onChange={(dirname) => { onChange({ ...value, dirname }); }} />
+          </div>
+          : null
+      }
     </div>
   )
 }
@@ -281,11 +300,13 @@ export default function OutCodeDirList(props: {
 
   const handleDel = (index: number) => { onChange([...value.slice(0, index), ...value.slice(index + 1)]); }
 
+  const title = isHttps ? '出码文件夹' : '出码类型'
+
   return (
     <div>
-      <span style={{ color: '#555' }}>出码文件夹</span>
+      <span style={{ color: '#555' }}>{title}</span>
 
-      <div className={css.btnAdd} onClick={() => handleAdd()}>添加出码文件夹</div>
+      <div className={css.btnAdd} onClick={() => handleAdd()}>添加{title}</div>
 
       {value.map((item, index) => (
         <OutCodeDirItem key={item.id} variableContext={variableContext} constantContext={constantContext}
