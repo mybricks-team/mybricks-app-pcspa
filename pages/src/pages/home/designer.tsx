@@ -15,6 +15,7 @@ import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
 import { fetchPlugins, removeBadChar } from '../../utils'
+import { PC_NORMAL_COM_LIB, BASIC_COM_LIB, CHARS_COM_LIB } from '../../constants'
 import { PreviewStorage } from './../../utils/previewStorage'
 import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
@@ -736,7 +737,13 @@ export default function MyDesigner({ appData: originAppData }) {
   const importDump = async (value) => {
     try {
       const { content, pageConfig } = JSON.parse(value)
-      Object.assign(ctx, pageConfig ?? {})
+      let newPageConfig
+      if( !pageConfig || !pageConfig?.comlibs?.length) {
+        // 无 pageConfig 或comlibs数组为空，导入时放入默认组件库
+        newPageConfig = pageConfig || {}
+        newPageConfig.comlibs = appData.defaultComlibs?.length ? appData.defaultComlibs : [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
+      }
+      Object.assign(ctx, newPageConfig ?? {})
       await designerRef.current.loadContent(content)
     } catch (e) {
       message.error(e)
