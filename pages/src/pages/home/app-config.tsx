@@ -265,19 +265,19 @@ export default function (
     outputs?: { id: string; title: string; schema: Record<string, string> }[]
     template?: Record<string, any>
   }> = [
-    {
-      type: 'normal',
-      title: '页面',
-      inputs: [
-        {
-          id: 'open',
-          title: '打开',
-          schema: {
-            type: 'any',
-          },
-        },
-      ],
-    },
+    // {
+    //   type: 'normal',
+    //   title: '页面',
+    //   inputs: [
+    //     {
+    //       id: 'open',
+    //       title: '打开',
+    //       schema: {
+    //         type: 'any',
+    //       },
+    //     },
+    //   ],
+    // },
   ]
   if (isReact) {
     adder.push(
