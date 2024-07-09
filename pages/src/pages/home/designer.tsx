@@ -19,7 +19,7 @@ import { PC_NORMAL_COM_LIB, BASIC_COM_LIB, CHARS_COM_LIB } from '../../constants
 import { PreviewStorage } from './../../utils/previewStorage'
 import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
-import { createFromIconfontCN } from '@ant-design/icons'
+import { createFromIconfontCN, InfoCircleTwoTone } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
@@ -251,6 +251,8 @@ export default function MyDesigner({ appData: originAppData }) {
   const operationList = useRef<any[]>([])
   const fileDBRef = useRef(null)
 
+  const beforeUnloadRef = useRef(false);
+
   const designer = useMemo(() => {
     if (ctx.debug && localStorage.getItem('__DEBUG_DESIGNER__')) {
       return localStorage.getItem('__DEBUG_DESIGNER__')
@@ -363,6 +365,7 @@ export default function MyDesigner({ appData: originAppData }) {
     } else {
       window.onbeforeunload = null
     }
+    beforeUnloadRef.current = beforeunload
   }, [beforeunload])
 
   const onEdit = useCallback((info) => {
@@ -676,6 +679,27 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }
 
+  const beforeToggleUnLock: any = () => {
+    if(!beforeUnloadRef.current) {
+      return true
+    }
+    return new Promise((resolve) => {
+      Modal.confirm({
+        title:   '解锁前确认',
+        icon: <InfoCircleTwoTone />,
+        content: `当前页面有内容未保存，请确定是否解锁页面？`,
+        okText: '确定',
+        cancelText: '取消',
+        onOk: () => {
+          resolve(true)
+        },
+        onCancel: () => {
+          resolve(false)
+        },
+      })
+    }) as Promise<boolean>
+  }
+
   const RenderLocker = useMemo(() => {
     return (
       <Locker
@@ -683,6 +707,7 @@ export default function MyDesigner({ appData: originAppData }) {
           setOperable(status === 1)
           ctx.operable = status === 1
         }}
+        beforeToggleUnLock={beforeToggleUnLock}
         compareVersion={true}
       />
     )
