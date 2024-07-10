@@ -2,6 +2,7 @@ import { APPType } from "../../types";
 import API from "@mybricks/sdk-for-app/api";
 import { Logger } from "@mybricks/rocker-commons";
 import { TContext } from "./type";
+import { ignoreNamespaces } from '../../constants'
 
 type Component = {
   namespace: string;
@@ -10,20 +11,6 @@ type Component = {
   isCloud?: boolean;
   deps?: Component[];
 };
-
-const ignoreNamespaces = [
-  "mybricks.core-comlib.fn",
-  "mybricks.core-comlib.var",
-  "mybricks.core-comlib.type-change",
-  "mybricks.core-comlib.connector",
-  "mybricks.core-comlib.frame-input",
-  "mybricks.core-comlib.frame-output",
-  "mybricks.core-comlib.scenes",
-  "mybricks.core-comlib.defined-com",
-  "mybricks.core-comlib.module",
-  'mybricks.core-comlib.group',
-  'mybricks.core-comlib.selection'
-];
 
 const getComponentFromMaterial = (
   component: Component
@@ -162,18 +149,27 @@ export const generateComLib = async (
       }
     }
 
-    script += isCloudComponent
-      ? `
-			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
-      }', runtime: ${decodeURIComponent(componentRuntime)} });
-		`
-      : `
-			eval(${JSON.stringify(decodeURIComponent(componentRuntime))});
-			comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
-      }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
-			if(Reflect.has(window, 'fangzhouComDef')) Reflect.deleteProperty(window, 'fangzhouComDef');
-			if(Reflect.has(window, 'MybricksComDef')) Reflect.deleteProperty(window, 'MybricksComDef');
-		`;
+    //   script += isCloudComponent
+    //     ? `
+    //   comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
+    //     }', runtime: ${decodeURIComponent(componentRuntime)} });
+    // `
+    //     : `
+    //   eval(${JSON.stringify(decodeURIComponent(componentRuntime))});
+    //   comAray.push({ namespace: '${component.namespace}', version: '${curComponent.version
+    //     }', runtime: (window.fangzhouComDef || window.MybricksComDef).default });
+    //   if(Reflect.has(window, 'fangzhouComDef')) Reflect.deleteProperty(window, 'fangzhouComDef');
+    //   if(Reflect.has(window, 'MybricksComDef')) Reflect.deleteProperty(window, 'MybricksComDef');
+    // `;
+
+
+    script += `
+    	comAray.push({
+        namespace: '${component.namespace}',
+        version: '${curComponent.version}',
+        runtime: ${decodeURIComponent(componentRuntime)}
+      });
+    `
   }
 
   Logger.info(`[publish] 组件内容获取完毕`);
