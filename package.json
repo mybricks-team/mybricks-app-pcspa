@@ -1,6 +1,6 @@
 {
   "name": "mybricks-app-pcspa",
-  "version": "1.3.96",
+  "version": "1.3.97",
   "description": "中后台类PC页面搭建",
   "scripts": {
     "watch:be-local": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://localhost:3100 node nodejs/index.js'",
