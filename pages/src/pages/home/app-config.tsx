@@ -250,13 +250,13 @@ export default function (
   const debugModeOptions =
     envList.length > 0
       ? [
-          { label: '选择环境', value: EnumMode.ENV },
-          { label: '自定义域名', value: EnumMode.CUSTOM },
-        ]
+        { label: '选择环境', value: EnumMode.ENV },
+        { label: '自定义域名', value: EnumMode.CUSTOM },
+      ]
       : [
-          { label: '默认', value: EnumMode.DEFAULT },
-          { label: '自定义域名', value: EnumMode.CUSTOM },
-        ]
+        { label: '默认', value: EnumMode.DEFAULT },
+        { label: '自定义域名', value: EnumMode.CUSTOM },
+      ]
 
   const adder: Array<{
     type: string
@@ -349,31 +349,31 @@ export default function (
       isPrivatization: ctx.setting?.system.config?.isPureIntranet === true,
       addActions: domainApp
         ? [
-            {
-              type: 'http-sql',
-              title: '领域接口',
-              noUseInnerEdit: true,
-              getTitle: (item) => {
-                return item.content?.domainServiceMap
-                  ? item.content.title
-                  : `${item.content.title || ''}(未选择)`
-              },
-              render: (props) => {
-                return (
-                  <CollaborationHttp
-                    {...props}
-                    openFileSelector={() =>
-                      openFilePanel({
-                        allowedFileExtNames: ['domain'],
-                        parentId: ctx.sdk.projectId,
-                        fileId: ctx.fileId,
-                      })
-                    }
-                  />
-                )
-              },
+          {
+            type: 'http-sql',
+            title: '领域接口',
+            noUseInnerEdit: true,
+            getTitle: (item) => {
+              return item.content?.domainServiceMap
+                ? item.content.title
+                : `${item.content.title || ''}(未选择)`
             },
-          ]
+            render: (props) => {
+              return (
+                <CollaborationHttp
+                  {...props}
+                  openFileSelector={() =>
+                    openFilePanel({
+                      allowedFileExtNames: ['domain'],
+                      parentId: ctx.sdk.projectId,
+                      fileId: ctx.fileId,
+                    })
+                  }
+                />
+              )
+            },
+          },
+        ]
         : void 0,
     }),
   ]
@@ -482,81 +482,81 @@ export default function (
       ...(ctx.isPreview
         ? []
         : [
-            versionPlugin({
-              user: ctx.user,
-              file: appData.fileContent || {},
-              disabled: ctx.disabled,
-              needSavePreview: true,
-              needPublishRevert: true,
-              envMap,
-              onInit: (versionApi) => {
-                ctx.versionApi = versionApi
-              },
-              onRevert: async (params: {
-                pubAssetFilePath: string
-                nowVersion: string
-                fileId: number
-                type: string
-              }) => {
-                const { fileId, nowVersion, pubAssetFilePath, type } = params
-                try {
-                  const finish = message.loading('正在回滚...', 0)
-                  const res: { code: number; message: string } =
-                    await fAxios.post('/api/pcpage/rollback', {
-                      filePath: pubAssetFilePath,
-                      nowVersion,
-                      type,
-                      fileId,
-                    })
-                  finish()
+          versionPlugin({
+            user: ctx.user,
+            file: appData.fileContent || {},
+            disabled: ctx.disabled,
+            needSavePreview: true,
+            needPublishRevert: true,
+            envMap,
+            onInit: (versionApi) => {
+              ctx.versionApi = versionApi
+            },
+            onRevert: async (params: {
+              pubAssetFilePath: string
+              nowVersion: string
+              fileId: number
+              type: string
+            }) => {
+              const { fileId, nowVersion, pubAssetFilePath, type } = params
+              try {
+                const finish = message.loading('正在回滚...', 0)
+                const res: { code: number; message: string } =
+                  await fAxios.post('/api/pcpage/rollback', {
+                    filePath: pubAssetFilePath,
+                    nowVersion,
+                    type,
+                    fileId,
+                  })
+                finish()
 
-                  if (res.code === 1) {
-                    message.success(res.message)
-                  } else {
-                    message.error('回滚失败！')
-                  }
-                } catch (e) {
+                if (res.code === 1) {
+                  message.success(res.message)
+                } else {
                   message.error('回滚失败！')
                 }
-              },
-              modalActiveExtends: [
-                {
-                  type: 'publish',
-                  title: (
-                    <Tooltip
-                      color="white"
-                      title={
-                        <a
-                          target="_blank"
-                          href="https://docs.mybricks.world/docs/publish-integration/kjkj/"
-                        >
-                          使用说明
-                        </a>
-                      }
-                    >
-                      下载
-                    </Tooltip>
-                  ),
-                  onClick({ fileId, type: envType, version }) {
-                    const loadend = message.loading(
-                      `版本 ${version} 下载中...`,
-                      0
-                    )
-                    download(
-                      `api/pcpage/download-product/${fileId}/${envType}/${version}`
-                    ).finally(() => {
-                      loadend()
-                    })
-                  },
+              } catch (e) {
+                message.error('回滚失败！')
+              }
+            },
+            modalActiveExtends: [
+              {
+                type: 'publish',
+                title: (
+                  <Tooltip
+                    color="white"
+                    title={
+                      <a
+                        target="_blank"
+                        href="https://docs.mybricks.world/docs/publish-integration/kjkj/"
+                      >
+                        使用说明
+                      </a>
+                    }
+                  >
+                    下载
+                  </Tooltip>
+                ),
+                onClick({ fileId, type: envType, version }) {
+                  const loadend = message.loading(
+                    `版本 ${version} 下载中...`,
+                    0
+                  )
+                  download(
+                    `api/pcpage/download-product/${fileId}/${envType}/${version}`
+                  ).finally(() => {
+                    loadend()
+                  })
                 },
-              ],
-            }),
-          ]),
+              },
+            ],
+          }),
+        ]),
     ],
     ...(ctx.hasMaterialApp
       ? {
-          comLibAdder: comLibAdderFunc(ctx),
-        }
+        comLibAdder: comLibAdderFunc(ctx),
+      }
       : {}),
     comLibLoader: comlibLoaderFunc(ctx),
     pageContentLoader() {
@@ -642,7 +642,7 @@ export default function (
         )
         return
       },
-      items({}, cate0, cate1, cate2) {
+      items({ }, cate0, cate1, cate2) {
         cate0.title = `项目`
         cate0.items = [
           {
@@ -709,7 +709,7 @@ export default function (
                   get() {
                     return decodeURIComponent(
                       ctx?.hasPermissionFn ||
-                        encodeURIComponent(defaultPermissionFn)
+                      encodeURIComponent(defaultPermissionFn)
                     )
                   },
                   set(context, v: string) {
@@ -1084,7 +1084,7 @@ export default function (
       },
       editorOptions: mergeEditorOptions([
         !!ctx.setting?.system.config?.isPureIntranet &&
-          PURE_INTERNET_EDITOR_OPTIONS,
+        PURE_INTERNET_EDITOR_OPTIONS,
         DESIGN_MATERIAL_EDITOR_OPTIONS(ctx),
       ]),
     },
@@ -1236,6 +1236,9 @@ export default function (
               return {}
             }
           },
+          get customMethods() {
+            return { options: ctx?.appConfig?.component?.customMethodOptions || [] }
+          }
         },
         get uploadFile() {
           return async (files) => {

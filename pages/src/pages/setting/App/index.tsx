@@ -7,6 +7,7 @@ import useConfig from './useConfig'
 import ConfigPlugin from './ConfigPlugin'
 import ConfigBase from './ConfigBase'
 import ConfigDesigner from './ConfigDesigner'
+import ConfigComponent from './ConfigComponent'
 export const _NAMESPACE_ = APP_NAME
 import { Collapse, Spin } from 'antd'
 import I18nConfig from './I18nConfig'
@@ -21,7 +22,7 @@ export default (props) => {
 
   return (
     <Spin spinning={configContext.loading}>
-      <Collapse style={{ padding: 24 }} className={style.wrapper} defaultActiveKey={[0, 1, 2, 3, 4]}>
+      <Collapse style={{ padding: 24 }} className={style.wrapper} defaultActiveKey={[0, 1, 2, 3, 4, 'ConfigComponent']}>
         <Collapse.Panel key={0} header="设计器">
           <ConfigDesigner {...configContext} />
         </Collapse.Panel>
@@ -32,6 +33,9 @@ export default (props) => {
             </Collapse.Panel>}
             {isInGroup && <Collapse.Panel key={2} header="多语言配置">
               <I18nConfig {...configContext} />
+            </Collapse.Panel>}
+            {isInGroup && <Collapse.Panel key='ConfigComponent' header="组件配置">
+              <ConfigComponent {...configContext} />
             </Collapse.Panel>}
             <Collapse.Panel key={3} header="服务扩展">
               <ConfigServer {...configContext} />

@@ -36,7 +36,7 @@ const isEqual = (param1, param2) => {
   return param1 === param2
 }
 
-const root = ({ renderType, locale, runtime, extVars, extCallConnector, ...props }) => {
+const root = ({ renderType, locale, runtime, extVars, extCallConnector, customMethodMap, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   const domainServicePath = '--domain-service-path--';//replace it
   /**网页标题i18n处理 */
@@ -66,6 +66,9 @@ const root = ({ renderType, locale, runtime, extVars, extCallConnector, ...props
         // 环境变量
         return {
           ...(extVars?.customVars || {}),
+          get customMethods() {
+            return { methodMap: customMethodMap || {} }
+          },
           get getExecuteEnv() {
             return () => executeEnv;
           },
