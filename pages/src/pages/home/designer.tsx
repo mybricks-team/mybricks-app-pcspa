@@ -15,7 +15,11 @@ import API from '@mybricks/sdk-for-app/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-config'
 import { fetchPlugins, removeBadChar } from '../../utils'
-import { PC_NORMAL_COM_LIB, BASIC_COM_LIB, CHARS_COM_LIB } from '../../constants'
+import {
+  PC_NORMAL_COM_LIB,
+  BASIC_COM_LIB,
+  CHARS_COM_LIB,
+} from '../../constants'
 import { PreviewStorage } from './../../utils/previewStorage'
 import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
@@ -167,7 +171,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon?},
+        param: { name?; shareType?; content?; icon? },
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
@@ -251,7 +255,7 @@ export default function MyDesigner({ appData: originAppData }) {
   const operationList = useRef<any[]>([])
   const fileDBRef = useRef(null)
 
-  const beforeUnloadRef = useRef(false);
+  const beforeUnloadRef = useRef(false)
 
   const designer = useMemo(() => {
     if (ctx.debug && localStorage.getItem('__DEBUG_DESIGNER__')) {
@@ -293,7 +297,7 @@ export default function MyDesigner({ appData: originAppData }) {
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ; (window as any).mybricks.SPADesigner &&
+        ;(window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -680,12 +684,12 @@ export default function MyDesigner({ appData: originAppData }) {
   }
 
   const beforeToggleUnLock: any = () => {
-    if(!beforeUnloadRef.current) {
+    if (!beforeUnloadRef.current) {
       return true
     }
     return new Promise((resolve) => {
       Modal.confirm({
-        title:   '解锁前确认',
+        title: '解锁前确认',
         icon: <InfoCircleTwoTone />,
         content: `当前页面有内容未保存，请确定是否解锁页面？`,
         okText: '确定',
@@ -763,10 +767,12 @@ export default function MyDesigner({ appData: originAppData }) {
     try {
       const { content, pageConfig } = JSON.parse(value)
       let newPageConfig
-      if( !pageConfig || !pageConfig?.comlibs?.length) {
+      if (!pageConfig || !pageConfig?.comlibs?.length) {
         // 无 pageConfig 或comlibs数组为空，导入时放入默认组件库
         newPageConfig = pageConfig || {}
-        newPageConfig.comlibs = appData.defaultComlibs?.length ? appData.defaultComlibs : [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
+        newPageConfig.comlibs = appData.defaultComlibs?.length
+          ? appData.defaultComlibs
+          : [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
       }
       Object.assign(ctx, newPageConfig ?? {})
       await designerRef.current.loadContent(content)
@@ -1092,15 +1098,11 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     const noThrowError = comlibs.some((lib) => !lib.coms && !lib.defined)
 
     deps.forEach((component) => {
-      let libIndex = allComLibsRuntimeMap.findIndex(
-        (lib) => lib[component.namespace + '@' + component.version]
-      )
+      const rtComKey = component.namespace + '@' + component.version
+      let libIndex = allComLibsRuntimeMap.findIndex((lib) => lib[rtComKey])
       let curComponent = null
       if (libIndex !== -1) {
-        curComponent =
-          allComLibsRuntimeMap[libIndex][
-          component.namespace + '@' + component.version
-          ]
+        curComponent = allComLibsRuntimeMap[libIndex][rtComKey]
       } else {
         libIndex = allComLibsRuntimeMap.findIndex((lib) =>
           Object.keys(lib).find((key) => key.startsWith(component.namespace))
@@ -1110,16 +1112,14 @@ const genLazyloadComs = async (comlibs, toJSON) => {
           if (noThrowError) {
             return
           } else {
-            throw new Error(
-              `找不到 ${component.namespace}@${component.version} 对应的组件资源`
-            )
+            throw new Error(`找不到 ${rtComKey} 对应的组件资源`)
           }
         }
         curComponent =
           allComLibsRuntimeMap[libIndex][
-          Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-            key.startsWith(component.namespace)
-          )
+            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+              key.startsWith(component.namespace)
+            )
           ]
       }
 
@@ -1127,18 +1127,15 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         if (noThrowError) {
           return
         } else {
-          throw new Error(
-            `找不到 ${component.namespace}@${component.version} 对应的组件资源`
-          )
+          throw new Error(`找不到 ${rtComKey} 对应的组件资源`)
         }
       }
 
       if (!willFetchComLibs[libIndex].componentRuntimeMap) {
         willFetchComLibs[libIndex].componentRuntimeMap = {}
       }
-      willFetchComLibs[libIndex].componentRuntimeMap[
-        component.namespace + '@' + curComponent.version
-      ] = curComponent
+
+      willFetchComLibs[libIndex].componentRuntimeMap[rtComKey] = curComponent
     })
   }
 
