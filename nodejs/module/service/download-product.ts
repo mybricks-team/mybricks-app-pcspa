@@ -8,8 +8,8 @@ import {
 import { Response } from "express";
 import * as os from "os";
 import * as mkdirp from "mkdirp";
-import publiAssets from './local-public'
-import { rimrafSync } from 'rimraf'
+import publiAssets from './local-public';
+import { rimrafSync } from "../tools";
 
 const path = require("path");
 const archiver = require("archiver");

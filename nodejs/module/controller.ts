@@ -17,12 +17,12 @@ import * as fs from "fs";
 import * as path from "path";
 import { getAppTypeFromTemplate } from "./tools/common";
 import { getAppConfig } from "./tools/get-app-config";
-import { generateToReactCode } from "@mybricks/to-code-react";
+// import { generateToReactCode } from "@mybricks/to-code-react";
 
 import { Response } from "express";
 import * as os from "os";
 import * as mkdirp from "mkdirp";
-import { rimrafSync } from 'rimraf'
+import { rimrafSync } from "./tools";
 
 const archiver = require("archiver");
 
@@ -105,30 +105,30 @@ export default class PcPageController {
     }
   }
 
-  @Post("/toCode")
-  async toCode(@Body("json") json: any, @Res() res: Response) {
-    Logger.info(`[toCode] 开始`);
+  // @Post("/toCode")
+  // async toCode(@Body("json") json: any, @Res() res: Response) {
+  //   Logger.info(`[toCode] 开始`);
 
-    try {
-      const zipFilePath = await generateToReactCode(json)
-      Logger.info(`[toCode] ${zipFilePath}`);
-      res.setHeader("Content-Disposition", `attachment; filename=1`);
-      res.setHeader("Content-Type", "application/zip");
-      fs.createReadStream(zipFilePath).pipe(res);
-      Logger.info(`[toCode] setHeader`);
+  //   try {
+  //     const zipFilePath = await generateToReactCode(json)
+  //     Logger.info(`[toCode] ${zipFilePath}`);
+  //     res.setHeader("Content-Disposition", `attachment; filename=1`);
+  //     res.setHeader("Content-Type", "application/zip");
+  //     fs.createReadStream(zipFilePath).pipe(res);
+  //     Logger.info(`[toCode] setHeader`);
 
-      res.on('finish', () => {
-        Logger.info(`[toCode] finish`);
-        fs.unlink(zipFilePath, () => {
-          Logger.info(`[toCode] delete`);
-        })
-      })
-    } catch (e) {
-      Logger.info("[toCode] 失败")
-      Logger.info(e.message)
-      Logger.info(e)
-    }
-  }
+  //     res.on('finish', () => {
+  //       Logger.info(`[toCode] finish`);
+  //       fs.unlink(zipFilePath, () => {
+  //         Logger.info(`[toCode] delete`);
+  //       })
+  //     })
+  //   } catch (e) {
+  //     Logger.info("[toCode] 失败")
+  //     Logger.info(e.message)
+  //     Logger.info(e)
+  //   }
+  // }
 
   @Post("/upload")
   @UseInterceptors(FileInterceptor("file"))
