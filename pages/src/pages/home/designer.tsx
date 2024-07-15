@@ -1112,30 +1112,31 @@ const genLazyloadComs = async (comlibs, toJSON) => {
           if (noThrowError) {
             return
           } else {
-            throw new Error(`找不到 ${rtComKey} 对应的组件资源`)
+            console.error(`找不到 ${rtComKey} 对应的组件资源`)
           }
-        }
-        curComponent =
+        }else{
+          curComponent =
           allComLibsRuntimeMap[libIndex][
             Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
               key.startsWith(component.namespace)
             )
           ]
-      }
-
-      if (!curComponent) {
-        if (noThrowError) {
-          return
-        } else {
-          throw new Error(`找不到 ${rtComKey} 对应的组件资源`)
         }
       }
 
-      if (!willFetchComLibs[libIndex].componentRuntimeMap) {
-        willFetchComLibs[libIndex].componentRuntimeMap = {}
+      if (!curComponent && libIndex !== -1) {
+        if (noThrowError) {
+          return
+        } else {
+          console.error(`找不到 ${rtComKey} 对应的组件资源`)
+        }
       }
-
-      willFetchComLibs[libIndex].componentRuntimeMap[rtComKey] = curComponent
+      if(libIndex !== -1){
+        if (!willFetchComLibs[libIndex].componentRuntimeMap) {
+          willFetchComLibs[libIndex].componentRuntimeMap = {}
+        }
+        willFetchComLibs[libIndex].componentRuntimeMap[rtComKey] = curComponent
+      }
     })
   }
 
