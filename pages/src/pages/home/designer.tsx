@@ -1124,14 +1124,14 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         }
       }
 
-      if (!curComponent && libIndex !== -1) {
+      if (!curComponent) {
         if (noThrowError) {
           return
         } else {
           console.error(`找不到 ${rtComKey} 对应的组件资源`)
         }
       }
-      if(libIndex !== -1){
+      if(curComponent && libIndex !== -1){
         if (!willFetchComLibs[libIndex].componentRuntimeMap) {
           willFetchComLibs[libIndex].componentRuntimeMap = {}
         }
