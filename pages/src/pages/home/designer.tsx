@@ -446,8 +446,15 @@ export default function MyDesigner({ appData: originAppData }) {
 
       setSaveLoading(false)
 
-      await initialSaveFileContent(fileDBRef, ctx)
-      setBeforeunload(false)
+      await initialSaveFileContent(fileDBRef, ctx);
+      
+      // 在 50 个版本之前的文件版本将被删除
+      await API.File.deleteFileSaves({
+        fileId: ctx.fileId,
+        beforeNVersion: 50,
+      });
+
+      setBeforeunload(false);
     } catch (e) {
       setSaveLoading(false)
       console.error(e)
