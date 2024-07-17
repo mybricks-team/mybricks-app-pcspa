@@ -449,7 +449,7 @@ export default function MyDesigner({ appData: originAppData }) {
       await initialSaveFileContent(fileDBRef, ctx);
       
       // 在 50 个版本之前的文件版本将被删除
-      await API.File.deleteFileSaves({
+      API.File.deleteFileSaves({
         fileId: ctx.fileId,
         beforeNVersion: 50,
       });
