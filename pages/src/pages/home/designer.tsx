@@ -449,10 +449,14 @@ export default function MyDesigner({ appData: originAppData }) {
       await initialSaveFileContent(fileDBRef, ctx);
       
       // 在 50 个版本之前的文件版本将被删除
-      API.File.deleteFileSaves({
-        fileId: ctx.fileId,
-        beforeNVersion: 50,
-      });
+      try {
+        API.File.deleteFileSaves({
+          fileId: ctx.fileId,
+          beforeNVersion: 50,
+        });
+      } catch (error) {
+        console.error("删除超出文件版本报错:", error);
+      }
 
       setBeforeunload(false);
     } catch (e) {
