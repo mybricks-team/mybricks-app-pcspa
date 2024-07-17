@@ -26,7 +26,7 @@ const transformCodeByBabel = (
   code: string,
   tips?: string,
   keepCode?: boolean,
-  options?: any
+  options?: any,
 ) => {
   /**
    * 已经babel的code直接返回
@@ -41,6 +41,12 @@ const transformCodeByBabel = (
   };
   try {
     let temp = safeDecoder(code);
+    if (!temp.trim()) {
+      Logger.warn(`[publish] ${tips}代码为空，已忽略跳过`)
+
+      return code
+    }
+
     if (keepCode) {
       // 不做处理
     } else if (/export\s+default.*async.*function.*\(/g.test(temp)) {
@@ -59,11 +65,13 @@ const transformCodeByBabel = (
     res = Babel.transform(temp, parserOptions).code;
     res = encodeURIComponent(`(function() { var _RTFN_; \n${res}\n; return _RTFN_; })()`)
   } catch (e) {
-    Logger.info(`[publish] ${tips}代码存在错误，请检查！！！`)
-    Logger.info(`[publish] ${e.message}`)
+    Logger.error(`[publish] ${tips}代码存在错误，请检查！！！`)
+    Logger.error(`[publish] ${e.message}`)
+
     if (tips) {
       throw new EnhancedError(`${tips}代码存在错误，请检查！！！`, { errorDetailMessage: e.message });
     }
+
     return code;
   }
   return res;
