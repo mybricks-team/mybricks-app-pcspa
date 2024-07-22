@@ -21,6 +21,8 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
 
     .loading {
       height: 100%;
@@ -40,11 +42,12 @@ body {
 }
 
 .toolbarWrapperPreview {
-  div > div:nth-child(2) > div > div > div:nth-child(1) > div:nth-child(2) {
-    & > button:nth-child(1) {
+  div>div:nth-child(2)>div>div>div:nth-child(1)>div:nth-child(2) {
+    &>button:nth-child(1) {
       display: none;
     }
-    & > div {
+
+    &>div {
       display: none;
     }
   }
@@ -55,7 +58,7 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  cursor: pointer; 
+  cursor: pointer;
   vertical-align: middle;
   color: #999;
   font-size: 20px;
@@ -66,7 +69,7 @@ body {
 .filePosition:hover {
   display: flex;
   overflow: hidden;
-  cursor: pointer; 
+  cursor: pointer;
   color: #555;
   background-color: #EBECEE;
   border-radius: 50%;
@@ -76,13 +79,16 @@ body {
 
 .overlayFilePopover {
   padding-top: 0 !important;
+
   :global {
     .ant-popover-arrow {
       display: none !important;
     }
+
     .ant-popover-inner {
       padding: 0 !important;
     }
+
     .ant-popover-inner-content {
       padding: 0 !important;
     }
@@ -94,11 +100,11 @@ body {
   padding: 4px 10px;
 }
 
-.itemContent{
+.itemContent {
   height: auto
 }
 
-.itemList{
+.itemList {
   display: flex;
   flex-wrap: nowrap;
   justify-content: space-between;
@@ -107,13 +113,13 @@ body {
   font-size: 14px;
 }
 
-.itemListLeft{
+.itemListLeft {
   display: flex;
   align-items: center;
-  
+
 }
 
-.itemListRight{
+.itemListRight {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -123,12 +129,12 @@ body {
   line-height: 24px;
 }
 
-.liBtn{
+.liBtn {
   min-width: 12px;
-  height: 24px; 
-  line-height: 24px; 
-  text-align: center; 
-  background-color:#fff; 
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  background-color: #fff;
   border-radius: 3px;
   border: 1px solid #ccc;
   padding: 0 7px;
@@ -137,12 +143,18 @@ body {
 
 
 
-.liOpt{
+.liOpt {
   min-width: 12px;
-  height: 24px; 
-  line-height: 24px; 
+  height: 24px;
+  line-height: 24px;
   text-align: center;
   margin: 0 2px;
   display: flex;
   align-items: center;
+}
+
+.errorDetail {
+  .message {
+    margin-bottom: 12px;
+  }
 }

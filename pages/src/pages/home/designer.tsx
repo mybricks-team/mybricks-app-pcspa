@@ -446,19 +446,19 @@ export default function MyDesigner({ appData: originAppData }) {
 
       setSaveLoading(false)
 
-      await initialSaveFileContent(fileDBRef, ctx);
-      
+      await initialSaveFileContent(fileDBRef, ctx)
+
       // 在 50 个版本之前的文件版本将被删除
       try {
         API.File.deleteFileSaves({
           fileId: ctx.fileId,
           beforeNVersion: 50,
-        });
+        })
       } catch (error) {
-        console.error("删除超出文件版本报错:", error);
+        console.error('删除超出文件版本报错:', error)
       }
 
-      setBeforeunload(false);
+      setBeforeunload(false)
     } catch (e) {
       setSaveLoading(false)
       console.error(e)
@@ -639,16 +639,24 @@ export default function MyDesigner({ appData: originAppData }) {
           }, 0)
         } else {
           close()
-          message.error({
-            content: res.message || '发布失败',
-            duration: 2,
-          })
+
           if (res.errorDetailMessage) {
             Modal.confirm({
               title: '详细报错信息',
               width: 800,
-              content: <pre>{res.errorDetailMessage}</pre>,
+              okText: '确认',
+              content: (
+                <div className={css.errorDetail}>
+                  <div className={css.message}>{res.message}</div>
+                  <pre>{res.errorDetailMessage}</pre>
+                </div>
+              ),
               okCancel: false,
+            })
+          } else {
+            message.error({
+              content: res.message || '发布失败',
+              duration: 2,
             })
           }
         }
@@ -1125,13 +1133,13 @@ const genLazyloadComs = async (comlibs, toJSON) => {
           } else {
             console.error(`找不到 ${rtComKey} 对应的组件资源`)
           }
-        }else{
+        } else {
           curComponent =
-          allComLibsRuntimeMap[libIndex][
-            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-              key.startsWith(component.namespace)
-            )
-          ]
+            allComLibsRuntimeMap[libIndex][
+              Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+                key.startsWith(component.namespace)
+              )
+            ]
         }
       }
 
@@ -1142,7 +1150,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
           console.error(`找不到 ${rtComKey} 对应的组件资源`)
         }
       }
-      if(curComponent && libIndex !== -1){
+      if (curComponent && libIndex !== -1) {
         if (!willFetchComLibs[libIndex].componentRuntimeMap) {
           willFetchComLibs[libIndex].componentRuntimeMap = {}
         }

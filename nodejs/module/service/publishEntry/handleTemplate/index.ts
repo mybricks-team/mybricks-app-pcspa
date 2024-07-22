@@ -1,6 +1,6 @@
 import { Logger } from "@mybricks/rocker-commons";
-import { transform } from "./transform";
-import { TProcessor } from "../type";
+import { transform } from '../../../../common/codeCompile'
+import { TProcessor } from '../type'
 
 const DEFAULT_META = [
   {
@@ -118,8 +118,6 @@ const handleTemplate: TProcessor = async (ctx) => {
 
 }
 
-export default handleTemplate
-
 function genThemesStyleStr(json) {
   let themesStyleStr = "";
 
@@ -148,3 +146,5 @@ function genThemesStyleStr(json) {
 
   return themesStyleStr;
 }
+
+export default handleTemplate

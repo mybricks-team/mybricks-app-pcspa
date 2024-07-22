@@ -8,8 +8,6 @@ body {
   -webkit-overflow-scrolling: touch;
   word-wrap: break-word;
   word-break: break-all;
-  -webkit-user-select: none;
-  user-select: none;
 }
 /* 内外边距通常让各个浏览器样式的表现位置不同 */
 body,
