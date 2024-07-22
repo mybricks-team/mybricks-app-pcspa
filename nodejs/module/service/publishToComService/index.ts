@@ -3,11 +3,9 @@ import * as path from "path";
 import { Logger } from "@mybricks/rocker-commons";
 import API from "@mybricks/sdk-for-app/api";
 
-import { transform } from './tools/transform'
 import { genTemplateForVue, genTemplateForVueIndex, genTemplateForVueReadme } from './genTemplateForVue'
 import { genConfig } from './genConfig'
 import { Scene, ToJSON } from "./type";
-import { analysisConfigInputsTS, analysisNormalInputsTS, analysisOutputsTS } from "./tools/utils";
 
 import * as prettier from 'prettier';
 import * as prettierPluginVue from 'prettier-plugin-vue'
