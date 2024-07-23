@@ -1,0 +1,28 @@
+import React from 'react'
+import { Renderer, Slot, Canvas, Module } from '@mybricks/renderer-pc'
+import { toJSON, config, comDefs, --reactComponentImports-- } from './config'
+import 'antd/dist/antd.css'
+
+interface IProps {
+  className?: string,
+  style?: React.CSSProperties,
+  --propsType--
+}
+
+const --componentName-- = (props: IProps) => {
+  return (
+    <Renderer
+      json={toJSON}
+      comDefs={comDefs}
+      config={config}
+      props={{
+        --defaultProps--
+        ...props
+      }}
+    >
+      --reactUI--
+    </Renderer>
+  )
+}
+
+export default --componentName--;

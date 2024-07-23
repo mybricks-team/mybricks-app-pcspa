@@ -282,7 +282,7 @@ export default class PcPageController {
         : json;
       Logger.info(`[publishToCom] jsonTransform finish`);
 
-      const code = await this.service.publishToCom({
+      const codes = await this.service.publishToCom({
         hostname,
         toLocalType,
         json: jsonTransform,
@@ -301,7 +301,7 @@ export default class PcPageController {
 
       return {
         code: 1,
-        data: code,
+        data: codes,
         message: "success",
       };
       // res.on('finish', () => {

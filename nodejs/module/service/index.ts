@@ -4,7 +4,7 @@ import { searchUser } from "./seachUser";
 import { upload } from "./upload";
 import { rollback } from "./rollback";
 import { downloadProduct } from "./download-product";
-import publishToCom from "./publishToComService";
+import publishToCom from "./publishToCom";
 
 @Injectable()
 export default class PcPageService {

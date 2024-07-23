@@ -4,7 +4,7 @@ import { fAxios as axios } from "@/services/http";
 import { setLocalData, getLocalData } from '../../../utils/fileSystemHandle'
 import { Modal } from 'antd';
 
-export const isHttps = window.location.protocol === 'https:'
+export const isHttps = !!window.showDirectoryPicker;
 
 interface Props {
   save: (...args: any) => Promise<any>

@@ -13,7 +13,7 @@ type ConstantContext = any;
 type HandleContext = any;
 type VariableContext = any;
 
-export const isHttps = window.location.protocol === 'https:'
+export const isHttps = !!window.showDirectoryPicker;
 
 async function createOutCodeDirItem(variableContext: VariableContext, constantContext: ConstantContext, form: FormInstance) {
   const id = uuid();
