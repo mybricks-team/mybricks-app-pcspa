@@ -18,6 +18,7 @@
     "application"
   ],
   "files": [
+    "nodejs/common",
     "nodejs/module",
     "nodejs/index.module.ts",
     "package.json",
