@@ -112,7 +112,7 @@ export default function MyDesigner({ appData: originAppData }) {
           ? EnumMode.ENV
           : EnumMode.DEFAULT
 
-    const fileContent = appData.fileContent?.content
+    // const fileContent = appData.fileContent?.content
 
     return {
       isPreview,
@@ -171,8 +171,11 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon?},
-        skipMessage?: boolean
+        param: { name?; shareType?; content?; icon? },
+        options?: {
+          skipMessage?: boolean
+          saveType?: string
+        }
       ) {
         const { name, shareType, content, icon } = param
 
@@ -183,8 +186,10 @@ export default function MyDesigner({ appData: originAppData }) {
 
         let httpStartTime = new Date().getTime()
 
-        await appData
-          .save({
+        let res
+
+        try {
+          res = await appData.save({
             userId: ctx.user?.id,
             fileId: ctx.fileId,
             name,
@@ -194,39 +199,43 @@ export default function MyDesigner({ appData: originAppData }) {
             icon,
             operationList: operationListStr,
           })
-          .then(() => {
-            // !skipMessage &&
-            //   message.success({ content: `保存完成`, key: msgSaveKey })
 
-            operationList.current = []
+          operationList.current = []
 
-            if (content) {
-              setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
-            }
-          })
-          .catch((e) => {
-            !skipMessage &&
-              message.error({
-                content: `保存失败：${e.message}`,
-                key: msgSaveKey,
-              })
+          if (content) {
+            setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
+          }
 
-            if (content) {
-              setSaveTip('保存失败')
-            }
-          })
-          .finally(() => {
-            // setSaveLoading(false)
-            if (!skipMessage) {
-              console.log(
-                `保存接口耗时 ${(new Date().getTime() - httpStartTime) / 1000}s`
-              )
-            }
+          if (!options?.skipMessage) {
+            console.log(
+              `保存接口耗时 ${(new Date().getTime() - httpStartTime) / 1000}s`
+            )
+          }
 
-            setTimeout(() => {
-              message.destroy(msgSaveKey)
-            }, 3000)
-          })
+          if (options?.saveType === 'import') {
+            location.reload()
+          }
+
+          setTimeout(() => {
+            message.destroy(msgSaveKey)
+          }, 3000)
+        } catch (e) {
+          res = e
+
+          !options?.skipMessage &&
+            message.error({
+              content: `保存失败：${e.message}`,
+              key: msgSaveKey,
+            })
+
+          if (content) {
+            setSaveTip('保存失败')
+          }
+
+          console.error(`[MyBricks PC Error]: 保存失败 ${res}`)
+        }
+
+        return res
       },
     }
   })
@@ -299,7 +308,7 @@ export default function MyDesigner({ appData: originAppData }) {
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ; (window as any).mybricks.SPADesigner &&
+        ;(window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -355,6 +364,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
     // 简单判断本地环境，不上报数据
     if (window.location.origin.includes('http://localhost')) return
+
     appData.report({
       jsonData: {
         type: 'appInfo',
@@ -390,94 +400,94 @@ export default function MyDesigner({ appData: originAppData }) {
     }, 0)
   }, [])
 
-  const save = useCallback(async () => {
-    if (isPreview) {
-      message.warn('请回到编辑页面，再进行保存')
-      return
-    }
-    if (!operableRef.current) {
-      message.warn('请先点击右上角个人头像上锁获取页面编辑权限')
-      return
-    }
-    if (ctx.isDebugMode) {
-      console.warn('请退出调试模式，再进行保存')
-      return
-    }
-
-    setSaveLoading(true)
-
-    setSaveTip('正在保存中...')
-
-    // message.loading({
-    //   key: msgSaveKey,
-    //   content: '保存中..',
-    //   duration: 0,
-    // })
-    //保存
-    const json = designerRef.current?.dump()
-    // const canvasDom = designerRef.current?.geoView.canvasDom
-
-    json.comlibs = ctx.comlibs
-    json.debugQuery = ctx.debugQuery
-    json.debugMockConfig = ctx.debugMockConfig
-    json.directConnection = ctx.directConnection
-    json.executeEnv = ctx.executeEnv
-    json.MYBRICKS_HOST = ctx.MYBRICKS_HOST
-    json.envList = ctx.envList
-    json.debugMainProps = ctx.debugMainProps
-    json.hasPermissionFn = ctx.hasPermissionFn
-    json.debugHasPermissionFn = ctx.debugHasPermissionFn
-    json.componentName = ctx.componentName
-    json.staticResourceToCDN = ctx.staticResourceToCDN
-    json.fontJS = ctx.fontJS
-    json.pageHeader = ctx.pageHeader
-    json.i18nLangContentType = ctx.i18nLangContentType
-    // json.useAutoPreviewImage = ctx.useAutoPreviewImage
-
-    json.projectId = ctx.sdk.projectId
-
-    try {
-      await addVersionContent({
-        fileId: ctx.fileId,
-        json,
-        version: ctx.version,
-        fileDBRef,
-      })
-
-      // message.success({ content: `保存完成`, key: msgSaveKey })
-
-      setSaveLoading(false)
-
-      await initialSaveFileContent(fileDBRef, ctx)
-
-      // 在 50 个版本之前的文件版本将被删除
-      try {
-        API.File.deleteFileSaves({
-          fileId: ctx.fileId,
-          beforeNVersion: 50,
-        })
-      } catch (error) {
-        console.error('删除超出文件版本报错:', error)
+  const save = useCallback(
+    async (params?: { saveType?: string }) => {
+      if (isPreview) {
+        message.warn('请回到编辑页面，再进行保存')
+        return
+      }
+      if (!operableRef.current) {
+        message.warn('请先点击右上角个人头像上锁获取页面编辑权限')
+        return
+      }
+      if (ctx.isDebugMode) {
+        console.warn('请退出调试模式，再进行保存')
+        return
       }
 
-      setBeforeunload(false)
-    } catch (e) {
-      setSaveLoading(false)
-      console.error(e)
-      setSaveTip('保存失败，请联系管理员')
-      message.error('保存失败，请联系管理员')
-    }
+      setSaveLoading(true)
 
-    // await ctx.save({
-    //   name: ctx.fileName,
-    //   content: JSON.stringify(json),
-    // })
+      setSaveTip('正在保存中...')
 
-    // 保存缩略图
-    // if (ctx.useAutoPreviewImage) {
-    // saveFileImage(canvasDom, ctx.save)
-    // }
-  }, [isPreview, ctx])
+      // message.loading({
+      //   key: msgSaveKey,
+      //   content: '保存中..',
+      //   duration: 0,
+      // })
+      //保存
+      const json = designerRef.current?.dump()
+      // const canvasDom = designerRef.current?.geoView.canvasDom
+
+      json.comlibs = ctx.comlibs
+      json.debugQuery = ctx.debugQuery
+      json.debugMockConfig = ctx.debugMockConfig
+      json.directConnection = ctx.directConnection
+      json.executeEnv = ctx.executeEnv
+      json.MYBRICKS_HOST = ctx.MYBRICKS_HOST
+      json.envList = ctx.envList
+      json.debugMainProps = ctx.debugMainProps
+      json.hasPermissionFn = ctx.hasPermissionFn
+      json.debugHasPermissionFn = ctx.debugHasPermissionFn
+      json.componentName = ctx.componentName
+      json.staticResourceToCDN = ctx.staticResourceToCDN
+      json.fontJS = ctx.fontJS
+      json.pageHeader = ctx.pageHeader
+      json.i18nLangContentType = ctx.i18nLangContentType
+      // json.useAutoPreviewImage = ctx.useAutoPreviewImage
+
+      json.projectId = ctx.sdk.projectId
+
+      let res
+
+      try {
+        await addVersionContent({
+          fileId: ctx.fileId,
+          json,
+          version: ctx.version,
+          fileDBRef,
+        })
+
+        setSaveLoading(false)
+
+        res = await initialSaveFileContent(fileDBRef, ctx, params?.saveType)
+
+        // 在 50 个版本之前的文件版本将被删除
+        try {
+          API.File.deleteFileSaves({
+            fileId: ctx.fileId,
+            beforeNVersion: 50,
+          })
+        } catch (error) {
+          console.error('删除超出文件版本报错:', error)
+        }
+
+        setBeforeunload(false)
+      } catch (e) {
+        setSaveLoading(false)
+        console.error(e)
+        setSaveTip('保存失败，请联系管理员')
+        message.error('保存失败，请联系管理员')
+      }
+
+      return res
+
+      // 保存缩略图
+      // if (ctx.useAutoPreviewImage) {
+      // saveFileImage(canvasDom, ctx.save)
+      // }
+    },
+    [isPreview, ctx]
+  )
 
   const preview = useCallback(() => {
     const json = designerRef.current?.toJSON()
@@ -572,12 +582,10 @@ export default function MyDesigner({ appData: originAppData }) {
         json.pageHeader = ctx.pageHeader
 
         await ctx.save(
-          {
-            content: JSON.stringify(json),
-            name: ctx.fileName,
-          },
-          true
+          { content: JSON.stringify(json), name: ctx.fileName },
+          { skipMessage: true }
         )
+
         setBeforeunload(false)
 
         const curToJSON = designerRef?.current?.toJSON()
@@ -828,60 +836,6 @@ export default function MyDesigner({ appData: originAppData }) {
     })
   }, [])
 
-  // const downloadCode = async () => {
-  //   const close = message.loading({
-  //     key: 'toCode',
-  //     content: '出码中...',
-  //     duration: 0,
-  //   })
-
-  //   let toJSON
-
-  //   try {
-  //     toJSON = designerRef.current.toJSON({ withDiagrams: true })
-  //   } catch (e) {
-  //     console.error('toJSON({ withDiagrams: true }) 报错: ', e)
-  //     message.error(
-  //       `出码失败: toJSON({ withDiagrams: true }) 报错 ${e.message}`
-  //     )
-  //     close()
-  //   }
-
-  //   if (toJSON) {
-  //     fAxios({
-  //       method: 'post',
-  //       url: '/api/pcpage/toCode',
-  //       responseType: 'blob',
-  //       data: {
-  //         json: toJSON,
-  //       },
-  //     })
-  //       .then((response: any) => {
-  //         // // 创建一个URL指向blob响应数据
-  //         const url = window.URL.createObjectURL(new Blob([response]))
-  //         // 创建一个a标签用于触发下载
-  //         const link = document.createElement('a')
-  //         link.href = url
-  //         // 设置下载后的文件名，如果服务器未指定，则可以在这里指定
-  //         link.setAttribute('download', '出码-react.zip') // 注意: 该名称可以根据实际情况命名
-  //         // 将a标签添加到body，触发点击事件，然后移除
-  //         document.body.appendChild(link)
-  //         link.click()
-  //         document.body.removeChild(link)
-  //         // 清理用完的URL对象
-  //         window.URL.revokeObjectURL(url)
-  //       })
-  //       .catch((error) => {
-  //         console.error('出码失败，报错信息:', error)
-  //         message.error(`出码失败: ${error.message}`)
-  //         throw error
-  //       })
-  //       .finally(() => {
-  //         close()
-  //       })
-  //   }
-  // }
-
   const TrueDesigner = useMemo(() => {
     return (
       SPADesigner &&
@@ -951,8 +905,7 @@ export default function MyDesigner({ appData: originAppData }) {
           <Toolbar.Tools
             onImport={async (dump) => {
               await importDump(dump)
-              await save()
-              location.reload()
+              await save({ saveType: 'import' })
             }}
             getExportDumpJSON={() => {
               return getDumpJson()
@@ -1142,9 +1095,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         } else {
           curComponent =
             allComLibsRuntimeMap[libIndex][
-            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-              key.startsWith(component.namespace)
-            )
+              Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+                key.startsWith(component.namespace)
+              )
             ]
         }
       }

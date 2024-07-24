@@ -200,20 +200,22 @@ async function getMybricksStudioDB() {
   return instance
 }
 
-const initialSaveFileContent = async (fileDBRef, ctx) => {
+const initialSaveFileContent = async (fileDBRef, ctx, saveType) => {
   const list = await fileDBRef.current.get(ctx.fileId)
   const firstItem = list[0]
 
   if (firstItem) {
-    await saveFileContentByIndexDB(firstItem, ctx, fileDBRef)
+    return await saveFileContentByIndexDB(firstItem, ctx, fileDBRef, saveType)
   }
 }
 
-const saveFileContentByIndexDB = async (item, ctx, fileDBRef) => {
+const saveFileContentByIndexDB = async (item, ctx, fileDBRef, saveType) => {
   const json = item.data
-  await ctx.save({ name: ctx.fileName, content: JSON.stringify(json) })
+  const res = await ctx.save({ name: ctx.fileName, content: JSON.stringify(json) }, { saveType })
 
   await fileDBRef.current.deleteByFileId(ctx.fileId)
+
+  return res
 }
 
 const addVersionContent = async (params: { fileId, version, fileDBRef, json }) => {
