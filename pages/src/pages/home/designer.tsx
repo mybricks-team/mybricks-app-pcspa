@@ -171,7 +171,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon? },
+        param: { name?; shareType?; content?; icon?},
         skipMessage?: boolean
       ) {
         const { name, shareType, content, icon } = param
@@ -240,7 +240,9 @@ export default function MyDesigner({ appData: originAppData }) {
     switchActivity
     getPluginData
     loadContent
+    toplView: { focusCom: (comId: string) => void }
   }>()
+
   const [beforeunload, setBeforeunload] = useState(false)
   const [operable, setOperable] = useState(false)
   const operableRef = useRef(operable)
@@ -297,7 +299,7 @@ export default function MyDesigner({ appData: originAppData }) {
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ;(window as any).mybricks.SPADesigner &&
+        ; (window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -617,6 +619,7 @@ export default function MyDesigner({ appData: originAppData }) {
           code: number
           message: string
           errorDetailMessage?: string
+          comId?: string
         } = await fAxios.post('/api/pcpage/publish', {
           userId: ctx.user?.id,
           fileId: ctx.fileId,
@@ -645,6 +648,9 @@ export default function MyDesigner({ appData: originAppData }) {
               title: '详细报错信息',
               width: 800,
               okText: '确认',
+              onOk: () => {
+                designerRef.current.toplView?.focusCom?.(res.comId)
+              },
               content: (
                 <div className={css.errorDetail}>
                   <div className={css.message}>{res.message}</div>
@@ -1136,9 +1142,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         } else {
           curComponent =
             allComLibsRuntimeMap[libIndex][
-              Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-                key.startsWith(component.namespace)
-              )
+            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+              key.startsWith(component.namespace)
+            )
             ]
         }
       }

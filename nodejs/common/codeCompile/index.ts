@@ -80,7 +80,7 @@ const transformCodeByBabel = (
     Logger.error(`[publish] ${e.message}`)
 
     if (tips) {
-      throw new EnhancedError(`${tips}代码存在错误，请检查！！！`, { errorDetailMessage: e.message });
+      throw new EnhancedError(`${tips}代码存在错误，请检查！！！`, { errorDetailMessage: e.message, comId: options?.id });
     }
 
     return code;
@@ -222,7 +222,7 @@ const compileJsCode = ({ data, namespace, title, id }, scope) => {
     typeof data.fns === "string"
   ) {
     const tips = `【${scope}/${title}】ID: ${id} —— 编译失败，`
-    data.fns = transformCodeByBabel(data.fns, tips);
+    data.fns = transformCodeByBabel(data.fns, tips, false, { id });
   }
 }
 

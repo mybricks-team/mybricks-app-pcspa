@@ -101,6 +101,7 @@ export default class PcPageController {
         code: -1,
         message: error.message || "发布失败",
         errorDetailMessage: error.errorDetailMessage,
+        comId: error.comId,
       };
     }
   }
