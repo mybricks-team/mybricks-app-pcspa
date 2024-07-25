@@ -38,6 +38,8 @@ const root = ({ renderType, locale, env, ...props }) => {
     throw Error(`找不到${renderType}渲染器`);
   }
   return renderUI(dumpJson, {
+    //控制页面右滑弹出
+    sceneOpenType: "redirect",
     env: {
       ...env,
       renderCom(json, opts, coms) {

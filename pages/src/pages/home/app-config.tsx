@@ -284,6 +284,19 @@ export default function (
     adder.push(
       ...[
         {
+          type: 'normal',
+          title: '页面',
+          inputs: [
+            {
+              id: 'open',
+              title: '打开',
+              schema: {
+                type: 'any',
+              },
+            },
+          ],
+        },
+        {
           type: 'popup',
           title: '对话框',
           template: {

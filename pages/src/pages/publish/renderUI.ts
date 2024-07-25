@@ -49,6 +49,8 @@ const root = ({ renderType, locale, runtime, extVars, extCallConnector, customMe
   }
   // =========== 网页标题i18n处理 end ===============
   return renderUI(projectJson, {
+    //控制页面右滑弹出
+    sceneOpenType: "redirect",
     env: {
       runtime,
       silent: true,
