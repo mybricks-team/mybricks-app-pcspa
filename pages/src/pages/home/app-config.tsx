@@ -44,9 +44,10 @@ import {
 } from './editor-options'
 // import { render as renderUI  } from '@mybricks/render-web';
 import { isValidPascalCase } from './utils'
-import OutCodeDirList, {
+import {
+  OutCodeDirList,
   OutCodeDirListType,
-} from './components/out-code-dir-list'
+} from '@mybricks/publish-to-com-sdk/ui'
 import { getLocalData, setLocalData } from './utils/fileSystemHandle'
 import { comlibDebugUtils } from './utils/comlibDebug'
 import { EnumLocale, getLocaleLang } from '../setting/App/I18nConfig/utils'
@@ -265,20 +266,20 @@ export default function (
     outputs?: { id: string; title: string; schema: Record<string, string> }[]
     template?: Record<string, any>
   }> = [
-    // {
-    //   type: 'normal',
-    //   title: '页面',
-    //   inputs: [
-    //     {
-    //       id: 'open',
-    //       title: '打开',
-    //       schema: {
-    //         type: 'any',
-    //       },
-    //     },
-    //   ],
-    // },
-  ]
+      // {
+      //   type: 'normal',
+      //   title: '页面',
+      //   inputs: [
+      //     {
+      //       id: 'open',
+      //       title: '打开',
+      //       schema: {
+      //         type: 'any',
+      //       },
+      //     },
+      //   ],
+      // },
+    ]
   if (isReact) {
     adder.push(
       ...[

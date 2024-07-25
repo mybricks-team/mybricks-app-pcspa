@@ -1,7 +1,7 @@
 import { Modal } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import React from 'react'
-import { OutCodeDirListType } from '../components/out-code-dir-list'
+import { OutCodeDirListType } from '@mybricks/publish-to-com-sdk/ui'
 
 /**
  * @description 通过indexdb来存储文件目录句柄，实现跨页面句柄传递，避免重复打开系统文件选择器

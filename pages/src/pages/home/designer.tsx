@@ -171,7 +171,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon? },
+        param: { name?; shareType?; content?; icon?},
         options?: {
           skipMessage?: boolean
           saveType?: string
@@ -237,6 +237,9 @@ export default function MyDesigner({ appData: originAppData }) {
 
         return res
       },
+      // 下面这俩字段在出码组件里面用到
+      publishToComUrl: '/api/pcpage/publishToCom',
+      publishToComDownloadUrl: '/api/pcpage/publishToComDownload',
     }
   })
 
@@ -308,7 +311,7 @@ export default function MyDesigner({ appData: originAppData }) {
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ;(window as any).mybricks.SPADesigner &&
+        ; (window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -1095,9 +1098,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         } else {
           curComponent =
             allComLibsRuntimeMap[libIndex][
-              Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-                key.startsWith(component.namespace)
-              )
+            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+              key.startsWith(component.namespace)
+            )
             ]
         }
       }
