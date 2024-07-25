@@ -28,7 +28,7 @@
   "license": "ISC",
   "dependencies": {
     "@babel/standalone": "^7.22.17",
-    "@mybricks/publish-to-com-sdk": "^0.0.13",
+    "@mybricks/publish-to-com-sdk": "^0.0.14",
     "@mybricks/render-types": "^0.0.1",
     "@mybricks/render-utils": "^0.0.19",
     "@mybricks/rocker-dao": "^0.0.6",

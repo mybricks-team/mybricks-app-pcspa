@@ -34,6 +34,7 @@ const transformCodeByBabel = (
   tips?: string,
   keepCode?: boolean,
   options?: any,
+  otherOptions?: any
 ) => {
   /**
    * 已经babel的code直接返回
@@ -80,7 +81,7 @@ const transformCodeByBabel = (
     Logger.error(`[publish] ${e.message}`)
 
     if (tips) {
-      throw new EnhancedError(`${tips}代码存在错误，请检查！！！`, { errorDetailMessage: e.message, comId: options?.id });
+      throw new EnhancedError(`${tips}代码存在错误，请检查！！！`, { errorDetailMessage: e.message, comId: otherOptions?.id });
     }
 
     return code;
@@ -222,7 +223,7 @@ const compileJsCode = ({ data, namespace, title, id }, scope) => {
     typeof data.fns === "string"
   ) {
     const tips = `【${scope}/${title}】ID: ${id} —— 编译失败，`
-    data.fns = transformCodeByBabel(data.fns, tips, false, { id });
+    data.fns = transformCodeByBabel(data.fns, tips, false, undefined, { id });
   }
 }
 
