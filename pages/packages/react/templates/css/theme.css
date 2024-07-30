@@ -1,16 +1,3 @@
-.fangzhou-theme {
-  /* stylelint-disable at-rule-empty-line-before,at-rule-name-space-after,at-rule-no-unknown */
-  /* stylelint-disable no-duplicate-selectors */
-  /* stylelint-disable */
-  /* stylelint-disable declaration-bang-space-before,no-duplicate-selectors,string-no-newline */
-  /* stylelint-disable at-rule-no-unknown */
-  /* stylelint-disable-next-line */
-  /**
- * Do not merge `height` & `line-height` under style with `selection` & `search`,
- * since chrome may update to redesign with its align logic.
- */
-  /* Reset search input style */
-}
 .fangzhou-theme [class^=ant-]::-ms-clear,
 .fangzhou-theme [class*=ant-]::-ms-clear,
 .fangzhou-theme [class^=ant-] input::-ms-clear,
@@ -19852,16 +19839,9 @@
   color: rgba(0, 0, 0, 0.25);
 }
 .fangzhou-theme .ant-select-item {
-  position: relative;
-  display: block;
-  min-height: 32px;
-  padding: 5px 12px;
-  color: #434343;
-  font-weight: normal;
-  font-size: 14px;
-  line-height: 22px;
+  color: rgba(0,0,0,.85);
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background .3s ease;
 }
 .fangzhou-theme .ant-select-item-group {
   color: #8c8c8c;
