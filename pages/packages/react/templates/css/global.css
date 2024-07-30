@@ -40,15 +40,7 @@ a {
   margin: 0;
   padding: 0;
 }
-/* 要注意表单元素并不继承父级 font 的问题 */
-body,
-button,
-input,
-select,
-legend,
-textarea {
-  font: 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, 'PingFang SC', miui, Roboto, Helvetica Neue, Helvetica, sans-serif;
-}
+
 /* 表单控件样式一致 */
 button,
 input,

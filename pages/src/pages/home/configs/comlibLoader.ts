@@ -244,8 +244,11 @@ export default (ctx) => (libDesc) => {
       /** 不带命令，且描述为空，即页面初始化，加载组件及组件库 */
       if (!libDesc) { // 此处加载报错，会导致引擎一直处于加载中
         try {
-          const comlibs = await initMaterials(ctx);
-          return resolve(comlibs)
+          // 延迟组件库加载，避免劫持 appendChild 导致非组件库样式被误删
+          setTimeout(async () => {
+            const comlibs = await initMaterials(ctx);
+            return resolve(comlibs)
+          }, 600)
         } catch (e) {
           console.error(e)
         }

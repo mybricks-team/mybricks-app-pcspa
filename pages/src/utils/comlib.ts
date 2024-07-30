@@ -71,9 +71,7 @@ function removeStylesBySubstring(substring) {
   const styleTags = document.querySelectorAll('style');
   // 遍历每个 style 标签
   styleTags.forEach(styleTag => {
-    // 增加 title == less 判断，引擎侧存在动态插入样式行为，会被误删
-    // Todo... 目前无法严格判断是否是组件库添加的样式
-    if (styleTag.id.includes(substring) && styleTag.title === 'less') {
+    if (styleTag.id.includes(substring)) {
       // 如果匹配，则移除该 style 标签
       styleTag.remove();
     }
