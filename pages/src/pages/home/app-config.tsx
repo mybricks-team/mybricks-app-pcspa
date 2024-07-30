@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { message, Tooltip, Modal, Descriptions } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import moment from 'moment'
+import OpenAI from "openai"
 
 import servicePlugin, {
   call as callConnectorHttp,
@@ -71,6 +72,15 @@ const defaultPermissionFn = `export default function ({ key }) {
   return true
 }
 `
+const openai = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  dangerouslyAllowBrowser: true,
+  apiKey: `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`,
+  // defaultHeaders: {
+  //   "HTTP-Referer": $YOUR_SITE_URL, // Optional, for including your app on openrouter.ai rankings.
+  //   "X-Title": $YOUR_SITE_NAME, // Optional. Shows in rankings on openrouter.ai.
+  // }
+})
 // const getComs = () => {
 //   const comDefs = {}
 //   const regAry = (comAray) => {
@@ -644,6 +654,60 @@ export default function (
       vars: {},
       fx: {},
       useStrict: false,
+    },
+    aiView: {
+      async request({ prompts, question }) {
+        // return new Promise((resolve, reject) => {
+        //   // const data = qs.stringify({
+        //   //   prompts,
+        //   //   question
+        //   // })
+        //   axios({
+        //     method: 'post',
+        //     url: 'https://openrouter.ai/api/v1/chat/completions',
+        //     headers: {
+        //       'Content-Type': 'application/json',
+        //       "Authorization": `Bearer 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`,
+        //     },
+        //     data: {
+        //       "model": "openai/gpt-4o-mini-2024-07-18",
+        //       "messages": [
+        //         { "role": "system", "content": prompts },
+        //         { "role": "user", "content": question },
+        //       ],
+        //     }
+        //   }).then((res) => {
+        //     const content = res.data.result
+
+        //     console.log(content)
+
+        //     resolve(content)
+        //   }).catch((err) => {
+        //     console.error(err)
+        //     reject(err)
+        //   })
+        // })
+        let content = '处理失败'
+        try {
+          const completion = await openai.chat.completions.create({
+            model: "openai/gpt-4o-mini-2024-07-18",
+            // model: "openai/gpt-4o",
+            messages: [
+              { role: "system", content: prompts },
+              { role: "user", content: question }
+            ],
+          })
+          content = completion.choices[0].message.content
+
+          return content
+        } catch (e) {
+          console.error(e)
+        } finally {
+          console.log(`prompts: ${prompts},
+          question: ${question},
+          返回结果: ${content}`)
+        }
+      }
     },
     editView: {
       editorAppender(editConfig) {
