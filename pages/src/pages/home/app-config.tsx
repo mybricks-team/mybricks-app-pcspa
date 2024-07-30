@@ -73,13 +73,10 @@ const defaultPermissionFn = `export default function ({ key }) {
 }
 `
 const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
+
+  baseURL: "https://openrouter.mybricks.world/api/v1",
   dangerouslyAllowBrowser: true,
-  apiKey: `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`,
-  // defaultHeaders: {
-  //   "HTTP-Referer": $YOUR_SITE_URL, // Optional, for including your app on openrouter.ai rankings.
-  //   "X-Title": $YOUR_SITE_NAME, // Optional. Shows in rankings on openrouter.ai.
-  // }
+  apiKey: ``,
 })
 // const getComs = () => {
 //   const comDefs = {}
@@ -657,41 +654,10 @@ export default function (
     },
     aiView: {
       async request({ prompts, question }) {
-        // return new Promise((resolve, reject) => {
-        //   // const data = qs.stringify({
-        //   //   prompts,
-        //   //   question
-        //   // })
-        //   axios({
-        //     method: 'post',
-        //     url: 'https://openrouter.ai/api/v1/chat/completions',
-        //     headers: {
-        //       'Content-Type': 'application/json',
-        //       "Authorization": `Bearer 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`,
-        //     },
-        //     data: {
-        //       "model": "openai/gpt-4o-mini-2024-07-18",
-        //       "messages": [
-        //         { "role": "system", "content": prompts },
-        //         { "role": "user", "content": question },
-        //       ],
-        //     }
-        //   }).then((res) => {
-        //     const content = res.data.result
-
-        //     console.log(content)
-
-        //     resolve(content)
-        //   }).catch((err) => {
-        //     console.error(err)
-        //     reject(err)
-        //   })
-        // })
         let content = '处理失败'
         try {
           const completion = await openai.chat.completions.create({
             model: "openai/gpt-4o-mini-2024-07-18",
-            // model: "openai/gpt-4o",
             messages: [
               { role: "system", content: prompts },
               { role: "user", content: question }
