@@ -318,6 +318,7 @@ const root = ({ renderType, locale, runtime, extVars, extCallConnector, customMe
         }
       },
     },
+    rootId: `C--fileId--`,
   });
 };
 

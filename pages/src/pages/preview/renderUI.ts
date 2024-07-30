@@ -9,8 +9,8 @@ import { runJs } from "@/utils/runJs";
 import { connectorLoader } from "@/utils/connectorLoader";
 import { PreviewStorage } from "@/utils/previewStorage";
 // import { mock as connectorHttpMock } from '@mybricks/plugin-connector-http'
-import connectorHttpMock from '@mybricks/plugin-connector-http/runtime/mock'
-import { call as callDomainHttp } from '@mybricks/plugin-connector-domain/runtime';
+import connectorHttpMock from "@mybricks/plugin-connector-http/runtime/mock";
+import { call as callDomainHttp } from "@mybricks/plugin-connector-domain/runtime";
 import { proxLocalStorage, proxSessionStorage } from "@/utils/debugMockUtils";
 
 const fileId = getQueryString("fileId");
@@ -26,12 +26,11 @@ const {
   directConnection,
   i18nLangContent,
   debugMockConfig,
-  runtimeUploadService
+  runtimeUploadService,
 } = previewStorage.getPreviewPageData();
 
-
-proxLocalStorage(debugMockConfig)
-proxSessionStorage(debugMockConfig)
+proxLocalStorage(debugMockConfig);
+proxSessionStorage(debugMockConfig);
 const root = ({ renderType, locale, env, ...props }) => {
   const renderUI = getRenderWeb(renderType);
   if (!renderUI) {
@@ -56,10 +55,12 @@ const root = ({ renderType, locale, env, ...props }) => {
       },
       i18n(title) {
         //多语言
-        if (typeof title?.id === 'undefined') return title
-        return i18nLangContent[title.id]?.content?.[locale]
-          || i18nLangContent[title.id]?.content?.[`zh-CN`]
-          || JSON.stringify(title)
+        if (typeof title?.id === "undefined") return title;
+        return (
+          i18nLangContent[title.id]?.content?.[locale] ||
+          i18nLangContent[title.id]?.content?.[`zh-CN`] ||
+          JSON.stringify(title)
+        );
       },
       /** 调用领域模型 */
       callDomainModel(domainModel, type, params) {
@@ -82,8 +83,8 @@ const root = ({ renderType, locale, env, ...props }) => {
           const curConnector = connector.script
             ? connector
             : (dumpJson.plugins[connector.connectorName] || []).find(
-              (con) => con.id === connector.id
-            );
+                (con) => con.id === connector.id
+              );
 
           if (curConnector?.globalMock || connectorConfig?.openMock) {
             return connectorHttpMock({ ...connector, ...connectorConfig }, {});
@@ -91,34 +92,35 @@ const root = ({ renderType, locale, env, ...props }) => {
 
           return curConnector
             ? plugin.call(
-              { ...connector, ...curConnector, useProxy: !directConnection },
-              newParams,
-              {
-                ...connectorConfig,
-                /** http-sql表示为领域接口 */
-                before: connector.type === 'http-sql' ?
-                  options => {
-                    const newOptions = { ...options }
-                    if (!newOptions.headers) {
-                      newOptions.headers = {};
-                    }
-                    newOptions.headers['x-mybricks-debug'] = 'true';
+                { ...connector, ...curConnector, useProxy: !directConnection },
+                newParams,
+                {
+                  ...connectorConfig,
+                  /** http-sql表示为领域接口 */
+                  before:
+                    connector.type === "http-sql"
+                      ? (options) => {
+                          const newOptions = { ...options };
+                          if (!newOptions.headers) {
+                            newOptions.headers = {};
+                          }
+                          newOptions.headers["x-mybricks-debug"] = "true";
 
-                    return newOptions;
-                  }
-                  : (options) => {
-                    return {
-                      ...options,
-                      url: shapeUrlByEnv(
-                        envList,
-                        executeEnv,
-                        options.url,
-                        MYBRICKS_HOST
-                      ),
-                    };
-                  },
-              }
-            )
+                          return newOptions;
+                        }
+                      : (options) => {
+                          return {
+                            ...options,
+                            url: shapeUrlByEnv(
+                              envList,
+                              executeEnv,
+                              options.url,
+                              MYBRICKS_HOST
+                            ),
+                          };
+                        },
+                }
+              )
             : Promise.reject("接口不存在，请检查连接器插件中接口配置");
         } else {
           return Promise.reject("错误的连接器类型");
@@ -132,7 +134,7 @@ const root = ({ renderType, locale, env, ...props }) => {
           return () => executeEnv;
         },
         get getI18nContent() {
-          return () => (i18nLangContent || {})
+          return () => i18nLangContent || {};
         },
         getQuery: () => parseQuery(location.search),
         get getProps() {
@@ -177,88 +179,85 @@ const root = ({ renderType, locale, env, ...props }) => {
       get hasPermission() {
         return ({ permission, key }) => {
           if (!hasPermissionFn) {
-            return true
+            return true;
           }
 
           // 编辑权限配置为”无“时，不需要进行权限校验
-          if (permission?.type === 'none') {
-            return true
+          if (permission?.type === "none") {
+            return true;
           }
 
-          const code = permission?.register?.code || key
+          const code = permission?.register?.code || key;
 
           // 如果没有权限编码，不需要校验
           if (code === undefined) {
-            return true
+            return true;
           }
 
-          let result: boolean | { permission: boolean }
+          let result: boolean | { permission: boolean };
 
           try {
             result = runJs(decodeURIComponent(hasPermissionFn), [
               { key: code },
-            ])
+            ]);
 
             if (
-              typeof result !== 'boolean' &&
-              typeof result?.permission !== 'boolean'
+              typeof result !== "boolean" &&
+              typeof result?.permission !== "boolean"
             ) {
-              result = true
+              result = true;
               console.warn(
-                '权限方法',
+                "权限方法",
                 `权限方法返回值类型应为 Boolean 或者 { permission: Boolean } 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(result)}`
-              )
+              );
               console.error(
                 `权限方法返回值类型应为 Boolean 或者 { permission: Boolean } 请检查，[Key] ${code};[返回值] Type: ${typeof result}; Value: ${JSON.stringify(result)}`
-              )
+              );
             }
           } catch (error) {
-            result = true
-            console.warn(
-              '权限方法',
-              `${error.message}`
-            )
-            console.error(`权限方法出错[Key] ${code};`, error)
+            result = true;
+            console.warn("权限方法", `${error.message}`);
+            console.error(`权限方法出错[Key] ${code};`, error);
           }
 
-          return result
+          return result;
         };
       },
       get uploadFile() {
         return async (files) => {
           if (!runtimeUploadService) {
-            throw new Error('请先配置运行时上传接口')
+            throw new Error("请先配置运行时上传接口");
           }
           // 创建FormData对象
           const formData = new FormData();
 
           // 添加文件到FormData对象
           for (const file of files) {
-            formData.append('file', file);
+            formData.append("file", file);
           }
 
           try {
             // 发送POST请求
             const response = await fetch(runtimeUploadService, {
               method: "POST",
-              body: formData
-            }).then(res => {
+              body: formData,
+            }).then((res) => {
               if (res.status !== 200 && res.status !== 201) {
-                throw new Error(`上传失败！`)
+                throw new Error(`上传失败！`);
               }
-              return res.json()
-            })
+              return res.json();
+            });
 
             return {
               url: response?.data?.url,
-              name: files[0].name
-            }
+              name: files[0].name,
+            };
           } catch (error) {
             // 错误处理
-            console.error('文件上传失败', error);
-            throw new Error(`上传失败，请检查上传接口设置！`)
+            console.error("文件上传失败", error);
+            throw new Error(`上传失败，请检查上传接口设置！`);
           }
-        }
+        };
       },
     },
     events: [
@@ -281,6 +280,7 @@ const root = ({ renderType, locale, env, ...props }) => {
         ],
       },
     ],
+    rootId: `C${fileId}`,
   });
 };
 
