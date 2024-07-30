@@ -56,7 +56,7 @@ export function myRequire(arr, onError): Promise<{ styles: any }> {
 
             if (REQ_TOTAL == REQLEN) {
               resolve({ styles })
-              removeStylesBySubstring('mybricks_')
+              removeStylesBySubstring('mybricks_comlib_')
               // callback && callback.apply(this, EXP_ARR);
               document.head.appendChild = _headAppendChild
             }
