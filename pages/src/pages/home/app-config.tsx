@@ -652,7 +652,7 @@ export default function (
       fx: {},
       useStrict: false,
     },
-    aiView: {
+    aiView: ctx?.appConfig?.publishLocalizeConfig?.enableAI ? {
       async request({ prompts, question }) {
         let content = '处理失败'
         try {
@@ -674,7 +674,7 @@ export default function (
           返回结果: ${content}`)
         }
       }
-    },
+    } : undefined,
     editView: {
       editorAppender(editConfig) {
         editConfig.fontJS = ctx.fontJS
