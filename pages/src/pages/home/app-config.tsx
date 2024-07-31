@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { message, Tooltip, Modal, Descriptions } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import moment from 'moment'
+import OpenAI from "openai"
 
 import servicePlugin, {
   call as callConnectorHttp,
@@ -71,6 +72,12 @@ const defaultPermissionFn = `export default function ({ key }) {
   return true
 }
 `
+const openai = new OpenAI({
+
+  baseURL: "https://openrouter.mybricks.world/api/v1",
+  dangerouslyAllowBrowser: true,
+  apiKey: ``,
+})
 // const getComs = () => {
 //   const comDefs = {}
 //   const regAry = (comAray) => {
@@ -645,6 +652,29 @@ export default function (
       fx: {},
       useStrict: false,
     },
+    aiView: ctx?.appConfig?.publishLocalizeConfig?.enableAI ? {
+      async request({ prompts, question }) {
+        let content = '处理失败'
+        try {
+          const completion = await openai.chat.completions.create({
+            model: "openai/gpt-4o-mini-2024-07-18",
+            messages: [
+              { role: "system", content: prompts },
+              { role: "user", content: question }
+            ],
+          })
+          content = completion.choices[0].message.content
+
+          return content
+        } catch (e) {
+          console.error(e)
+        } finally {
+          console.log(`prompts: ${prompts},
+          question: ${question},
+          返回结果: ${content}`)
+        }
+      }
+    } : undefined,
     editView: {
       editorAppender(editConfig) {
         editConfig.fontJS = ctx.fontJS
