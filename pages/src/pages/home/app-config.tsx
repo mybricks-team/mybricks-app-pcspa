@@ -1412,9 +1412,9 @@ const getAiView = (enableAI) => {
         } catch (e) {
           console.error(e)
         } finally {
-          console.log(`prompts: ${prompts},
-      question: ${question},
-      返回结果: ${content}`)
+          //     console.log(`prompts: ${prompts},
+          // question: ${question},
+          // 返回结果: ${content}`)
         }
       },
     }
