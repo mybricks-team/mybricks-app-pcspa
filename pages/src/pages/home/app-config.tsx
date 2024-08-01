@@ -38,6 +38,7 @@ import download from '@/utils/download'
 import upload from '@/utils/upload'
 import searchUser from '@/utils/searchUser'
 import { blobToBase64 } from '@/utils/blobToBase64'
+import { getAiEncryptData } from './utils/get-ai-encrypt-data'
 import {
   DESIGN_MATERIAL_EDITOR_OPTIONS,
   mergeEditorOptions,
@@ -1399,10 +1400,10 @@ const getAiView = (enableAI) => {
       async request(messages) {
         let content = '处理失败'
         try {
-          const completion = await openai.chat.completions.create({
+          const completion = await openai.chat.completions.create(getAiEncryptData({
             model: '',
             messages
-          })
+          }))
           content = completion.choices[0].message.content
 
           return content
