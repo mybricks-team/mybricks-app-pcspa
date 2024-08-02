@@ -1398,9 +1398,9 @@ const getAiView = (enableAI) => {
             method: 'POST',
             url: '//ai.mybricks.world/chat',
             withCredentials: false,
-            data: {
+            data: getAiEncryptData({
               messages,
-            },
+            }),
             headers: {
               'Content-Type': 'application/json',
             },
