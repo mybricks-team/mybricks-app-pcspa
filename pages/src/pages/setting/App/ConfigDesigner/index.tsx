@@ -16,6 +16,9 @@ export default (props: TConfigProps) => {
 
   const onSubmit = (values) => {
     const updateTime = dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+    if (values?.url === '') {
+      delete values.url
+    }
     mergeUpdateConfig({ designer: { ...values, updateTime, user: user?.email } });
   }
 
