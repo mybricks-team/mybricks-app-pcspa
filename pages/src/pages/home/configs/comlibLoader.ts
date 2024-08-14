@@ -30,11 +30,14 @@ export default (ctx) => (libDesc) => {
 
   const mySelfLib = ctx?.comlibs.find(t => t?.id === MY_SELF_ID)
 
-  const addSelfLibComponents = (components => {
+  const addSelfLibComponents = ((components, comlibsComponents) => {
     components.forEach(component => {
       const mySelfLib = ctx?.comlibs.find(t => t?.id === MY_SELF_ID)
       const index = mySelfLib.comAray.findIndex((item) => item.namespace === component.namespace);
-
+      
+      if (comlibsComponents.find(item => item.namespace === component.namespace)) {
+        return
+      }
       /** 当前组件已经存在 */
       if (index !== -1) {
         mySelfLib.comAray[index] = {
@@ -78,9 +81,27 @@ export default (ctx) => (libDesc) => {
 
   //   return mySelfLib.comAray
   // }
-
+  // 获取组件库下面的所有组件
+  const getComLibComponents = () => {
+    let normalLibs  = ctx.comlibs.filter(lib => lib.id !==  MY_SELF_ID)
+    let arr = []
+     normalLibs.forEach(item => {
+      if(Array.isArray(item.deps) && item.deps.length) {
+        arr.push(...item.deps)
+      }
+      if(!item.deps) {
+        let target = window['__comlibs_edit_'].find(lib => lib.namespace=== item.namespace)
+        if(Array.isArray(target.comAray)) {
+          arr.push(...target.comAray)
+        }
+      }
+     })
+    return arr
+  }
   const getSelfComponents = () => {
-    return mySelfLib?.comAray.filter(com => isObject(com))
+    let mySelfArr = mySelfLib?.comAray.filter(com => isObject(com))
+    let normalLibs = getComLibComponents()
+    return [ ...mySelfArr, ...normalLibs]
   }
 
   // const LATEST_COMLIBS = cloneDeep(ctx.latestComlibs || []);
@@ -94,7 +115,7 @@ export default (ctx) => (libDesc) => {
 
         let index = -1
         let com
-
+        let comlibsComponents = getComLibComponents();
         switch (cmd) {
           case 'upgradeCom':
             const mySelfLib = ctx?.comlibs.find(t => t?.id === MY_SELF_ID) ?? [];
@@ -103,6 +124,7 @@ export default (ctx) => (libDesc) => {
             ctx.sdk.openUrl({
               url: 'MYBRICKS://mybricks-material/materialSelectorPage',
               params: {
+                // 这里如果带上了组件库下面的组件，需要在下面的success 里面，去除掉comlibs下面的组件
                 defaultSelected: getSelfComponents(),
                 curUpgradeMaterial: curCom,
                 userId: ctx.user?.id,
@@ -111,8 +133,7 @@ export default (ctx) => (libDesc) => {
               },
               onSuccess: (params) => {
                 const { materials, updatedMaterials } = params
-                const newComponents = addSelfLibComponents(materials)
-
+                const newComponents = addSelfLibComponents(materials, comlibsComponents)
                 getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
                   const curMaterial = updatedMaterials[0]
                   const curComInfo = newComlib?.comAray.find(item => item.namespace === curMaterial?.namespace)
@@ -168,7 +189,7 @@ export default (ctx) => (libDesc) => {
                 tags: [APP_TYPE]
               },
               onSuccess: ({ materials, updatedMaterials }) => {
-                const newComponents = addSelfLibComponents(materials)
+                const newComponents = addSelfLibComponents(materials, comlibsComponents)
                 getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
                   resolve({
                     id: '_myself_',
@@ -191,7 +212,7 @@ export default (ctx) => (libDesc) => {
                 tags: [APP_TYPE]
               },
               onSuccess: ({ materials, updatedMaterials }) => {
-                const newComponents = addSelfLibComponents(materials)
+                const newComponents = addSelfLibComponents(materials, comlibsComponents)
                 getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
                   console.log(newComlib)
                   resolve({
@@ -215,7 +236,7 @@ export default (ctx) => (libDesc) => {
                 tags: ['js']
               },
               onSuccess: ({ materials, updatedMaterials }) => {
-                const newComponents = addSelfLibComponents(materials)
+                const newComponents = addSelfLibComponents(materials, comlibsComponents)
                 getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
                   resolve({
                     id: '_myself_',
