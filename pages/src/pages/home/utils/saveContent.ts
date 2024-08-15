@@ -67,7 +67,7 @@ class MyBricksStudioDB {
       }
 
       transaction.oncomplete = function () {
-        console.log('存储事务完成')
+        // console.log('存储事务完成')
       }
 
       transaction.onerror = function (event) {
@@ -149,7 +149,7 @@ class MyBricksStudioDB {
       const request = objectStore.delete(id)
 
       request.onsuccess = function (event) {
-        resolve('对象已删除，ID为：' + id)
+        // resolve('对象已删除，ID为：' + id)
       }
 
       transaction.oncomplete = function () {
@@ -183,7 +183,7 @@ class MyBricksStudioDB {
           cursor.delete();
           cursor.continue();
         } else {
-          console.log(`删除 fileId：${fileId} 记录成功`)
+          // console.log(`删除 fileId：${fileId} 记录成功`)
           resolve({ msg: 'success' })
         }
       }

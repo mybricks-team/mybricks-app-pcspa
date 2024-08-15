@@ -171,7 +171,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon?},
+        param: { name?; shareType?; content?; icon? },
         options?: {
           skipMessage?: boolean
           saveType?: string
@@ -206,11 +206,11 @@ export default function MyDesigner({ appData: originAppData }) {
             setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
           }
 
-          if (!options?.skipMessage) {
-            console.log(
-              `保存接口耗时 ${(new Date().getTime() - httpStartTime) / 1000}s`
-            )
-          }
+          // if (!options?.skipMessage) {
+          //   console.log(
+          //     `保存接口耗时 ${(new Date().getTime() - httpStartTime) / 1000}s`
+          //   )
+          // }
 
           if (options?.saveType === 'import') {
             location.reload()
@@ -311,7 +311,7 @@ export default function MyDesigner({ appData: originAppData }) {
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ; (window as any).mybricks.SPADesigner &&
+        ;(window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -1098,9 +1098,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         } else {
           curComponent =
             allComLibsRuntimeMap[libIndex][
-            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-              key.startsWith(component.namespace)
-            )
+              Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+                key.startsWith(component.namespace)
+              )
             ]
         }
       }
