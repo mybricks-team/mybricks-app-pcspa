@@ -45,6 +45,8 @@ export const BASIC_COM_LIB = {
   legacy: true
 }
 
+export const MY_SELF_ID = "_myself_";
+
 export const MySelf_COM_LIB = {
   comAray: [],
   id: "_myself_",
