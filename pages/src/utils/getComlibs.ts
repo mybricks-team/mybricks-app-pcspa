@@ -3,6 +3,7 @@ import {
   PC_NORMAL_COM_LIB,
   CHARS_COM_LIB,
   BASIC_COM_LIB,
+  MY_SELF_ID,
 } from "../constants";
 import { compareVersions } from "compare-versions";
 import API from "@mybricks/sdk-for-app/api";
@@ -58,6 +59,10 @@ const getLibsFromConfig = (appData: Record<string, any>) => {
       }
       return lib;
     });
+    let hasMySelfLib = libs.some(item => item.id === MY_SELF_ID);
+    if(!hasMySelfLib) {
+      libs.unshift(MySelf_COM_LIB);
+    }
     return libs;
   }
 };

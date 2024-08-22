@@ -19,6 +19,8 @@ import {
   PC_NORMAL_COM_LIB,
   BASIC_COM_LIB,
   CHARS_COM_LIB,
+  MySelf_COM_LIB,
+  MY_SELF_ID
 } from '../../constants'
 import { PreviewStorage } from './../../utils/previewStorage'
 import unionBy from 'lodash/unionBy'
@@ -804,13 +806,31 @@ export default function MyDesigner({ appData: originAppData }) {
       const { content, pageConfig } = JSON.parse(value)
       let newPageConfig
       if (!pageConfig || !pageConfig?.comlibs?.length) {
-        // 无 pageConfig 或comlibs数组为空，导入时放入默认组件库
+        // 无 pageConfig 或comlibs数组为空，导入时放入默认组件库 以及我的组件库，去更新到ctx.comlibs
         newPageConfig = pageConfig || {}
         newPageConfig.comlibs = appData.defaultComlibs?.length
           ? appData.defaultComlibs
           : [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB]
+        // 放入默认的我的组件
+        newPageConfig.comlibs.unshift(MySelf_COM_LIB)
       }
-      Object.assign(ctx, newPageConfig ?? {})
+      Object.assign(ctx, newPageConfig ?? {});
+
+      let ctxMySelfIndex = ctx?.comlibs.findIndex(t => t?.id === MY_SELF_ID);
+
+      if(pageConfig && pageConfig?.comlibs?.length) {
+        const importMySelfLib = pageConfig?.comlibs.find(
+          (comlib) => comlib.id === "_myself_"
+        );
+        // 导入的dumpJson中的我的组件下面的组件数组长度 > 0，更新我的组件数据
+        if(importMySelfLib && importMySelfLib.comAray?.length > 0) {
+          if(ctxMySelfIndex > -1) {
+            ctx.comlibs[ctxMySelfIndex] = importMySelfLib
+          } else {
+            ctx.comlibs.unshift(importMySelfLib)
+          }
+        }
+      }
       await designerRef.current.loadContent(content)
     } catch (e) {
       message.error(e)
