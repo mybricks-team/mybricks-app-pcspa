@@ -20,7 +20,7 @@ import {
   BASIC_COM_LIB,
   CHARS_COM_LIB,
   MySelf_COM_LIB,
-  MY_SELF_ID
+  MY_SELF_ID,
 } from '../../constants'
 import { PreviewStorage } from './../../utils/previewStorage'
 import unionBy from 'lodash/unionBy'
@@ -290,13 +290,8 @@ export default function MyDesigner({ appData: originAppData }) {
         const newComlibs = ctx.debug
           ? replaceComlib(comlibs, comlibDebugUtils.get())
           : comlibs
+
         setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
-        // setCtx((pre) => ({
-        //   ...pre, comlibs: [
-        //     `http://localhost:20000/comlib.js`,
-        //     `http://localhost:20001/comlib.js`
-        //   ], latestComlibs
-        // }))
       })
       .finally(loadDesigner)
   }, [designer])
@@ -388,6 +383,15 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     beforeUnloadRef.current = beforeunload
   }, [beforeunload])
+
+  const getToJSON = () => {
+    try {
+      return designerRef?.current?.toJSON()
+    } catch (e) {
+      message.error('获取页面数据失败')
+      console.error(e)
+    }
+  }
 
   const onEdit = useCallback((info) => {
     operationList.current.push({
@@ -495,7 +499,11 @@ export default function MyDesigner({ appData: originAppData }) {
   )
 
   const preview = useCallback(() => {
-    const json = designerRef.current?.toJSON()
+    const json = getToJSON()
+
+    if (!json) {
+      return
+    }
 
     const previewStorage = new PreviewStorage({ fileId: ctx.fileId })
     previewStorage.savePreviewPageData({
@@ -550,6 +558,13 @@ export default function MyDesigner({ appData: originAppData }) {
       if (publishingRef.current) {
         return
       }
+
+      const curToJSON = getToJSON()
+
+      if (!curToJSON) {
+        return
+      }
+
       const { envType = 'prod', commitInfo } = publishConfig
       publishingRef.current = true
 
@@ -592,8 +607,6 @@ export default function MyDesigner({ appData: originAppData }) {
         )
 
         setBeforeunload(false)
-
-        const curToJSON = designerRef?.current?.toJSON()
 
         const curComLibs = await genLazyloadComs(ctx.comlibs, curToJSON)
 
@@ -814,17 +827,17 @@ export default function MyDesigner({ appData: originAppData }) {
         // 放入默认的我的组件
         newPageConfig.comlibs.unshift(MySelf_COM_LIB)
       }
-      Object.assign(ctx, newPageConfig ?? {});
+      Object.assign(ctx, newPageConfig ?? {})
 
-      let ctxMySelfIndex = ctx?.comlibs.findIndex(t => t?.id === MY_SELF_ID);
+      let ctxMySelfIndex = ctx?.comlibs.findIndex((t) => t?.id === MY_SELF_ID)
 
-      if(pageConfig && pageConfig?.comlibs?.length) {
+      if (pageConfig && pageConfig?.comlibs?.length) {
         const importMySelfLib = pageConfig?.comlibs.find(
-          (comlib) => comlib.id === "_myself_"
-        );
+          (comlib) => comlib.id === '_myself_'
+        )
         // 导入的dumpJson中的我的组件下面的组件数组长度 > 0，更新我的组件数据
-        if(importMySelfLib && importMySelfLib.comAray?.length > 0) {
-          if(ctxMySelfIndex > -1) {
+        if (importMySelfLib && importMySelfLib.comAray?.length > 0) {
+          if (ctxMySelfIndex > -1) {
             ctx.comlibs[ctxMySelfIndex] = importMySelfLib
           } else {
             ctx.comlibs.unshift(importMySelfLib)
