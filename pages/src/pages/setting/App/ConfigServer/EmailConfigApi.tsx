@@ -41,7 +41,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         rules={[{ required: true, message: '请输入接收消息的邮件接口' }]}
         tooltip="评论中艾特用户后，会自动调用该接口，传递评论相关内容（如页面id，评论内容，主题、等）"
       >
-        <Input placeholder='https://my.mybricks.world/publish' />
+        <Input placeholder='https://my.mybricks.world/' />
       </Form.Item>
       <Form.Item style={{ textAlign: 'right' }}>
         {Object.keys(emailApiConfig).length > 0 && <Meta description={`${emailApiConfig.user} 更新于 ${emailApiConfig.updateTime}`} />}
