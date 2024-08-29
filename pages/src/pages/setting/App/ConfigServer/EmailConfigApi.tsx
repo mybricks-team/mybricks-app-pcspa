@@ -36,17 +36,17 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
     <Form form={form} onFinish={onSubmit} style={{ marginTop: 12 }}>
       <Form.Item
         name={fieldName}
-        label="艾特消息邮件通知接口"
+        label="@消息邮件通知接口"
         required
         rules={[{ required: true, message: '请输入接收消息的邮件接口' }]}
-        tooltip="评论中艾特用户后，会自动调用该接口，传递评论相关内容（如页面id，评论内容，主题、等）"
+        tooltip="评论中@用户后，会自动调用该接口，传递评论相关内容（如页面id，评论内容，主题、等）"
       >
         <Input placeholder='https://my.mybricks.world/' />
       </Form.Item>
       <Form.Item style={{ textAlign: 'right' }}>
         {Object.keys(emailApiConfig).length > 0 && <Meta description={`${emailApiConfig.user} 更新于 ${emailApiConfig.updateTime}`} />}
         <Popconfirm
-          title={`确定清空发布邮件通知接口吗？`}
+          title={`确定清空邮件通知接口吗？`}
           onConfirm={onReset}
           okText="确定"
           cancelText="再想想"
