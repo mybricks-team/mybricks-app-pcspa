@@ -79,6 +79,12 @@ const root = ({ renderType, locale, runtime, extVars, extCallConnector, customMe
           },
           get getQuery() {
             return () => {
+              if (location.hash) { // 兼容 hash 路由场景
+                const hash = location.hash.substring(1)
+                const searchPart = hash.split('?')[1] || ''
+                return parseQuery(`?${searchPart}`)
+              }
+
               return parseQuery(location.search);
             };
           },

@@ -83,8 +83,8 @@ const root = ({ renderType, locale, env, ...props }) => {
           const curConnector = connector.script
             ? connector
             : (dumpJson.plugins[connector.connectorName] || []).find(
-                (con) => con.id === connector.id
-              );
+              (con) => con.id === connector.id
+            );
 
           if (curConnector?.globalMock || connectorConfig?.openMock) {
             return connectorHttpMock({ ...connector, ...connectorConfig }, {});
@@ -92,35 +92,35 @@ const root = ({ renderType, locale, env, ...props }) => {
 
           return curConnector
             ? plugin.call(
-                { ...connector, ...curConnector, useProxy: !directConnection },
-                newParams,
-                {
-                  ...connectorConfig,
-                  /** http-sql表示为领域接口 */
-                  before:
-                    connector.type === "http-sql"
-                      ? (options) => {
-                          const newOptions = { ...options };
-                          if (!newOptions.headers) {
-                            newOptions.headers = {};
-                          }
-                          newOptions.headers["x-mybricks-debug"] = "true";
+              { ...connector, ...curConnector, useProxy: !directConnection },
+              newParams,
+              {
+                ...connectorConfig,
+                /** http-sql表示为领域接口 */
+                before:
+                  connector.type === "http-sql"
+                    ? (options) => {
+                      const newOptions = { ...options };
+                      if (!newOptions.headers) {
+                        newOptions.headers = {};
+                      }
+                      newOptions.headers["x-mybricks-debug"] = "true";
 
-                          return newOptions;
-                        }
-                      : (options) => {
-                          return {
-                            ...options,
-                            url: shapeUrlByEnv(
-                              envList,
-                              executeEnv,
-                              options.url,
-                              MYBRICKS_HOST
-                            ),
-                          };
-                        },
-                }
-              )
+                      return newOptions;
+                    }
+                    : (options) => {
+                      return {
+                        ...options,
+                        url: shapeUrlByEnv(
+                          envList,
+                          executeEnv,
+                          options.url,
+                          MYBRICKS_HOST
+                        ),
+                      };
+                    },
+              }
+            )
             : Promise.reject("接口不存在，请检查连接器插件中接口配置");
         } else {
           return Promise.reject("错误的连接器类型");
@@ -136,7 +136,15 @@ const root = ({ renderType, locale, env, ...props }) => {
         get getI18nContent() {
           return () => i18nLangContent || {};
         },
-        getQuery: () => parseQuery(location.search),
+        getQuery: () => {
+          if (location.hash) { // 兼容 hash 路由场景
+            const hash = location.hash.substring(1)
+            const searchPart = hash.split('?')[1] || ''
+            return parseQuery(`?${searchPart}`)
+          }
+
+          return parseQuery(location.search)
+        },
         get getProps() {
           return () => {
             // 获取主应用参数方法，如：token等参数，取决于主应用传入
