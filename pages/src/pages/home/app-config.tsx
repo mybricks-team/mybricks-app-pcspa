@@ -455,6 +455,24 @@ export default function (
             }
           })
         },
+        onAtsEmail: ({ subject, to, body, extra, from }) => {
+          let data = {fileId: ctx.fileId, subject, to, body, extra, from }
+          const config = appData.config[APP_NAME]?.config
+          const serviceApi = config?.emailApiConfig?.sendAtsEmailApi || ''
+          if(serviceApi) {
+              axios({
+                method: 'POST',
+                url: serviceApi,
+                withCredentials: false,
+                data,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }).catch(err => {
+                console.log('err', err)
+              })
+          }
+        },
         onSearchUser: (keyword: string) => {
           return new Promise(async (resolve, reject) => {
             try {
