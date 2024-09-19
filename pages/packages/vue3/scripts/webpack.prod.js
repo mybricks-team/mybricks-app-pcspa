@@ -9,7 +9,7 @@ const WebpackBar = require('webpackbar')
 const HtmlWebpackInlineSourcePlugin = require('@effortlessmotion/html-webpack-inline-source-plugin')
 const pkg = require(path.join(__dirname, '../../../../package.json'))
 
-const appInfo = pkg.appConfig.vue2;
+const appInfo = pkg.appConfig.vue3;
 module.exports = (env) => merge(common, (function () {
   const isOffline = env && env.app?.type === 'offline';
   return {

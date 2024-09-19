@@ -3,7 +3,7 @@ const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const pkg = require(path.join(__dirname, '../../../../package.json'))
 
-const appInfo = pkg.appConfig.vue2;
+const appInfo = pkg.appConfig.vue3;
 module.exports = {
   entry: {
     ['index']: path.resolve(__dirname, '../../../src/pages/design/index.tsx'),
