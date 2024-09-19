@@ -55,6 +55,8 @@ import { compareVersionLatest } from './utils/saveContent'
 
 const { confirm } = Modal
 
+import { PcEditor } from "/Users/yanwenjun/workplace/editors-pc-common/src/index";
+
 const defaultPermissionComments = `/**
 *
 * interface Props {
@@ -666,14 +668,14 @@ export default function (
     aiView: getAiView(ctx?.appConfig?.publishLocalizeConfig?.enableAI),
     editView: {
       editorAppender(editConfig) {
-        editConfig.fontJS = ctx.fontJS
-        injectUpload(
-          editConfig,
-          ctx.uploadService,
-          ctx.manateeUserInfo,
-          ctx.fileId
-        )
-        return
+        // editConfig.fontJS = ctx.fontJS
+        // injectUpload(
+        //   editConfig,
+        //   ctx.uploadService,
+        //   ctx.manateeUserInfo,
+        //   ctx.fileId
+        // )
+        return PcEditor({ editConfig } as any);
       },
       items({}, cate0, cate1, cate2) {
         cate0.title = `项目`
