@@ -37,8 +37,7 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
-      '@': path.resolve(__dirname, '../../../src'),
-      '@mybricks/sdk-for-app/ui': path.resolve(__dirname, '../../../../../../../sdk-for-app/src/ui/index.ts'),
+      '@': path.resolve(__dirname, '../../../src')
     },
   },
   externals: [
