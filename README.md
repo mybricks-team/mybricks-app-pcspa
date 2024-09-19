@@ -1,5 +1,6 @@
 # mybricks-app-pcspa
-PC通用搭建应用
+SPA页面搭建应用
+
 ## dev
 启动react应用及服务
 ```ts
@@ -7,12 +8,19 @@ yarn watch:test
 cd pages
 yarn dev:react
 ```
+
 启动vue2应用及服务
+
 ```ts
 yarn watch:test
 cd pages
 yarn dev:vue2
 ```
+登录方式：
+前端代理根据pages/packages/vue2/scripts/webpack.dev.js中的代理
+在cookie中填写mybricks-login-user=xxx
+已实现登录
+
 ## build
 打包react应用
 ```ts

@@ -1,10 +1,9 @@
-import { ComlibRtUrl, ComlibEditUrl } from './../constants'
 import axios from 'axios'
 import React from "react"
 import ReactDOM from "react-dom"
-import { message } from 'antd'
-import { PluginType } from '@/pages/setting/ConfigPlugin/type'
-import { USE_CUSTOM_HOST } from '@/pages/home/constants'
+import {message} from 'antd'
+import {PluginType} from '@/pages/setting/ConfigPlugin/type'
+import {USE_CUSTOM_HOST} from '@/pages/design/constants'
 
 export function getApiUrl(uri) {
   return uri

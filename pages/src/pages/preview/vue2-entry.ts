@@ -12,6 +12,8 @@ const Vue = window.Vue;
 let vueApp;
 
 if (!dumpJson) {
+    debugger
+    
     throw new Error('数据错误：项目数据缺失')
 }
 

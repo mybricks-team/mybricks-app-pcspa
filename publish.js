@@ -53,11 +53,21 @@ const publishVue2AppOnline = () => {
   })
 }
 
+const publishVue3AppOffline = () => {
+  return new Promise((resolve) => {
+    const buildCommand = `cd pages && npm run build:vue3-offline`
+    shelljs.exec(buildCommand, () => {
+      const syncCommand = `node sync_offline.js vue3`
+      shelljs.exec(syncCommand, resolve)
+    })
+  })
+}
+
 const fixPkg = () => {
   return new Promise((resolve) => {
     const json = { ...pkgJson }
-    json.name = json.appConfig.vue2.name
-    json.mybricks = { ...json.mybricks, ...json.appConfig.vue2.mybricks }
+    json.name = json.appConfig.vue3.name
+    json.mybricks = { ...json.mybricks, ...json.appConfig.vue3.mybricks }
     fs.writeFileSync("./package.json", JSON.stringify(json, null, 2))
     resolve()
   })
@@ -84,7 +94,9 @@ const execChain = (fns) => {
 if (isOffline) {
   execChain([
     clearZipPkg,
-    publishReactAppOffline,
+    //publishReactAppOffline,
+    fixPkg,
+    publishVue3AppOffline,
     // fixPkg,
     // publishVue2AppOffline,
     // resetPkg
