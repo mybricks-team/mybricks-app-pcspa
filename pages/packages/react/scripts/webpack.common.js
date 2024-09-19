@@ -6,7 +6,7 @@ const pkg = require(path.join(__dirname, '../../../../package.json'))
 const appInfo = pkg.appConfig.react
 module.exports = {
   entry: {
-    ['index']: path.resolve(__dirname, '../../../src/pages/home/index.tsx'),
+    ['index']: path.resolve(__dirname, '../../../src/pages/design/index.tsx'),
     ['preview']: path.resolve(__dirname, '../../../src/pages/preview/react-entry.ts'),
     ['setting']: path.resolve(__dirname, '../../../src/pages/setting/globalSettingIndex.tsx'),
     ['groupSetting']: path.resolve(__dirname, '../../../src/pages/setting/groupSettingIndex.tsx'),

@@ -12,6 +12,7 @@ const legacyLibs =
 
 export const compatContent = (content) => {
   content = JSON.parse(content);
+
   return content[APP_TYPE] ?? content;
 };
 
@@ -76,6 +77,7 @@ export const getLatestComLib = async (comlibs) => {
       ...compatContent(lib.content),
     }))
   );
+
   return { comlibs, latestComlibs };
 };
 

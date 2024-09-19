@@ -5,10 +5,12 @@
   "scripts": {
     "dev:react": "npm i && webpack serve --config ./packages/react/scripts/webpack.dev.js",
     "dev:vue2": "npm i && webpack serve --config ./packages/vue2/scripts/webpack.dev.js",
+    "dev:vue3": "npm i && webpack serve --config ./packages/vue3/scripts/webpack.dev.js",
     "build:react": "npm install && webpack build --config ./packages/react/scripts/webpack.prod.js",
     "build:react-offline": "npm install && webpack build --config ./packages/react/scripts/webpack.prod.js --env app.type='offline'",
     "build:vue2": "npm install && webpack build --config ./packages/vue2/scripts/webpack.prod.js",
-    "build:vue2-offline": "npm install && webpack build --config ./packages/vue2/scripts/webpack.prod.js --env app.type='offline'"
+    "build:vue2-offline": "npm install && webpack build --config ./packages/vue2/scripts/webpack.prod.js --env app.type='offline'",
+    "build:vue3-offline": "npm install && webpack build --config ./packages/vue3/scripts/webpack.prod.js --env app.type='offline'"
   },
   "keywords": [
     "mybricks",

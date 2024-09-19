@@ -7,6 +7,7 @@ const fs = require('fs')
 const pkg = require(path.join(__dirname, '../../../../package.json'))
 
 const appInfo = pkg.appConfig.react
+
 module.exports = merge(common, {
   mode: 'development',
   devtool: 'inline-source-map',

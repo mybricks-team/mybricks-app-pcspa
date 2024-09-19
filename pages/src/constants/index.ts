@@ -54,5 +54,5 @@ export const MySelf_COM_LIB = {
   defined: true,
 };
 
-
-export const DESIGNER_STATIC_PATH = './public/designer-spa/3.7.991/index.min.js'
+//调试时指向test/my的设计器文件
+export const DESIGNER_STATIC_PATH = './public/designer-spa/3.8.001/index.min.js'
