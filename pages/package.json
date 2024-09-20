@@ -9,6 +9,7 @@
     "build:react": "npm install && webpack build --config ./packages/react/scripts/webpack.prod.js",
     "build:react-offline": "npm install && webpack build --config ./packages/react/scripts/webpack.prod.js --env app.type='offline'",
     "build:vue2": "npm install && webpack build --config ./packages/vue2/scripts/webpack.prod.js",
+    "build:vue3": "npm install && webpack build --config ./packages/vue3/scripts/webpack.prod.js",
     "build:vue2-offline": "npm install && webpack build --config ./packages/vue2/scripts/webpack.prod.js --env app.type='offline'",
     "build:vue3-offline": "npm install && webpack build --config ./packages/vue3/scripts/webpack.prod.js --env app.type='offline'"
   },

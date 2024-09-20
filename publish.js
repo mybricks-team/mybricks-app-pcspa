@@ -63,11 +63,14 @@ const publishVue3AppOffline = () => {
   })
 }
 
-const fixPkg = () => {
+const fixPkg = (appType) => {
   return new Promise((resolve) => {
     const json = { ...pkgJson }
-    json.name = json.appConfig.vue3.name
-    json.mybricks = { ...json.mybricks, ...json.appConfig.vue3.mybricks }
+    json.name = json.appConfig[appType].name;
+    json.description = json.appConfig[appType].description;
+    json.version = json.appConfig[appType].version;
+    json.mybricks = json.appConfig[appType].mybricks;
+    console.log(json);
     fs.writeFileSync("./package.json", JSON.stringify(json, null, 2))
     resolve()
   })
@@ -94,18 +97,22 @@ const execChain = (fns) => {
 if (isOffline) {
   execChain([
     clearZipPkg,
+    fixPkg('react'),
     //publishReactAppOffline,
-    fixPkg,
+    fixPkg('vue3'),
     publishVue3AppOffline,
-    // fixPkg,
+    resetPkg,
+    // fixPkg('vue2'),
     // publishVue2AppOffline,
     // resetPkg
   ])
 } else {
   execChain([
+    fixPkg('react'),
     publishReactAppOnline,
-    // fixPkg,
-    // publishVue2AppOnline,
+    resetPkg
+    // fixPkg('vue3'),
+    // publishVue3AppOffline,
     // resetPkg
   ])
 }

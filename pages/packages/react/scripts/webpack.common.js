@@ -22,7 +22,7 @@ module.exports = {
     new webpack.DefinePlugin({
       APP_NAME: JSON.stringify(appInfo.name),
       APP_TYPE: JSON.stringify('react'),
-      APP_VERSION: JSON.stringify(pkg.version),
+      APP_VERSION: JSON.stringify(appInfo.version),
     }),
     new CopyWebpackPlugin({
       patterns: [

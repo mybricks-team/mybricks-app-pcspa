@@ -3,8 +3,8 @@ const path = require('path');
 const JSZip = require('jszip');
 const packageJSON = require('./package.json');
 
-const type = process.argv[2]
-const pkgName = packageJSON.appConfig[type].name
+const type = process.argv[2];
+const pkgName = packageJSON.appConfig[type].name;
 const moment = require('moment')
 
 const zip = new JSZip();
@@ -62,7 +62,7 @@ zip.generateAsync({
     level: 9
   }
 }).then((content) => {
-  const fileName = `${packageJSON.name}-${moment().format('YYYY-MM-DD-HH-mm-ss')}.zip`;
+  const fileName = `${pkgName}-${moment().format('YYYY-MM-DD-HH-mm-ss')}.zip`;
   fs.writeFileSync(path.join(__dirname, `./${fileName}`), content, 'utf-8');
   console.log(`离线包打包完成，请将 ${fileName} 拖拽到平台进行离线安装`);
 });

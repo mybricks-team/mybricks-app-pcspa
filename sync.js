@@ -19,7 +19,10 @@ const appType = appTypeArg.replace('--appType=', '')
 const noServiceUpdate = !!args.find(arg => arg==='--noServiceUpdate');
 const offlineUpdate = !!args.find(arg => arg==='--offline');
 
-const appName = packageJSON.appConfig[appType].name
+/** 即将要发布的 app 信息 */
+const nextAppConfig = packageJSON.appConfig[appType];
+
+const appName = nextAppConfig.name
 
 const zip = new JSZip();
 /** 根目录 */
@@ -83,18 +86,18 @@ zip.generateAsync({
   formData.append('action', 'app_publishVersion');
   formData.append('userId', Buffer.from('em91eW9uZ3NoZW5nQGt1YWlzaG91LmNvbQ==', 'base64').toString('utf-8'));
   formData.append('payload', JSON.stringify({
-    name: (packageJSON.mybricks ? packageJSON.mybricks.title : '') || appName,
-    version: packageJSON.version,
+    name: (nextAppConfig.mybricks ? nextAppConfig.mybricks.title : '') || appName,
+    version: nextAppConfig.version,
     namespace: appName,
     type: 'app',
     installInfo: JSON.stringify({
-      path: `/asset/app/${appName}/${packageJSON.version}/${appName}.zip`,
+      path: `/asset/app/${appName}/${nextAppConfig.version}/${appName}.zip`,
       changeLog: '优化部分逻辑，修复若干 bug',
       noServiceUpdate: noServiceUpdate
     }),
     creator_name: Buffer.from('em91eW9uZ3NoZW5nQGt1YWlzaG91LmNvbQ==', 'base64').toString('utf-8') || '',
-    icon: packageJSON.mybricks ? packageJSON.mybricks.icon : '',
-    description: packageJSON.mybricks ? (packageJSON.mybricks.description || packageJSON.description) : packageJSON.description,
+    icon: nextAppConfig.mybricks ? nextAppConfig.mybricks.icon : '',
+    description: nextAppConfig.mybricks ? (nextAppConfig.mybricks.description || nextAppConfig.description) : nextAppConfig.description,
     createTime: Date.now(),
   }));
   formData.append('file', content, `${appName}.zip`);
