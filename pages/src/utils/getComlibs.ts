@@ -125,14 +125,34 @@ const createScript = (url: string) => {
 };
 
 const createLink = (url: string) => {
-  if (document.querySelector(`link[href="${url}"]`)) return Promise.resolve();
+  let querySelector = document.querySelector.bind(document), appendChild = document.head.appendChild.bind(document.head);
+
+  // 考虑在搭建态的情况，css要塞到shadowDom里
+  const desnGeoViewShadowDom = document.querySelector('#_mybricks-geo-webview_')?.shadowRoot
+
+  if (desnGeoViewShadowDom) {
+    querySelector = desnGeoViewShadowDom.querySelector.bind(desnGeoViewShadowDom);
+    //@ts-ignore
+    appendChild = (element) => {
+      const firstChild = desnGeoViewShadowDom.firstChild;
+      // 将 <style> 标签插入到第一个子元素之前
+      if (firstChild) {
+        desnGeoViewShadowDom.insertBefore(element, firstChild);
+      } else {
+        // 如果没有子元素，直接添加到 Shadow Root
+        desnGeoViewShadowDom.appendChild(element);
+      }
+    }
+  }
+
+  if (querySelector(`link[href="${url}"]`)) return Promise.resolve();
   const link = document.createElement("link");
   link.href = url;
   link.rel = "stylesheet";
   return new Promise((resolve, reject) => {
     link.onload = resolve;
     link.onerror = reject;
-    document.head.appendChild(link);
+    appendChild(link);
   });
 };
 
@@ -146,6 +166,35 @@ const insertDeps = async (libs) => {
   return libs;
 };
 
+/** 获取 CSS 文件依赖，由于 comlibLoader 执行时，设计器还没 init，所以只能放到styleAry去，这里可以获取styleAry */
+const getCssDeps = (libs) => {
+  if (!libs.length) return libs;
+  function getCssLinkElements(lib) {
+    const p = [];
+    lib.externals?.forEach((it) => {
+      const { library, urls } = it;
+      if (Array.isArray(urls) && urls.length) {
+        urls.forEach((url) => {
+          if (url.endsWith(".css")) {
+            const link = document.createElement("link");
+            link.href = url;
+            link.rel = "stylesheet";
+            p.push(link);
+          }
+        });
+      }
+    });
+    return p;
+  }
+  return libs.reduce((acc, lib) => {
+    if (typeof lib === 'object' && "externals" in lib) {
+      const eles = getCssLinkElements(lib);
+      return acc.concat(eles.filter(c => !!c));
+    }
+    return acc
+  }, [])
+};
+
 const insertExternal = async (lib) => {
   const p = [];
   lib.externals?.forEach((it) => {
@@ -153,10 +202,9 @@ const insertExternal = async (lib) => {
     if (Array.isArray(urls) && urls.length) {
       urls.forEach((url) => {
         if (url.endsWith(".js")) {
-          if (library in window) return;
+          if (!!library && library in window) return;
           p.push(createScript(url));
-        }
-        if (url.endsWith(".css")) {
+        } else if (url.endsWith(".css")) {
           p.push(createLink(url));
         }
       });
@@ -180,4 +228,4 @@ const getInitComLibs = composeAsync(
 
 const upgradeExternal = composeAsync(insertExternal, getLibExternals);
 
-export { getInitComLibs, upgradeExternal, insertDeps };
+export { getInitComLibs, upgradeExternal, insertDeps, getCssDeps };

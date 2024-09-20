@@ -1,6 +1,7 @@
 import { compareVersions } from "compare-versions";
 import { getComlibsByNamespaceAndVersion } from "../../../utils/comlib";
 import { myRequire } from "../../../utils/comlib";
+import { getCssDeps } from './../../../utils/getComlibs'
 
 const MY_SELF_ID = "_myself_";
 const ComLib_Edit = "__comlibs_edit_";
@@ -30,8 +31,10 @@ export const initMaterials = async (ctx: Record<string, any>) => {
     (comlib) => comlib.id !== "_myself_"
   );
 
+  /** 获取 CSS 文件依赖，由于 comlibLoader 执行时，设计器还没 init，所以只能放到styleAry去，这里可以获取styleAry */
+  const cssLinks = getCssDeps(ctx.comlibs);
   if (comlibIndex !== -1) {
-    window[ComLib_Edit][comlibIndex]._styleAry = styles;
+    window[ComLib_Edit][comlibIndex]._styleAry = styles.concat(cssLinks);
   }
 
   /**

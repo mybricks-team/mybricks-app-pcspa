@@ -13,7 +13,7 @@ import { message, Modal } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 // import API from '../../../../../sdk-for-app/src/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
-import config from './app-configs/index.tsx'
+import config from './app-configs/index'
 import { fetchPlugins, removeBadChar } from '../../utils'
 import {
   PC_NORMAL_COM_LIB,
@@ -899,7 +899,7 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [SPADesigner, remotePlugins, window?.mybricks?.createObservable])
 
   return (
-    <div className={css.view}>
+    <div className={`${css.view} fangzhou-theme`}>
       <Toolbar
         title={ctx.fileName}
         updateInfo={
@@ -921,16 +921,18 @@ export default function MyDesigner({ appData: originAppData }) {
               }}
               dotTip={beforeunload}
             />
-            {/*<Toolbar.Button disabled={isDebugMode} onClick={preview}>*/}
-            {/*  预览*/}
-            {/*</Toolbar.Button>*/}
-            {/*<Toolbar.Button*/}
-            {/*  disabled={!operable || isDebugMode}*/}
-            {/*  loading={publishLoading}*/}
-            {/*  onClick={() => setPublishModalVisible(true)}*/}
-            {/*>*/}
-            {/*  发布*/}
-            {/*</Toolbar.Button>*/}
+            <Toolbar.Button disabled={isDebugMode} onClick={preview}>
+              预览
+            </Toolbar.Button>
+            {
+              APP_TYPE === 'vue3' ? null : <Toolbar.Button
+                disabled={!operable || isDebugMode}
+                loading={publishLoading}
+                onClick={() => setPublishModalVisible(true)}
+              >
+                发布
+             </Toolbar.Button>
+            }
           </>
         )}
         <div className={`${isPreview ? css.toolbarWrapperPreview : ''}`}>
