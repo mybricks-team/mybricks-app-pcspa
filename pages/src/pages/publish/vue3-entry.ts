@@ -9,9 +9,7 @@ const render = (props) => {
     /** publish template style */
     root.style.width = '100%';
     root.style.height = '100%';
-    vueApp = new Vue({
-        render: (h) => h(renderUI({ ...props, renderType: 'vue2' })),
-    }).$mount(root)
+    vueApp = Vue.createApp(renderUI({ ...props, renderType: 'vue3' })).mount((container ?? document).querySelector(root))
 }
 
 if (!window.__POWERED_BY_QIANKUN__) {
@@ -27,6 +25,6 @@ export async function mount(props) {
 }
 
 export async function unmount(props) {
-    vueApp.$destroy();
+    vueApp.unmount();
     vueApp.$el.innerHTML = '';
 }

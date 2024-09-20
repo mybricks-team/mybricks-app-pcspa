@@ -113,6 +113,21 @@ export default {
       CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443577599.2.29.4_locale_zh-cn.min.js",
     },
   ],
+  vue3: [
+    {
+      tag: "script",
+      path: "public/vue/3.5.6/vue.global.prod.js"
+    },
+    {
+      tag: "script",
+      path: "public/plugin-http-connector/1.2.3/index.js",
+      CDN: "//f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.2.3/index.js",
+    },
+    {
+      tag: "script",
+      path: "public/render-web-vue3/0.0.1/index.umd.js",
+    },
+  ],
 
   // 应用需要但发布页面不直接需要的依赖
   others: {

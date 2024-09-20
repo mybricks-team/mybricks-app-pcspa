@@ -48,9 +48,7 @@ const render = async (props) => {
     if (comlibs && Array.isArray(comlibs)) {
         await insertDeps(comlibs)
         Promise.all(getRtComlibsFromConfigEdit(comlibs).map((t) => requireScript(t))).then(() => {
-            vueApp = new Vue({
-                render: (h) => h(renderUI({ ...props, renderType: 'vue2' })),
-            }).$mount((container ?? document).querySelector('#root'))
+            vueApp = Vue.createApp(renderUI({ ...props, renderType: 'vue3' })).mount((container ?? document).querySelector('#root'))
         })
     }
 }
@@ -69,6 +67,6 @@ export async function mount(props) {
 }
 
 export async function unmount(props) {
-    vueApp.$destroy();
+    vueApp.unmount();
     vueApp.$el.innerHTML = '';
 }
