@@ -26,16 +26,24 @@ module.exports = merge(common, {
     },
     proxy: [
       {
-        context: ['/api/pcpage/publish', '/api/pcpage/upload'],
+        context: [
+          '/api/pcpage/toCode',
+          '/api/pcpage/publish',
+          '/api/pcpage/upload',
+          '/api/pcpage/rollback',
+          '/api/pcpage/download-product',
+          '/api/pcpage/publishToCom',
+          '/api/pcpage/publishToComDownload',
+        ],
         // target: 'https://my.mybricks.world',
-        target: 'http://localhost:9003',
+        target: 'http://localhost:9002/mybricks-app-pcspa',
         secure: false,
         changeOrigin: true,
       },
       {
         context: ['/'],
-        target: 'https://test.mybricks.world/',
-        // target: 'https://my.mybricks.world',
+        // target: 'https://test.mybricks.world/',
+        target: 'https://my.mybricks.world',
         // target: 'http://localhost:3100',
         secure: false,
         changeOrigin: true,
