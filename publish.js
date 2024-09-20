@@ -70,7 +70,6 @@ const fixPkg = (appType) => {
     json.description = json.appConfig[appType].description;
     json.version = json.appConfig[appType].version;
     json.mybricks = json.appConfig[appType].mybricks;
-    console.log(json);
     fs.writeFileSync("./package.json", JSON.stringify(json, null, 2))
     resolve()
   })
