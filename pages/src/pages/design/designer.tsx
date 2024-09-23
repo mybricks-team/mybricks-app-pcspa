@@ -466,6 +466,8 @@ export default function MyDesigner({ appData: originAppData }) {
 
         res = await initialSaveFileContent(fileDBRef, ctx, params?.saveType)
 
+        message.success('保存成功')
+
         // 在 50 个版本之前的文件版本将被删除
         try {
           API.File.deleteFileSaves({
