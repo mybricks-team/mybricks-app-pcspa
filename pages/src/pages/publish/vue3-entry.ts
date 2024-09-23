@@ -9,7 +9,7 @@ const render = (props) => {
     /** publish template style */
     root.style.width = '100%';
     root.style.height = '100%';
-    vueApp = Vue.createApp(renderUI({ ...props, renderType: 'vue3' })).mount((container ?? document).querySelector(root))
+    vueApp = Vue.createApp(renderUI({ ...props, renderType: 'vue3' })).mount(root)
 }
 
 if (!window.__POWERED_BY_QIANKUN__) {

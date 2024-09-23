@@ -926,15 +926,13 @@ export default function MyDesigner({ appData: originAppData }) {
             <Toolbar.Button disabled={isDebugMode} onClick={preview}>
               预览
             </Toolbar.Button>
-            {
-              APP_TYPE === 'vue3' ? null : <Toolbar.Button
-                disabled={!operable || isDebugMode}
-                loading={publishLoading}
-                onClick={() => setPublishModalVisible(true)}
-              >
-                发布
-             </Toolbar.Button>
-            }
+            <Toolbar.Button
+              disabled={!operable || isDebugMode}
+              loading={publishLoading}
+              onClick={() => setPublishModalVisible(true)}
+            >
+              发布
+            </Toolbar.Button>
           </>
         )}
         <div className={`${isPreview ? css.toolbarWrapperPreview : ''}`}>
