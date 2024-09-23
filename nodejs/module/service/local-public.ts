@@ -116,7 +116,8 @@ export default {
   vue3: [
     {
       tag: "script",
-      path: "public/vue/3.5.6/vue.global.prod.js"
+      path: "public/vue/3.5.6/vue.global.prod.js",
+      CDN: "//f2.eckwai.com/kos/nlav11092/mybricks/vue/3.5.6/vue.global.prod.js"
     },
     {
       tag: "script",
@@ -126,6 +127,7 @@ export default {
     {
       tag: "script",
       path: "public/render-web-vue3/0.0.1/index.umd.js",
+      CDN: "//f2.eckwai.com/kos/nlav11092/mybricks/render-web-vue3/0.0.1/index.umd.js"
     },
   ],
 
