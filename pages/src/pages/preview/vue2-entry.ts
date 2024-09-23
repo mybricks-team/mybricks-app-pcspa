@@ -63,7 +63,7 @@ if (!window.__POWERED_BY_QIANKUN__) {
 }
 
 export async function bootstrap() {
-    console.log('react app bootstrap');
+    console.log('vue2 app bootstrap');
 }
 
 export async function mount(props) {
