@@ -16,32 +16,66 @@ if (!dumpJson) {
 }
 
 function cssVariable(dumpJson) {
-    const themes = dumpJson?.plugins?.['@mybricks/plugins/theme/use']?.themes
-    if (Array.isArray(themes)) {
-        themes.forEach(({ namespace, content }) => {
-            const variables = content?.variables
-
-            if (Array.isArray(variables)) {
-                const style = document.createElement('style')
-                style.id = namespace
-                let innerHTML = ''
-
-                variables.forEach(({ configs }) => {
-                    if (Array.isArray(configs)) {
-                        configs.forEach(({ key, value }) => {
-                            innerHTML = innerHTML + `${key}: ${value};\n`
-                        })
-                    }
-                })
-
-                style.innerHTML = `:root {\n${innerHTML}}`
-                document.body.appendChild(style)
-            }
+    const themeData = dumpJson?.plugins?.['@mybricks/plugins/theme/use']
+  
+    if (themeData) {
+      const { antdV4Variable, themes } = themeData
+      if (antdV4Variable) {
+        const localKey = localStorage.getItem("MYBRICKS_PLUGINS_THEME_KEY")
+        let activeVariables;
+        let localVariables;
+        const variables = themes[0].content.variables;
+        variables.forEach(({ active, key, variables }) => {
+          if (active) {
+            activeVariables = variables;
+          }
+          if (localKey === key) {
+            localVariables = variables;
+          }
+        });
+        const style = document.createElement('style');
+        style.id = themes[0].namespace;
+        let innerHTML = '';
+        (localVariables || activeVariables || variables[0].variables).forEach(({ configs }) => {
+          if (Array.isArray(configs)) {
+            configs.forEach(({ key, value }) => {
+              innerHTML = innerHTML + `${key}: ${value};\n`
+            })
+          }
+        });
+        antdV4Variable.configs.forEach(({ key, value }) => {
+          innerHTML = innerHTML + `${key}: ${value};\n`
         })
+        style.innerHTML = `:root {\n${innerHTML}}`
+        document.body.appendChild(style)
+      } else {
+        if (Array.isArray(themes)) {
+          themes.forEach(({ namespace, content }) => {
+            const variables = content?.variables
+      
+            if (Array.isArray(variables)) {
+              const style = document.createElement('style')
+              style.id = namespace
+              let innerHTML = ''
+      
+              variables.forEach(({ configs }) => {
+                if (Array.isArray(configs)) {
+                  configs.forEach(({ key, value }) => {
+                    innerHTML = innerHTML + `${key}: ${value};\n`
+                  })
+                }
+              })
+      
+              style.innerHTML = `:root {\n${innerHTML}}`
+              document.body.appendChild(style)
+            }
+          })
+        }
+      }
     }
-}
-
-cssVariable(dumpJson)
+  }
+  
+  cssVariable(dumpJson)
 
 const render = async (props) => {
     const { container } = props
