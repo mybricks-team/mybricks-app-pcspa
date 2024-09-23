@@ -7,6 +7,11 @@ const type = process.argv[2];
 const pkgName = packageJSON.appConfig[type].name;
 const moment = require('moment')
 
+/** 打包别名 */
+const ALIAS_MAP = {
+  'mybricks-app-pcspa': 'mybricks-app-pcspa-react'
+}
+
 const zip = new JSZip();
 /** 根目录 */
 const rootDir = zip.folder(pkgName);
@@ -62,7 +67,7 @@ zip.generateAsync({
     level: 9
   }
 }).then((content) => {
-  const fileName = `${pkgName}-${moment().format('YYYY-MM-DD-HH-mm-ss')}.zip`;
+  const fileName = `${ALIAS_MAP[pkgName] ?? pkgName}-${moment().format('YYYY-MM-DD-HH-mm-ss')}.zip`;
   fs.writeFileSync(path.join(__dirname, `./${fileName}`), content, 'utf-8');
   console.log(`离线包打包完成，请将 ${fileName} 拖拽到平台进行离线安装`);
 });
