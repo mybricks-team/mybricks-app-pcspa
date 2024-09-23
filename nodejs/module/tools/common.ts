@@ -9,6 +9,9 @@ export const getAppTypeFromTemplate = (template: string) => {
     if (APP_TYPE_COMMIT.includes(APPType.Vue2)) {
       app_type = APPType.Vue2;
     }
+    if (APP_TYPE_COMMIT.includes(APPType.Vue3)) {
+      app_type = APPType.Vue3;
+    }
     if (APP_TYPE_COMMIT.includes(APPType.React)) {
       app_type = APPType.React;
     }
