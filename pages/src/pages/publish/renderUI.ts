@@ -10,6 +10,69 @@ const envList = "--envList--";
 const i18nLangContent = "--i18nLangContent--";
 const titleI18n = "--title-i18n--";
 const runtimeUploadService = "--runtimeUploadService--";
+const pluginTheme = "--plugin-theme--";
+
+function cssVariable() {
+  const themeData = pluginTheme as any;
+
+  if (themeData) {
+    const { antdV4Variable, themes } = themeData
+    if (antdV4Variable) {
+      const localKey = localStorage.getItem("MYBRICKS_PLUGINS_THEME_KEY")
+      let activeVariables;
+      let localVariables;
+      const variables = themes[0].content.variables;
+      variables.forEach(({ active, key, variables }) => {
+        if (active) {
+          activeVariables = variables;
+        }
+        if (localKey === key) {
+          localVariables = variables;
+        }
+      });
+      const style = document.createElement('style');
+      style.id = themes[0].namespace;
+      let innerHTML = '';
+      (localVariables || activeVariables || variables[0].variables).forEach(({ configs }) => {
+        if (Array.isArray(configs)) {
+          configs.forEach(({ key, value }) => {
+            innerHTML = innerHTML + `${key}: ${value};\n`
+          })
+        }
+      });
+      antdV4Variable.configs.forEach(({ key, value }) => {
+        innerHTML = innerHTML + `${key}: ${value};\n`
+      })
+      style.innerHTML = `:root {\n${innerHTML}}`
+      document.body.appendChild(style)
+    } else {
+      if (Array.isArray(themes)) {
+        themes.forEach(({ namespace, content }) => {
+          const variables = content?.variables
+    
+          if (Array.isArray(variables)) {
+            const style = document.createElement('style')
+            style.id = namespace
+            let innerHTML = ''
+    
+            variables.forEach(({ configs }) => {
+              if (Array.isArray(configs)) {
+                configs.forEach(({ key, value }) => {
+                  innerHTML = innerHTML + `${key}: ${value};\n`
+                })
+              }
+            })
+    
+            style.innerHTML = `:root {\n${innerHTML}}`
+            document.body.appendChild(style)
+          }
+        })
+      }
+    }
+  }
+}
+
+cssVariable();
 
 const getCustomHostFromUrl = () => {
   try {
