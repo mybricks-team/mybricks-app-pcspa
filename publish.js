@@ -96,14 +96,14 @@ const execChain = (fns) => {
 if (isOffline) {
   execChain([
     clearZipPkg,
-    fixPkg('react'),
-    //publishReactAppOffline,
+    // fixPkg('react'),
+    // publishReactAppOffline,
     fixPkg('vue3'),
     publishVue3AppOffline,
-    resetPkg,
+    // resetPkg,
     // fixPkg('vue2'),
     // publishVue2AppOffline,
-    // resetPkg
+    resetPkg
   ])
 } else {
   execChain([
