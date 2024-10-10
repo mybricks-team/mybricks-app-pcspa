@@ -60,6 +60,7 @@ const getAppSetting = async () => {
 
 export default function MyDesigner({ appData: originAppData }) {
   window.fileId = originAppData.fileId
+  window._disableSmartLayout = originAppData?.config?.['mybricks-app-pcspa']?.config?.feature?.disableSmartLayout; // 是否禁用智能布局
   
   const appData = useMemo(() => {
     let data = { ...originAppData }
