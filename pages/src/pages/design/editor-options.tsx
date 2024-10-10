@@ -96,6 +96,7 @@ export const DESIGN_MATERIAL_EDITOR_OPTIONS = (ctx) => {
             const result = await API.Material.getMaterialList({
               type: "picture",
               tags: "icon",
+              pageSize: 9999
             }).then((res) => {
               return Object.fromEntries(
                 res.list
