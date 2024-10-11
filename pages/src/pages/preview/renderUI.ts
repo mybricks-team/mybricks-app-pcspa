@@ -160,6 +160,7 @@ const root = ({ renderType, locale, env, ...props }) => {
           };
           return () => ({
             reload: () => location.reload(),
+            forcedReload: () => location.reload(true),
             redirect: ({ url }: { url: string }) => location.replace(url),
             back: () => history.back(),
             forward: () => history.forward(),

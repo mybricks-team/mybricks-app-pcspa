@@ -183,6 +183,7 @@ const root = ({ renderType, locale, runtime, extVars, extCallConnector, customMe
             };
             return () => ({
               reload: () => location.reload(),
+              forcedReload: () => location.reload(true),
               redirect: ({ url }) => location.replace(url),
               back: () => history.back(),
               forward: () => history.forward(),
