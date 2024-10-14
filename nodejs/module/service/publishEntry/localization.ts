@@ -244,13 +244,18 @@ const collectExternal = (
       }
       if (Array.isArray(urls) && urls.length) {
         urls.forEach((url) => {
+          const isHttps = /^http[s]?:/.test(url)
           if (url.endsWith(".js")) {
             htmlStrSet.add(`<script src="${url}"></script>`);
-            pathSet.add(url);
+            if (!isHttps) {
+              pathSet.add(url);
+            }
           }
           if (url.endsWith(".css")) {
             htmlStrSet.add(`<link rel="stylesheet" href="${url}"/>`);
-            pathSet.add(url);
+            if (!isHttps) {
+              pathSet.add(url);
+            }
           }
         });
       }
