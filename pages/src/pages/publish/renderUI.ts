@@ -244,6 +244,8 @@ const root = ({ renderType, locale, runtime, extVars, extCallConnector, customMe
         if (isEqual(executeEnv, USE_CUSTOM_HOST)) {
           if (params instanceof FormData) {
             newParams.append("MYBRICKS_HOST", JSON.stringify(MYBRICKS_HOST));
+          } else if (Array.isArray(newParams)) {
+            newParams["MYBRICKS_HOST"] = { ...MYBRICKS_HOST };
           } else {
             newParams = { ...params, MYBRICKS_HOST: { ...MYBRICKS_HOST } };
           }
