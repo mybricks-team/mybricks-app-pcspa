@@ -224,29 +224,30 @@ export async function generateComLibRT(
     (pre, scene) => [...pre, ...scene.deps],
     []
   )
-  scenesDeps.forEach((item) => {
-    if (item.moduleId) {
-      // 如果是模块，且存在 moduleId
-      const module = json?.modules[item.moduleId]
 
-      if (module) {
-        modulesDeps = [
-          ...modulesDeps,
-          ...module?.json.deps,
-        ]
+  // scenesDeps.forEach((item) => {
+  //   if (item.moduleId) {
+  //     // 如果是模块，且存在 moduleId
+  //     const module = json?.modules[item.moduleId]
 
-      } else {
-        Logger.info(`[publish] 模块 ID ${item.moduleId} 不存在，数据可能存在错误`);
-      }
+  //     if (module) {
+  //       modulesDeps = [
+  //         ...modulesDeps,
+  //         ...module?.json.deps,
+  //       ]
 
-    }
-  })
+  //     } else {
+  //       Logger.info(`[publish] 模块 ID ${item.moduleId} 不存在，数据可能存在错误`);
+  //     }
 
-  // if (json.modules) {
-  //   Object.keys(json.modules).forEach((key) => {
-  //     modulesDeps = [...modulesDeps, ...json.modules[key].json.deps];
-  //   });
-  // }
+  //   }
+  // })
+
+  if (json.modules) {
+    Object.keys(json.modules).forEach((key) => {
+      modulesDeps = [...modulesDeps, ...json.modules[key].json.deps];
+    });
+  }
 
   let deps = [
     ...scenesDeps

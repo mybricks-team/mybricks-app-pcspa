@@ -68,7 +68,8 @@ export async function downloadProduct(
       .replace(publicAssetsRegex, () => {
         return publiAssets.react.map(item => {
           const tagStr = item.tag.toLocaleLowerCase()
-          return tagStr === 'link' ? `<link rel="stylesheet" href="http:${item.CDN}" />` : `<script src="http:${item.CDN}"></script>`
+          // return tagStr === 'link' ? `<link rel="stylesheet" href="http:${item.CDN}" />` : `<script src="http:${item.CDN}"></script>`
+          return tagStr === 'link' ? `<link rel="stylesheet" href="${item.CDN}" />` : `<script src="${item.CDN}"></script>` // 不要带具体协议，跟随页面协议
         }).join('\n')
         //         return `<script src="http://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443543399.2.29.4_moment.min.js"></script>
         //       <script src="http://f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443577599.2.29.4_locale_zh-cn.min.js"></script>

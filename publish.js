@@ -97,13 +97,13 @@ if (isOffline) {
   execChain([
     clearZipPkg,
     fixPkg('react'),
-    //publishReactAppOffline,
-    fixPkg('vue3'),
-    publishVue3AppOffline,
-    resetPkg,
+    publishReactAppOffline,
+    // fixPkg('vue3'),
+    // publishVue3AppOffline,
+    // resetPkg,
     // fixPkg('vue2'),
     // publishVue2AppOffline,
-    // resetPkg
+    resetPkg
   ])
 } else {
   execChain([

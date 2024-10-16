@@ -152,7 +152,7 @@ async function resourceLocalization(
     return res;
   });
 
-  const { chunkAssets, pathArr } = collectExternal(localPublicInfos, comlibs, componentModules, materialExternalInfos);
+  const { chunkAssets, onlineChunkAssets, pathArr } = collectExternal(localPublicInfos, comlibs, componentModules, materialExternalInfos);
 
   const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
     switch (cur.tag) {
@@ -167,6 +167,7 @@ async function resourceLocalization(
   }, "");
 
   template = template.replace("-- public --", chunkAssets);
+  template = template.replace("-- online-public --", onlineChunkAssets);
 
   Logger.info(`[publish] 发布资源 ${localPublicInfos}`);
   Logger.info(`[publish] 发布资源 ${materialExternalInfos}`);
@@ -218,6 +219,7 @@ const collectExternal = (
   componentModules,
   materialExternalInfos
 ) => {
+  let onlineHtmlStrSet = new Set();
   let htmlStrSet = new Set();
   let pathSet = new Set<string>();
   common.forEach((it) => {
@@ -244,19 +246,29 @@ const collectExternal = (
       }
       if (Array.isArray(urls) && urls.length) {
         urls.forEach((url) => {
+          const isHttps = /^http[s]?:/.test(url)
           if (url.endsWith(".js")) {
-            htmlStrSet.add(`<script src="${url}"></script>`);
-            pathSet.add(url);
+            if (!isHttps) {
+              htmlStrSet.add(`<script src="${url}"></script>`);
+              pathSet.add(url);
+            } else {
+              onlineHtmlStrSet.add(`<script src="${url}"></script>`)
+            }
           }
           if (url.endsWith(".css")) {
-            htmlStrSet.add(`<link rel="stylesheet" href="${url}"/>`);
-            pathSet.add(url);
+            if (!isHttps) {
+              htmlStrSet.add(`<link rel="stylesheet" href="${url}"/>`);
+              pathSet.add(url);
+            } else {
+              onlineHtmlStrSet.add(`<link rel="stylesheet" href="${url}"/>`)
+            }
           }
         });
       }
     });
   });
   return {
+    onlineChunkAssets: [...onlineHtmlStrSet].join("\n"),
     chunkAssets: [...htmlStrSet].join("\n"),
     pathArr: [...pathSet],
   }

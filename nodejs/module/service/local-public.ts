@@ -67,8 +67,8 @@ export default {
     },
     {
       tag: "script",
-      path: "public/render-web/1.3.34/index.min.js",
-      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.3.34/index.min.js",
+      path: "public/render-web/1.3.38/index.min.js",
+      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.3.38/index.min.js",
     },
   ],
   vue2: [
@@ -137,60 +137,60 @@ export default {
       // 引擎相关资源
       {
         path: "public/designer-spa/1.3.49/index.min.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.49/index.min.js",
+        CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.49/index.min.js",
       },
       // {
       //   path: "public/designer-spa/1.3.48/828.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/828.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/828.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/635.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/635.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/635.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/74.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/74.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/74.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/239.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/239.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/239.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/554.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/554.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/554.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/452.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/452.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/452.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/9.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/9.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/9.index.min.js",
       // },
       // 兜底组件库
       {
         path: "public/comlibs/5952_1.0.1/2023-07-25_22-02-32/edit.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/5952_1.0.1/2023-07-25_22-02-32/edit.js",
+        CDN: "https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/5952_1.0.1/2023-07-25_22-02-32/edit.js",
       },
       {
         path: "public/comlibs/5952_1.0.1/2023-07-25_22-02-32/rt.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/5952_1.0.1/2023-07-25_22-02-32/rt.js",
+        CDN: "https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/5952_1.0.1/2023-07-25_22-02-32/rt.js",
       },
       {
         path: "public/comlibs/7182_1.0.29/2023-07-25_22-04-55/rt.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7182_1.0.29/2023-07-25_22-04-55/rt.js",
+        CDN: "https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7182_1.0.29/2023-07-25_22-04-55/rt.js",
       },
       {
         path: "public/comlibs/7182_1.0.29/2023-07-25_22-04-55/edit.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7182_1.0.29/2023-07-25_22-04-55/edit.js",
+        CDN: "https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7182_1.0.29/2023-07-25_22-04-55/edit.js",
       },
       {
         path: "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
+        CDN: "https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.2.72/2023-08-28_16-50-20/edit.js",
       },
       {
         path: "public/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
+        CDN: "https://f2.eckwai.com/kos/nlav12333/fangzhou/pub/comlibs/7632_1.2.72/2023-08-28_16-50-20/rt.js",
       },
       // 其他
       {
@@ -202,35 +202,35 @@ export default {
       // 引擎相关资源
       {
         path: "public/designer-spa/1.3.49/index.min.js",
-        CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.49/index.min.js",
+        CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.49/index.min.js",
       },
       // {
       //   path: "public/designer-spa/1.3.48/74.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/74.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/74.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/9.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/9.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/9.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/452.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/452.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/452.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/239.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/239.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/239.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/828.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/828.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/828.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/635.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/635.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/635.index.min.js",
       // },
       // {
       //   path: "public/designer-spa/1.3.48/554.index.min.js",
-      //   CDN: "https://f1.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/554.index.min.js",
+      //   CDN: "https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/1.3.48/554.index.min.js",
       // },
     ],
   },
