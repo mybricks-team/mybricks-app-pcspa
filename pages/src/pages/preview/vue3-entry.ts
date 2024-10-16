@@ -47,7 +47,7 @@ function cssVariable(dumpJson) {
           innerHTML = innerHTML + `${key}: ${value};\n`
         })
         style.innerHTML = `:root {\n${innerHTML}}`
-        document.body.appendChild(style)
+        document.head.appendChild(style)
       } else {
         if (Array.isArray(themes)) {
           themes.forEach(({ namespace, content }) => {
@@ -67,7 +67,7 @@ function cssVariable(dumpJson) {
               })
       
               style.innerHTML = `:root {\n${innerHTML}}`
-              document.body.appendChild(style)
+              document.head.appendChild(style)
             }
           })
         }
