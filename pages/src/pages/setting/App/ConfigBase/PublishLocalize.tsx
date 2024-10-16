@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Form, Card, Button, Switch } from 'antd'
+import { Form, Card, Button, Switch, Input } from 'antd'
 import { _NAMESPACE_ } from "..";
 import dayjs from "dayjs";
 import { TConfigProps } from '../useConfig';
@@ -26,11 +26,14 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         isEncode: !!values.isEncode,
         enableCompatible: !!values.enableCompatible,
         enableAI: !!values.enableAI,
+        selectAIModel: !!values.selectAIModel ? values.selectAIModel : undefined,
         updateTime,
         user: user?.email
       }
     });
   }
+
+  const enableAI = Form.useWatch('enableAI', form);
 
   return <>
     <Form form={form} style={{ marginTop: 12 }}>
@@ -58,6 +61,14 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       >
         <Switch />
       </Form.Item>
+      {
+        enableAI && <Form.Item
+          name="selectAIModel"
+          label="指定AI模型"
+        >
+          <Input placeholder='不指定将使用默认模型' />
+        </Form.Item>
+      }
       <Form.Item
         name="enableCompatible"
         label="兼容低版本浏览器"

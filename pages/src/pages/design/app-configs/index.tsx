@@ -519,7 +519,9 @@ export default function appConfig(
       fx: {},
       useStrict: false,
     },
-    aiView: getAiView(ctx?.appConfig?.publishLocalizeConfig?.enableAI),
+    aiView: getAiView(ctx?.appConfig?.publishLocalizeConfig?.enableAI, {
+      model: ctx?.appConfig?.publishLocalizeConfig?.selectAIModel
+    }),
     editView: editViewConfig({ctx,envList}),
     com: {
       env: {
@@ -805,18 +807,24 @@ export default function appConfig(
   }
 }
 
-const getAiView = (enableAI) => {
+const getAiView = (enableAI, option) => {
+  const { model } = option ?? {};
+
   if (enableAI) {
     return {
       async request(messages) {
+        // console.log(messages[0].content)
+        // console.log(messages[messages.length - 1].content)
+
         let content = '处理失败'
         try {
           let res = await axios({
             method: 'POST',
-            url: '//ai.mybricks.world/chat',
+            url: '//ai.mybricks.world/code',
             withCredentials: false,
             data: getAiEncryptData({
-              messages,
+              model: !!model ? model : undefined,
+              messages
             }),
             headers: {
               'Content-Type': 'application/json',
@@ -835,6 +843,14 @@ const getAiView = (enableAI) => {
       },
       async requestAsStream(messages, {write, complete, error}) {
         try {
+          // console.log(messages[0].content)
+          // console.log(messages[messages.length - 1].content)
+
+          // messages[0].1 = '你好'
+
+          // 用于debug用户当前使用的模型
+          window._ai_use_model_ = model;
+
           const response = await fetch('//ai.mybricks.world/stream', {
             method: 'POST',
             headers: {
@@ -842,6 +858,11 @@ const getAiView = (enableAI) => {
             },
             body: JSON.stringify(
               getAiEncryptData({
+                model: !!model ? model : undefined,
+                // model: 'qwen-max-latest',
+                // model: 'qwen-plus-latest',
+                // model: 'qwen-turbo-latest',
+                // model: 'openai/gpt-4o-mini',
                 messages,
               })
             ),
