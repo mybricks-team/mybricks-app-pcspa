@@ -855,8 +855,8 @@ const getAiView = (enableAI, option) => {
 
         try {
           // console.log(messages)
-          console.log(messages[0].content)
-          console.log(messages[messages.length - 1].content)
+          // console.log(messages[0].content)
+          // console.log(messages[messages.length - 1].content)
 
           // messages[0].content = '你是一个智能助手'
 
