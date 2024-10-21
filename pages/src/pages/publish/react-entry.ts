@@ -26,7 +26,6 @@ const getCurrentLocale = () => {
   return getLocaleLang(localeConfig as any)
 }
 
-
 const render = (props) => {
   const { container } = props;
   useReactRender = props?.useReactRender

@@ -799,7 +799,8 @@ export default function appConfig(
       },
       theme: {
         css: [
-          "public/antd/antd@4.21.6.variable.min.css",
+          // 去除默认的样式文件
+          // "public/antd/antd@4.21.6.variable.min.css",
           ///...(!isReact ? ['./public/elementUI/element@2.15.14.css'] : []),
         ],
       },

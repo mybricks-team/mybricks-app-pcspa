@@ -98,6 +98,38 @@ const checkDeps = async (libs) => {
   return libs;
 };
 
+export const getLibExternalsFill = (lib) => {
+  if (lib.namespace === "mybricks.normal-pc" && !lib.externals.length) {
+    // 兼容，添加默认的externals
+    lib.externals = [
+      {
+        "name": "@ant-design/icons",
+        "library": "icons",
+        "urls": [
+          "public/ant-design-icons@4.7.0.min.js"
+        ]
+      },
+      {
+        "name": "moment",
+        "library": "moment",
+        "urls": [
+          "public/moment/moment@2.29.4.min.js",
+          "public/moment/locale/zh-cn.min.js"
+        ]
+      },
+      {
+        "name": "antd",
+        "library": "antd",
+        "urls": [
+          "public/antd/antd@4.21.6.variable.min.css",
+          "public/antd/antd@4.21.6.min.js",
+          "public/antd/locale/zh_CN.js"
+        ]
+      }
+    ]
+  }
+}
+
 const getLibExternals = ({ namespace, version }) => {
   return API.Material.getMaterialContent({
     namespace,
@@ -105,14 +137,16 @@ const getLibExternals = ({ namespace, version }) => {
     codeType: "pure",
   }).then((lib) => {
     const content = compatContent(lib.content);
-    return {
+    const res = {
       ...lib,
       ...content,
-    };
+    }
+    getLibExternalsFill(res);
+    return res;
   });
 };
 
-const createScript = (url: string) => {
+export const createScript = (url: string) => {
   if (document.querySelector(`script[src="${url}"]`)) return Promise.resolve();
   const script = document.createElement("script");
   script.src = url;
@@ -158,11 +192,16 @@ const createLink = (url: string) => {
 
 const insertDeps = async (libs) => {
   if (!libs.length) return libs;
-  await Promise.all(
-    libs.map((lib) => {
-      return (typeof lib === 'object' && "externals" in lib) ? insertExternal(lib) : Promise.resolve();
-    })
-  );
+  for (const lib of libs) {
+    if (typeof lib === 'object' && "externals" in lib) {
+      await insertExternal(lib)
+    }
+  }
+  // await Promise.all(
+  //   libs.map((lib) => {
+  //     return (typeof lib === 'object' && "externals" in lib) ? insertExternal(lib) : Promise.resolve();
+  //   })
+  // );
   return libs;
 };
 
@@ -195,24 +234,74 @@ const getCssDeps = (libs) => {
   }, [])
 };
 
-const insertExternal = async (lib) => {
-  const p = [];
-  lib.externals?.forEach((it) => {
-    const { library, urls } = it;
-    if (Array.isArray(urls) && urls.length) {
-      urls.forEach((url) => {
-        if (url.endsWith(".js")) {
-          if (!!library && library in window) return;
-          p.push(createScript(url));
-        } else if (url.endsWith(".css")) {
-          p.push(createLink(url));
-        }
-      });
+const loadScripts = (scripts: string[]) => {
+  // console.log("scripts: ", scripts);
+  return new Promise((resolve, reject) => {
+    if (scripts.length === 0) {
+      // 如果没有剩余的脚本，则说明所有脚本都已经加载完成
+      resolve(true);
+    } else {
+      // console.log(`开始加载 ${scripts[0]}`)
+      createScript(scripts[0]).then(() => {
+        // console.log(`加载完成 ${scripts[0]} 开始下一个`)
+        loadScripts(scripts.slice(1)).then(() => {
+          resolve(true)
+        }).catch(reject);
+      }).catch(reject)
     }
-  });
-  await Promise.all(p);
+  })
+}
+
+const insertExternal = async (lib) => {
+  const css = [];
+  const js = [];
+  if (lib?.externals) {
+    for (const external of lib.externals) {
+      const { library, urls } = external;
+      if (library && library in window) { 
+        // 有配置library且window上已有，不加载覆盖
+        console.log(`[组件库依赖加载]: ${library} 已存在，不进行加载覆盖`, external);
+      } else {
+        if (Array.isArray(urls)) {
+          for (const url of urls) {
+            if (url.endsWith(".js")) {
+              // js按顺序加载
+              js.push(url)
+            } else if (url.endsWith(".css")) {
+              // css不用按顺序
+              css.push(createLink(url));
+            }
+          }
+        }
+      }
+    }
+  }
+  // for (const url of js) {
+  //   await createScript(url);
+  // }
+  await loadScripts(js);
+  await Promise.all(css);
   return lib;
 };
+
+// const insertExternal = async (lib) => {
+//   const p = [];
+//   lib.externals?.forEach((it) => {
+//     const { library, urls } = it;
+//     if (Array.isArray(urls) && urls.length) {
+//       urls.forEach((url) => {
+//         if (url.endsWith(".js")) {
+//           if (!!library && library in window) return;
+//           p.push(createScript(url));
+//         } else if (url.endsWith(".css")) {
+//           p.push(createLink(url));
+//         }
+//       });
+//     }
+//   });
+//   await Promise.all(p);
+//   return lib;
+// };
 
 const composeAsync =
   (...fns) =>

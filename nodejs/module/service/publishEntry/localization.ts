@@ -232,15 +232,51 @@ const collectExternal = (
       pathSet.add(it.path);
     }
   });
+
+  comlibs.forEach((lib) => {
+    if (lib.namespace === "mybricks.normal-pc" && !lib.externals.length) {
+      // 兼容，添加默认的externals
+      lib.externals = [
+        {
+          "name": "@ant-design/icons",
+          "library": "icons",
+          "urls": [
+            "public/ant-design-icons@4.7.0.min.js"
+          ]
+        },
+        {
+          "name": "moment",
+          "library": "moment",
+          "urls": [
+            "public/moment/moment@2.29.4.min.js",
+            "public/moment/locale/zh-cn.min.js"
+          ]
+        },
+        {
+          "name": "antd",
+          "library": "antd",
+          "urls": [
+            "public/antd/antd@4.21.6.variable.min.css",
+            "public/antd/antd@4.21.6.min.js",
+            "public/antd/locale/zh_CN.js"
+          ]
+        }
+      ]
+    }
+  })
+
   filterComLibFromComponent(
     (comlibs ?? []).filter(({ id }) => id !== "_myself_"),
     componentModules
   ).forEach((it) => {
     (it.externals ?? []).forEach((it) => {
-      let { urls, library } = it;
-      const mybricksExternal = materialExternalInfos.find(
-        (it) => it.library.toLowerCase() === library!.toLowerCase()
-      );
+      let { urls, library, version } = it;
+      const mybricksExternal = library ? materialExternalInfos.find(
+        (it) => {
+          // 有version的话校验version
+          return (it.library.toLowerCase() === library!.toLowerCase()) && (version ? it.version === version : true)
+        }
+      ) : null;
       if (mybricksExternal) {
         urls = mybricksExternal.path;
       }
