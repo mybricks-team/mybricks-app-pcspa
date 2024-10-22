@@ -111,7 +111,34 @@ async function render(props) {
     comlibs.forEach((comlib) => {
       getLibExternalsFill(comlib);
     })
-    await insertDeps(comlibs)
+    await insertDeps([{
+      externals: [
+        {
+          "name": "@ant-design/icons",
+          "library": "icons",
+          "urls": [
+            "public/ant-design-icons@4.7.0.min.js"
+          ]
+        },
+        {
+          "name": "moment",
+          "library": "moment",
+          "urls": [
+            "public/moment/moment@2.29.4.min.js",
+            "public/moment/locale/zh-cn.min.js"
+          ]
+        },
+        {
+          "name": "antd",
+          "library": "antd",
+          "urls": [
+            "public/antd/antd@4.21.6.variable.min.css",
+            "public/antd/antd@4.21.6.min.js",
+            "public/antd/locale/zh_CN.js"
+          ]
+        }
+      ]
+    }].concat(comlibs))
     // if (!window.antd) {
     //   console.log("没有antd，默认加载")
     //   console.log("兼容通用PC组件库（老版本没有配置externals）")
@@ -151,26 +178,61 @@ async function render(props) {
     // }
     Promise.all(getRtComlibsFromConfigEdit(comlibs).map((t) => requireScript(t))).then(() => {
       const antd = window.antd;
+      const antd_5_21_4 = window.antd_5_21_4;
       const lang = getAntdLocalName(getCurrentLocale())
 
-      const antdLocalLib = antd?.locales?.[lang] || (Object.values(antd?.locales || {}))?.find(item => item.locale === getCurrentLocale()) || antd.locale['zh_CN'].default
+      const antdLocalLib = antd?.locales?.[lang] || (Object.values(antd?.locales || {}))?.find(item => item.locale === getCurrentLocale()) || antd?.locale['zh_CN'].default
 
       reactRoot = ReactDOM.createRoot((container ?? document).querySelector('#root'));
 
-      reactRoot.render(React.createElement(
-        antd.ConfigProvider,
-        {
-          // 如鬼没有就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
-          locale: [`en_US`, `en`].includes(lang) ? undefined : antdLocalLib
-        },
-        renderUI({
-          ...props, renderType: 'react', locale: getCurrentLocale(), env: {
-            callDomainModel(domainModel, type, params) {
-              return callDomainHttp(domainModel, params, { action: type } as any);
-            }
+      const antdProps = {
+        // 如鬼没有就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
+        locale: [`en_US`, `en`].includes(lang) ? undefined : antdLocalLib
+      }
+      let reactNode = renderUI({
+        ...props, renderType: 'react', locale: getCurrentLocale(), env: {
+          callDomainModel(domainModel, type, params) {
+            return callDomainHttp(domainModel, params, { action: type } as any);
           }
-        })
-      ));
+        }
+      })
+
+      const antdConfigProvider = antd?.ConfigProvider
+
+      if (antdConfigProvider) {
+        reactNode = React.createElement(
+          antdConfigProvider,
+          antdProps,
+          reactNode
+        )
+      }
+
+      const antd_5_21_4_ConfigProvider = antd_5_21_4?.ConfigProvider
+
+      if (antd_5_21_4_ConfigProvider) {
+        reactNode = React.createElement(
+          antd_5_21_4_ConfigProvider,
+          antdProps,
+          reactNode
+        )
+      }
+
+      reactRoot.render(reactNode)
+
+      // reactRoot.render(React.createElement(
+      //   antd.ConfigProvider,
+      //   {
+      //     // 如鬼没有就传入undefined使用默认的英文，否则使用指定的语言包，并以中文兜底
+      //     locale: [`en_US`, `en`].includes(lang) ? undefined : antdLocalLib
+      //   },
+      //   renderUI({
+      //     ...props, renderType: 'react', locale: getCurrentLocale(), env: {
+      //       callDomainModel(domainModel, type, params) {
+      //         return callDomainHttp(domainModel, params, { action: type } as any);
+      //       }
+      //     }
+      //   })
+      // ));
     })
   }
 }

@@ -12,6 +12,7 @@ declare interface Window {
   Vue: Vue;
   ReactDOM: ReactDOM;
   antd: any;
+  antd_5_21_4: any;
   pluginConnectorDomain: Function
   showDirectoryPicker: Function
   fileId: string
