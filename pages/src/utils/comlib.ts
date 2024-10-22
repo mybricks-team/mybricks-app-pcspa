@@ -272,20 +272,25 @@ const mergeMyComlib = (myComlib, newMyComlib) => {
   const newComs = newComAray.slice(0, newComAray.length - 1);
 
   newComs.forEach((com) => {
-    const { namespace, version } = com;
-    if (!coms.find((com) => com.namespace === namespace && com.version === version)) {
+    const { namespace } = com;
+    const index = coms.findIndex((com) => com.namespace === namespace)
+    if (index === -1) {
+      // 添加
       comAray.splice(comAray.length - 1, 0, com)
+    } else {
+      // 更新
+      comAray[index] = com;
     }
   })
 }
 
-export const addMyComponents = (nameAndVersions: NameAndVersion[], comboLibType: ComboLibType = 'edit') => {
+export const updateMyComponents = (nameAndVersions: NameAndVersion[], comboLibType: ComboLibType = 'edit') => {
   const comboComlibURL = new ComboComlibURL()
   comboComlibURL.setComponents(nameAndVersions)
 
   return new Promise((resolve, reject) => {
-    myRequire([comboLibType === 'edit' ? comboComlibURL.toEditUrl() : comboComlibURL.toRtUrl()], () => {
-      reject(new Error('加载我的组件失败'))
+    myRequire([comboLibType === 'edit' ? comboComlibURL.toEditUrl() : comboComlibURL.toRtUrl()], (err) => {
+      reject(err)
     }).then(({ styles }) => {
       const { myComlib, newMyComlib } = getMyComlib();
       mergeMyComlib(myComlib, newMyComlib);

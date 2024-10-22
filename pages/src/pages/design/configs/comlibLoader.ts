@@ -2,7 +2,7 @@ import isObject from 'lodash/isObject'
 import { Modal, message } from 'antd'
 // import { MaterialService } from './../../../services'
 // import { MaterialComlib } from './../../../types'
-import { getComlibsByNamespaceAndVersion, addMyComponents } from './../../../utils/comlib'
+import { getComlibsByNamespaceAndVersion, updateMyComponents } from './../../../utils/comlib'
 import { initMaterials } from './initMaterials'
 import { addComlib } from './addComlib'
 import { upgradeLatestComlib, upgradeComlibByVersion } from './upgradeComlib'
@@ -58,8 +58,8 @@ export default (ctx) => (libDesc) => {
   })
 
   // 返回当前添加的物料信息
-  const addCtxMyComlibComponents = ((components, comlibsComponents) => {
-    const addComs = [];
+  const updateCtxMyComlibComponents = ((components, comlibsComponents) => {
+    const updateComs = [];
     const mySelfLib = ctx?.comlibs.find(t => t?.id === MY_SELF_ID)
 
     components.forEach(component => {
@@ -76,15 +76,23 @@ export default (ctx) => (libDesc) => {
           namespace: component.namespace,
           version: component.version,
         });
-        addComs.push({
+      } else {
+        // 更新
+        mySelfLib.comAray[index] = {
           materialId: component.materialId,
           namespace: component.namespace,
           version: component.version,
-        })
+        };
       }
+
+      updateComs.push({
+        materialId: component.materialId,
+        namespace: component.namespace,
+        version: component.version,
+      })
     })
 
-    return addComs
+    return updateComs
   })
 
   const removeSelfLibComponents = (comNamespaces) => {
@@ -163,22 +171,39 @@ export default (ctx) => (libDesc) => {
               },
               onSuccess: (params) => {
                 const { materials, updatedMaterials } = params
-                const newComponents = addSelfLibComponents(materials, comlibsComponents)
-                getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
-                  const curMaterial = updatedMaterials[0]
-                  const curComInfo = newComlib?.comAray.find(item => item.namespace === curMaterial?.namespace)
+                const key = Math.random();
+                message.loading({ content: '正在更新组件，请稍后...', key, duration: 0 });
 
+                const newComponents = updateCtxMyComlibComponents(updatedMaterials, comlibsComponents)
+                updateMyComponents(newComponents).then((myComlib: any) => {
+                  message.success({ content: "更新成功", key, duration: 2})
                   resolve({
                     id: '_myself_',
                     title: '我的组件',
                     defined: true,
-                    comAray: newComlib?.comAray || []
+                    comAray: myComlib?.comAray || []
                   })
-                  message.success(`${curComInfo ? `【${curComInfo.title}】` : ''} 组件 版本：${curMaterial.version} 更新成功`)
-                }).catch(e => {
-                  message.error('更新失败')
-                  console.warn(`[MyBricks PC Warn]: ${comNamespace} 更新失败`)
+                }).catch((e) => {
+                  console.error("更新组件: ", e);
+                  message.error({ content: "更新失败", key, duration: 2})
                 })
+
+                // const newComponents = addSelfLibComponents(materials, comlibsComponents)
+                // getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
+                //   const curMaterial = updatedMaterials[0]
+                //   const curComInfo = newComlib?.comAray.find(item => item.namespace === curMaterial?.namespace)
+
+                //   resolve({
+                //     id: '_myself_',
+                //     title: '我的组件',
+                //     defined: true,
+                //     comAray: newComlib?.comAray || []
+                //   })
+                //   message.success(`${curComInfo ? `【${curComInfo.title}】` : ''} 组件 版本：${curMaterial.version} 更新成功`)
+                // }).catch(e => {
+                //   message.error('更新失败')
+                //   console.warn(`[MyBricks PC Warn]: ${comNamespace} 更新失败`)
+                // })
 
               }
             })
@@ -245,8 +270,8 @@ export default (ctx) => (libDesc) => {
                 const key = Math.random();
                 message.loading({ content: '正在加载组件，请稍后...', key, duration: 0 });
 
-                const newComponents = addCtxMyComlibComponents(updatedMaterials, comlibsComponents)
-                addMyComponents(newComponents).then((myComlib: any) => {
+                const newComponents = updateCtxMyComlibComponents(updatedMaterials, comlibsComponents)
+                updateMyComponents(newComponents).then((myComlib: any) => {
                   message.success({ content: "加载成功", key, duration: 2})
                   resolve({
                     id: '_myself_',
@@ -289,8 +314,8 @@ export default (ctx) => (libDesc) => {
                 const key = Math.random();
                 message.loading({ content: '正在加载组件，请稍后...', key, duration: 0 });
 
-                const newComponents = addCtxMyComlibComponents(updatedMaterials, comlibsComponents)
-                addMyComponents(newComponents).then((myComlib: any) => {
+                const newComponents = updateCtxMyComlibComponents(updatedMaterials, comlibsComponents)
+                updateMyComponents(newComponents).then((myComlib: any) => {
                   message.success({ content: "加载成功", key, duration: 2})
                   resolve({
                     id: '_myself_',
