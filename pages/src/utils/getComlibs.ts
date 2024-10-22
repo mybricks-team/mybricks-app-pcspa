@@ -194,6 +194,7 @@ const insertDeps = async (libs) => {
   if (!libs.length) return libs;
   for (const lib of libs) {
     if (typeof lib === 'object' && "externals" in lib) {
+      getLibExternalsFill(lib);
       await insertExternal(lib)
     }
   }
