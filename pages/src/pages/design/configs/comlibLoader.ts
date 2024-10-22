@@ -2,7 +2,7 @@ import isObject from 'lodash/isObject'
 import { Modal, message } from 'antd'
 // import { MaterialService } from './../../../services'
 // import { MaterialComlib } from './../../../types'
-import { getComlibsByNamespaceAndVersion } from './../../../utils/comlib'
+import { getComlibsByNamespaceAndVersion, addMyComponents } from './../../../utils/comlib'
 import { initMaterials } from './initMaterials'
 import { addComlib } from './addComlib'
 import { upgradeLatestComlib, upgradeComlibByVersion } from './upgradeComlib'
@@ -55,6 +55,36 @@ export default (ctx) => (libDesc) => {
     })
 
     return mySelfLib.comAray
+  })
+
+  // 返回当前添加的物料信息
+  const addCtxMyComlibComponents = ((components, comlibsComponents) => {
+    const addComs = [];
+    const mySelfLib = ctx?.comlibs.find(t => t?.id === MY_SELF_ID)
+
+    components.forEach(component => {
+      if (comlibsComponents.find(item => item.namespace === component.namespace)) {
+        return
+      }
+
+      const index = mySelfLib.comAray.findIndex((item) => item.namespace === component.namespace);
+
+      if (index === -1) {
+        // 没有，添加
+        mySelfLib.comAray.push({
+          materialId: component.materialId,
+          namespace: component.namespace,
+          version: component.version,
+        });
+        addComs.push({
+          materialId: component.materialId,
+          namespace: component.namespace,
+          version: component.version,
+        })
+      }
+    })
+
+    return addComs
   })
 
   const removeSelfLibComponents = (comNamespaces) => {
@@ -212,16 +242,36 @@ export default (ctx) => (libDesc) => {
                 tags: [APP_TYPE]
               },
               onSuccess: ({ materials, updatedMaterials }) => {
-                const newComponents = addSelfLibComponents(materials, comlibsComponents)
-                getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
-                  console.log(newComlib)
+                const key = Math.random();
+                message.loading({ content: '正在加载组件，请稍后...', key, duration: 0 });
+
+                const newComponents = addCtxMyComlibComponents(updatedMaterials, comlibsComponents)
+                addMyComponents(newComponents).then((myComlib: any) => {
+                  message.success({ content: "加载成功", key, duration: 2})
                   resolve({
                     id: '_myself_',
                     title: '我的组件',
                     defined: true,
-                    comAray: newComlib?.comAray || []
+                    comAray: myComlib?.comAray || []
                   })
+                }).catch((e) => {
+                  console.error("添加UI组件: ", e);
+                  message.error({ content: "加载失败", key, duration: 2})
                 })
+
+                // const newComponents = addSelfLibComponents(materials, comlibsComponents)
+                // console.log("newComponents: ", newComponents)
+                // console.time("加载时间")
+                // getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
+                //   console.log("newComlib: ", newComlib)
+                //   console.timeEnd("加载时间")
+                //   resolve({
+                //     id: '_myself_',
+                //     title: '我的组件',
+                //     defined: true,
+                //     comAray: newComlib?.comAray || []
+                //   })
+                // })
               }
             })
 
@@ -236,15 +286,31 @@ export default (ctx) => (libDesc) => {
                 tags: ['js']
               },
               onSuccess: ({ materials, updatedMaterials }) => {
-                const newComponents = addSelfLibComponents(materials, comlibsComponents)
-                getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
+                const key = Math.random();
+                message.loading({ content: '正在加载组件，请稍后...', key, duration: 0 });
+
+                const newComponents = addCtxMyComlibComponents(updatedMaterials, comlibsComponents)
+                addMyComponents(newComponents).then((myComlib: any) => {
+                  message.success({ content: "加载成功", key, duration: 2})
                   resolve({
                     id: '_myself_',
                     title: '我的组件',
                     defined: true,
-                    comAray: newComlib?.comAray || []
+                    comAray: myComlib?.comAray || []
                   })
+                }).catch((e) => {
+                  console.error("添加JS组件: ", e);
+                  message.error({ content: "加载失败", key, duration: 2})
                 })
+                // const newComponents = addSelfLibComponents(materials, comlibsComponents)
+                // getComlibsByNamespaceAndVersion(newComponents).then((newComlib) => {
+                //   resolve({
+                //     id: '_myself_',
+                //     title: '我的组件',
+                //     defined: true,
+                //     comAray: newComlib?.comAray || []
+                //   })
+                // })
               }
             })
 

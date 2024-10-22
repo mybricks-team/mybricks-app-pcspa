@@ -238,6 +238,63 @@ export const getComlibsByNamespaceAndVersion = (nameAndVersions: NameAndVersion[
   return getMySelfLibComsFromUrl(comboLibType === 'edit' ? comboComlibURL.toEditUrl() : comboComlibURL.toRtUrl());
 }
 
+const getMyComlib = () => {
+  const comlibs = window['__comlibs_edit_']
+  const firstComIdx = comlibs.findIndex(
+    (lib) => lib.id === MY_SELF_ID,
+  );
+  const lastComIndex = comlibs.findLastIndex(
+    (lib) => lib.id === MY_SELF_ID,
+  );
+  const myComlib = comlibs[firstComIdx];
+  const newMyComlib = comlibs[lastComIndex];
+  comlibs.splice(lastComIndex, 1);
+  return {
+    myComlib,
+    newMyComlib
+  }
+}
+
+const mergeMyComlib = (myComlib, newMyComlib) => {
+  const { comAray } = myComlib;
+  const { comAray: newComAray } = newMyComlib;
+  const deps = comAray[comAray.length -1].comAray;
+  const newDeps = newComAray[newComAray.length - 1].comAray;
+
+  newDeps.forEach((dep) =>{ 
+    const { namespace, version } = dep;
+    if (!deps.find((dep) => dep.namespace === namespace && dep.version === version)) {
+      deps.push(dep)
+    }
+  })
+
+  const coms = comAray.slice(0, comAray.length - 1);
+  const newComs = newComAray.slice(0, newComAray.length - 1);
+
+  newComs.forEach((com) => {
+    const { namespace, version } = com;
+    if (!coms.find((com) => com.namespace === namespace && com.version === version)) {
+      comAray.splice(comAray.length - 1, 0, com)
+    }
+  })
+}
+
+export const addMyComponents = (nameAndVersions: NameAndVersion[], comboLibType: ComboLibType = 'edit') => {
+  const comboComlibURL = new ComboComlibURL()
+  comboComlibURL.setComponents(nameAndVersions)
+
+  return new Promise((resolve, reject) => {
+    myRequire([comboLibType === 'edit' ? comboComlibURL.toEditUrl() : comboComlibURL.toRtUrl()], () => {
+      reject(new Error('加载我的组件失败'))
+    }).then(({ styles }) => {
+      const { myComlib, newMyComlib } = getMyComlib();
+      mergeMyComlib(myComlib, newMyComlib);
+      setTimeout(() => resolveSelfLibStyle(styles), 1500);
+      resolve(myComlib);
+    })
+  })
+}
+
 export function resolveSelfLibStyle(styles) {
   const childNodes = document.querySelector("[class^='canvasTrans']")?.childNodes;
 
