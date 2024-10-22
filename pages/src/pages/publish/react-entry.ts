@@ -29,10 +29,12 @@ const getCurrentLocale = () => {
 const render = (props) => {
   const { container } = props;
   useReactRender = props?.useReactRender
-  const root = !window.__POWERED_BY_QIANKUN__ ? document.body : (container || document).querySelector('#mybricks-page-root')
+  // const root = !window.__POWERED_BY_QIANKUN__ ? document.body : (container || document).querySelector('#mybricks-page-root')
+  const root = (container || document).querySelector('#mybricks-page-root')
   /** publish template style */
   root.style.width = '100%';
   root.style.height = '100%';
+  root.style.overflow = 'auto';
   antd.message?.config({
     getContainer() {
       return props?.canvasElement || root || document.body
