@@ -258,15 +258,20 @@ const getMyComlib = () => {
 const mergeMyComlib = (myComlib, newMyComlib) => {
   const { comAray } = myComlib;
   const { comAray: newComAray } = newMyComlib;
-  const deps = comAray[comAray.length -1].comAray;
-  const newDeps = newComAray[newComAray.length - 1].comAray;
 
-  newDeps.forEach((dep) =>{ 
-    const { namespace, version } = dep;
-    if (!deps.find((dep) => dep.namespace === namespace && dep.version === version)) {
-      deps.push(dep)
-    }
-  })
+  const deps = comAray[comAray.length -1]?.comAray;
+
+  if (deps) {
+    const newDeps = newComAray[newComAray.length - 1].comAray;
+    newDeps.forEach((dep) =>{ 
+      const { namespace, version } = dep;
+      if (!deps.find((dep) => dep.namespace === namespace && dep.version === version)) {
+        deps.push(dep)
+      }
+    })
+  } else {
+    comAray.push(newComAray[newComAray.length - 1])
+  }
 
   const coms = comAray.slice(0, comAray.length - 1);
   const newComs = newComAray.slice(0, newComAray.length - 1);
