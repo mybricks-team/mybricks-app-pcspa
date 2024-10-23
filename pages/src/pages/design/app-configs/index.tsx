@@ -203,6 +203,66 @@ export default function appConfig(
         },
       ]
     );
+
+    if (window.antd_5_21_4) {
+      adder.push(...[
+        {},
+        {
+          type: "popup",
+          title: "对话框(antd5)",
+          template: {
+            namespace: "mybricks.basic-comlib.antd5.popup",
+            deletable: false,
+            asRoot: true,
+          },
+        },
+        {
+          type: "popup",
+          title: "抽屉(antd5)",
+          template: {
+            namespace: "mybricks.basic-comlib.antd5.drawer",
+            deletable: false,
+            asRoot: true,
+          },
+        },
+        {
+          type: "popup",
+          title: "打印对话框(antd5)",
+          template: {
+            namespace: "mybricks.normal-pc.antd5.print",
+            deletable: false,
+            asRoot: true,
+          },
+        },
+        {
+          type: "normal",
+          title: "静默打印(antd5)",
+          template: {
+            namespace: "mybricks.normal-pc.antd5.silent-print",
+            deletable: false,
+            asRoot: true,
+          },
+          inputs: [
+            {
+              id: "print",
+              title: "打印",
+              schema: {
+                type: "any",
+              },
+            },
+          ],
+          outputs: [
+            {
+              id: "printed",
+              title: "打印完成",
+              schema: {
+                type: "any",
+              },
+            },
+          ],
+        },
+      ])
+    }
   }
 
   const getCurrentLocale = () => {
