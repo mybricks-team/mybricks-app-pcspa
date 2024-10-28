@@ -907,16 +907,32 @@ const getAiView = (enableAI, option) => {
   
         let context = args[0];
         let tools = undefined;
+        let extraOption = {};
+        
         if (args.length === 2) {
-          context = args[1]
-          tools = args[0]
+          tools = args[0];
+          context = args[1];
         }
+
+        if (args.length === 3) {
+          tools = args[0];
+          context = args[1];
+          extraOption = args[2];
+        }
+
         const { write, complete, error } = context ?? {};
+
+        const usedModel = extraOption?.expert === 'image' ? 'openai/gpt-4o' : (!!model ? model : undefined); 
+
+        // 用于debug用户当前使用的模型
+        window._ai_use_model_ = usedModel;
 
         try {
           // console.log(messages)
           // console.log(messages[0].content)
-          // console.log(messages[messages.length - 1].content)
+          // console.log(messages?.[messages.length - 2]?.content)
+          // console.log(messages?.[messages.length - 1]?.content)
+          // console.log(messages?.[messages.length]?.content)
 
           // messages[0].content = '你是一个智能助手'
 
@@ -1002,8 +1018,7 @@ const getAiView = (enableAI, option) => {
           // ]
           
 
-          // 用于debug用户当前使用的模型
-          window._ai_use_model_ = model;
+          
           const response = await fetch('//ai.mybricks.world/stream-with-tools', {
             method: 'POST',
             headers: {
@@ -1011,7 +1026,7 @@ const getAiView = (enableAI, option) => {
             },
             body: JSON.stringify(
               getAiEncryptData({
-                model: !!model ? model : undefined,
+                model: usedModel,
                 // model: 'openai/gpt-4o-mini',
                 messages,
                 tools
