@@ -138,7 +138,7 @@ module.exports = {
         use: ['style-loader', 'css-loader'],
       },
       {
-        test: /\.(xml|txt|html|cjs|theme)$/i,
+        test: /\.(xml|txt|html|cjs|theme|md)$/i,
         use: [{ loader: 'raw-loader' }],
       },
     ],
