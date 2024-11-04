@@ -99,6 +99,10 @@ export async function localization(ctx: TContext) {
     template = _template;
     Logger.info("[publish] 资源本地化成功！");
   } catch (e) {
+    Logger.error(`[publish] 资源本地化失败: ${e}`)
+    Logger.error(`[publish] 资源本地化失败: ${e.name}`)
+    Logger.error(`[publish] 资源本地化失败: ${e.message}`)
+    Logger.error(`[publish] 资源本地化失败: ${e.stack}`)
     Logger.error(`[publish] 资源本地化失败: ${JSON.stringify(e)}`);
     throw new Error("资源本地化失败！");
   }
@@ -234,7 +238,8 @@ const collectExternal = (
   });
 
   comlibs.forEach((lib) => {
-    if (lib.namespace === "mybricks.normal-pc" && !lib.externals.length) {
+    Logger.info(`[publish] 组件库依赖兼容 ${lib.namespace} ${lib.externals ? lib.externals.length : "null"}`)
+    if (lib.namespace === "mybricks.normal-pc" && !lib.externals?.length) {
       // 兼容，添加默认的externals
       lib.externals = [
         {
@@ -315,16 +320,18 @@ const filterComLibFromComponent = (comLib, componentModules) => {
     const set = new Set([
       ...(cur.deps ?? []).map((it) => `${it.namespace}@${it.version}`),
     ]);
-    for (let i = 0; i < componentModules.length; i++) {
-      if (
-        !set.size ||
-        set.has(
-          `${componentModules[i].namespace}@${componentModules[i].version}`
-        )
-      ) {
-        pre.push(cur);
-        break;
-      }
+    if (Array.isArray(componentModules)) {
+      for (let i = 0; i < componentModules.length; i++) {
+        if (
+          !set.size ||
+          set.has(
+            `${componentModules[i].namespace}@${componentModules[i].version}`
+          )
+        ) {
+          pre.push(cur);
+          break;
+        }
+      } 
     }
     return pre;
   }, []);
