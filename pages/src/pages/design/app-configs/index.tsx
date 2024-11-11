@@ -938,7 +938,7 @@ const getAiView = (enableAI, option) => {
             break
           }
           default: {
-            usedModel = !!model ? model : undefined;
+            usedModel = !!model ? model : usedModel;
             break;
           }
         }
