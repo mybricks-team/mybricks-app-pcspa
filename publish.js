@@ -35,7 +35,7 @@ const publishReactAppOnline = () => {
   return new Promise((resolve) => {
     const buildCommand = `cd pages && npm run build:react`
     shelljs.exec(buildCommand, () => {
-      const syncCommand = `npm publish --registry=https://registry.npmjs.org && node sync.js ${origin} --appType=react ${noServiceUpdate ? "--noServiceUpdate" : ""
+      const syncCommand = `node sync.js ${origin} --appType=react ${noServiceUpdate ? "--noServiceUpdate" : ""
         }`
       shelljs.exec(syncCommand, resolve)
     })
