@@ -97,7 +97,7 @@ export const getAiView = (enableAI, isEncrypt = true) => {
             break
           }
           case ['architect'].includes(extraOption.aiRole): {
-            usedModel = 'openai/gpt-4o-2024-08-06';
+            usedModel = 'openai/gpt-4o-2024-11-20';
             break
           }
           default: {
