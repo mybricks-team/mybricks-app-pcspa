@@ -55,4 +55,4 @@ export const MySelf_COM_LIB = {
 };
 
 //调试时指向test/my的设计器文件
-export const DESIGNER_STATIC_PATH = './public/designer-spa/3.9.022/index.min.js'
+export const DESIGNER_STATIC_PATH = './public/designer-spa/3.9.025/index.min.js'
