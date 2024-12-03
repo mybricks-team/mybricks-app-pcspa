@@ -323,7 +323,7 @@ export default function MyDesigner({ appData: originAppData }) {
       user: appData.user,
       fileContent: appData.fileContent,
     }).then(setRemotePlugins)
-    console.log('应用数据:', appData)
+    // console.log('应用数据:', appData)
   }, [])
 
   useEffect(() => {

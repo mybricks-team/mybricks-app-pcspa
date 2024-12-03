@@ -261,7 +261,7 @@ const insertExternal = async (lib) => {
       const { library, urls } = external;
       if (library && library in window) { 
         // 有配置library且window上已有，不加载覆盖
-        console.log(`[组件库依赖加载]: ${library} 已存在，不进行加载覆盖`, external);
+        // console.log(`[组件库依赖加载]: ${library} 已存在，不进行加载覆盖`, external);
       } else {
         if (Array.isArray(urls)) {
           for (const url of urls) {
