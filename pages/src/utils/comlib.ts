@@ -161,6 +161,8 @@ export class ComboComlibURL {
       return `${acc}${!!acc ? ',' : ''}${cur.namespace}@${cur.version}`
     }, '')
     this._URL_.searchParams.set('components', queryStr)
+    // TODO: 缓存
+    this._URL_.searchParams.set('time', String(new Date().valueOf()))
   }
 
   deleteComponents = (namespace: string) => {

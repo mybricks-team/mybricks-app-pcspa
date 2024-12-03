@@ -16,18 +16,22 @@ const getComponentFromMaterial = (
   component: Component
 ): Promise<Component | undefined> => {
   Logger.info(`[publish] 开始从物料中心获取 ${component.namespace}@${component.version}`);
+  /** 是否最新版 */
+  const isLatest = component.version === "latest";
 
   return API.Material.getMaterialContent({
     namespace: component.namespace,
-    version: component.version,
+    // 不传，获取最新版本
+    version: isLatest ? null : component.version,
   })
     .then((data) => {
       const { version, namespace, runtime, isCloudComponent, deps } = data;
 
-      Logger.info(`[publish] 获取 ${namespace}@${version} 成功`);
+      Logger.info(`[publish] 获取 ${namespace}@${isLatest ? `latest(${version})` : version} 成功`);
 
       return {
-        version,
+        // 如果是最新版，version 为 latest
+        version: isLatest ? "latest" : version,
         namespace,
         deps,
         isCloud: isCloudComponent,
