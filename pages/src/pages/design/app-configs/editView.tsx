@@ -583,7 +583,10 @@ function injectUpload(
           const staticUrl = /^http/.test(url)
             ? url
             : `${getDomainFromPath(uploadService)}${url}`
-          return [staticUrl].map((url) => url.replace('https', 'http'))
+          if (location.protocol === "http:") {
+            return [staticUrl].map((url) => url.replace('https', 'http'))
+          }
+          return [staticUrl]
         }
         
         throw Error(`【图片上传出错】: ${message}`)
