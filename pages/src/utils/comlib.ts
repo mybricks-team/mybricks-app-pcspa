@@ -2,6 +2,31 @@
 import { PC_COMMON_MAP } from './../constants'
 /** 组件库、组件相关utils */
 
+if (!Array.prototype.findLastIndex) {
+  Array.prototype.findLastIndex = function (callback, thisArg) {
+    if (this == null) {
+      throw new TypeError('Array.prototype.findLastIndex called on null or undefined');
+    }
+
+    const O = Object(this);
+    const len = O.length >>> 0;
+    if (typeof callback !== 'function') {
+      throw new TypeError('callback must be a function');
+    }
+
+    let k = len - 1;
+    while (k >= 0) {
+      const kValue = O[k];
+      if (callback.call(thisArg, kValue, k, O)) {
+        return k;
+      }
+      k--;
+    }
+
+    return -1;
+  }
+}
+
 
 function createScript(src, index) {
   var script = document.createElement('script')
