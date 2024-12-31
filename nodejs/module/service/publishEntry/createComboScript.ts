@@ -10,6 +10,7 @@ type Component = {
   runtime?: string;
   isCloud?: boolean;
   deps?: Component[];
+  currentVersion: string;
 };
 
 const getComponentFromMaterial = (
@@ -32,6 +33,7 @@ const getComponentFromMaterial = (
       return {
         // 如果是最新版，version 为 latest
         version: isLatest ? "latest" : version,
+        currentVersion: version,
         namespace,
         deps,
         isCloud: isCloudComponent,
@@ -63,6 +65,11 @@ export const generateComLib = async (
     );
     if (hasCache) continue;
     let curComponent = await getComponentFromMaterial(component);
+    if (curComponent) {
+      component.currentVersion = curComponent.currentVersion
+    } else {
+      component.currentVersion = component.version
+    }
     if (curComponent?.deps) {
       componentModules.push(
         ...curComponent.deps.filter(
@@ -309,8 +316,39 @@ export async function createComboScript(ctx: TContext) {
     });
     ctx.comboScriptText = scriptText
     ctx.componentModules = componentModules
+
+    const comDepsMap: {[key: string]: Set<string>} = {};
+
+    componentModules.forEach((component) => {
+      if (component) {
+        const { namespace, currentVersion } = component;
+        if (!comDepsMap[namespace]) {
+          comDepsMap[namespace] = new Set([currentVersion]);
+        } else {
+          comDepsMap[namespace].add(currentVersion)
+        }
+      }
+    })
+
+    ctx.template = ctx.template.replace('--comDeps--', convertToComDepsNotes(comDepsMap))
   } else {
     ctx.comboScriptText = ''
     ctx.componentModules = []
+
+    ctx.template = ctx.template.replace('--comDeps--', "[]")
   }
+}
+
+function convertToComDepsNotes (comDepsMap: Record<string, Set<string>>) {
+  const comDeps: {namespace: string, version: string}[] = [];
+  Object.entries(comDepsMap).forEach(([namespace, versions]) => {
+    versions.forEach((version) => {
+      comDeps.push({
+        namespace,
+        version
+      })
+    })
+  })
+
+  return JSON.stringify(comDeps)
 }
