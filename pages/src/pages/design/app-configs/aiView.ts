@@ -2,7 +2,9 @@ import forge from 'node-forge';
 import axios from "axios";
 import { getAxiosInstance, getMessageFromAxiosErrorException } from "@mybricks/sdk-for-app/api/util";
 
-const DEFAULT_MODEL = 'openai/gpt-4o-mini';
+// const DEFAULT_MODEL = 'openai/gpt-4o-mini';
+
+const DEFAULT_MODEL = 'deepseek-chat';
 
 let isChecked: 'idle' | boolean = 'idle';
 
