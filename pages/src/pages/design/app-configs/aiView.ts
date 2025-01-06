@@ -91,11 +91,11 @@ export const getAiView = (enableAI, isEncrypt = true) => {
 
         switch (true) {
           case extraOption?.expert === 'image': {
-            usedModel = 'anthropic/claude-3.5-sonnet';
+            usedModel = 'anthropic/claude-3.5-sonnet:beta';
             break;
           }
           case ['image'].includes(extraOption?.aiRole): {
-            usedModel = 'anthropic/claude-3.5-sonnet';
+            usedModel = 'anthropic/claude-3.5-sonnet:beta';
             break
           }
           case ['architect'].includes(extraOption.aiRole): {
