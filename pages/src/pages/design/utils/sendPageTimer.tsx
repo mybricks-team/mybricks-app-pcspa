@@ -14,11 +14,12 @@ function sendPageTimer(appData: any, currentRef: any) {
     try {
       await axios({
         method: "POST",
-        url: "/biz/modularity/project0/saveMybricksPageDevTime",
+        url: "/mybricks-app-pcspa/paas/api/proxy",
         withCredentials: false,
         data,
         headers: {
           "Content-Type": "application/json",
+          "X-Target-Url": location.origin + "/biz/modularity/project0/saveMybricksPageDevTime"
         },
       });
       return true;
