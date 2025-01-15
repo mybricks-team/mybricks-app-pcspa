@@ -132,6 +132,18 @@ export default function appConfig(
   ];
 
   if (isReact) {
+    if (!!ctx.hasAIComlib) {
+      adder.push({
+        type: 'ai',
+          title: 'AI场景',
+          template: {
+            namespace: 'mybricks.basic-comlib.ai-mix',
+            deletable: false,
+            asRoot: true,
+          }
+      })
+    }
+
     adder.push(
       ...[
         {

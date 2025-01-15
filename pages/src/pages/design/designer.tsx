@@ -288,7 +288,9 @@ export default function MyDesigner({ appData: originAppData }) {
           ? replaceComlib(comlibs, comlibDebugUtils.get())
           : comlibs
 
-        setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
+        const hasAIComlib = comlibs.some(lib => lib.namespace === 'mybricks.ai-comlib-pc');
+
+        setCtx((pre) => ({ ...pre, comlibs: newComlibs, hasAIComlib, latestComlibs }))
       })
       .finally(loadDesigner)
   }, [designer])
