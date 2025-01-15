@@ -27,7 +27,7 @@ import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
 import { createFromIconfontCN, InfoCircleTwoTone } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
-import sendPageTimer from './utils/sendPageTimer'
+import {usePageStayTime} from './utils/sendPageTimer'
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
 import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
@@ -481,8 +481,6 @@ export default function MyDesigner({ appData: originAppData }) {
         }
 
         setBeforeunload(false)
-        // 上报页面的开发数据
-        sendPageTimer(ctx, designerRef)
       } catch (e) {
         setSaveLoading(false)
         console.error(e)
@@ -872,6 +870,9 @@ export default function MyDesigner({ appData: originAppData }) {
       window.parent.postMessage({ type: 'RENDER_COMPLETE' }, '*')
     })
   }, [])
+
+  // 上报页面的开发数据
+  usePageStayTime({operable, appData: ctx, currentRef:designerRef})
 
   const TrueDesigner = useMemo(() => {
     return (

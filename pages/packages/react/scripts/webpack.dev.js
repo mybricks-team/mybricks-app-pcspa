@@ -47,12 +47,12 @@ module.exports = merge(common, {
         secure: false,
         changeOrigin: true,
         logLevel:'debug',
-        on:{
-          proxyReq:(proxyReq, req, res)=>{
-            proxyReq.setHeader('session', '525d868d8ef7477c0790fc43abe8adf3');
-            proxyReq.setHeader('token', '93db687cbaa9dda7d1c46cbd9a43bf2e');
-          }
-        }
+        // on:{
+        //   proxyReq:(proxyReq, req, res)=>{
+        //     proxyReq.setHeader('session', '525d868d8ef7477c0790fc43abe8adf3');
+        //     proxyReq.setHeader('token', '93db687cbaa9dda7d1c46cbd9a43bf2e');
+        //   }
+        // }
       },
       {
         context: ['/'],
