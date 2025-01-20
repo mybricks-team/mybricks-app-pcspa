@@ -455,6 +455,11 @@ export default function MyDesigner({ appData: originAppData }) {
 
       json.projectId = ctx.sdk.projectId
 
+      json.comlibs = json.comlibs.map((comlib) => {
+        const { content, ...other } = comlib;
+        return other;
+      })
+
       let res
 
       try {
