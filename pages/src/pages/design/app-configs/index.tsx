@@ -585,6 +585,7 @@ export default function appConfig(
       vars: {},
       fx: {},
       useStrict: false,
+      useExtendedInput: true, // 开启场景卡片的扩展输入
     },
     aiView: getAiView(ctx?.appConfig?.publishLocalizeConfig?.enableAI, {
       model: ctx?.appConfig?.publishLocalizeConfig?.selectAIModel
