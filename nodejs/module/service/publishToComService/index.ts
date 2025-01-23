@@ -73,7 +73,8 @@ function getComDeps(json: ToJSON) {
     "mybricks.core-comlib.defined-com",
     "mybricks.core-comlib.module",
     'mybricks.core-comlib.group',
-    'mybricks.core-comlib.selection'
+    'mybricks.core-comlib.selection',
+    'mybricks.core-comlib.js-ai'
   ];
   let definedComsDeps: any[] = [];
   let modulesDeps: any[] = [];
