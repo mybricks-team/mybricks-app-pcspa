@@ -9,7 +9,8 @@ export const ignoreNamespaces = [
   "mybricks.core-comlib.defined-com",
   "mybricks.core-comlib.module",
   'mybricks.core-comlib.group',
-  'mybricks.core-comlib.selection'
+  'mybricks.core-comlib.selection',
+  'mybricks.core-comlib.js-ai'
 ];
 
 export const MY_BRICKS_PCSPA = '__MY_BRICKS_PCSPA__'

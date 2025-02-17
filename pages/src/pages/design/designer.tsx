@@ -289,7 +289,9 @@ export default function MyDesigner({ appData: originAppData }) {
           ? replaceComlib(comlibs, comlibDebugUtils.get())
           : comlibs
 
-        setCtx((pre) => ({ ...pre, comlibs: newComlibs, latestComlibs }))
+        const hasAIComlib = comlibs.some(lib => lib.namespace === 'mybricks.ai-comlib-pc');
+
+        setCtx((pre) => ({ ...pre, comlibs: newComlibs, hasAIComlib, latestComlibs }))
       })
       .finally(loadDesigner)
   }, [designer])
@@ -453,6 +455,11 @@ export default function MyDesigner({ appData: originAppData }) {
       // json.useAutoPreviewImage = ctx.useAutoPreviewImage
 
       json.projectId = ctx.sdk.projectId
+
+      json.comlibs = json.comlibs.map((comlib) => {
+        const { content, ...other } = comlib;
+        return other;
+      })
 
       let res
 
@@ -1028,6 +1035,7 @@ const genLazyloadComs = async (comlibs, toJSON) => {
     'mybricks.core-comlib.module',
     'mybricks.core-comlib.group',
     'mybricks.core-comlib.selection',
+    'mybricks.core-comlib.js-ai'
   ]
 
   let definedComsDeps = []
