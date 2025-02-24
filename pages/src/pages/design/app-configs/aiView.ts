@@ -82,7 +82,7 @@ export const getAiView = (enableAI, isEncrypt = true) => {
           extraOption = args[2];
         }
 
-        const { write, complete, error } = context ?? {};
+        const { write, complete, error, cancel } = context ?? {};
 
         let usedModel = DEFAULT_MODEL
         // let usedModel = 'openai/gpt-4o-2024-08-06'
@@ -242,6 +242,11 @@ export const getAiView = (enableAI, isEncrypt = true) => {
           //   }
           // ]
 
+          const cancelControl = !!AbortController ? new AbortController() : null;
+
+          cancel?.(() => {
+            cancelControl?.abort?.();
+          })
 
           const streamUrl = (await shouldRouteToCustomService()) ? '/api/ai-service/stream' : '//ai.mybricks.world/stream-with-tools'
           
@@ -252,6 +257,7 @@ export const getAiView = (enableAI, isEncrypt = true) => {
             headers: {
               "Content-Type": "application/json",
             },
+            signal: cancelControl?.signal,
             body: JSON.stringify(
               getAiEncryptData({
                 model: usedModel,
