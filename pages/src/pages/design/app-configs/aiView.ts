@@ -257,7 +257,7 @@ export const getAiView = (enableAI, isEncrypt = true) => {
             cancelControl?.abort?.();
           })
 
-          const streamUrl = (await shouldRouteToCustomService()) ? '/api/ai-service/stream' : '//localhost:4000/stream-with-tools'
+          const streamUrl = (await shouldRouteToCustomService()) ? '/api/ai-service/stream' : '//ai.mybricks.world/stream-with-tools'
           
           // //localhost:8002/api/ai-service/stream
           // //localhost:4000/stream-with-tools
