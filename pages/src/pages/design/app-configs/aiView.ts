@@ -31,6 +31,54 @@ function shouldRouteToCustomService(): Promise<boolean> {
   });
 }
 
+function getDesignerParams (args) {
+  let context = args[0];
+  let tools = undefined;
+  let extraOption = {};
+  
+  if (args.length === 2) {
+    tools = args[0];
+    context = args[1];
+  }
+
+  if (args.length === 3) {
+    tools = args[0];
+    context = args[1];
+    extraOption = args[2];
+  }
+
+  let model = DEFAULT_MODEL, role;
+
+  switch (true) {
+    case extraOption?.expert === 'image': {
+      model = 'anthropic/claude-3.7-sonnet';
+      role = 'image'
+      break;
+    }
+    case ['image'].includes(extraOption?.aiRole): {
+      model = 'anthropic/claude-3.7-sonnet';
+      role = 'image'
+      break
+    }
+    case ['architect'].includes(extraOption.aiRole): {
+      model = 'openai/gpt-4o-2024-11-20';
+      role = 'architect'
+      break
+    }
+    default: {
+      role = 'default'
+      break;
+    }
+  }
+
+  return {
+    context: context ?? {},
+    tools,
+    model,
+    role,
+  }
+}
+
 
 export const getAiView = (enableAI, isEncrypt = true) => {
   shouldRouteToCustomService();
@@ -66,49 +114,10 @@ export const getAiView = (enableAI, isEncrypt = true) => {
         }
       },
       async requestAsStream(messages, ...args) {
-  
-        let context = args[0];
-        let tools = undefined;
-        let extraOption = {};
-        
-        if (args.length === 2) {
-          tools = args[0];
-          context = args[1];
-        }
-
-        if (args.length === 3) {
-          tools = args[0];
-          context = args[1];
-          extraOption = args[2];
-        }
-
+        const { context, tools, model, role } = getDesignerParams(args);
         const { write, complete, error, cancel } = context ?? {};
-
-        let usedModel = DEFAULT_MODEL
-        // let usedModel = 'openai/gpt-4o-2024-08-06'
-        // let usedModel = 'anthropic/claude-3.5-sonnet'
-        // let usedModel = 'qwen2.5-coder-32b-instruct'
-
-        switch (true) {
-          case extraOption?.expert === 'image': {
-            usedModel = 'anthropic/claude-3.7-sonnet';
-            break;
-          }
-          case ['image'].includes(extraOption?.aiRole): {
-            usedModel = 'anthropic/claude-3.7-sonnet';
-            break
-          }
-          case ['architect'].includes(extraOption.aiRole): {
-            usedModel = 'openai/gpt-4o-2024-11-20';
-            break
-          }
-          default: {
-            break;
-          }
-        }
-
         // 用于debug用户当前使用的模型
-        window._ai_use_model_ = usedModel;
+        window._ai_use_model_ = model;
 
         try {
           // messages = [
@@ -193,12 +202,12 @@ export const getAiView = (enableAI, isEncrypt = true) => {
 
 
           // messages = [
-          //   {role: "user",      content: "告诉我今天的天气如何，会不会下雨"},
-          //   {role: "assistant", tool_calls: [{type: "function", function: {name: "getCurrentLocation", arguments: "{}"}, id: "123"}]},
-          //   {role: "tool",      name: "getCurrentLocation", content: "北京", tool_call_id: "123"},
-          //   {role: "assistant", tool_calls: [{type: "function", function: {name: "getWeather", arguments: '{"location": "北京"}'}, id: "1234"}]},
-          //   {role: "tool",      name: "getWeather", content: '{"temperature": "28摄氏度", "preciptation": "high"}', tool_call_id: "1234"},
-          //   {role: "assistant", content: '北京今天是28摄氏度',}
+          //   {role: "user",      content: "天气预报今天下雨，要不要带伞"},
+          //   // {role: "assistant", tool_calls: [{type: "function", function: {name: "getCurrentLocation", arguments: "{}"}, id: "123"}]},
+          //   // {role: "tool",      name: "getCurrentLocation", content: "北京", tool_call_id: "123"},
+          //   // {role: "assistant", tool_calls: [{type: "function", function: {name: "getWeather", arguments: '{"location": "北京"}'}, id: "1234"}]},
+          //   // {role: "tool",      name: "getWeather", content: '{"temperature": "28摄氏度", "preciptation": "high"}', tool_call_id: "1234"},
+          //   // {role: "assistant", content: '北京今天是28摄氏度',}
           // ];
 
           // tools = [
@@ -248,7 +257,7 @@ export const getAiView = (enableAI, isEncrypt = true) => {
             cancelControl?.abort?.();
           })
 
-          const streamUrl = (await shouldRouteToCustomService()) ? '/api/ai-service/stream' : '//ai.mybricks.world/stream-with-tools'
+          const streamUrl = (await shouldRouteToCustomService()) ? '/api/ai-service/stream' : '//localhost:4000/stream-with-tools'
           
           // //localhost:8002/api/ai-service/stream
           // //localhost:4000/stream-with-tools
@@ -256,19 +265,25 @@ export const getAiView = (enableAI, isEncrypt = true) => {
             method: 'POST',
             headers: {
               "Content-Type": "application/json",
+              ...(role ? {
+                "M-Request-Role": role,
+              }: {})
             },
             signal: cancelControl?.signal,
             body: JSON.stringify(
-              getAiEncryptData({
-                model: usedModel,
-                // model: 'openai/gpt-4o-mini',
-                // top_p: 0.2,
+              APP_ENV === 'production' ? getAiEncryptData({
+                model,
+                role,
                 messages,
                 tools,
-                // tool_choice: 'none',
                 tool_choice: 'auto',
                 // tool_choice: {"type": "function", "function": {"name": "query_knowledges"}},
-              })
+              }) : {
+                model,
+                messages,
+                tools,
+                tool_choice: 'auto',
+              }
             ),
           });
 
