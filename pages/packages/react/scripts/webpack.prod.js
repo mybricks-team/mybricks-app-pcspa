@@ -33,6 +33,9 @@ module.exports = (env) => merge(common, (function () {
         cleanOnceBeforeBuildPatterns: ['**/*', '!favicon.ico*', '!css/**'],
       }),
       new WebpackBar(),
+      new webpack.DefinePlugin({
+        APP_ENV: JSON.stringify('production')
+      }),
       ...generateAssetMapPlugin({
         filename: 'index.html',
         chunks: ['index'],

@@ -1,6 +1,7 @@
 const path = require('path')
 const { merge } = require('webpack-merge')
 const common = require('./webpack.common')
+const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const WebpackBar = require('webpackbar')
 const fs = require('fs')
@@ -58,6 +59,9 @@ module.exports = merge(common, {
   },
   plugins: [
     new WebpackBar(),
+    new webpack.DefinePlugin({
+      APP_ENV: JSON.stringify('development')
+    }),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       chunks: ['index'],
