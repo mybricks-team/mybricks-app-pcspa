@@ -57,8 +57,8 @@ export default {
     // },
     {
       tag: "script",
-      path: "public/plugin-http-connector/1.2.18/index.js",
-      CDN: "//f1.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.2.18/index.js",
+      path: "public/plugin-http-connector/1.2.30/index.js",
+      CDN: "//f1.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.2.30/index.js",
     },
     {
       tag: "script",
@@ -99,8 +99,8 @@ export default {
     // },
     {
       tag: "script",
-      path: "public/plugin-http-connector/1.2.3/index.js",
-      CDN: "//f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.2.3/index.js",
+      path: "public/plugin-http-connector/1.2.30/index.js",
+      CDN: "//f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.2.30/index.js",
     },
     {
       tag: "script",
@@ -121,8 +121,8 @@ export default {
     },
     {
       tag: "script",
-      path: "public/plugin-http-connector/1.2.3/index.js",
-      CDN: "//f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.2.3/index.js",
+      path: "public/plugin-http-connector/1.2.30/index.js",
+      CDN: "//f2.eckwai.com/kos/nlav12333/mybricks/plugin-http-connector/1.2.30/index.js",
     },
     {
       tag: "script",
