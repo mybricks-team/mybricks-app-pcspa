@@ -4,7 +4,7 @@
     "importHelpers": false,
     "target": "es5",
     "jsx": "react",
-    "module": "es2015",
+    "module": "es2020",
     "moduleResolution": "node",
     "lib": [
       "dom",
