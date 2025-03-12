@@ -30,3 +30,5 @@ declare const APP_TYPE: 'react' | 'vue2' | 'vue3';
 declare const APP_NAME: string;
 
 declare const APP_VERSION: string;
+
+declare const APP_ENV: 'development' | 'production';

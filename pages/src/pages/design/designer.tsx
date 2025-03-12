@@ -268,6 +268,7 @@ export default function MyDesigner({ appData: originAppData }) {
   const [publishLoading, setPublishLoading] = useState(false)
   const [SPADesigner, setSPADesigner] = useState(null)
   const [remotePlugins, setRemotePlugins] = useState(null)
+  const [builtPlugins, setBuildPlugins] = useState(null);
   const [publishModalVisible, setPublishModalVisible] = useState(false)
   const [isDebugMode, setIsDebugMode] = useState(false)
   const operationList = useRef<any[]>([])
@@ -326,6 +327,22 @@ export default function MyDesigner({ appData: originAppData }) {
       user: appData.user,
       fileContent: appData.fileContent,
     }).then(setRemotePlugins)
+
+    Promise.all([
+      new Promise((resolve) => {
+        import("@mybricks/plugin-note").then(resolve)
+      }),
+      new Promise((resolve) => {
+        import("@mybricks/plugin-theme").then(resolve)
+      }),
+      new Promise((resolve) => {
+        import("@mybricks/plugin-connector-http").then(resolve)
+      })
+    ]).then(([notePlugin, themePlugin, httpPlugin]) => {
+      setBuildPlugins({
+        notePlugin, themePlugin, httpPlugin
+      })
+    })
     // console.log('应用数据:', appData)
   }, [])
 
@@ -885,6 +902,7 @@ export default function MyDesigner({ appData: originAppData }) {
     return (
       SPADesigner &&
       remotePlugins &&
+      builtPlugins &&
       window?.mybricks?.createObservable && (
         <>
           <SPADesigner
@@ -896,7 +914,8 @@ export default function MyDesigner({ appData: originAppData }) {
               designerRef,
               remotePlugins,
               fileDBRef,
-              setBeforeunload
+              setBeforeunload,
+              builtPlugins,
             )}
             onEdit={onEdit}
             onMessage={onMessage}

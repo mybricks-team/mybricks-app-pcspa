@@ -4,18 +4,19 @@ import { ExclamationCircleOutlined } from "@ant-design/icons";
 import moment from "moment";
 import axios from "axios";
 
-import servicePlugin, {
-  call as callConnectorHttp,
-  mock as connectorHttpMock,
-} from "@mybricks/plugin-connector-http";
+// import servicePlugin, {
+//   call as callConnectorHttp,
+//   mock as connectorHttpMock,
+// } from "@mybricks/plugin-connector-http";
 import domainServicePlugin, {
   call as callDomainHttp,
 } from "@mybricks/plugin-connector-domain";
+import pluginToCode from "@mybricks/plugin-tocode";
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from "mybricks-plugin-version";
 import localePlugin from "@mybricks/plugin-locale";
-import notePlugin from "@mybricks/plugin-note";
-import { use as useTheme } from "@mybricks/plugin-theme";
+// import notePlugin from "@mybricks/plugin-note";
+// import { use as useTheme } from "@mybricks/plugin-theme";
 import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 
 import comlibLoaderFunc from "../configs/comlibLoader";
@@ -84,7 +85,8 @@ export default function appConfig(
   designerRef,
   remotePlugins = [],
   fileDBRef,
-  setBeforeunload
+  setBeforeunload,
+  builtPlugins
 ) {
   const envList = ctx.envList;
   // 获得环境信息映射表
@@ -281,6 +283,11 @@ export default function appConfig(
     return getLocaleLang(ctx?.appConfig?.localeConfig);
   };
 
+  const { notePlugin, themePlugin, httpPlugin } = builtPlugins;
+  const servicePlugin = httpPlugin.default;
+  const callConnectorHttp = httpPlugin.call;
+  const connectorHttpMock = httpPlugin.mock;
+
   const connetorPlugins: any[] = [
     servicePlugin({
       isPrivatization: ctx.setting?.system.config?.isPureIntranet === true,
@@ -336,7 +343,7 @@ export default function appConfig(
     },
     plugins: [
       ...connetorPlugins,
-      notePlugin({
+      notePlugin.default({
         user: ctx.user,
         onUpload: async (file: File) => {
           return new Promise(async (resolve, reject) => {
@@ -433,7 +440,7 @@ export default function appConfig(
         },
       }),
       ...remotePlugins,
-      useTheme({ sdk: appData }),
+      themePlugin.use({ sdk: appData }),
       ...(ctx.isPreview
         ? []
         : [
@@ -507,6 +514,9 @@ export default function appConfig(
               ],
             }),
           ]),
+      pluginToCode({
+        type: "spa",
+      })
     ],
     ...(ctx.hasMaterialApp
       ? {

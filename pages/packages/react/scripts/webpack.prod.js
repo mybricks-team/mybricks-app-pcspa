@@ -2,6 +2,7 @@ const { merge } = require('webpack-merge')
 const fs = require('fs')
 const path = require('path')
 const common = require('./webpack.common')
+const webpack = require('webpack')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -33,6 +34,9 @@ module.exports = (env) => merge(common, (function () {
         cleanOnceBeforeBuildPatterns: ['**/*', '!favicon.ico*', '!css/**'],
       }),
       new WebpackBar(),
+      new webpack.DefinePlugin({
+        APP_ENV: JSON.stringify('production')
+      }),
       ...generateAssetMapPlugin({
         filename: 'index.html',
         chunks: ['index'],
