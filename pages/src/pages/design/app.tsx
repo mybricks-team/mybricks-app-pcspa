@@ -14,6 +14,7 @@ export default function App() {
   const fileId = parseQueryString('id');
   return (
     <View
+      appType={APP_TYPE}
       onLoad={(appData) => {
         return <Designer appData={appData} />
       }}

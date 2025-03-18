@@ -284,17 +284,29 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [appConfig])
   
   useLayoutEffect(() => {
-    getInitComLibs(appData)
-      .then(async ({ comlibs, latestComlibs }) => {
-        const newComlibs = ctx.debug
-          ? replaceComlib(comlibs, comlibDebugUtils.get())
-          : comlibs
+    appData.getInitComLibs({
+      localComlibs: APP_TYPE === "react" ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : [],
+      currentComlibs: appData.fileContent?.content?.comlibs,
+    }).then(({ comlibs, latestComlibs }) => {
+      const newComlibs = ctx.debug
+      ? replaceComlib(comlibs, comlibDebugUtils.get())
+      : comlibs
 
-        const hasAIComlib = comlibs.some(lib => lib.namespace === 'mybricks.ai-comlib-pc');
+      const hasAIComlib = comlibs.some(lib => lib.namespace === 'mybricks.ai-comlib-pc');
 
-        setCtx((pre) => ({ ...pre, comlibs: newComlibs, hasAIComlib, latestComlibs }))
-      })
-      .finally(loadDesigner)
+      setCtx((pre) => ({ ...pre, comlibs: newComlibs, hasAIComlib, latestComlibs }))
+    }).finally(loadDesigner)
+    // getInitComLibs(appData)
+    //   .then(async ({ comlibs, latestComlibs }) => {
+    //     const newComlibs = ctx.debug
+    //       ? replaceComlib(comlibs, comlibDebugUtils.get())
+    //       : comlibs
+
+    //     const hasAIComlib = comlibs.some(lib => lib.namespace === 'mybricks.ai-comlib-pc');
+
+    //     setCtx((pre) => ({ ...pre, comlibs: newComlibs, hasAIComlib, latestComlibs }))
+    //   })
+    //   .finally(loadDesigner)
   }, [designer])
 
   useEffect(() => {
@@ -788,6 +800,7 @@ export default function MyDesigner({ appData: originAppData }) {
         }}
         beforeToggleUnLock={beforeToggleUnLock}
         compareVersion={true}
+        autoLock={true}
       />
     )
   }, [])

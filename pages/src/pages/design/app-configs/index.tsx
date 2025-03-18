@@ -518,12 +518,16 @@ export default function appConfig(
         type: "spa",
       })
     ],
-    ...(ctx.hasMaterialApp
-      ? {
-          comLibAdder: comLibAdderFunc(ctx),
-        }
-      : {}),
-    comLibLoader: comlibLoaderFunc(ctx),
+    // ...(ctx.hasMaterialApp
+    //   ? {
+    //       comLibAdder: comLibAdderFunc(ctx),
+    //     }
+    //   : {}),
+    // comLibLoader: comlibLoaderFunc(ctx),
+    comLibAdder: appData.comLibAdder(ctx),
+    comLibLoader: appData.comLibLoader({
+      comlibs: ctx.comlibs
+    }),
     pageContentLoader() {
       //加载页面内容
       return new Promise(async (resolve, reject) => {
