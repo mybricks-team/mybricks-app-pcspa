@@ -33,6 +33,19 @@ module.exports = merge(common, {
         changeOrigin: true,
       },
       {
+        context: ['/biz/'],
+        target: 'http://dev.manateeai.com/',
+        secure: false,
+        changeOrigin: true,
+        logLevel:'debug',
+        on:{
+          proxyReq:(proxyReq, req, res)=>{
+            proxyReq.setHeader('session', '525d868d8ef7477c0790fc43abe8adf3');
+            proxyReq.setHeader('token', '93db687cbaa9dda7d1c46cbd9a43bf2e');
+          }
+        }
+      },
+      {
         context: ['/'],
         target: 'https://test.mybricks.world/',
         // target: 'https://my.mybricks.world',
