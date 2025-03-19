@@ -11,6 +11,7 @@ import axios from "axios";
 import domainServicePlugin, {
   call as callDomainHttp,
 } from "@mybricks/plugin-connector-domain";
+import pluginToCode from "@mybricks/plugin-tocode";
 // import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import versionPlugin from "mybricks-plugin-version";
 import localePlugin from "@mybricks/plugin-locale";
@@ -513,6 +514,9 @@ export default function appConfig(
               ],
             }),
           ]),
+      pluginToCode({
+        type: "spa",
+      })
     ],
     // ...(ctx.hasMaterialApp
     //   ? {

@@ -27,6 +27,7 @@ import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
 import { createFromIconfontCN, InfoCircleTwoTone } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
+import {usePageStayTime} from './utils/sendPageTimer'
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
 import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
@@ -840,7 +841,6 @@ export default function MyDesigner({ appData: originAppData }) {
   useEffect(() => {
     const removeLocalProxy = proxLocalStorage(ctx.debugMockConfig)
     const removeSessionProxy = proxSessionStorage(ctx.debugMockConfig)
-
     return () => {
       removeLocalProxy()
       removeSessionProxy()
@@ -907,6 +907,9 @@ export default function MyDesigner({ appData: originAppData }) {
       window.parent.postMessage({ type: 'RENDER_COMPLETE' }, '*')
     })
   }, [])
+
+  // 上报页面的开发数据
+  usePageStayTime({operable, appData: ctx, currentRef:designerRef})
 
   const TrueDesigner = useMemo(() => {
     return (

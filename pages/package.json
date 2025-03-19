@@ -68,6 +68,7 @@
     "@mybricks/plugin-locale": "^1.0.6",
     "@mybricks/plugin-note": "^0.0.14",
     "@mybricks/plugin-theme": "^0.0.55",
+    "@mybricks/plugin-tocode": "^0.0.1-next.1",
     "@mybricks/plugin-tools": "1.0.17",
     "@mybricks/publish-to-com-sdk": "^1.0.0",
     "@mybricks/render-web": "1.3.23",
