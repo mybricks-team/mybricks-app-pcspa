@@ -378,3 +378,31 @@ export function parseQueryString(key?: string) {
   if (key) return params[key] || '';
   return params;
 }
+
+export function checkElement(elementId, interval = 100) {
+  let lastCheck = 0
+
+  return new Promise((resolve, reject) => {
+    const check = (timestamp) => {
+      try {
+        // 控制查询间隔
+        if (timestamp - lastCheck < interval) {
+          return requestAnimationFrame(check)
+        }
+
+        lastCheck = timestamp
+        const element = document.getElementById(elementId)
+
+        if (element) {
+          resolve(true)
+        } else {
+          requestAnimationFrame(check)
+        }
+      } catch (error) {
+        reject(error)
+      }
+    }
+
+    requestAnimationFrame(check)
+  })
+}

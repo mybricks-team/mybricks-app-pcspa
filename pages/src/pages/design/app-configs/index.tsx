@@ -23,7 +23,7 @@ import { comLibAdderFunc } from "../configs/comLibAdder";
 import CollaborationHttp from "../plugin/collaboration-http";
 import { runJs } from "../../../utils/runJs";
 
-import { shapeUrlByEnv } from "../../../utils";
+import { shapeUrlByEnv, checkElement } from "../../../utils";
 import { EnumMode } from "../components/PublishModal";
 import {
   GET_DEFAULT_PAGE_HEADER,
@@ -563,6 +563,13 @@ export default function appConfig(
 
             resolve(curContent);
           }
+        } else if (curContent.templateJson) { //说明是从AI中创建的模板
+          // 等设计器加载完毕之后将模板Json导入
+          checkElement('_mybricks-geo-webview_', 300).then(() => {
+            designerRef.current.loadTpt(curContent.templateJson)
+          })
+
+          return resolve({})
         } else {
           delete curContent.comlibs;
 
