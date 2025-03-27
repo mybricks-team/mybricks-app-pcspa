@@ -941,7 +941,7 @@ export default function MyDesigner({ appData: originAppData }) {
         </>
       )
     )
-  }, [SPADesigner, remotePlugins, window?.mybricks?.createObservable])
+  }, [SPADesigner, remotePlugins, builtPlugins, window?.mybricks?.createObservable])
 
   return (
     <div className={`${css.view} fangzhou-theme`}>
