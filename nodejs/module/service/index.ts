@@ -10,7 +10,7 @@ import publishToCom from "./publishToCom";
 export default class PcPageService {
   async publish(req, { json, userId, fileId, envType, commitInfo, appConfig }) {
     // return await publish(req, { json, userId, fileId, envType, commitInfo, appConfig });
-    return await publish({ req, json, userId, envType, fileId, commitInfo, appConfig })
+    return await publish({ req, json, userId, envType, fileId, commitInfo, appConfig, imagesPath: new Set() })
   }
 
   async upload(req, { file }, { groupId = "" } = {}) {

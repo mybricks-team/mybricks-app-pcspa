@@ -3,6 +3,7 @@ import API from "@mybricks/sdk-for-app/api";
 import { Logger } from "@mybricks/rocker-commons";
 import { TContext } from "./type";
 import { ignoreNamespaces } from '../../constants'
+import { analysisAllImageUrl } from "../../tools/analysis";
 
 type Component = {
   namespace: string;
@@ -11,6 +12,7 @@ type Component = {
   isCloud?: boolean;
   deps?: Component[];
   currentVersion: string;
+  schema: object;
 };
 
 const getComponentFromMaterial = (
@@ -26,7 +28,7 @@ const getComponentFromMaterial = (
     version: isLatest ? null : component.version,
   })
     .then((data) => {
-      const { version, namespace, runtime, isCloudComponent, deps } = data;
+      const { version, namespace, runtime, isCloudComponent, deps, schema } = data;
 
       Logger.info(`[publish] 获取 ${namespace}@${isLatest ? `latest(${version})` : version} 成功`);
 
@@ -37,6 +39,7 @@ const getComponentFromMaterial = (
         namespace,
         deps,
         isCloud: isCloudComponent,
+        schema,
         runtime: encodeURIComponent(runtime),
       };
     })
@@ -48,12 +51,13 @@ const getComponentFromMaterial = (
 export const generateComLib = async (
   allComLibs: any[],
   deps: Component[],
-  options: { comLibId: number; noThrowError: boolean; appType: APPType }
+  options: { comLibId: number; noThrowError: boolean; appType: APPType, origin: string }
 ) => {
-  const { comLibId, noThrowError, appType = APPType.React } = options;
+  const { comLibId, noThrowError, appType = APPType.React, origin } = options;
   let script = "";
   const componentModules = [...deps];
   const componentCache: Component[] = [];
+  const images = new Set<string>();
 
   Logger.info(`[publish] 开始从物料中心获取组件内容`);
 
@@ -70,6 +74,14 @@ export const generateComLib = async (
     } else {
       component.currentVersion = component.version
     }
+
+    if (curComponent?.schema) {
+      const imageURLs = analysisAllImageUrl("", curComponent.schema, origin);
+      imageURLs.forEach((imageUrl) => {
+        images.add(imageUrl)
+      })
+    }
+
     if (curComponent?.deps) {
       componentModules.push(
         ...curComponent.deps.filter(
@@ -203,13 +215,14 @@ export const generateComLib = async (
 		})()
 	`,
     componentModules,
+    images: Array.from(images),
   };
 };
 
 export async function generateComLibRT(
   comlibs,
   json,
-  { fileId, noThrowError, app_type }
+  { fileId, noThrowError, app_type, origin }
 ) {
   const mySelfComMap: Record<string, boolean> = {};
   comlibs.forEach((comlib) => {
@@ -300,19 +313,21 @@ export async function generateComLibRT(
     comLibId: fileId,
     noThrowError,
     appType: app_type,
+    origin
   });
 }
 
 
 export async function createComboScript(ctx: TContext) {
-  const { json, fileId, hasOldComLib, app_type } = ctx
+  const { req, json, fileId, hasOldComLib, app_type } = ctx
   const { comlibs } = ctx.configuration
   /** 生成 combo 组件库代码 */
   if (ctx.needCombo) {
-    const { scriptText, componentModules } = await generateComLibRT(comlibs, json, {
+    const { scriptText, componentModules, images } = await generateComLibRT(comlibs, json, {
       fileId,
       noThrowError: hasOldComLib,
       app_type,
+      origin: req.headers.origin,
     });
     ctx.comboScriptText = scriptText
     ctx.componentModules = componentModules
@@ -331,6 +346,10 @@ export async function createComboScript(ctx: TContext) {
     })
 
     ctx.template = ctx.template.replace('--comDeps--', convertToComDepsNotes(comDepsMap))
+
+    images.forEach((image) => {
+      ctx.imagesPath.add(image)
+    })
   } else {
     ctx.comboScriptText = ''
     ctx.componentModules = []

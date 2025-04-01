@@ -92,7 +92,8 @@ export async function localization(ctx: TContext) {
       origin,
       comlibs,
       componentModules,
-      app_type
+      app_type,
+      ctx.imagesPath
     );
     globalDeps = globalDeps.concat(_globalDeps || []);
     images = _images;
@@ -124,7 +125,8 @@ async function resourceLocalization(
   origin,
   comlibs,
   componentModules,
-  type = "react"
+  type = "react",
+  imagesPath: Set<string>,
 ) {
   const localPublicInfos = LocalPublic[type].map((info) => {
     const res = { ...info };
@@ -187,7 +189,13 @@ async function resourceLocalization(
   }
 
   // 模板中所有的图片资源
-  const imageURLs = analysisAllImageUrl(template, json, origin);
+  analysisAllImageUrl(template, json, origin).forEach((imageURL) => {
+    imagesPath.add(imageURL);
+  });
+
+  const imageURLs = Array.from(imagesPath);
+
+  Logger.info(`[publish] 收集图片资源 ${JSON.stringify(imageURLs)}`);
 
   // 图片地址改成相对路径，放在固定位置，方便配置 nginx
   let images = (

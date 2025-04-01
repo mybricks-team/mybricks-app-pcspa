@@ -26,6 +26,7 @@ type TContext = {
     }>,
     globalDeps?: ILocalizationInfo[]
     images?: ILocalizationInfo[]
+    imagesPath: Set<string>;
     result?: any
 }
 
