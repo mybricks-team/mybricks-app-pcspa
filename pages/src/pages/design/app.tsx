@@ -28,13 +28,22 @@ export default function App() {
   )
 }
 
+let templateJson
+
+try {
+  const templateString = localStorage.getItem(`${location.hostname}/preview@pcpage`);
+  templateJson = JSON.parse(templateString)
+} catch (error) {
+  
+}
+
 const DesignerWithoutFileId = ({ appData }) => {
   return <Designer appData={{
     isPreview: true,
     ...appData,
     fileContent: {
-      name: "动态模板预览",
-      content: {}
+      name: templateJson ? "AI模板预览" : "动态模板预览",
+      content: templateJson ? { templateJson } : {}
     }
   }} />
 }
