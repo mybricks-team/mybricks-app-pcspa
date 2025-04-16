@@ -1,5 +1,6 @@
 import { getComs, shapeUrlByEnv, parseQuery, getRenderWeb } from "@/utils";
 import { runJs } from "@/utils/runJs";
+import DomainModelExecutor from "@mybricks/plugin-domain/dist/esm/runtime/DomainModelExecutor";
 
 const USE_CUSTOM_HOST = "__USE_CUSTOM_HOST__";
 /** template */
@@ -11,6 +12,7 @@ const i18nLangContent = "--i18nLangContent--";
 const titleI18n = "--title-i18n--";
 const runtimeUploadService = "--runtimeUploadService--";
 const pluginTheme = "--plugin-theme--";
+const domainModel = new DomainModelExecutor(projectJson.plugins["@mybricks/plugin-domain"])
 
 function cssVariable() {
   const themeData = pluginTheme as any;
@@ -202,27 +204,28 @@ const root = ({ renderType, locale, runtime, extVars, extCallConnector, customMe
       },
       projectId,
       /** 调用领域模型 */
-      callDomainModel(domainModel, type, params) {
-        return window.pluginConnectorDomain.call(domainModel, params, {
-          action: type,
-          before(options) {
-            if (['domain', 'aggregation-model'].includes(domainModel.type)) {
-              let newOptions = { ...options };
-              if (projectId) {
-                Object.assign(newOptions.data, {
-                  projectId: projectId,
-                });
-              }
-              return {
-                ...newOptions,
-                url: domainServicePath,
-              };
-            } else {
-              return options;
-            }
-          },
-        });
-      },
+      callDomainModel: domainModel.call.bind(domainModel),
+      // callDomainModel(domainModel, type, params) {
+      //   return window.pluginConnectorDomain.call(domainModel, params, {
+      //     action: type,
+      //     before(options) {
+      //       if (['domain', 'aggregation-model'].includes(domainModel.type)) {
+      //         let newOptions = { ...options };
+      //         if (projectId) {
+      //           Object.assign(newOptions.data, {
+      //             projectId: projectId,
+      //           });
+      //         }
+      //         return {
+      //           ...newOptions,
+      //           url: domainServicePath,
+      //         };
+      //       } else {
+      //         return options;
+      //       }
+      //     },
+      //   });
+      // },
       callConnector(connector, params, connectorConfig = {}) {
         const plugin =
           window[connector.connectorName] ||

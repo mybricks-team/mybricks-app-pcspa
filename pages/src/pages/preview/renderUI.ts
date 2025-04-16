@@ -12,6 +12,7 @@ import { PreviewStorage } from "@/utils/previewStorage";
 import connectorHttpMock from "@mybricks/plugin-connector-http/runtime/mock";
 import { call as callDomainHttp } from "@mybricks/plugin-connector-domain/runtime";
 import { proxLocalStorage, proxSessionStorage } from "@/utils/debugMockUtils";
+import DomainModelExecutor from "@mybricks/plugin-domain/dist/esm/runtime/DomainModelExecutor";
 
 const fileId = getQueryString("fileId");
 const USE_CUSTOM_HOST = "__USE_CUSTOM_HOST__";
@@ -28,6 +29,7 @@ const {
   debugMockConfig,
   runtimeUploadService,
 } = previewStorage.getPreviewPageData();
+const domainModel = new DomainModelExecutor(dumpJson.plugins["@mybricks/plugin-domain"])
 
 proxLocalStorage(debugMockConfig);
 proxSessionStorage(debugMockConfig);
@@ -63,9 +65,10 @@ const root = ({ renderType, locale, env, ...props }) => {
         );
       },
       /** 调用领域模型 */
-      callDomainModel(domainModel, type, params) {
-        return callDomainHttp(domainModel, params, { action: type } as any);
-      },
+      callDomainModel: domainModel.call.bind(domainModel),
+      // callDomainModel(domainModel, type, params) {
+      //   return callDomainHttp(domainModel, params, { action: type } as any);
+      // },
       async callConnector(connector, params, connectorConfig = {}) {
         await connectorLoader(appConfig);
         const plugin =

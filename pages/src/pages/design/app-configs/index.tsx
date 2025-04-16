@@ -19,6 +19,8 @@ import localePlugin from "@mybricks/plugin-locale";
 // import { use as useTheme } from "@mybricks/plugin-theme";
 import { openFilePanel } from "@mybricks/sdk-for-app/ui";
 import { showAIPageModal } from '@mybricks/sdk-for-ai'
+import pluginDomain from "@mybricks/plugin-domain";
+import DomainModelExecutor from "@mybricks/plugin-domain/dist/esm/runtime/DomainModelExecutor";
 
 import comlibLoaderFunc from "../configs/comlibLoader";
 import { comLibAdderFunc } from "../configs/comLibAdder";
@@ -535,7 +537,8 @@ export default function appConfig(
           ]),
       pluginToCode({
         type: "spa",
-      })
+      }),
+      pluginDomain()
     ],
     // ...(ctx.hasMaterialApp
     //   ? {
@@ -741,6 +744,11 @@ export default function appConfig(
               }
             );
           }
+        },
+        callDomainModel(...args) {
+          const plugin = designerRef.current?.getPlugin("@mybricks/plugin-domain");
+          const domainModel = new DomainModelExecutor(plugin.data)
+          return domainModel.call(...args)
         },
         vars: {
           get getExecuteEnv() {
