@@ -18,6 +18,7 @@ import localePlugin from "@mybricks/plugin-locale";
 // import notePlugin from "@mybricks/plugin-note";
 // import { use as useTheme } from "@mybricks/plugin-theme";
 import { openFilePanel } from "@mybricks/sdk-for-app/ui";
+import { showAIPageModal } from '@mybricks/sdk-for-ai'
 
 import comlibLoaderFunc from "../configs/comlibLoader";
 import { comLibAdderFunc } from "../configs/comLibAdder";
@@ -145,6 +146,24 @@ export default function appConfig(
     //       }
     //   })
     // }
+
+    adder.push({
+      type: 'defined',
+      title: 'AI生成...',
+      // @ts-ignore
+      load: () => {
+        return new Promise((resolve, reject) => {
+          const destroy = showAIPageModal({
+            onGenerateFinish({ templateJson }) {
+              resolve(templateJson)
+              destroy?.()
+            },
+          })
+        })
+      }
+    })
+    // @ts-ignore
+    adder.push({})
 
     adder.push(
       ...[
