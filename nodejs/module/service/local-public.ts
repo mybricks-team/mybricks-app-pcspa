@@ -70,6 +70,11 @@ export default {
       path: "public/render-web/1.3.57/index.min.js",
       CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/render-web/1.3.57/index.min.js",
     },
+    {
+      tag: "script",
+      path: "public/axios@0.18.1.min.js",
+      CDN: "https://w1.eckwai.com/kos/nlav12333/mybricks/axios0.18.1.min.js",
+    },
   ],
   vue2: [
     {
