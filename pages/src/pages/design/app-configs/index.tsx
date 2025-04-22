@@ -746,7 +746,8 @@ export default function appConfig(
           }
         },
         callDomainModel(...args) {
-          return window._mybricks_domainModel.call(...args)
+          const plugin = designerRef.current?.getPlugin("@mybricks/plugin-domain");
+          return plugin.callDomainModel(...args)
         },
         vars: {
           get getExecuteEnv() {

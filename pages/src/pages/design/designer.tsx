@@ -33,7 +33,6 @@ import { DESIGNER_STATIC_PATH } from '../../constants'
 import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
 import { getInitComLibs } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
-import DomainModelExecutor from "@mybricks/plugin-domain/dist/esm/runtime/DomainModelExecutor";
 import download from '@/utils/download'
 import {
   getMybricksStudioDB,
@@ -815,13 +814,9 @@ export default function MyDesigner({ appData: originAppData }) {
     setIsDebugMode(true)
     ctx.isDebugMode = true
 
-    // [TODO]
-    const plugin = designerRef.current?.getPlugin("@mybricks/plugin-domain");
-    window._mybricks_domainModel = new DomainModelExecutor(plugin.data)
     return () => {
       setIsDebugMode(false)
       ctx.isDebugMode = false
-      window._mybricks_domainModel = false;
     }
   }, [])
 
