@@ -120,7 +120,7 @@ const root = ({ renderType, locale, runtime, extVars, extCallConnector, customMe
       runtime,
       silent: true,
       showErrorNotification: false,
-      canvasElement: props?.canvasElement || props.container || props.renderRoot || document.body,
+      canvasElement: props?.canvasElement || props.renderRoot || props.container || document.body,
       i18n(title) {
         //多语言
         if (typeof title?.id === 'undefined') return title
