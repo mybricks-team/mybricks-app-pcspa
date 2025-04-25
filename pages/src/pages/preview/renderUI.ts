@@ -29,7 +29,7 @@ const {
   debugMockConfig,
   runtimeUploadService,
 } = previewStorage.getPreviewPageData();
-const domainModel = new DomainModelExecutor(dumpJson.plugins["@mybricks/plugin-domain"])
+const domainModel = new DomainModelExecutor(dumpJson.plugins["@mybricks/plugin-domain"] || { domainModels: [] })
 
 proxLocalStorage(debugMockConfig);
 proxSessionStorage(debugMockConfig);

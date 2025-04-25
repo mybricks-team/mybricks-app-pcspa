@@ -12,7 +12,7 @@ const i18nLangContent = "--i18nLangContent--";
 const titleI18n = "--title-i18n--";
 const runtimeUploadService = "--runtimeUploadService--";
 const pluginTheme = "--plugin-theme--";
-const domainModel = new DomainModelExecutor(projectJson.plugins["@mybricks/plugin-domain"])
+const domainModel = new DomainModelExecutor(projectJson.plugins["@mybricks/plugin-domain"] || { domainModels: [] })
 
 function cssVariable() {
   const themeData = pluginTheme as any;
