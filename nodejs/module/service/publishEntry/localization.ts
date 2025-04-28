@@ -26,6 +26,7 @@ export async function localization(ctx: TContext) {
   const { comlibs } = ctx.configuration
   /** 是否本地化发布 */
   const needLocalization = await getCustomNeedLocalization();
+  Logger.info(`[publish] 是否需要本地化 ${needLocalization}`)
   const origin = req.headers.origin;
 
   /** 所有要本地化的公共依赖 */
@@ -158,6 +159,8 @@ async function resourceLocalization(
     return res;
   });
 
+  Logger.info(`[publish] materialExternalInfos: ${JSON.stringify(materialExternalInfos)}`);
+
   const { chunkAssets, onlineChunkAssets, pathArr } = collectExternal(localPublicInfos, comlibs, componentModules, materialExternalInfos);
 
   const publicHtmlStr = localPublicInfos.reduce((pre, cur) => {
@@ -171,6 +174,9 @@ async function resourceLocalization(
     }
     return pre;
   }, "");
+
+  Logger.info(`[publish] chunkAssets: ${chunkAssets}`);
+  Logger.info(`[publish] onlineChunkAssets: ${onlineChunkAssets}`);
 
   template = template.replace("-- public --", chunkAssets);
   template = template.replace("-- online-public --", onlineChunkAssets);

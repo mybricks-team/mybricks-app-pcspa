@@ -76,6 +76,7 @@ export default {
     {
       name: "antd",
       library: "antd_5_21_4",
+      version: "5.21.4",
       path: [
         "public/antd/antd@5.21.4.min.js",
         "public/antd/locale/zh_CN.js",
