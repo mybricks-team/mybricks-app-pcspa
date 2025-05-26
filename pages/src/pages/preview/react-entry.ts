@@ -57,6 +57,8 @@ function cssVariable(dumpJson) {
       antdV4Variable.configs.forEach(({ key, value }) => {
         innerHTML = innerHTML + `${key}: ${value};\n`
       })
+      // 兼容
+      innerHTML = innerHTML + `--mybricks-primary-color: var(--mb-color-primary);\n`
       style.innerHTML = `:root {\n${innerHTML}}`
       document.head.appendChild(style)
     } else {
