@@ -157,9 +157,6 @@ export default function appConfig(
 
     const { adderAntd4Ary, adderAntd5Ary } = getAdders(ctx.comlibs);
 
-    console.log("adderAntd4Ary => ", adderAntd4Ary)
-    console.log("adderAntd5Ary => ", adderAntd5Ary)
-
     adder.push(
       ...[
         {
