@@ -137,18 +137,6 @@ export default function appConfig(
   ];
 
   if (isReact) {
-    // if (!!ctx.hasAIComlib) {
-    //   adder.push({
-    //     type: 'ai',
-    //       title: 'AI场景',
-    //       template: {
-    //         namespace: 'mybricks.basic-comlib.ai-mix',
-    //         deletable: false,
-    //         asRoot: true,
-    //       }
-    //   })
-    // }
-
     adder.push({
       type: 'defined',
       title: 'AI生成...',
@@ -167,6 +155,11 @@ export default function appConfig(
     // @ts-ignore
     adder.push({})
 
+    const { adderAntd4Ary, adderAntd5Ary } = getAdders(ctx.comlibs);
+
+    console.log("adderAntd4Ary => ", adderAntd4Ary)
+    console.log("adderAntd5Ary => ", adderAntd5Ary)
+
     adder.push(
       ...[
         {
@@ -182,122 +175,10 @@ export default function appConfig(
             },
           ],
         },
-        {
-          type: "popup",
-          title: "对话框",
-          template: {
-            namespace: "mybricks.basic-comlib.popup",
-            deletable: false,
-            asRoot: true,
-          },
-        },
-        {
-          type: "popup",
-          title: "抽屉",
-          template: {
-            namespace: "mybricks.basic-comlib.drawer",
-            deletable: false,
-            asRoot: true,
-          },
-        },
-        {
-          type: "popup",
-          title: "打印对话框",
-          template: {
-            namespace: "mybricks.normal-pc.print",
-            deletable: false,
-            asRoot: true,
-          },
-        },
-        {
-          type: "normal",
-          title: "静默打印",
-          template: {
-            namespace: "mybricks.normal-pc.silent-print",
-            deletable: false,
-            asRoot: true,
-          },
-          inputs: [
-            {
-              id: "print",
-              title: "打印",
-              schema: {
-                type: "any",
-              },
-            },
-          ],
-          outputs: [
-            {
-              id: "printed",
-              title: "打印完成",
-              schema: {
-                type: "any",
-              },
-            },
-          ],
-        },
+        ...adderAntd4Ary,
+        ...adderAntd5Ary
       ]
     );
-
-    if (window.antd_5_21_4) {
-      adder.push(...[
-        {},
-        {
-          type: "popup",
-          title: "对话框(antd5)",
-          template: {
-            namespace: "mybricks.basic-comlib.antd5.popup",
-            deletable: false,
-            asRoot: true,
-          },
-        },
-        {
-          type: "popup",
-          title: "抽屉(antd5)",
-          template: {
-            namespace: "mybricks.basic-comlib.antd5.drawer",
-            deletable: false,
-            asRoot: true,
-          },
-        },
-        {
-          type: "popup",
-          title: "打印对话框(antd5)",
-          template: {
-            namespace: "mybricks.normal-pc.antd5.print",
-            deletable: false,
-            asRoot: true,
-          },
-        },
-        {
-          type: "normal",
-          title: "静默打印(antd5)",
-          template: {
-            namespace: "mybricks.normal-pc.antd5.silent-print",
-            deletable: false,
-            asRoot: true,
-          },
-          inputs: [
-            {
-              id: "print",
-              title: "打印",
-              schema: {
-                type: "any",
-              },
-            },
-          ],
-          outputs: [
-            {
-              id: "printed",
-              title: "打印完成",
-              schema: {
-                type: "any",
-              },
-            },
-          ],
-        },
-      ])
-    }
   }
 
   const getCurrentLocale = () => {
@@ -939,4 +820,141 @@ export default function appConfig(
       layout: window._disableSmartLayout ? "flex-column" : "smart",
     },
   };
+}
+
+function getAdders(comlibs) {
+  const { hasAntd4Normal, hasAntd4Basic, hasAntd5Normal, hasAntd5Basic } = comlibs.reduce((pre, { namespace }) => {
+    if (namespace === "mybricks.basic-comlib.antd5") pre.hasAntd5Basic = true;
+    else if (namespace === "mybricks.normal-pc.antd5") pre.hasAntd5Normal = true;
+    else if (namespace === "mybricks.normal-pc") pre.hasAntd4Normal = true;
+    else if (namespace === "mybricks.basic-comlib") pre.hasAntd4Basic = true;
+    return pre;
+  }, { hasAntd4Normal: false, hasAntd4Basic: false, hasAntd5Normal: false, hasAntd5Basic: false });
+
+  const template = ({ namespace, title, type }) => ({
+    type,
+    title,
+    template: { namespace: namespace, deletable: false, asRoot: true }
+  });
+  const silentPrintIO = {
+    inputs: [
+      {
+        id: "print",
+        title: "打印",
+        schema: {
+          type: "any",
+        },
+      },
+    ],
+    outputs: [
+      {
+        id: "printed",
+        title: "打印完成",
+        schema: {
+          type: "any",
+        },
+      },
+    ],
+  }
+
+  const adderAntd4Ary = [];
+  const adderAntd5Ary = [];
+
+  if (hasAntd4Basic) {
+    adderAntd4Ary.push(
+      template({
+        type: "popup",
+        title: "对话框",
+        namespace: "mybricks.basic-comlib.popup"
+      }),
+      template({
+        type: "popup",
+        title: "抽屉",
+        namespace: "mybricks.basic-comlib.drawer"
+      })
+    )
+    if (hasAntd5Basic) {
+      adderAntd5Ary.push(
+        template({
+          type: "popup",
+          title: "对话框(antd5)",
+          namespace: "mybricks.basic-comlib.antd5.popup"
+        }),
+        template({
+          type: "popup",
+          title: "抽屉(antd5)",
+          namespace: "mybricks.basic-comlib.antd5.drawer"
+        }),
+      )
+    }
+  } else if (hasAntd5Basic) {
+    adderAntd5Ary.push(
+      template({
+        type: "popup",
+        title: "对话框",
+        namespace: "mybricks.basic-comlib.antd5.popup"
+      }),
+      template({
+        type: "popup",
+        title: "抽屉",
+        namespace: "mybricks.basic-comlib.antd5.drawer"
+      }),
+    )
+  }
+
+  if (hasAntd4Normal) {
+    adderAntd4Ary.push(
+      template({
+        type: "popup",
+        title: "打印对话框",
+        namespace: "mybricks.normal-pc.print",
+      }),
+      {
+        ...template({
+          type: "normal",
+          title: "静默打印",
+          namespace: "mybricks.normal-pc.silent-print",
+        }),
+        ...silentPrintIO
+      }
+    )
+    if (hasAntd5Normal) {
+      adderAntd5Ary.push(
+        template({
+          type: "popup",
+          title: "打印对话框(antd5)",
+          namespace: "mybricks.normal-pc.antd5.print",
+        }),
+        {
+          ...template({
+            type: "normal",
+            title: "静默打印(antd5)",
+            namespace: "mybricks.normal-pc.antd5.silent-print",
+          }),
+          ...silentPrintIO
+        }
+      )
+    }
+  } else if (hasAntd5Normal) {
+    adderAntd5Ary.push(
+      template({
+        type: "popup",
+        title: "打印对话框",
+        namespace: "mybricks.normal-pc.antd5.print",
+      }),
+      {
+        ...template({
+          type: "normal",
+          title: "静默打印",
+          namespace: "mybricks.normal-pc.antd5.silent-print",
+        }),
+        ...silentPrintIO
+      }
+    )
+  }
+
+  return {
+    adderAntd4Ary,
+    adderAntd5Ary
+  }
 }
