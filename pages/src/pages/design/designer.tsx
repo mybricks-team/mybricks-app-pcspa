@@ -1075,6 +1075,14 @@ const genLazyloadComs = async (comlibs, toJSON) => {
   let definedComsDeps = []
   let modulesDeps = []
 
+  if (toJSON.modules) {
+    Object.entries(toJSON.modules).forEach(([, module]: any) => {
+      if (module.json.deps) {
+        modulesDeps = [...modulesDeps, ...module.json.deps]
+      }
+    })
+  }
+
   if (toJSON.definedComs) {
     Object.keys(toJSON.definedComs).forEach((key) => {
       definedComsDeps = [
