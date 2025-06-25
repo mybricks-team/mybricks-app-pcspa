@@ -48,7 +48,8 @@ import { compareVersionLatest } from "../utils/saveContent";
 
 const { confirm } = Modal;
 import editViewConfig from "./editView";
-import { getAiView } from './aiView'
+// import { getAiView } from './aiView'
+import getAiView from "./getAiView";
 import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
 
 // const getComs = () => {
