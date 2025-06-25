@@ -167,7 +167,7 @@ const getAiView = (enableAI, option) => {
           // ]
 
           const response = await fetch(
-            "//ai.mybricks.world/stream-with-tools",
+            APP_ENV === 'production' ? "//ai.mybricks.world/stream-with-tools" : "//ai.mybricks.world/stream-test",
             {
               method: "POST",
               headers: {

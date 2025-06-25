@@ -3,9 +3,11 @@ export const getDSLPrompts = () => {
   1、page.dsl文件，为页面界面的结构描述，如下为一个卡片中有一个文本：
   \`\`\`dsl file="page.dsl"
   <page title="你好世界">
-    <flex title="主体卡片" layout={{ width: '100%', marginTop: 10, marginLeft: 12, marginRight: 12, justifyContent: 'center' }}>
-      <textComponentNamespace title="文本" layout={{ width: 'fit-content', marginTop: 20 }} styleAry={[]} data={{}} />
-    </flex>
+    <cardComponentNamespace>
+      <slots.content title="卡片内容" layout={{ width: '100%', height: 'fit-content' }}>
+        <textComponentNamespace title="文本" layout={{ width: 'fit-content' }} styleAry={[]} data={{}} />
+      </slots.content>
+    </cardComponentNamespace>
   </page>
   \`\`\`
   
