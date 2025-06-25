@@ -12,6 +12,7 @@ export const _NAMESPACE_ = APP_NAME;
 import { Collapse, Spin } from "antd";
 import I18nConfig from "./I18nConfig";
 import ConfigFeature from "./ConfigFeature";
+import ConfigLocalizeAssetPath from "./ConfigLocalizeAssetPath";
 
 import style from "./app.less";
 
@@ -31,28 +32,28 @@ export default (props) => {
         <Collapse.Panel key={0} header="设计器">
           <ConfigDesigner {...configContext} />
         </Collapse.Panel>
-        {
-          <>
-            {!isInGroup && (
-              <Collapse.Panel key={1} header="基础设置">
-                <ConfigBase {...configContext} />
-              </Collapse.Panel>
-            )}
-            {isInGroup && (
-              <Collapse.Panel key={2} header="多语言配置">
-                <I18nConfig {...configContext} />
-              </Collapse.Panel>
-            )}
-            {isInGroup && (
-              <Collapse.Panel key="ConfigComponent" header="组件配置">
-                <ConfigComponent {...configContext} />
-              </Collapse.Panel>
-            )}
-            <Collapse.Panel key={3} header="服务扩展">
-              <ConfigServer {...configContext} />
-            </Collapse.Panel>
-          </>
-        }
+        {!isInGroup && (
+          <Collapse.Panel key={1} header="基础设置">
+            <ConfigBase {...configContext} />
+          </Collapse.Panel>
+        )}
+        {isInGroup && (
+          <Collapse.Panel key={2} header="多语言配置">
+            <I18nConfig {...configContext} />
+          </Collapse.Panel>
+        )}
+        {isInGroup && (
+          <Collapse.Panel key="ConfigComponent" header="组件配置">
+            <ConfigComponent {...configContext} />
+          </Collapse.Panel>
+        )}
+        <Collapse.Panel key={99} header="本地化文件路径">
+          <ConfigLocalizeAssetPath {...configContext} />
+        </Collapse.Panel>
+        <Collapse.Panel key={3} header="服务扩展">
+          <ConfigServer {...configContext} />
+        </Collapse.Panel>
+
         {/* {!isInGroup && <Collapse.Panel key={1} header="基础设置">
           <ConfigBase {...configContext} />
         </Collapse.Panel>}

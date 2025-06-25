@@ -88,13 +88,13 @@ export async function localization(ctx: TContext) {
     } = await resourceLocalization(
       template,
       needLocalization,
-      appConfig?.publishLocalizeConfig?.enableCompatible,
+      appConfig,
       json,
       origin,
       comlibs,
       componentModules,
       app_type,
-      ctx.imagesPath
+      ctx.imagesPath,
     );
     globalDeps = globalDeps.concat(_globalDeps || []);
     images = _images;
@@ -121,7 +121,7 @@ export async function localization(ctx: TContext) {
 async function resourceLocalization(
   template: string,
   needLocalization: boolean,
-  enableCompatible: boolean,
+  appConfig: any,
   json: any,
   origin,
   comlibs,
@@ -129,6 +129,15 @@ async function resourceLocalization(
   type = "react",
   imagesPath: Set<string>,
 ) {
+  const enableCompatible = appConfig?.publishLocalizeConfig?.enableCompatible;
+  let localAssetPath: string = appConfig?.localizeAssetPathConfig?.path || 'test/abc'
+  if (localAssetPath.startsWith('/')) {
+    localAssetPath = localAssetPath.slice(1)
+  }
+  if (localAssetPath.endsWith('/')) {
+    localAssetPath = localAssetPath.slice(-1)
+  }
+
   const localPublicInfos = LocalPublic[type].map((info) => {
     const res = { ...info };
     // 按需替换成兼容资源
@@ -189,7 +198,7 @@ async function resourceLocalization(
     // 获取所有本地化需要除了图片以外的信息，这些信息目前存储在相对位置
     globalDeps = await Promise.all(
       pathArr.map((path) =>
-        getLocalizationInfoByLocal(path, path.split("/").slice(0, -1).join("/"))
+        getLocalizationInfoByLocal(path, (path || '').split("/").slice(0, -1).join("/"))
       )
     );
   }
@@ -209,7 +218,7 @@ async function resourceLocalization(
       imageURLs.map((url) =>
         getLocalizationInfoByNetwork(
           url,
-          `mfs/files/${url
+          `${localAssetPath}/${url
             .split("/mfs/files/")[1]
             .split("/")
             .slice(0, -1)
@@ -219,6 +228,8 @@ async function resourceLocalization(
       )
     )
   ).filter((item) => !!item);
+
+  console.log(images, "images=========");
 
   // 把模板中的图片资源地址替换成本地化后的地址
   imageURLs.forEach((url, index) => {
