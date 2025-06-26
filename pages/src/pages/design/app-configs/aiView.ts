@@ -1,4 +1,4 @@
-import { Utils } from '@mybricks/sdk-for-ai'
+import { Utils } from '@mybricks/ai-utils'
 import axios from "axios";
 import { getAxiosInstance, getMessageFromAxiosErrorException } from "@mybricks/sdk-for-app/api/util";
 

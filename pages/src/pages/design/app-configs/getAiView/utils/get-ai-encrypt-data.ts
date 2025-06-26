@@ -1,10 +1,3 @@
-import { Utils } from '@mybricks/sdk-for-ai'
+import { Utils } from '@mybricks/ai-utils'
 
-export const aiUtils = {
-  get getAiEncryptData () {
-    if (window._ai_test_) {
-      return (data) => data
-    }
-    return Utils.getAiEncryptData
-  }
-}
+export const getAiEncryptData = Utils.getAiEncryptData
