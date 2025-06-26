@@ -79,7 +79,6 @@ const getNewDSL = (params) => {
   
       if (shouldTransformToGrid) {
         const { justifyContent = 'flex-start', alignItems = 'flex-start', columnGap = 0 } = component.style ?? {};
-        console.log("[transform - mybricks.basic-comlib.antd5.grid]")
         component.namespace = gridComponentNamespace
   
         const heightProps = {
@@ -322,15 +321,15 @@ const getSystemPrompts = genGetSystemPrompts({
   style: `网页的设计要富有美感，关注设计元素间距，圆角，字体大小，图片配合等，网页的纵向排列应包含尽可能多的功能模块
   一个偏向活力的京东红风格是一个不错的选择
   颜色
-    主题色：京东红 #e93b3d
-    次要色：深灰 #333
-    背景色：浅灰背景 #f5f5f5
+    主题色：#e93b3d
+    次要色：#333
+    背景色：#f5f5f5
   字体
-    标题：标题加速 bold 16px
-    正文：常规正文 14px
+    标题：bold 16px
+    正文：14px
   边框
     圆角：4px
-  阴影：0 2px 8px rgba(0,0,0,0.1)
+    阴影：0 2px 8px rgba(0,0,0,0.1)
   
   你也可以任意发挥，但是尽量遵循需求，如果要求模仿某个网站，一定要以该网站主题主题、排版布局为准。
   通常可以参考一些比较出名的网站，不限于风格，比如京东、淘宝、特斯拉等网站的元素设计。`
@@ -339,12 +338,11 @@ const getSystemPrompts = genGetSystemPrompts({
 const getDSLPrompts = genGetDslPrompts({
   dslDemoPrompts: `
   page.dsl文件代表一个PC网站的其中一个页面，不局限于简单的demo，应该尽量的复杂，尽可能多的ui和交互，禁止过于简约。
-  网页的纵向排列应包含尽可能多的功能模块。
-  网页的设计要富有美感，关注设计元素间距，圆角，字体大小，图片配合等。
+  网页的设计要注重美观度，有设计感，关注设计元素间距，圆角，字体大小，图片配合等。
 
   如下为一个卡片中有一个文本：
   \`\`\`dsl file="page.dsl"
-  <page title="你好世界">
+  <page title="你好世界" style={{backgroundColor: "#fff"}}>
     <card.component.namespace
       title="卡片"
       layout={{ width: '100%', height: 'fit-content' }}
@@ -372,9 +370,11 @@ const getDSLPrompts = genGetDslPrompts({
   建议：
     1. 电商网站可以参考淘宝、京东、Amazon、eBay、Walmart、Rakuten
     2. 门户网站可以参考Yahoo、Microsoft Service Network、Facebook、X、Twitter
+    3. 给使用的组件都设置上主题色
   必须遵循：
-    1. 必须包含尽可能多的元素，文字需求纵向至少10个模块以上。
-    2. 除非必须要用图标，否则应该完全使用图片来表达。
+    1. 必须包含尽可能多的元素，文字需求至少添加8个及以上UI层面的功能模块，搭建更多的内容。
+    2. 优先使用图片组件，除非是工具类图标。
+    3. 一个页面的需求分析规格说明书(prd.md)，至少包含8个及以上UI层面的功能模块，搭建更多的内容。
   `,
   canvasInfoPrompts: `
   由于我们都是PC端组件和PC端页面，所以需要遵循一些以下PC端规范。
@@ -389,10 +389,11 @@ const getDSLPrompts = genGetDslPrompts({
   
   建议：
     1. 电商网站可以参考淘宝、京东、Amazon、eBay、Walmart、Rakuten
-    2. 门户网站可以参考Yahoo、Microsoft Service Network、Facebook、X、Twitter
+    2. 门户网站可以参考Yahoo、Microsoft Service Network、Facebook、X、Twitter、新浪网
   必须遵循：
-    1. 必须包含尽可能多的元素，文字需求纵向至少10个模块以上。
-    2. 除非必须要用图标，否则应该完全使用图片来表达。
+    1. 必须包含尽可能多的元素，文字需求至少添加8个及以上UI层面的功能模块，搭建更多的内容。
+    2. 优先使用图片组件，除非是工具类图标。
+    3. 一个页面的需求分析规格说明书(prd.md)，至少包含8个及以上UI层面的功能模块，搭建更多的内容。
   `,
   // 特殊地，系统已经内置了底部导航栏和顶部导航栏，仅关注页面内容即可，不用实现此部分内容。
   componentSuggestionPrompts: `
@@ -404,10 +405,11 @@ const getDSLPrompts = genGetDslPrompts({
   4. 尽可能使用margin替代padding，多注意组件是否需要配置margin，如果是横向布局，组件间的间距必须使用右侧组件的左间距，如果是横向布局，必须使用下侧组件的上间距；
   5. 仔细检查是否需要用到绝对定义，是相对于父元素的；
   6. page下方的元素注意配置左右margin；
-  7. 当没有合适的图标来表达时，使用图片组件替代；
-  8. 除非必须要用图标，否则应该完全使用图片来表达；
-  9. 所有使用的组件必须有自定义的data数据源；
-  10. 如果组件没有明确说明插槽内可以不包含内容，每个插槽里必须包含组件
+  7. 优先使用图片组件，除非是工具类图标。
+  8. 所有使用的组件必须有自定义的data数据源；
+  9. 如果组件没有明确说明slots内可以不包含内容，每个slots里必须包含子组件
+  10. 给所有使用到的组件设置主题色
+  11. 所有组件都必须使用适应高度（layout={height:'fit-content'}），除非必须为固定高度
   `,
 })
 

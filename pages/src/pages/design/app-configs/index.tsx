@@ -138,23 +138,23 @@ export default function appConfig(
   ];
 
   if (isReact) {
-    adder.push({
-      type: 'defined',
-      title: 'AI生成...',
-      // @ts-ignore
-      load: () => {
-        return new Promise((resolve, reject) => {
-          const destroy = showAIPageModal({
-            onGenerateFinish({ templateJson }) {
-              resolve(templateJson)
-              destroy?.()
-            },
-          })
-        })
-      }
-    })
+    // adder.push({
+    //   type: 'defined',
+    //   title: 'AI生成...',
+    //   // @ts-ignore
+    //   load: () => {
+    //     return new Promise((resolve, reject) => {
+    //       const destroy = showAIPageModal({
+    //         onGenerateFinish({ templateJson }) {
+    //           resolve(templateJson)
+    //           destroy?.()
+    //         },
+    //       })
+    //     })
+    //   }
+    // })
     // @ts-ignore
-    adder.push({})
+    // adder.push({})
 
     const { adderAntd4Ary, adderAntd5Ary } = getAdders(ctx.comlibs);
 
