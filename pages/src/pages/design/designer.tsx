@@ -9,7 +9,7 @@ import React, {
 import axios from 'axios'
 import { fAxios } from '../../services/http'
 import moment from 'moment'
-import { message, Modal } from 'antd'
+import { message, Modal, Tooltip } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
 // import API from '../../../../../sdk-for-app/src/api'
 import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
@@ -47,6 +47,10 @@ import {
   replaceComlib,
 } from './utils/comlibDebug'
 
+import { preview as preview_icon } from './icon/preview'
+import { publish as publish_icon } from './icon/publish'
+import classNames from 'classnames'
+
 const msgSaveKey = 'save'
 
 /**
@@ -62,7 +66,7 @@ const getAppSetting = async () => {
 export default function MyDesigner({ appData: originAppData }) {
   window.fileId = originAppData.fileId
   window._disableSmartLayout = originAppData?.config?.['mybricks-app-pcspa']?.config?.feature?.disableSmartLayout; // 是否禁用智能布局
-  
+
   const appData = useMemo(() => {
     let data = { ...originAppData }
     const urlParams = new URLSearchParams(window.location.search)
@@ -282,15 +286,15 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return appConfig.designer?.url || DESIGNER_STATIC_PATH
   }, [appConfig])
-  
+
   useLayoutEffect(() => {
     appData.getInitComLibs({
       localComlibs: APP_TYPE === "react" ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : [],
       currentComlibs: appData.fileContent?.content?.comlibs,
     }).then(({ comlibs, latestComlibs }) => {
       const newComlibs = ctx.debug
-      ? replaceComlib(comlibs, comlibDebugUtils.get())
-      : comlibs
+        ? replaceComlib(comlibs, comlibDebugUtils.get())
+        : comlibs
 
       const hasAIComlib = comlibs.some(lib => lib.namespace === 'mybricks.ai-comlib-pc');
 
@@ -952,6 +956,7 @@ export default function MyDesigner({ appData: originAppData }) {
           <Toolbar.LastUpdate
             content={saveTip}
             onClick={handleSwitch2SaveVersion}
+            isModify={beforeunload}
           />
         }
       >
@@ -967,16 +972,59 @@ export default function MyDesigner({ appData: originAppData }) {
               }}
               dotTip={beforeunload}
             />
-            <Toolbar.Button disabled={isDebugMode} onClick={preview}>
+
+            {/* <Toolbar.Button disabled={isDebugMode} onClick={preview}>
               预览
-            </Toolbar.Button>
-            <Toolbar.Button
+            </Toolbar.Button> */}
+
+            <Tooltip
+              placement="bottom"
+              title={"预览"}
+            >
+              <div 
+              className={
+                classNames({
+                [css.preview_btn]: true,
+                [css.btn_disable]: !operable || isDebugMode
+              })
+              } 
+              onClick={()=>{
+                if(!operable || isDebugMode) return
+                //在调试模式，不给点击
+                preview()
+                }}>
+              {preview_icon}
+              </div>
+            </Tooltip>
+
+            {/* <Toolbar.Button
               disabled={!operable || isDebugMode}
               loading={publishLoading}
               onClick={() => setPublishModalVisible(true)}
             >
               发布
-            </Toolbar.Button>
+            </Toolbar.Button> */}
+
+            <Tooltip
+              placement="bottom"
+              title={"发布"}
+            >
+              <div 
+              className={
+                classNames({
+                [css.publish_btn]: true,
+                [css.btn_disable]: !operable || isDebugMode
+              })
+              } 
+              onClick={() => {
+                if(!operable || isDebugMode) return
+                //在调试模式，不给点击
+                setPublishModalVisible(true)
+              }}>
+                {publish_icon}
+              </div>
+            </Tooltip>
+
           </>
         )}
         <div className={`${isPreview ? css.toolbarWrapperPreview : ''}`}>
@@ -1183,9 +1231,9 @@ const genLazyloadComs = async (comlibs, toJSON) => {
         } else {
           curComponent =
             allComLibsRuntimeMap[libIndex][
-              Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
-                key.startsWith(component.namespace)
-              )
+            Object.keys(allComLibsRuntimeMap[libIndex]).find((key) =>
+              key.startsWith(component.namespace)
+            )
             ]
         }
       }

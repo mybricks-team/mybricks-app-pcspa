@@ -58,7 +58,8 @@ module.exports = {
       moment: 'moment',
       antd: 'antd',
       '@ant-design/icons': 'icons',
-      '@mybricks/sdk-for-ai': 'mybricks_sdk_for_ai'
+      '@mybricks/sdk-for-ai': 'mybricks_sdk_for_ai',
+      '@mybricks/ai-utils': 'mybricks_ai_utils',
     },
   ],
   module: {

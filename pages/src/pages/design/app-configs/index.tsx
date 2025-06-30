@@ -18,7 +18,7 @@ import localePlugin from "@mybricks/plugin-locale";
 // import notePlugin from "@mybricks/plugin-note";
 // import { use as useTheme } from "@mybricks/plugin-theme";
 import { openFilePanel } from "@mybricks/sdk-for-app/ui";
-import { showAIPageModal } from '@mybricks/sdk-for-ai'
+import { showAIPageModal } from '@mybricks/ai-utils'
 import pluginDomain from "@mybricks/plugin-domain";
 import DomainModelExecutor from "@mybricks/plugin-domain/dist/esm/runtime/DomainModelExecutor";
 
@@ -48,7 +48,8 @@ import { compareVersionLatest } from "../utils/saveContent";
 
 const { confirm } = Modal;
 import editViewConfig from "./editView";
-import { getAiView } from './aiView'
+// import { getAiView } from './aiView'
+import getAiView from "./getAiView";
 import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
 
 // const getComs = () => {
@@ -137,23 +138,23 @@ export default function appConfig(
   ];
 
   if (isReact) {
-    adder.push({
-      type: 'defined',
-      title: 'AI生成...',
-      // @ts-ignore
-      load: () => {
-        return new Promise((resolve, reject) => {
-          const destroy = showAIPageModal({
-            onGenerateFinish({ templateJson }) {
-              resolve(templateJson)
-              destroy?.()
-            },
-          })
-        })
-      }
-    })
+    // adder.push({
+    //   type: 'defined',
+    //   title: 'AI生成...',
+    //   // @ts-ignore
+    //   load: () => {
+    //     return new Promise((resolve, reject) => {
+    //       const destroy = showAIPageModal({
+    //         onGenerateFinish({ templateJson }) {
+    //           resolve(templateJson)
+    //           destroy?.()
+    //         },
+    //       })
+    //     })
+    //   }
+    // })
     // @ts-ignore
-    adder.push({})
+    // adder.push({})
 
     const { adderAntd4Ary, adderAntd5Ary } = getAdders(ctx.comlibs);
 
@@ -509,7 +510,8 @@ export default function appConfig(
       useExtendedInput: true, // 开启场景卡片的扩展输入
     },
     aiView: getAiView(ctx?.appConfig?.publishLocalizeConfig?.enableAI, {
-      model: ctx?.appConfig?.publishLocalizeConfig?.selectAIModel
+      model: ctx?.appConfig?.publishLocalizeConfig?.selectAIModel,
+      designerRef
     }),
     editView: editViewConfig({ ctx, envList }),
     com: {
