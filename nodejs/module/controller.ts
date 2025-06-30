@@ -16,7 +16,7 @@ import Decorator from "@mybricks/sdk-for-app/decorator";
 import * as fs from "fs";
 import * as path from "path";
 import { getAppTypeFromTemplate } from "./tools/common";
-import { getAppConfig } from "./tools/get-app-config";
+import { getAppAllConfig, getAppConfig, getGroupId } from "./tools/get-app-config";
 // import { generateToReactCode } from "@mybricks/to-code-react";
 
 import { Response } from "express";
@@ -60,8 +60,15 @@ export default class PcPageController {
     try {
       Logger.info("[publish] 调用发布接口");
       const startTime = Date.now();
+      const groupId = await getGroupId(fileId);
+      let appConfig = {} as any;
+      if (groupId) {
+        appConfig = await getAppAllConfig({ groupId });
+      } else {
+        appConfig = await getAppConfig();
+      }
 
-      const appConfig = await getAppConfig();
+      console.log("[publish] appConfig", groupId, appConfig);
       const isEncode = !!appConfig?.publishLocalizeConfig?.isEncode;
 
       Logger.info(`[publish] 获取编码状态 isEncode ${isEncode}`);
@@ -76,7 +83,6 @@ export default class PcPageController {
           )
         )
         : json;
-
       const result = await this.service.publish(req, {
         json: jsonTransform,
         userId,

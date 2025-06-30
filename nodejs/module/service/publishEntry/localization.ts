@@ -130,7 +130,7 @@ async function resourceLocalization(
   imagesPath: Set<string>,
 ) {
   const enableCompatible = appConfig?.publishLocalizeConfig?.enableCompatible;
-  let localAssetPath: string = appConfig?.localizeAssetPathConfig?.path || 'test/abc'
+  let localAssetPath: string = appConfig?.localizeAssetPathConfig?.path || 'mfs/files';
   if (localAssetPath.startsWith('/')) {
     localAssetPath = localAssetPath.slice(1)
   }

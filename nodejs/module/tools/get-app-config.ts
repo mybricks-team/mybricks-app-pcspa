@@ -5,6 +5,15 @@ import * as path from "path";
 import * as fs from 'fs';
 const pkg = require('../../../package.json')
 
+export const getGroupId = async (fileId: number) => {
+  try {
+    const res = await API.File.getHierarchy({ fileId: String(fileId) });
+    return res.groupId
+  } catch (e) {
+    return '';
+  }
+}
+
 // 不传groupId表示获取的是全局配置
 export const getAppConfig = async ({ groupId } = {} as any) => {
   const template = fs.readFileSync(path.resolve(__dirname, '../../../assets') + '/publish.html', 'utf8')
@@ -21,6 +30,27 @@ export const getAppConfig = async ({ groupId } = {} as any) => {
       typeof originConfig === "string"
         ? JSON.parse(originConfig)
         : originConfig;
+  } catch (e) {
+    Logger.error("[publish] getAppConfig error", e);
+  }
+  return config;
+};
+
+export const getAppAllConfig = async ({ groupId } = {} as any) => {
+  const template = fs.readFileSync(path.resolve(__dirname, '../../../assets') + '/publish.html', 'utf8')
+  const app_type = getAppTypeFromTemplate(template);
+  const _NAMESPACE_ = pkg.appConfig[app_type].name ?? pkg.name;
+  
+  const options = !!groupId ? { type: "all", id: groupId } : {};
+  const res = await API.Setting.getSetting([_NAMESPACE_], options);
+
+  let config = {} as any;
+  const originConfig = res[_NAMESPACE_]?.config || {};
+  const groupConfig = res[`${_NAMESPACE_}@group[${groupId}]`]?.config || {};
+  try {
+    const isString = typeof originConfig === "string";
+    const isGroupString = typeof groupConfig === "string";
+    config = Object.assign({}, isString ? JSON.parse(originConfig) : originConfig, isGroupString ? JSON.parse(groupConfig) : groupConfig);
   } catch (e) {
     Logger.error("[publish] getAppConfig error", e);
   }
