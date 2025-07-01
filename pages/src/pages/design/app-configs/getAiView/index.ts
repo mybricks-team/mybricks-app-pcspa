@@ -1,8 +1,9 @@
 import aiViewConfig from './aiview'
 import { getAiEncryptData } from "./utils/get-ai-encrypt-data"
 
-const DEFAULT_MODEL = 'deepseek-chat';
-function getDesignerParams(args) {
+// const DEFAULT_MODEL = 'deepseek-chat';
+const DEFAULT_MODEL = 'openai/gpt-4.1-mini-2025-04-14';
+function getDesignerParams(args, { defaultModel }) {
   let context = args[0];
   let tools = undefined;
   let extraOption = {};
@@ -18,7 +19,7 @@ function getDesignerParams(args) {
     extraOption = args[2];
   }
 
-  let model = DEFAULT_MODEL, role;
+  let model = defaultModel || DEFAULT_MODEL, role;
 
   switch (true) {
     case extraOption?.expert === 'image': {
@@ -58,14 +59,16 @@ function getDesignerParams(args) {
 }
 
 const getAiView = (enableAI, option) => {
-  const { model, designerRef } = option ?? {};
+  const { model: defaultModel, designerRef } = option ?? {};
 
   if (enableAI) {
     return {
       ...aiViewConfig,
       getNewDSL: aiViewConfig.getNewDSL({ designerRef }),
       async requestAsStream(messages, ...args) {
-        const { context, tools, model, role } = getDesignerParams(args);
+        const { context, tools, model, role } = getDesignerParams(args, {
+          defaultModel
+        });
         const { write, complete, error, cancel } = context ?? {};
         // 用于debug用户当前使用的模型
         window._ai_use_model_ = model;
