@@ -816,6 +816,7 @@ export default function appConfig(
         ],
       },
       layout: window._disableSmartLayout ? "flex-column" : "smart",
+      toolbarContainer: '#sdk_toolbar_center',
     },
   };
 }
