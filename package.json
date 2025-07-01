@@ -1,7 +1,7 @@
 {
-  "name": "不要使用此字段，请修改下方的 appConfig 字段中 框架类型 的 name 字段",
-  "version": "不要使用此字段，请修改下方的 appConfig 字段中 框架类型 的 version 字段",
-  "description": "不要使用此字段，请修改下方的 appConfig 字段中 框架类型 的 description 字段",
+  "name": "mybricks-app-pcspa",
+  "version": "1.5.30",
+  "description": "中后台类PC页面搭建",
   "scripts": {
     "watch:be-local": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=http://localhost:3100 node nodejs/index.js'",
     "watch:be": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=https://my.mybricks.world node nodejs/index.js'",
