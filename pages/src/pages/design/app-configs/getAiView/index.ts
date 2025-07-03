@@ -91,6 +91,7 @@ const getAiView = (enableAI, option) => {
                 } : {})
               },
               signal: cancelControl?.signal,
+              credentials: 'include',
               body: JSON.stringify(
                 APP_ENV === 'production' ? getAiEncryptData({
                   model,
