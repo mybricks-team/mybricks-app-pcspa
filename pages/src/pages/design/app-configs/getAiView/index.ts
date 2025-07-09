@@ -3,7 +3,7 @@ import aiViewConfig from './aiview'
 // import mock2Prompts from './mock/mock2Prompts';
 // import mock1Res from './mock/mock1Res'
 // import mock2Res from './mock/mock2Res'
-import { getAiEncryptData } from "./utils/get-ai-encrypt-data"
+import { aiUtils } from "./utils/get-ai-encrypt-data"
 
 // const DEFAULT_MODEL = 'deepseek-chat';
 const DEFAULT_MODEL = 'openai/gpt-4.1-mini-2025-04-14';
@@ -122,7 +122,7 @@ const getAiView = (enableAI, option) => {
               signal: cancelControl?.signal,
               credentials: 'include',
               body: JSON.stringify(
-                APP_ENV === 'production' ? getAiEncryptData({
+                APP_ENV === 'production' ? aiUtils.getAiEncryptData({
                   model,
                   role,
                   messages,
