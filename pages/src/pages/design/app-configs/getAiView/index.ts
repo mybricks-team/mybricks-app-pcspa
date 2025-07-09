@@ -1,4 +1,8 @@
 import aiViewConfig from './aiview'
+// import { mock1Prompts } from './mock';
+// import mock2Prompts from './mock/mock2Prompts';
+// import mock1Res from './mock/mock1Res'
+// import mock2Res from './mock/mock2Res'
 import { getAiEncryptData } from "./utils/get-ai-encrypt-data"
 
 // const DEFAULT_MODEL = 'deepseek-chat';
@@ -78,6 +82,31 @@ const getAiView = (enableAI, option) => {
         cancel?.(() => {
           cancelControl?.abort?.();
         });
+
+        // let _message = Array.from(messages)
+
+        // console.log(1, _message)
+
+        // const isFirstOne = messages.length === 2
+        // if (isFirstOne) {
+        //   // write(mock1Res);
+        //   // complete();
+        //   // return
+        //   // _message[0].content = mock1Prompts
+        // }
+
+        // const isScenond = messages.length > 2
+        // if (isScenond) {
+        //   // setTimeout(() => {
+        //   //   write(mock2Res);
+        //   //   complete();
+        //   // }, 1000)
+        //   // return 
+        //   // _message[0].content = mock2Prompts
+        //   // _message = [_message[0], _message[1], _message[2], _message[3]]
+        // }
+
+        // console.log(2, _message)
 
         try {
           const response = await fetch(

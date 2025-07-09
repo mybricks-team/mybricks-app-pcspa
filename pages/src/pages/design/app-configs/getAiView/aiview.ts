@@ -26,6 +26,24 @@ const getNewDSL = (params) => {
         }
       }
 
+      // 兼容把样式写到 layout 的情况
+      if (component.style) {
+        const { width, height, justifyContent, alignItems, flex, styleAry, ...extra } = component.style
+
+        if (!component?.style?.styleAry) {
+          component.style.styleAry = [
+            {
+              selector: ':root',
+              css: {}
+            }
+          ]
+        }
+        component.style.styleAry[0].css = {
+          ...(component.style.styleAry[0]?.css ?? {}),
+          ...(extra ?? {})
+        }
+      }
+
       if (component?.style?.styleAry) {
         component?.style?.styleAry?.forEach?.(item => {
           if (!item.css) {
@@ -227,68 +245,79 @@ const getNewDSL = (params) => {
         return
       }
     },
+    'system.page': (component) => {
+      const allComDef = designerRef.current.components.getAllComDef()
+      const keys = Object.keys(allComDef)
+      if (keys.find((key) => key.startsWith("mybricks.normal-pc.antd5"))) {
+        customContainerComponentNamespace = "mybricks.normal-pc.antd5.custom-container"
+      } else {
+        customContainerComponentNamespace = "mybricks.normal-pc.custom-container"
+      }
+      component.namespace = customContainerComponentNamespace
+    }
   })
 }
 
 const getSystemPrompts = genGetSystemPrompts({
-  title: "京东购物PC网站",
+  title: "京东购物网站",
   pages: [
     {
       title: "首页",
-      prd: `#### （1）顶部导航栏
-      - **功能**：提供平台基础功能快捷入口，如购物车、我的订单、企业采购等；展示用户账号信息（含PLUS会员标识 ）；支持语言/模式切换（如网站无障碍模式 ）。
-      - **视觉**：简洁清晰，与平台整体风格统一，突出关键功能入口，PLUS会员标识等做差异化显示 。
+      prd: `购物网站首页一般包含导航栏、搜索栏、商品类目导航、轮播banner、个人信息、猜你喜欢等区域。
 
-      #### （2）搜索栏区域
-      - **功能**：支持商品关键词搜索，提供搜索历史、热门搜索词推荐；“京东AI”按钮可唤起智能搜索/推荐辅助功能 。
-      - **视觉**：搜索框占据显眼位置，按钮样式突出，与整体风格协调 。
+      我们从上到下，从左到右来分析UI
 
-      #### （3）左侧分类导航
-      - **功能**：梳理平台商品分类，如家用电器、手机数码、服饰美妆等，快速引导用户找到商品类目；展示特色业务（如京东新品专属推广位 ）。
-      - **视觉**：分类层级清晰，文字简洁，搭配简洁图标（可选 ），侧边栏固定，方便用户随时操作 。
+      ## 顶部导航栏
+      功能：顶部导航栏，提供一些基础信息的展示（如位置信息、用户昵称），同时提供一些二级页面的快捷入口
+      视觉：电商网站的导航栏不是重点区域，高度相对较小，文字内容也不大，不是重点视觉，可以延展至和页面等宽，不需要间距
+        - 左侧：居左展示位置信息和用户名称
+        - 右侧：居右展示购物车、我的订单等其他页面入口
+      
+      ## 搜索栏
+      功能：吸引用户点击，作为全局搜索入口，由输入框和按钮组成
+      视觉：重点区域，用红色边框高亮，但左右两侧较空，所以可以放置一些logo、一些辅助的按钮来填充
+        - 左侧：居左展示京东logo
+        - 中间：重点放置搜索栏
+        - 右侧：放置一个引入注目的AI按钮
 
-      #### （4）中间核心内容区
-      - **轮播图/营销banner**
-          - **功能**：展示平台大促活动、热门业务、重点推荐商品等营销内容，吸引用户关注 。
-          - **视觉**：画面清晰、色彩鲜艳，突出营销重点信息 。
-      - **业务模块区**
-          - 涵盖“京选好物”“企业会员权益”“京东直播”“京东秒杀”“国家补贴×百亿补贴”等板块，分别展示对应业务的商品、权益、活动内容 。
-          - **视觉**：模块布局规整，区分明显，通过标题、样式突出业务特色 。
-      - **推荐商品区**
-          - 包含“为你推荐”“潮电好物”“居家优品”等个性化推荐板块，基于用户行为数据展示商品 。
-          - **视觉**：商品排版整齐，图片清晰，价格、标题等信息展示明确 。
+      ## 核心内容区
+      功能：提升利用率，通过左中右三个分区，展示更多信息，吸引用户和展示信息的重点区域
+      视觉：
+        - 左侧：居左展示商品分类导航
+        - 中间：展示活动轮播 + 顶流商品，提升营销氛围
+        - 右侧：居右展示个人信息卡片，包含头像昵称以及优惠券订单等特殊信息，用黑金氛围表示个人的尊贵感
 
-      #### （5）右侧个人及功能快捷栏
-      - **功能**：展示用户账号基本信息（含PLUS会员权益 ）、订单状态快捷入口（待付款等 ）、功能快捷按钮（购物车、我的、客服、反馈 ）；呈现浏览记录、收藏等信息 。
-      - **视觉**：布局紧凑，突出个人相关信息与快捷操作，样式与整体风格统一 。
+      ## 猜你喜欢
+      功能：通过标签分类 + 商品瀑布流的方式留住顾客，让顾客产生留下的冲动
+      视觉：
+        - 一个分类标签栏，提供了「为你推荐」「进口好物」等分类标签
+        - 商品卡片的瀑布流，用列表实现一行N列的瀑布流
       `
     },
     {
-      title: "购物车",
-      prd: `1. **顶部区域**：展示京东logo、搜索栏（可快捷搜索商品） ，及用户相关入口（我的订单、我的京东等） ，与京东PC站全局导航保持一致，强化品牌与用户便捷访问路径。 
-2. **商品筛选与分类区**：提供“全选”“自营”等筛选按钮，支持按商品属性（如自营/第三方）快速筛选；展示“全部商品”分类及数量统计，清晰呈现购物车商品结构。 
-3. **商品列表区**：以列表形式展示商品，包含商品勾选框、商品信息（名称、规格、套装组成等）、单价、数量、操作（删除、移入关注等） ，布局规整，信息层级清晰，方便用户快速浏览与操作。 
-4. **营销与结算区**：显示营销信息（如降价提醒） 、已选商品统计、总价，及“去结算”按钮，突出结算引导，结合优惠信息刺激下单。 
-5. **猜你喜欢区**：在购物车底部或侧边，基于用户行为推荐商品，拓展消费场景，提升平台GMV 。 `
-    },
-    {
-      title: "订单",
-      prd: `## 一、头部导航模块
-- **功能**：承载品牌标识展示（京东 logo、“我的京东” 标识 ）、全局跳转（返回京东首页 ）、通用工具（搜索框用于站内商品/订单搜索、购物车入口便捷查看购物车内容 ），是连接京东 PC 站全局与订单页的枢纽，帮助用户快速切换核心场景 。 
+      title: "商品详情页",
+      prd: `商品详情页包含导航栏、店铺信息、商品图片、商品名称、商品价格、商品评价、收货地址等内容
 
-## 二、左侧导航栏模块
-- **功能**：对用户在 “我的京东” 下的核心功能进行分类聚合，涵盖订单管理（订单中心：我的订单、评价晒单等 ，满足订单全流程操作需求 ）、关注管理（关注中心：关注商品、店铺、活动 ，沉淀用户关注内容，便于二次触达 ）、资产管理（资产中心：小金库、京东白条、领货码等 ，集中管理金融及权益类资产 ）、特色业务（特色业务：企业租赁、我的营业厅等 ，拓展业务场景，服务企业及多元需求用户 ） 。 
-## 三、订单状态筛选模块
-- **功能**：提供订单状态维度的筛选能力，包含 “全部订单、待付款、待收货/使用、待评价、订单回收站” 标签切换，以及商品/订单号搜索、高级筛选（如时间、金额区间 ），支持用户按不同订单进度、精准条件快速定位订单 。 
+      从上到下，从左到右来分析UI
 
-## 四、订单列表展示模块
-- **功能**：以条目形式呈现订单核心信息，包括下单时间、订单号、商品信息（图 + 名称 + 规格 ）、收货人、金额与支付方式、订单状态，同时配套操作入口（查看发票、订单详情 ），是订单信息与操作的载体 。 
+      ## 顶部导航栏，和之前一样，一般而言，同一个网站的顶部导航栏都是不变的
 
-## 五、订单操作模块
-- **功能**：围绕订单提供深度操作能力，“订单详情” 跳转/弹窗展示完整订单链路信息（商品、地址、物流、支付 ）；“查看发票” 关联发票管理页，支持发票信息查看与电子票下载；订单删除/回收功能，支持订单清理与误删恢复，覆盖订单全生命周期管理需求 。 
+      ## 店铺区域
+      功能：展示商品所属店铺信息，右侧比较空白，所以将店铺搜索栏展示于此
+      视觉：
+        - 左侧：居左展示，店铺卡片，包含店铺头像、店铺名称、以及一些店铺的操作按钮（收藏店铺、联系客服）
+        - 右侧：居右展示，一个符合整体风格的搜索栏，可以搜搜店铺的商品
+     
+      ## 商品区域
+      功能：核心区域，重点展示商品的各类信息以及选购信息
+      视觉：
+        - 左侧：居左展示，轮播的商品图片，用于展示商品的更多图片
+        - 右侧：居右展示，整个商品的选购信息卡片，从上到下，需要展示商品价格、商品划线价、送到什么收获地址、款式选择、数量，操作按钮（加入购物车 + 立即购买）
 
-## 六、分页功能模块
-- **功能**：对多页订单数据进行切分，通过 “上一页、页码、下一页” 控件，支持用户翻页浏览不同页订单，控制单页订单展示数量，保障页面加载与浏览体验 。`
+      ## 商品评价
+      功能：一般在底部都是可垂直方向延展的内容，所以将商品评价方到底部，可以通过加载更多的列表来加载更多的评价
+        - 评价的总结信息，展示各种标签「赞不绝口」「省时便捷」「安装简单」等总结性标签 + 评论总数
+        - 评价列表，包含评价用户信息，评价图片以及评价内容`
     },
   ],
   style: `网页的设计要富有美感，关注设计元素间距，圆角，字体大小，图片配合等，网页的纵向排列应包含尽可能多的功能模块
@@ -310,10 +339,7 @@ const getSystemPrompts = genGetSystemPrompts({
 
 const getDSLPrompts = genGetDslPrompts({
   dslDemoPrompts: `
-  page.dsl文件代表一个PC网站的其中一个页面，不局限于简单的demo，应该尽量的复杂，尽可能多的ui和交互，禁止过于简约。
-  网页的设计要注重美观度，有设计感，关注设计元素间距，圆角，字体大小，图片配合等。
-
-  如下为一个卡片中有一个文本：
+  1、page.dsl文件，为页面界面的结构描述，如下为一个卡片中有一个文本：
   \`\`\`dsl file="page.dsl"
   <page title="你好世界" style={{backgroundColor: "#fff"}}>
     <card.component.namespace
@@ -336,96 +362,232 @@ const getDSLPrompts = genGetDslPrompts({
   上述用到的“text.component.namespace”以及可能的其它组件均同上述card组件同理。
   “page”为特殊画布节点，不需要选择建议组件的namespace，直接使用“page”即可。
   “flex”组件为特殊组件，不需要选择建议组件的namespace，直接使用“flex”即可。
-  上述只是一个简单的demo，注意生成PC页面时内容一定要足够丰富。
   更多用法关注组件使用建议，严格按照组件的文档提示来使用。
-  网页的纵向排列应包含尽可能多的功能模块。
 
-  建议：
-    1. 电商网站可以参考淘宝、京东、Amazon、eBay、Walmart、Rakuten
-    2. 门户网站可以参考Yahoo、Microsoft Service Network、Facebook、X、Twitter
-    3. 给使用的组件都设置上主题色
-  必须遵循：
-    1. 必须包含尽可能多的元素，文字需求至少添加8个及以上UI层面的功能模块，搭建更多的内容。
-    2. 优先使用图片组件，除非是工具类图标。
-    3. 一个页面的需求分析规格说明书(prd.md)，至少包含8个及以上UI层面的功能模块，搭建更多的内容。
-    4. 禁止超出3张页面
+  特别地，只有插槽可以配置height=100%，其他标签都不可以
+
   `,
   canvasInfoPrompts: `
-  由于我们都是PC端组件和PC端页面，所以需要遵循一些以下PC端规范。
-  最多只能生成3张页面
-  网页的纵向排列应包含尽可能多的功能模块。
-  搭建内容必须丰富（元素足够多），必须检索你所了解的PC网站，学习PC网站设计、风格，并思考，将简单的一句话需求，转换为更复杂的场景，发挥你的想象。
-  当前搭建画布宽度为1024，所有元素的尺寸都需要关注此信息，且尽可能自适应布局，1024只是在MyBricks搭建时的画布宽度，实际运行时可能会更宽，所以元素内容可以尽可能丰富。
-  搭建内容必须参考PC端网站进行设计。
-    比如:
-      1. page下方的元素考虑是否需要配置宽度100%且配置左右margin，效果更好；
-      2. 布局需要自适应画布宽度；
-      3. 页面可以配置backgroundColor
+  当前搭建画布的宽度为1024，所有元素的尺寸需要关注此信息，且尽可能自适应布局。1024只是在MyBricks搭建时的画布宽度，实际运行时可能会更宽。
   
-  建议：
-    1. 电商网站可以参考淘宝、京东、Amazon、eBay、Walmart、Rakuten
-    2. 门户网站可以参考Yahoo、Microsoft Service Network、Facebook、X、Twitter、新浪网
-  必须遵循：
-    1. 必须包含尽可能多的元素，文字需求至少添加8个及以上UI层面的功能模块，搭建更多的内容。
-    2. 优先使用图片组件，除非是工具类图标。
-    3. 一个页面的需求分析规格说明书(prd.md)，至少包含8个及以上UI层面的功能模块，搭建更多的内容。
-    4. 禁止超出3张页面
+  搭建内容必须参考PC端网站进行设计，内容必须考虑左右排列的丰富度，以及以下PC的特性
+    比如:
+      1. 布局需要自适应画布宽度，实际运行的电脑宽度不固定；
+      2. 宽度和间距配置的时候要注意，画布只有1024，特别注意总宽度不可以超过1024；
+      3. 页面可以配置backgroundColor；
+  搭建风格也要尽可能贴合中国网站的设计风格；
   `,
-  // 特殊地，系统已经内置了底部导航栏和顶部导航栏，仅关注页面内容即可，不用实现此部分内容。
   componentSuggestionPrompts: `
   1. 基础布局必须使用“flex”组件，禁止使用容器、布局类组件；
-  2. 文本、图片、按钮组件属于基础组件，任何情况下都可以优先使用，即使不在允许使用的组件里；
-  3. 关于图片和图标
-    3.1 如果是常规图片，使用https://ai.mybricks.world/image-search?term=dog&w=100&h=200，其中term代表搜索词，w和h可以配置图片宽高；
-    3.2 如果是图标和Logo，可以使用https://placehold.co来配置一个带文本和颜色的图标，其中text需要为图标的英文搜索词，禁止使用emoji或者特殊符号；
-  4. 尽可能使用margin替代padding，多注意组件是否需要配置margin，如果是横向布局，组件间的间距必须使用右侧组件的左间距，如果是横向布局，必须使用下侧组件的上间距；
-  5. 仔细检查是否需要用到绝对定义，是相对于父元素的；
-  6. page下方的元素注意配置左右margin；
-  7. 优先使用图片组件，除非是工具类图标。
-  8. 所有使用的组件必须有自定义的data数据源；
-  9. 如果组件没有明确说明slots内可以不包含内容，每个slots里必须包含子组件
-  10. 给所有使用到的组件设置主题色
-  11. 所有组件都必须使用适应高度（layout={height:'fit-content'}），除非组件必须或建议固定高度
-  12. 所有slots.xxx插槽必须默认设置为纵向排版（layout={{ width: '100%', height: '100%', "justifyContent":"flex-start","alignItems":"flex-start","layout":"flex-column" }}）
+  2. 文本、图片、按钮、图标组件属于基础组件，任何情况下都可以优先使用，即使不在允许使用的组件里；
+  3. 对于图标，图标禁止使用emoji或者特殊符号，必须使用图标组件来搭建；
+  4. 关于图片
+    4.1 如果是常规图片，使用https://ai.mybricks.world/image-search?term=dog&w=100&h=200，其中term代表搜索词，w和h可以配置图片宽高；
+    4.2 如果是Logo，可以使用https://placehold.co来配置一个带文本和颜色的图标，其中text需要为图标的英文搜索词，禁止使用emoji或者特殊符号；
+  5. 尽可能使用margin替代padding，多注意组件是否需要配置margin，如果是横向布局，组件间的间距必须使用右侧组件的左间距，如果是横向布局，必须使用下侧组件的上间距；
+  6. 仔细是否需要用到绝对定位，是相对于父元素的；
+  7. page下方的元素合理配置左右margin，导航栏、通栏内容、菜单等都不需要配置左右间距，主要是考虑美观度；
+  8. 给所有使用到的组件设置主题色
   `,
 })
+
+const getPRDPromptsAtFirst = () => {
+  return `对于需求，我们需要严格按以下格式返回
+    <需求格式>
+    1.概述
+    2.总体设计规范
+    3.设计亮点
+      - 在此部分，你需要扮演创意总监的角色，超越简单的功能堆砌，核心是增加内容的丰富度和美观度，请从以下角度发散思考，对每个区域都提供一些可落地的设计亮点
+        - 丰富度
+          - 通过左右分栏、左中右分栏等方式增加PC网站的信息密度，不至于大片留白
+          - 通过绝对定位、标签、高亮信息、补充文字等方式来补充局部的内容
+        - 美观度
+          - 通过渐变色、半透明背景色、边框、阴影、多色文字等方式来增添美观度
+    4.内容分析和描述
+      - 从上到下，从左到右分析和描述内容
+    5.参考风格和网站
+      - 提供一些可被参考的设计风格，以及可被参考的网页设计
+    </需求格式>
+    `
+}
 
 export const getExamplePrompts = () => {
   return `
   <example>
-    <user_query>搭建一个书籍检索页面</user_query>
+    <user_query>搭建两个竖排的按钮，按钮宽度固定 + 铺满</user_query>
     <assistant_response>
     \`\`\`dsl file="page.dsl"
-      <page title="书籍检索页面">
-        <form-container.component.namespace
-          title="查询表单"
-          layout={{ width: '100%' }}
-          data={{"layoutType":"Form","span":8,"items":[{"id":"u_wcnJM","comName":"u_3Vkb8","schema":{"type":"string"},"name":"bookName","label":"书籍名称","widthOption":"span","span":12,"colon":"default","labelWidthType":"default","hiddenLabel":false,"visible":true,"hidden":false,"tooltip":"请输入书籍名称"}],"additionalItems":[],"nameCount":1,"formItemColumn":2,"enable24Grid":true,"ellipseMode":"default","expandText":"展开","collapsedText":"收起","actions":{"visible":true,"widthOption":"flexFull","span":12,"align":"right","items":[{"title":"查询","type":"primary","isDefault":true,"visible":true,"outputId":"onClickSubmit","key":"submit","useDynamicDisabled":false,"useDynamicHidden":false,"disabled":false,"useIcon":false,"iconDistance":8,"icon":"HomeOutlined","iconLocation":"front"}]},"isFormItem":false,"wrapperCol":24,"labelWidthType":"px","labelWidth":98,"labelCol":4,"itemWidthType":"flex","paramsSchema":{},"submitHiddenFields":false,"validateHiddenFields":true,"config":{"colon":true,"layout":"inline","disabled":false,"size":"middle"},"domainModel":{"type":""},"mobileConfig":{"enableWidthAdaptive":true},"defaultCollapsed":true,"columnGap":0}}
-        >
-          <slots.content title="表单内容" layout={{ width: '100%', height: '100%' }}>
-            <form-tex.component.namespace
-              title="书籍名称"
-              layout={{ width: '100%' }}
-              data={{"visible":true,"rules":[],"validateTrigger":["onBlur","onPressEnter"],"config":{"allowClear":true,"placeholder":"请输入内容","disabled":false,"addonBefore":"","addonAfter":"","showCount":false,"maxLength":-1,"size":"middle"},"src":false,"innerIcon":"HomeOutlined","isEditable":true,"preSrc":false,"preInnerIcon":"HomeOutlined","setAutoFocus":false}}
-            />
-          </slots.content>
-        </form-container.component.namespace>
-        <table.component.namespace
-          title="书籍表格"
-          layout={{ width: '100%', height: 'fit-content' }}
-          styleAry={[{"selector":".summaryCellTitle","css":{"textAlign":"center"}},{"selector":".summaryCellContent","css":{"textAlign":"center"}},{"selector":"tfoot.ant-table-summary>.summaryRow:hover","css":{"background":"#f5f7f9"}}]}
-          data={{"rowKey":"id","dataSource":[],"columns":[{"title":"ID","key":"rowKey","width":"auto","visible":false,"contentType":"text","_id":"p24POF","dataIndex":"id","isRowKey":true},{"title":"书名","key":"u_trxz63","width":"auto","visible":true,"contentType":"text","_id":"p5KBRu","dataIndex":"bookName","keepDataIndex":true,"filter":{"filterIconInherit":true},"sorter":{"enable":false,"type":"size"},"isRowKey":false},{"title":"作者","key":"u_dddx68","width":"auto","visible":true,"contentType":"text","_id":"rVBDTw","dataIndex":"auther","keepDataIndex":true,"filter":{"filterIconInherit":true},"sorter":{"enable":false,"type":"size"},"isRowKey":false},{"title":"操作","key":"u_5yb5sr","width":"auto","visible":true,"contentType":"slotItem","_id":"GGaXOa","dataIndex":"action","keepDataIndex":true,"filter":{"filterIconInherit":true},"sorter":{"enable":false,"type":"size"},"isRowKey":false,"slotId":"u_21di73"}],"fixedHeader":false,"enableStripe":false,"headStyle":{"color":"#1f1f1f","background":"#f5f7f9"},"contentStyle":{},"scroll":{"y":"","scrollToFirstRowOnChange":true},"bordered":false,"size":"middle","useRowSelection":false,"enableRowClickSelection":false,"rowSelectionMessage":"已选中 { count } 项","rowSelectionPostion":["top","bottom"],"useLoading":true,"tableLayout":"fixed","loadingTip":"","usePagination":false,"paginationConfig":{"total":20,"text":"共 {total} 条结果","current":1,"currentPage":{"pageNum":1,"pageSize":10},"isDynamic":false,"disabled":false,"defaultPageSize":10,"align":"flex-end","size":"default","showSizeChanger":false,"pageSizeOptions":["10","20","50","100"],"showQuickJumper":false,"hideOnSinglePage":false,"useDynamicTitle":false},"domainModel":{},"useSummaryColumn":false,"summaryColumnTitle":"合计","summaryCellTitleCol":1,"summaryColumnContentType":"text","summaryColumnContentSchema":{"type":"string"},"mergeCheckboxColumn":false,"isEmpty":false,"description":"暂无数据","enableOnRow":false,"onRowScript":"","lazyLoad":false,"filterIconDefault":"FilterFilled","hasUpdateRowKey":1}}
-        >
-          <slots.u_21di73 title="操作-列" layout={{ width: '100%', height: '100%' }}>
-            <button.component.namespace
-              title="查看详情按钮"
-              layout={{ width: 'fit-content', height: 'fit-content' }}
-              data={{"asMapArea":false,"text":"详情","dataType":"number","outVal":0,"inVal":"","useIcon":false,"isCustom":false,"icon":"HomeOutlined","size":"small","type":"link","shape":"default","src":"","showText":true,"iconLocation":"front","iconDistance":8,"contentSize":[14,14]}}
-            />
-          </slots.u_21di73>
-        </table.component.namespace>
+      <page title="测试页面" style={{backgroundColor: "#f5f5f5"}}>
+        <button.component.namespace
+          title="按钮1" 
+          layout={{width: 50, height: 36}}
+          styleAry={[{selector:".button",css:{"backgroundColor":"red"}}]}
+          data={{ text:"按钮1", type: 'primary' }}
+        />
+        <button.component.namespace
+          title="按钮2" 
+          layout={{width: '100%', height: 36}}
+          styleAry={[{selector:".button",css:{"backgroundColor":"blue"}}]}
+          data={{ text:"按钮2", type: 'primary' }}
+        />
       </page>
     \`\`\`
+    </assistant_response>
+  </example>
+  `
+}
+
+export const getExamplePromptsAtFirst = () => {
+  return `
+  <example>
+    <user_query>我要搭建一个京东首页</user_query>
+    <assistant_response>
+      好的，我来参考京东首页的内容实现一下，以下是需求分析规格说明书和组件选型的内容：
+      \`\`\`md file="prd.md"
+      # 概述
+      首页一般包含导航栏、搜索栏、商品类目导航、轮播banner、个人信息、猜你喜欢等区域。
+
+      # 总体设计规范
+      - 一致性：保证各区域的圆角一致、保证字体大小合理，审视间距的配置是否过大或者过小，又或者是多个间距叠加在一起了；
+      - 丰富性：电商网站要求信息量大，在每一个区域展示更多的内容，增加信息展示的密度；
+
+      # 设计亮点
+      - 内容丰富分成左中右三栏不对称的「核心内容」区域
+      - 可以配置渐变色和阴影的AI按钮，引入注目
+      - 左右不对称的「科学研究」区域
+      - 对商品卡片的内容进行拓展，图片加价格太过单调，可以拓展成一个丰富的商品卡片，上方商品图片，下方排一个「无理由退货」「百亿补贴」等营销标签，中间左侧放置价格以及划线价，右侧放置销量，再下方提供多少人已购买字样
+
+      我们从上到下，从左到右来分析UI
+
+      ## 顶部导航栏
+      功能：顶部导航栏，提供一些基础信息的展示（如位置信息、用户昵称），同时提供一些二级页面的快捷入口
+      视觉：电商网站的导航栏不是重点区域，高度相对较小，文字内容也不大，不是重点视觉，可以延展至和页面等宽，不需要间距
+        - 左侧：居左展示位置信息和用户名称
+        - 右侧：居右展示购物车、我的订单等其他页面入口
+      
+      ## 搜索栏
+      功能：吸引用户点击，作为全局搜索入口，由输入框和按钮组成
+      视觉：重点区域，用红色边框高亮，但左右两侧较空，所以可以放置一些logo、一些辅助的按钮来填充
+        - 左侧：居左展示京东logo
+        - 中间：重点放置搜索栏
+        - 右侧：放置一个引入注目的AI按钮
+
+      ## 核心内容区
+      功能：提升利用率，通过左中右三个分区，展示更多信息，吸引用户和展示信息的重点区域
+      视觉：
+        - 左侧：居左展示商品分类导航
+        - 中间：展示活动轮播 + 顶流商品，提升营销氛围
+        - 右侧：居右展示个人信息卡片，包含头像昵称以及优惠券订单等特殊信息，用黑金氛围表示个人的尊贵感
+
+      ## 猜你喜欢
+      功能：通过标签分类 + 商品瀑布流的方式留住顾客，让顾客产生留下的冲动
+      视觉：
+        - 一个分类标签栏，提供了「为你推荐」「进口好物」等分类标签
+        - 商品卡片的瀑布流，用列表实现一行N列的瀑布流
+
+      # 参考风格和网站
+      红色营销风格，京东、淘宝等PC站点设计
+      
+      \`\`\`
+    
+      推荐采用以下组件进行搭建
+      \`\`\`json file="require.json"
+      [
+        {
+          "namespace": "mybricks.somelib.icon"
+        },
+        {
+          "namespace": "mybricks.somelib.text"
+        },
+        {
+          "namespace": "mybricks.somelib.button"
+        }
+      ]
+      \`\`\`
+    </assistant_response>
+  </example>
+
+  <example>
+    <user_query>开发一个大学官网</user_query>
+    <assistant_response>
+      好的，我来实现一个大学官网，以下是需求分析规格说明书和组件选型的内容：
+      \`\`\`md file="prd.md"
+      # 概述
+      一个大学的门户网站，这个大学网站包含了导航栏、学校介绍、历史沿革、院系设置、招生就业、学术科研、页脚等部分。
+
+      # 总体设计规范
+      - 一致性：保证各区域的圆角一致、保证字体大小合理，审视间距的配置是否过大或者过小，又或者是多个间距叠加在一起了；
+      - 丰富性：官网要求信息量大，在卡片设计和其他内容展示更多的内容和丰富的样式，增加信息展示的密度和层次感；
+
+      # 设计亮点
+      - 对学校介绍进行拓展
+        - 利用双色标题，展示学校的slogan
+        - 利用左右分栏的不对称布局展示更多的信息
+        - 利用绝对定位绘制一些高亮标签
+      - 标题+副标题增添每个区域的内容丰富度
+      - 左右不对称的「科学研究」区域，增加内容利用率
+
+      我们从上到下，从左到右来分析UI
+
+      ## 顶部导航栏
+      功能：顶部导航栏，提供一些学校logo和其他区域的导航入口。
+      视觉：导航栏核心是一个总览作用，可以延展至和页面等宽，不需要间距
+        - 左侧：居左展示logo和学校名称
+        - 右侧：居右展示各个区域或者其他页面的入口
+      
+      ## 学校介绍
+      功能：作为第一个看到的区域，内容必须有冲击力且能说明优势
+      视觉：重点区域，同时展示slogan、简短的介绍，一个学校图片、以及一些学校的数据，比如就业率、专业数量、教学质量等信息
+        - 左侧：用双色标题展示slogan，同时展示一句优势介绍，再用主题色提供一些数据支持，提供两个带按钮的图标
+        - 右侧：放置学校图片，同时可以用绝对定位绘制一些高亮信息（比如科研实力top1等）
+
+      ## 历史沿革
+      功能：介绍学校厚重的历史
+      视觉：通过标题和副标题总结该区域，同时介绍学校历史
+        - 左侧历史图片，右侧历史总结
+        - 下方再添加学校的一些数据，比如办学历史、校园面积、教职工数量等
+
+      ## 院系设置
+      功能：介绍学校覆盖各类学科领域知识
+      视觉：通过标题和副标题总结该区域，同时详细介绍下学院、王牌专业、教师数量等信息
+        - 通过横向列表+卡片的形式来展示此区域
+        - 卡片部分能够展示一些详细信息，比如学院信息，王牌专业（使用高亮标签），教师和学生数量（使用图标+文字）
+        - 同时提供了解更多的入口
+
+      ## 科学研究
+      功能：介绍学校浓厚的科学研究氛围和实力
+      视觉：通过标题和副标题总结该区域，同时通过左右不对称的样式增加美观度
+        - 左侧介绍中重点实验室、合作实验室等图片和信息
+        - 右侧通过数据卡片，提供一些专利数量、论文数量、国家重点实验室等数据支持，可以通过边框来绘制带封边的卡片
+
+      ## 页脚
+      功能：展示快速导航、在线服务连接、联系方式、以及版权信息
+      视觉：左右无间距的深色页脚，注意响应式，也可以添加几个平台的图标用于跳转其他平台账号
+      \`\`\`
+
+      # 参考风格和网站
+      清华大学、harvard.edu等校园网站设计
+    
+      推荐采用以下组件进行搭建
+      \`\`\`json file="require.json"
+      [
+        {
+          "namespace": "mybricks.somelib.icon"
+        },
+        {
+          "namespace": "mybricks.somelib.text"
+        },
+        {
+          "namespace": "mybricks.somelib.button"
+        },
+        {
+          "namespace": "mybricks.somelib.list"
+        },
+        {
+          "namespace": "mybricks.somelib.image"
+        }
+      ]
+      \`\`\`
     </assistant_response>
   </example>
   `
@@ -438,5 +600,7 @@ export default {
   getNewDSL,
   getDSLPrompts,
   getSystemPrompts,
-  getExamplePrompts
+  getPRDPromptsAtFirst,
+  getExamplePrompts,
+  getExamplePromptsAtFirst
 }
