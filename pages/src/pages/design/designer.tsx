@@ -985,11 +985,11 @@ export default function MyDesigner({ appData: originAppData }) {
               className={
                 classNames({
                 [css.preview_btn]: true,
-                [css.btn_disable]: !operable || isDebugMode
+                [css.btn_disable]: isDebugMode
               })
               } 
               onClick={()=>{
-                if(!operable || isDebugMode) return
+                if(isDebugMode) return
                 //在调试模式，不给点击
                 preview()
                 }}>
