@@ -57,14 +57,14 @@ const getNewDSL = (params) => {
       }
   
       // 处理幻觉
-      if (component.style?.paddingLeft) {
-        component.style.marginLeft = component.style?.paddingLeft
-        delete component.style?.paddingLeft
-      }
-      if (component.style?.paddingRight) {
-        component.style.marginRight = component.style?.paddingRight
-        delete component.style?.paddingRight
-      }
+      // if (component.style?.paddingLeft) {
+      //   component.style.marginLeft = component.style?.paddingLeft
+      //   delete component.style?.paddingLeft
+      // }
+      // if (component.style?.paddingRight) {
+      //   component.style.marginRight = component.style?.paddingRight
+      //   delete component.style?.paddingRight
+      // }
   
       // 处理绝对定位兼容
       const rootStyle = component?.style?.styleAry?.find?.(s => s.selector === ':root')?.css
@@ -89,6 +89,26 @@ const getNewDSL = (params) => {
         }
   
         delete rootStyle.position
+      }
+
+      // 兼容布局写到rootStyle的情况
+      if (rootStyle?.flexDirection) {
+        if (!component.style) {
+          component.style = {}
+        }
+        component.style.flexDirection = rootStyle.flexDirection
+      }
+      if (rootStyle?.alignItems) {
+        if (!component.style) {
+          component.style = {}
+        }
+        component.style.alignItems = rootStyle.alignItems
+      }
+      if (rootStyle?.justifyContent) {
+        if (!component.style) {
+          component.style = {}
+        }
+        component.style.justifyContent = rootStyle.justifyContent
       }
   
       const shouldTransformToGrid = component.style?.flexDirection === 'row' && component?.comAry?.some(com => {
@@ -152,7 +172,8 @@ const getNewDSL = (params) => {
                   }
                   case widthType === 'number': {
                     base.width = getValidSizeValue(comStyle?.width)
-                    base.widthMode = 'px'
+                    // base.widthMode = 'px'
+                    base.widthMode = 'fit-content'
                     break
                   }
                 }

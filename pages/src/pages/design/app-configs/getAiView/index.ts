@@ -89,19 +89,19 @@ const getAiView = (enableAI, option) => {
 
         // const isFirstOne = messages.length === 2
         // if (isFirstOne) {
-        //   // write(mock1Res);
-        //   // complete();
-        //   // return
-        //   // _message[0].content = mock1Prompts
+        //   write(mock1Res);
+        //   complete();
+        //   return
+        //   _message[0].content = mock1Prompts
         // }
 
         // const isScenond = messages.length > 2
         // if (isScenond) {
-        //   // setTimeout(() => {
-        //   //   write(mock2Res);
-        //   //   complete();
-        //   // }, 1000)
-        //   // return 
+        //   setTimeout(() => {
+        //     write(mock2Res);
+        //     complete();
+        //   }, 1000)
+        //   return 
         //   // _message[0].content = mock2Prompts
         //   // _message = [_message[0], _message[1], _message[2], _message[3]]
         // }
