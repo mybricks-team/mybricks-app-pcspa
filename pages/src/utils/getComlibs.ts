@@ -99,7 +99,7 @@ const checkDeps = async (libs) => {
 };
 
 export const getLibExternalsFill = (lib) => {
-  if (lib.namespace === "mybricks.normal-pc" && !lib.externals.length) {
+  if (lib.namespace === "mybricks.normal-pc" && !lib.externals?.length) {
     // 兼容，添加默认的externals
     lib.externals = [
       {
