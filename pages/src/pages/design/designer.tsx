@@ -977,11 +977,8 @@ export default function MyDesigner({ appData: originAppData }) {
               预览
             </Toolbar.Button> */}
 
-            <Tooltip
-              placement="bottom"
-              title={"预览"}
-            >
-              <div 
+              <div
+              data-mybricks-tip={`{content:'预览',position:'bottom'}`} 
               className={
                 classNames({
                 [css.preview_btn]: true,
@@ -995,7 +992,6 @@ export default function MyDesigner({ appData: originAppData }) {
                 }}>
               {preview_icon}
               </div>
-            </Tooltip>
 
             {/* <Toolbar.Button
               disabled={!operable || isDebugMode}
@@ -1005,11 +1001,8 @@ export default function MyDesigner({ appData: originAppData }) {
               发布
             </Toolbar.Button> */}
 
-            <Tooltip
-              placement="bottom"
-              title={"发布"}
-            >
-              <div 
+              <div
+              data-mybricks-tip={`{content:'发布',position:'bottom'}`} 
               className={
                 classNames({
                 [css.publish_btn]: true,
@@ -1023,7 +1016,6 @@ export default function MyDesigner({ appData: originAppData }) {
               }}>
                 {publish_icon}
               </div>
-            </Tooltip>
 
           </>
         )}
