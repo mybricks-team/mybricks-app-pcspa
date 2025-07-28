@@ -1,9 +1,9 @@
-import aiViewConfig from './aiview'
+import aiViewConfig, { getAIResponse } from './aiview'
 // import { mock1Prompts } from './mock';
 // import mock2Prompts from './mock/mock2Prompts';
 // import mock1Res from './mock/mock1Res'
 // import mock2Res from './mock/mock2Res'
-import { aiUtils } from "./utils/get-ai-encrypt-data"
+// import { aiUtils } from "./utils/get-ai-encrypt-data"
 
 // const DEFAULT_MODEL = 'deepseek-chat';
 const DEFAULT_MODEL = 'openai/gpt-4.1-mini-2025-04-14';
@@ -77,11 +77,11 @@ const getAiView = (enableAI, option) => {
         // 用于debug用户当前使用的模型
         window._ai_use_model_ = model;
 
-        const cancelControl = !!AbortController ? new AbortController() : null;
+        // const cancelControl = !!AbortController ? new AbortController() : null;
 
-        cancel?.(() => {
-          cancelControl?.abort?.();
-        });
+        // cancel?.(() => {
+        //   cancelControl?.abort?.();
+        // });
 
         // let _message = Array.from(messages)
 
@@ -109,50 +109,67 @@ const getAiView = (enableAI, option) => {
         // console.log(2, _message)
 
         try {
-          const response = await fetch(
-            APP_ENV === 'production' ? "//ai.mybricks.world/stream-with-tools" : "//ai.mybricks.world/stream-test",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                ...(role ? {
-                  "M-Request-Role": role,
-                } : {})
-              },
-              signal: cancelControl?.signal,
-              credentials: 'include',
-              body: JSON.stringify(
-                APP_ENV === 'production' ? aiUtils.getAiEncryptData({
-                  model,
-                  role,
-                  messages,
-                  tools,
-                  tool_choice: 'auto',
-                  // tool_choice: {"type": "function", "function": {"name": "query_knowledges"}},
-                }) : {
-                  model,
-                  messages,
-                  tools,
-                  tool_choice: 'auto',
-                }
-              ),
-            }
-          );
+          const { abort } = await getAIResponse({
+            model,
+            messages,
+            role,
+            tools
+          }, {
+            onMessage: (chunk) => {
+              write(chunk);
+            },
+            onComplete: (content) => {
+              complete();
+            },
+            devMode: APP_ENV !== 'production',
+          })
 
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
+          cancel?.(abort)
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              break;
-            }
+          // const response = await fetch(
+          //   APP_ENV === 'production' ? "//ai.mybricks.world/stream-with-tools" : "//ai.mybricks.world/stream-test",
+          //   {
+          //     method: "POST",
+          //     headers: {
+          //       "Content-Type": "application/json",
+          //       ...(role ? {
+          //         "M-Request-Role": role,
+          //       } : {})
+          //     },
+          //     signal: cancelControl?.signal,
+          //     credentials: 'include',
+          //     body: JSON.stringify(
+          //       APP_ENV === 'production' ? aiUtils.getAiEncryptData({
+          //         model,
+          //         role,
+          //         messages,
+          //         tools,
+          //         tool_choice: 'auto',
+          //         // tool_choice: {"type": "function", "function": {"name": "query_knowledges"}},
+          //       }) : {
+          //         model,
+          //         messages,
+          //         tools,
+          //         tool_choice: 'auto',
+          //       }
+          //     ),
+          //   }
+          // );
 
-            const chunk = decoder.decode(value, { stream: true });
-            write(chunk);
-          }
+          // const reader = response.body.getReader();
+          // const decoder = new TextDecoder();
 
-          complete();
+          // while (true) {
+          //   const { done, value } = await reader.read();
+          //   if (done) {
+          //     break;
+          //   }
+
+          //   const chunk = decoder.decode(value, { stream: true });
+          //   write(chunk);
+          // }
+
+          // complete();
         } catch (ex) {
           error(ex);
         }

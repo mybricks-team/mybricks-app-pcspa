@@ -616,6 +616,8 @@ export const getExamplePromptsAtFirst = () => {
 
 const getAvailable = Services.getAvailable
 
+export const getAIResponse = Services.getAIResponse
+
 export default {
   getAvailable,
   getNewDSL,
