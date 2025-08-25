@@ -185,6 +185,13 @@ export default function appConfig(
       load() {
         return new Promise((resolve, reject) => {
           const { pcPageTemplateList } = ctx.appConfig.publishLocalizeConfig;
+
+          if (!pcPageTemplateList?.length) {
+            message.info("未配置模版，请联系平台管理员");
+            resolve(null);
+            return
+          }
+
           appData.openUrl({
             url: 'MYBRICKS://mybricks-material/materialSelectorPage',
             params: {
