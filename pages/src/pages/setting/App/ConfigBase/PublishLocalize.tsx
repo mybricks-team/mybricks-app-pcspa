@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react'
-import { Form, Card, Button, Switch, Input } from 'antd'
+import React, { useState, useEffect } from 'react'
+import { Form, Card, Button, Switch, Input, Select } from 'antd'
 import { _NAMESPACE_ } from "..";
 import dayjs from "dayjs";
 import { TConfigProps } from '../useConfig';
+import API from '@mybricks/sdk-for-app/api'
 const { Meta } = Card;
 
 const fieldName = `needLocalization`
@@ -27,6 +28,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         enableCompatible: !!values.enableCompatible,
         enableAI: !!values.enableAI,
         selectAIModel: !!values.selectAIModel ? values.selectAIModel : undefined,
+        pcPageTemplateList: !!values.pcPageTemplateList ? values.pcPageTemplateList : [],
         updateTime,
         user: user?.email
       }
@@ -34,6 +36,22 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
   }
 
   const enableAI = Form.useWatch('enableAI', form);
+
+  const [pcPageTemplateListOptions, setPcPageTemplateListOptions] = useState([]);
+
+  useEffect(() => {
+    API.Material.getMaterialList({
+      type: "pc-page-template"
+    }).then((res) => {
+      console.log("[物料列表]", res.list)
+      setPcPageTemplateListOptions(res.list.map(({ id, title }) => {
+        return {
+          label: title,
+          value: id
+        }
+      }));
+    })
+  }, [])
 
   return <>
     <Form form={form} style={{ marginTop: 12 }}>
@@ -76,6 +94,17 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         valuePropName="checked"
       >
         <Switch />
+      </Form.Item>
+      <Form.Item
+        name="pcPageTemplateList"
+        label="模版扩展"
+        tooltip="模版扩展"
+      >
+        <Select
+          mode='multiple'
+          placeholder='请选择需要扩展的模版'
+          options={pcPageTemplateListOptions}
+        />
       </Form.Item>
       <Form.Item style={{ textAlign: 'right' }}>
         {Object.keys(publishLocalizeConfig).length > 0 && <Meta description={`${publishLocalizeConfig.user} 更新于 ${publishLocalizeConfig.updateTime}`} />}

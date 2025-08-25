@@ -50,6 +50,7 @@ const { confirm } = Modal;
 import editViewConfig from "./editView";
 import getAiView from "./getAiView";
 import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
+import API from "@mybricks/sdk-for-app/api";
 
 // const getComs = () => {
 //   const comDefs = {}
@@ -120,6 +121,7 @@ export default function appConfig(
     inputs?: { id: string; title: string; schema: Record<string, string> }[];
     outputs?: { id: string; title: string; schema: Record<string, string> }[];
     template?: Record<string, any>;
+    load?: () => Promise<any>
   }> = [
     // {
     //   type: 'normal',
@@ -176,6 +178,39 @@ export default function appConfig(
         ...adderAntd5Ary
       ]
     );
+
+    adder.push(null, {
+      type: 'cloudTpt',
+      title: '动态配置的模版',
+      load() {
+        return new Promise((resolve, reject) => {
+          const { pcPageTemplateList } = ctx.appConfig.publishLocalizeConfig;
+          appData.openUrl({
+            url: 'MYBRICKS://mybricks-material/materialSelectorPage',
+            params: {
+              limit: 1,
+              title: '选择模版',
+              type: 'pc-page-template',
+              materialIds: pcPageTemplateList ? pcPageTemplateList.join() : ""
+            },
+            onSuccess: async (params) => {
+              const close = message.loading({
+                key: 'load',
+                content: '模版加载中...',
+                duration: 0,
+              })
+
+              const template = params.materials[0];
+              const publish = await API.File.getPublishContent({ pubId: template.publishId })
+
+              message.success("模版加载完成");
+              close()
+              resolve(JSON.stringify(publish.content));
+            }
+          })
+        })
+      }
+    })
   }
 
   const getCurrentLocale = () => {
