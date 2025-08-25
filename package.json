@@ -65,7 +65,7 @@
   "appConfig": {
     "react": {
       "name": "mybricks-app-pcspa",
-      "description": "中后台类PC页面搭建",
+      "description": "PC页面，支持导出html及react源代码",
       "version": "1.5.38",
       "mybricks": {
         "extName": "pc-page",
