@@ -181,7 +181,7 @@ export default function appConfig(
 
     adder.push(null, {
       type: 'cloudTpt',
-      title: '动态配置的模版',
+      title: '更多模版...',
       load() {
         return new Promise((resolve, reject) => {
           const { pcPageTemplateList } = ctx.appConfig.publishLocalizeConfig;
