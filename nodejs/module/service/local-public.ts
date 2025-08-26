@@ -75,6 +75,33 @@ export default {
       path: "public/axios@0.18.1.min.js",
       CDN: "https://w1.eckwai.com/kos/nlav12333/mybricks/axios0.18.1.min.js",
     },
+
+
+    {
+      tag: "script",
+      path: "public/antd/cssinjs.min.js",
+      CDN: "//f2.eckwai.com/kos/nlav12333/antd/cssinjs/cssinjs.min.js",
+    },
+    {
+      tag: "script",
+      path: "public/dayjs/dayjs@1.11.13.min.js",
+      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/dayjs_1.11.13.min.js",
+    },
+    {
+      tag: "script",
+      path: "public/dayjs/locale/zh-cn.min.js",
+      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/zh-cn.min.js",
+    },
+    {
+      tag: "script",
+      path: "public/antd/antd@5.21.4.min.js",
+      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/antd_5.21.4.min.js",
+    },
+    {
+      tag: "script",
+      path: "public/echarts@5.5.1.min.js",
+      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/echarts_5.5.1.min.js",
+    },
   ],
   vue2: [
     {

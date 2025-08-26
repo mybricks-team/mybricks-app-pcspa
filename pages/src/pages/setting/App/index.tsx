@@ -71,6 +71,9 @@ export default (props) => {
         <Collapse.Panel key={6} header="实验室">
           <ConfigFeature {...configContext} />
         </Collapse.Panel>
+        <Collapse.Panel key={6} header="模版扩展">
+          <ConfigFeature {...configContext} />
+        </Collapse.Panel>
       </Collapse>
     </Spin>
   );
