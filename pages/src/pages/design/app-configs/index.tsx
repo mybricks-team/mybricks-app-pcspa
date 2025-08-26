@@ -18,7 +18,6 @@ import localePlugin from "@mybricks/plugin-locale";
 // import notePlugin from "@mybricks/plugin-note";
 // import { use as useTheme } from "@mybricks/plugin-theme";
 import { openFilePanel } from "@mybricks/sdk-for-app/ui";
-import { showAIPageModal } from '@mybricks/ai-utils'
 import pluginDomain from "@mybricks/plugin-domain";
 import DomainModelExecutor from "@mybricks/plugin-domain/dist/esm/runtime/DomainModelExecutor";
 

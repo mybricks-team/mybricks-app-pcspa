@@ -108,4 +108,10 @@ module.exports = merge(common, {
       chunks: ['groupSetting'],
     }),
   ],
+  ignoreWarnings: [
+    {
+      module: /postcss-loader/,
+      message: /start value has mixed support/,
+    },
+  ],
 })

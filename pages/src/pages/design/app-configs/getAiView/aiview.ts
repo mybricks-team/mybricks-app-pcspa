@@ -1,12 +1,12 @@
-// import { getNewDSL as genGetNewDsl, getDSLPrompts as genGetDslPrompts, getSystemPrompts as genGetSystemPrompts, DslHelper, Services } from '/Users/cocolbell/Desktop/projects/mybricks/sdk-for-ai/dist/index.umd'
+// import { getNewDSL as genGetNewDsl, getDSLPrompts as genGetDslPrompts, getSystemPrompts as genGetSystemPrompts, DslHelper, Services } from '/Users/cocolbell/Desktop/projects/mybricks/ai-utils/dist/index.umd'
 import { getNewDSL as genGetNewDsl, getDSLPrompts as genGetDslPrompts, getSystemPrompts as genGetSystemPrompts, DslHelper, Services } from '@mybricks/ai-utils'
 
 const { checkValueType, getValidSlotStyle, getValidSizeValue, transformToValidBackground } = DslHelper
 
 const getNewDSL = (params) => {
   const { designerRef } = params;
-  let gridComponentNamespace = "";
-  let customContainerComponentNamespace = "";
+  let gridComponentNamespace;
+  let customContainerComponentNamespace;
   return genGetNewDsl({
     flex: (component) => {
       if (!gridComponentNamespace) {
@@ -266,13 +266,48 @@ const getNewDSL = (params) => {
         return
       }
     },
-    'system.page': (component) => {
+    group: (component) => {
       const allComDef = designerRef.current.components.getAllComDef()
       const keys = Object.keys(allComDef)
-      if (keys.find((key) => key.startsWith("mybricks.normal-pc.antd5"))) {
-        customContainerComponentNamespace = "mybricks.normal-pc.antd5.custom-container"
-      } else {
-        customContainerComponentNamespace = "mybricks.normal-pc.custom-container"
+
+      if (!customContainerComponentNamespace) {
+        if (keys.find((key) => key.startsWith("mybricks.normal-pc.antd5"))) {
+          customContainerComponentNamespace = "mybricks.normal-pc.antd5.custom-container"
+        } else {
+          customContainerComponentNamespace = "mybricks.normal-pc.custom-container"
+        }
+      }
+
+      if (!component.data) {
+        component.data = {}
+      }
+
+      component.namespace = customContainerComponentNamespace;
+
+      component.slots = {
+        content: {
+          id: 'content',
+          title: component.title ? `${component.title}插槽` : '内容',
+          style: {
+            width: '100%',
+            height: '100%',
+            layout: `smart`,
+          },
+          comAry: component?.comAry
+        }
+      }
+      component.comAry = undefined
+
+    },
+    'system.page': (component) => {
+      if (!customContainerComponentNamespace) {
+        const allComDef = designerRef.current.components.getAllComDef()
+        const keys = Object.keys(allComDef)
+        if (keys.find((key) => key.startsWith("mybricks.normal-pc.antd5"))) {
+          customContainerComponentNamespace = "mybricks.normal-pc.antd5.custom-container"
+        } else {
+          customContainerComponentNamespace = "mybricks.normal-pc.custom-container"
+        }
       }
       component.namespace = customContainerComponentNamespace
     }
@@ -366,7 +401,7 @@ const getDSLPrompts = genGetDslPrompts({
     <card.component.namespace
       title="卡片"
       layout={{ width: '100%', height: 'fit-content' }}
-      data={{"title":"卡片","useExtra":false,"bordered":true,"hoverable":false,"cursor":false,"size":"default","style":{},"bodyStyle":{},"outputContent":0,"dataType":"number","borderStyle":{"borderRadius":"8px 8px 8px 8px","borderColor":"#F0F0F0 #F0F0F0 #F0F0F0 #F0F0F0","borderWidth":"1px 1px 1px 1px","borderStyle":"solid solid solid solid"},"isAction":false,"items":[{"key":"key1","name":"操作项1"}],"padding":"24px","isHeight":false,"height":"80px","showTitle":true,"slotStyle":{"display":"flex","position":"inherit","flexDirection":"column","alignItems":"flex-start","justifyContent":"flex-start","flexWrap":"nowrap","rowGap":0,"columnGap":0}}}
+      data={{"title":"卡片"}}}
     >
       <slots.body title="卡片内容" layout={{ width: '100%', height: '100%', "justifyContent":"flex-start","alignItems":"flex-start","layout":"flex-column" }}>
         <text.component.namespace
@@ -411,6 +446,62 @@ const getDSLPrompts = genGetDslPrompts({
   8. 给所有使用到的组件设置主题色
   `,
 })
+
+// const getDSLPrompts = genGetDslPrompts({
+//   dslDemoPrompts: `
+//   1、page.dsl文件，为页面界面的结构描述，如下为一个卡片中有一个文本：
+//   \`\`\`dsl file="page.dsl"
+//   <page title="你好世界" style={{backgroundColor: "#fff"}}>
+//     <card.component.namespace
+//       title="卡片"
+//       layout={{ width: '100%', height: 'fit-content' }}
+//       data={{"title":"卡片"}}}
+//     >
+//       <slots.body title="卡片内容">
+//         <text.component.namespace
+//           title="文本"
+//           layout={{ width: 'fit-content' }}
+//           data={{"content":"文字"}}
+//         />
+//       </slots.body>
+//     </card.component.namespace>
+//   </page>
+//   \`\`\`
+//   注意：
+//   上述用到的“card.component.namespace”表达的是使用card组件的namesapce，如果包含多个card组件，优先选择namespace中包含antd5的组件namespace
+//   上述用到的“text.component.namespace”以及可能的其它组件均同上述card组件同理。
+//   “page”为特殊画布节点，不需要选择建议组件的namespace，直接使用“page”即可。
+//   “flex”组件为特殊组件，不需要选择建议组件的namespace，直接使用“flex”即可。
+//   更多用法关注组件使用建议，严格按照组件的文档提示来使用。
+
+//   特别地，只有插槽可以配置height=100%，其他标签都不可以
+
+//   `,
+//   canvasInfoPrompts: `
+//   当前搭建画布的宽度为1024，所有元素的尺寸需要关注此信息，且尽可能自适应布局。1024只是在MyBricks搭建时的画布宽度，实际运行时可能会更宽。
+  
+//   搭建内容必须参考PC端网站进行设计，内容必须考虑左右排列的丰富度，以及以下PC的特性
+//     比如:
+//       1. 布局需要自适应画布宽度，实际运行的电脑宽度不固定；
+//       2. 宽度和间距配置的时候要注意，画布只有1024，特别注意总宽度不可以超过1024；
+//       3. 页面可以配置backgroundColor；
+//   搭建风格也要尽可能贴合中国网站的设计风格；
+//   `,
+//   componentSuggestionPrompts: `
+//   1. 优先考虑使用绝对定位布局模式，减少布局组件的嵌套；
+//   2. 文本、图片、按钮、图标组件属于基础组件，任何情况下都可以优先使用，即使不在允许使用的组件里；
+//   3. 对于图标，图标禁止使用emoji或者特殊符号，必须使用图标组件来搭建；
+//   4. 关于图片
+//     4.1 如果是常规图片，使用https://ai.mybricks.world/image-search?term=dog&w=100&h=200，其中term代表搜索词，w和h可以配置图片宽高；
+//     4.2 如果是Logo，可以使用https://placehold.co来配置一个带文本和颜色的图标，其中text需要为图标的英文搜索词，禁止使用emoji或者特殊符号；
+//   5. 对于横向排列或者竖向排列的多个相似元素，考虑如下情况
+//     - 如果猜测是动态项，使用列表或者瀑布流这类组件来搭建；
+//     - 如果猜测是静态内容，使用布局，N行M列来搭建；
+//     - 如果是属于某个组件的内容，使用组件来搭建；
+//   6. page下方的元素考虑使用flex布局并且合理配置左右margin，导航栏、通栏内容、菜单等都不需要配置左右间距，主要是考虑美观度；
+//   7. 给所有使用到的组件设置主题色。
+//   `,
+// })
 
 const getPRDPromptsAtFirst = () => {
   return `对于需求，我们需要严格按以下格式返回
