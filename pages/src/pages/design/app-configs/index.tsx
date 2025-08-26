@@ -179,7 +179,7 @@ export default function appConfig(
       ]
     );
 
-    adder.push(null, {
+    adder.push({
       type: 'cloudTpt',
       title: '更多模版...',
       load() {
