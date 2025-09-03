@@ -49,7 +49,7 @@ const { confirm } = Modal;
 import editViewConfig from "./editView";
 import getAiView from "./getAiView";
 import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
-import API from "@mybricks/sdk-for-app/api";
+import cloudTpt from "./cloudTpt";
 
 // const getComs = () => {
 //   const comDefs = {}
@@ -178,45 +178,7 @@ export default function appConfig(
       ]
     );
 
-    adder.push({
-      type: 'cloudTpt',
-      title: '更多模版...',
-      load() {
-        return new Promise((resolve, reject) => {
-          const { pcPageTemplateList } = ctx.appConfig.publishLocalizeConfig;
-
-          if (!pcPageTemplateList?.length) {
-            message.info("未配置模版，请联系平台管理员");
-            resolve(null);
-            return
-          }
-
-          appData.openUrl({
-            url: 'MYBRICKS://mybricks-material/materialSelectorPage',
-            params: {
-              limit: 1,
-              title: '选择模版',
-              type: 'pc-page-template',
-              materialIds: pcPageTemplateList ? pcPageTemplateList.join() : ""
-            },
-            onSuccess: async (params) => {
-              const close = message.loading({
-                key: 'load',
-                content: '模版加载中...',
-                duration: 0,
-              })
-
-              const template = params.materials[0];
-              const publish = await API.File.getPublishContent({ pubId: template.publishId })
-
-              message.success("模版加载完成");
-              close()
-              resolve(JSON.stringify(publish.content));
-            }
-          })
-        })
-      }
-    })
+    adder.push(cloudTpt({ ctx }))
   }
 
   const getCurrentLocale = () => {
