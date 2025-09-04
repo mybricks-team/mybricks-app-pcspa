@@ -178,7 +178,7 @@ export default function appConfig(
       ]
     );
 
-    adder.push(cloudTpt({ ctx }))
+    adder.push(null, cloudTpt({ ctx }))
   }
 
   const getCurrentLocale = () => {
