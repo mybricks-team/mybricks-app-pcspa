@@ -48,6 +48,11 @@ function getDesignerParams(args, { defaultModel }) {
       role = 'expert'
       break
     }
+    case ['imageCreator'].includes(extraOption.aiRole) || extraOption?.expert === 'imageCreator': {
+      model = 'google/gemini-2.5-flash-image-preview';
+      role = 'imageCreator'
+      break
+    }
     default: {
       role = 'default'
       break;
