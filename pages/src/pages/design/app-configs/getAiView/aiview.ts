@@ -705,6 +705,117 @@ export const getExamplePromptsAtFirst = () => {
   `
 }
 
+export const getSystemAppendPrompts = () => {
+  return `<对于当前搭建有以下特殊上下文>
+  <搭建画布信息>
+    当前搭建画布的宽度为1024，所有元素的尺寸需要关注此信息，且尽可能自适应布局。1024只是在MyBricks搭建时的画布宽度，实际运行时可能会更宽。
+    
+    搭建内容必须参考PC端网站进行设计，内容必须考虑左右排列的丰富度，以及以下PC的特性
+      比如:
+        1. 布局需要自适应画布宽度，实际运行的电脑宽度不固定；
+        2. 宽度和间距配置的时候要注意，画布只有1024，特别注意总宽度不可以超过1024；
+        3. 页面可以配置backgroundColor；
+    搭建风格也要尽可能贴合中国网站的设计风格；
+  </搭建画布信息>
+
+  <允许使用的图标>
+  antd中的图标
+  </允许使用的图标>
+</对于当前搭建有以下特殊上下文>`
+}
+
+export const getSystemExamplePrompts = () => {
+  return `
+  <example>
+    <user_query>搭建一个云服务器管理中后台页面</user_query>
+    <assistant_response>
+      基于用户当前的选择上下文，我们来实现一个云服务器管理中后台页面，思考过程如下：
+
+      任何时刻，必须先确认_root_的布局，根据需求，我们配置flex垂直布局；
+      
+      首先，这是一个典型的，左侧侧边，右边顶部 + 内容的中后台界面，我们首先来分析和设计页面级布局：
+        整个页面可以从根组件上可以分为左右两个部分，左侧固定宽度，右侧自适应拉伸（从画布上体现则是1024 - 左侧宽度）。
+        直接用grid组件来实现
+          - 添加一个一行两列布局，左侧固定200宽度，右侧拉伸，同时配置合理的间距；
+          - 自身设置height=fit-content适应flex内容的高度，宽度设置100%，方便画布宽度的调整；
+          - 行列的间距使用子组件的margin来实现，左侧容器就设置了marginRight=12，不要遗漏；
+      接下来，左右分别从上往下开始使用flex布局，按照从上往下的搭建方式进行搭建
+        左侧从上往下，是Logo和网站信息 + 侧边栏
+        - Logo和网站，图文编排，我们使用absolute布局的自定义容器
+        - 侧边栏使用菜单组件配置
+        右侧从上往下，需要配置每个区块的间距，其中从上往下分为三个部分
+        - 顶部是个人信息，一些图文编排场景，我们使用absolute布局来减少嵌套，由于使用了absolute，需要配置高度为number；
+        - 中部是卡片概览，一行三列等分，我们使用一个自定义容器来均分三列；
+        - 底部是表格，表格外使用自定义容器配置背景和圆角，内部使用表格配置多列，并且配置合理的分页信息
+          - 其中表格有几列是图文排版，我们尝试在外层套一个absolute布局的自定义容器，添加图文信息UI
+
+      \`\`\`json file="actions.json"
+      [
+        ["_root_",":root","doConfig",{"path":"页面/样式","style":{"background":"#f5f5f5"}}],
+        ["_root_",":root","doConfig",{"path":"页面/布局","value":{"display":"flex", "flexDirection": "column"}}],
+        ["_root_","_rootSlot_","addChild",{"title": "页面布局", "ns": "mybricks.basic-comlib.grid", "comId": "u_page", "layout": {"width": "100%", "height": "fit-content"}, configs: [{"path": "常规/行列数据", "value": [{ "key": "row1", "cols": [{ "key": "col1", "width": 200 }, { "key": "col2", "width": "auto" }] }] }] }],
+        ["u_page","col1","addChild",{"title":"左侧容器","ns":"mybricks.normal-pc.custom-container","comId":"u_left","layout":{"width":"100%","height":'fit-content',"marginRight":12},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}]}],
+        ["u_left","content","addChild", Logo和网站],
+        ["u_left","content","addChild", 侧边栏],
+        ["u_page","col2","addChild",{"title":"右侧容器","ns":"mybricks.normal-pc.custom-container","comId":"u_right","layout":{"width":"100%","height":'fit-content'},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}]}]
+        // ...
+      ]
+      \`\`\`
+    
+    在上述内容中：
+    我们遵循了以下关键事项：
+    流程：从「根组件布局设计」-> 「考虑是否使用grid布局」-> 从上往下分区开始搭建内容。
+    布局规则：
+      1. 页面级布局，通过画布的宽度和grid组件完成了这类复杂页面布局；
+      2. 除了从上往下的内容外，在各类容器使用absolute布局来减少嵌套；
+    </assistant_response>
+  </example>
+
+  <example>
+    <user_query>搭建一个博客详情页</user_query>
+    <assistant_response>
+      基于用户当前的选择上下文，我们来实现一个博客详情页面，思考过程如下：
+
+      任何时刻，必须先确认_root_的布局，根据需求，我们配置flex垂直布局；
+      
+      首先，这是一个典型的，从上往下排列的页面，我们首先来分析和设计页面级布局：
+        整个页面没有复杂的左右布局等，可以直接设置根组件的布局为flex垂直布局，同时配置合理的间距，从上往下一一实现即可
+      接下来，从上往下开始搭建
+
+        顶部导航，使用absolute布局，完成左侧菜单 + 右侧图文编排的需求
+
+        下方是文档详情，其中
+          - 标题和作者信息使用absolute布局来完成文本编排；
+          - 文章内容直接使用flex布局，保证内容增长时容器变高；
+        
+      \`\`\`json file="actions.json"
+      [
+        ["_root_",":root","doConfig",{"path":"页面/样式","style":{"background":"#f5f5f5"}}],
+        ["_root_",":root","doConfig",{"path":"页面/布局","value":{"display":"flex", "flexDirection": "column"}}],
+        ["_root_","_rootSlot_","addChild",{"title": "顶部导航", "ns": "mybricks.normal-pc.custom-container", "comId": "u_navs", "layout": {"width": "100%", "height": 60}, configs: [{"path":"常规/布局","value":{"display":"absolute"}}] }],
+        ["u_navs","content","addChild", 菜单],
+        ["u_navs","content","addChild", 头像],
+        ["u_navs","content","addChild", 昵称],
+        ["_root_","_rootSlot_","addChild",{"title": "详情内容", "ns": "mybricks.normal-pc.custom-container", "comId": "u_detail", "layout": {"width": "100%", "height": 'fit-content', marginTop: 12, marginLeft: 12, marginRight: 12}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}] }],
+        ["u_detail","content","addChild",{"title": "文章头部", "ns": "mybricks.normal-pc.custom-container", "comId": "u_header", "layout": {"width": "100%", "height": 100}, configs: [{"path":"常规/布局","value":{"display":"absolute"}}] }],
+        ["u_header","content","addChild", {"title": "标题", "ns": "", comId: "u_title", "layout": {"left": 0, "top": 12 }}],
+        ["u_detail","content","addChild",{"title": "文章内容", "ns": "mybricks.normal-pc.custom-container", "comId": "u_header", "layout": {"width": "100%", "height": 'fit-content'}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}] }],
+        // ...
+      ]
+      \`\`\`
+    
+    在上述内容中：
+    我们遵循了以下关键事项：
+    流程：从「根组件布局设计」-> 「考虑是否使用grid布局」-> 从上往下开始搭建内容。
+    布局规则：
+      1. 给每一个容器显式声明布局，同时合理使用flex布局+height=fit-content，以及absolute布局+height=number；
+      2. 除了从上往下的内容外，在各类容器使用absolute布局来减少嵌套；
+      3. 对于absolute布局中，定位仅可以配置number数字类型；
+    </assistant_response>
+  </example>
+  `
+}
+
 const getAvailable = Services.getAvailable
 
 export const getAIResponse = Services.getAIResponse
@@ -716,5 +827,7 @@ export default {
   getSystemPrompts,
   getPRDPromptsAtFirst,
   getExamplePrompts,
-  getExamplePromptsAtFirst
+  getExamplePromptsAtFirst,
+  getSystemAppendPrompts,
+  getSystemExamplePrompts
 }
