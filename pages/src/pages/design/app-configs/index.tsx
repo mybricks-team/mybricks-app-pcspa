@@ -429,7 +429,7 @@ export default function appConfig(
     // comLibLoader: comlibLoaderFunc(ctx),
     // comLibLoader: () => {
     //   return new Promise((resolve) => {
-    //     resolve(['http://localhost:20001/comlib.js', 'http://localhost:20000/comlib.js'])
+    //     resolve(['https://assets.mybricks.world/comlibs/mybricks.basic-comlib.antd5/1.0.10/2025-09-12_18-46-51/edit.js', 'http://localhost:20000/comlib.js'])
     //   })
     // },
     comLibAdder: appData.comLibAdder(ctx),
