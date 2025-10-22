@@ -419,7 +419,7 @@ export default function appConfig(
       pluginToCode({
         type: "spa",
       }),
-      pluginDomain()
+      // pluginDomain()
     ],
     // ...(ctx.hasMaterialApp
     //   ? {
