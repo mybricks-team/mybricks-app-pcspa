@@ -1,6 +1,6 @@
 import aiViewConfig, { getAIResponse } from './aiview'
 // import { mock1Prompts } from './mock';
-// import mock2Prompts from './mock/mock2Prompts';
+import mock2Prompts from './mock/mock2Prompts';
 // import mock1Res from './mock/mock1Res'
 // import mock2Res from './mock/mock2Res'
 // import { aiUtils } from "./utils/get-ai-encrypt-data"
@@ -27,12 +27,12 @@ function getDesignerParams(args, { defaultModel }) {
 
   switch (true) {
     case extraOption?.expert === 'image': {
-      model = 'anthropic/claude-sonnet-4';
+      model = 'anthropic/claude-sonnet-4.5';
       role = 'image'
       break;
     }
     case ['image'].includes(extraOption?.aiRole): {
-      model = 'anthropic/claude-sonnet-4';
+      model = 'anthropic/claude-sonnet-4.5';
       role = 'image'
       break
     }
@@ -44,7 +44,7 @@ function getDesignerParams(args, { defaultModel }) {
       break
     }
     case ['expert'].includes(extraOption.aiRole): {
-      model = 'anthropic/claude-sonnet-4';
+      model = 'anthropic/claude-sonnet-4.5';
       role = 'expert'
       break
     }
@@ -102,13 +102,14 @@ const getAiView = (enableAI, option) => {
 
         // const isScenond = messages.length > 2
         // if (isScenond) {
-        //   setTimeout(() => {
-        //     write(mock2Res);
-        //     complete();
-        //   }, 1000)
-        //   return 
-        //   // _message[0].content = mock2Prompts
-        //   // _message = [_message[0], _message[1], _message[2], _message[3]]
+          // setTimeout(() => {
+          //   write(mock2Res);
+          //   complete();
+          // }, 1000)
+          // return 
+          // console.log('2prompts', _message[0].content);
+          // _message[0].content = mock2Prompts
+          // _message = [_message[0], _message[1], _message[2], _message[3]]
         // }
 
         // console.log(2, _message)
