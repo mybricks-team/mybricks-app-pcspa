@@ -722,8 +722,12 @@ export const getSystemAppendPrompts = () => {
   </允许使用的图标>
 
   <返回的文件格式>
-  必须为\`\`\`json file="actions.json" \`\`\`格式的操作列表，其中 file="actions.json" 不可省略，否则无法区分。
+  必须为\`\`\`json file="actions.json" \`\`\`格式的操作列表，注意格式为符合Json规范的数组格式，其中 file="actions.json" 不可省略，否则无法区分。
   </返回的文件格式>
+
+  <对于图片或原型>
+    可能会存在明显异于UI的评论、标注信息，注意筛选后去除。
+  </对于图片或原型>
 </对于当前搭建有以下特殊上下文>`
 }
 
@@ -753,8 +757,8 @@ export const getSystemExamplePrompts = () => {
 
       \`\`\`json file="actions.json"
       [
-        ["_root_",":root","doConfig",{"path":"页面/样式","style":{"background":"#f5f5f5"}}],
-        ["_root_",":root","doConfig",{"path":"页面/布局","value":{"display":"flex", "flexDirection": "column"}}],
+        ["_root_",":root","doConfig",{"path":"root/样式","style":{"background":"#f5f5f5"}}],
+        ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex", "flexDirection": "column"}}],
         ["_root_","_rootSlot_","addChild",{"title": "页面布局", "ns": "mybricks.basic-comlib.grid", "comId": "u_page", "layout": {"width": "100%", "height": "fit-content"}, configs: [{"path": "常规/行列数据", "value": [{ "key": "row1", "cols": [{ "key": "col1", "width": 200 }, { "key": "col2", "width": "auto" }] }] }] }],
         ["u_page","col1","addChild",{"title":"左侧容器","ns":"mybricks.normal-pc.custom-container","comId":"u_left","layout":{"width":"100%","height":'fit-content',"marginRight":12},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}]}],
         ["u_left","content","addChild", Logo和网站],
@@ -794,8 +798,8 @@ export const getSystemExamplePrompts = () => {
         
       \`\`\`json file="actions.json"
       [
-        ["_root_",":root","doConfig",{"path":"页面/样式","style":{"background":"#f5f5f5"}}],
-        ["_root_",":root","doConfig",{"path":"页面/布局","value":{"display":"flex", "flexDirection": "column"}}],
+        ["_root_",":root","doConfig",{"path":"root/样式","style":{"background":"#f5f5f5"}}],
+        ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex", "flexDirection": "column"}}],
         ["_root_","_rootSlot_","addChild",{"title": "顶部导航", "ns": "mybricks.normal-pc.custom-container", "comId": "u_navs", "layout": {"width": "100%", "height": 60, "marginBottom": 24}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "space-between"}}] }],
         ["u_navs","content","addChild", {"title": "左侧菜单", "ns": "菜单", "comId": "u_leftMenu", "layout": {"width": '100%', "height": 'fit-content', "marginLeft": 12}, configs: [] }],
         ["u_navs","content","addChild", {"title": "右侧头像昵称区域", "ns": "mybricks.normal-pc.custom-container", "comId": "u_rightProfile", "layout": {"width": 'fit-content', "height": '100%', "marginRight": 12}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "flex-end"}}] }],
