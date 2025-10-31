@@ -73,6 +73,7 @@ const getAiView = (enableAI, option) => {
   if (enableAI) {
     return {
       ...aiViewConfig,
+      getSystemExamplePrompts: aiViewConfig.getSystemExamplePrompts({ designerRef }),
       getNewDSL: aiViewConfig.getNewDSL({ designerRef }),
       async requestAsStream(messages, ...args) {
         const { context, tools, model, role } = getDesignerParams(args, {

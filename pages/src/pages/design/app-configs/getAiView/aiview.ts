@@ -731,8 +731,25 @@ export const getSystemAppendPrompts = () => {
 </对于当前搭建有以下特殊上下文>`
 }
 
-export const getSystemExamplePrompts = () => {
-  return `
+let gridComponentNamespace;
+let customContainerComponentNamespace;
+export const getSystemExamplePrompts = ({ designerRef }) => {
+  return () => {
+    const allComDef = designerRef.current.components.getAllComDef()
+    const keys = Object.keys(allComDef)
+
+    if (keys.find((key) => key.startsWith("mybricks.basic-comlib.antd5"))) {
+      gridComponentNamespace = "mybricks.basic-comlib.antd5.grid"
+    } else {
+      gridComponentNamespace = "mybricks.basic-comlib.grid"
+    }
+
+    if (keys.find((key) => key.startsWith("mybricks.normal-pc.antd5"))) {
+      customContainerComponentNamespace = "mybricks.normal-pc.antd5.custom-container"
+    } else {
+      customContainerComponentNamespace = "mybricks.normal-pc.custom-container"
+    }
+    return `
   <example>
     <user_query>搭建一个云服务器管理中后台页面</user_query>
     <assistant_response>
@@ -759,11 +776,11 @@ export const getSystemExamplePrompts = () => {
       [
         ["_root_",":root","doConfig",{"path":"root/样式","style":{"background":"#f5f5f5"}}],
         ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex", "flexDirection": "column"}}],
-        ["_root_","_rootSlot_","addChild",{"title": "页面布局", "ns": "mybricks.basic-comlib.grid", "comId": "u_page", "layout": {"width": "100%", "height": "fit-content"}, configs: [{"path": "常规/行列数据", "value": [{ "key": "row1", "cols": [{ "key": "col1", "width": 200 }, { "key": "col2", "width": "auto" }] }] }] }],
-        ["u_page","col1","addChild",{"title":"左侧容器","ns":"mybricks.normal-pc.custom-container","comId":"u_left","layout":{"width":"100%","height":'fit-content',"marginRight":12},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}]}],
+        ["_root_","_rootSlot_","addChild",{"title": "页面布局", "ns": "${gridComponentNamespace}", "comId": "u_page", "layout": {"width": "100%", "height": "fit-content"}, configs: [{"path": "常规/行列数据", "value": [{ "key": "row1", "cols": [{ "key": "col1", "width": 200 }, { "key": "col2", "width": "auto" }] }] }] }],
+        ["u_page","col1","addChild",{"title":"左侧容器","ns":"${customContainerComponentNamespace}","comId":"u_left","layout":{"width":"100%","height":'fit-content',"marginRight":12},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}]}],
         ["u_left","content","addChild", Logo和网站],
         ["u_left","content","addChild", 侧边栏],
-        ["u_page","col2","addChild",{"title":"右侧容器","ns":"mybricks.normal-pc.custom-container","comId":"u_right","layout":{"width":"100%","height":'fit-content'},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}]}]
+        ["u_page","col2","addChild",{"title":"右侧容器","ns":"${customContainerComponentNamespace}","comId":"u_right","layout":{"width":"100%","height":'fit-content'},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}]}]
         ["u_right","content","addChild", 顶部个人信息],
         ["u_right","content","addChild", 卡片概览],
         ["u_right","content","addChild", 底部表格]
@@ -800,12 +817,12 @@ export const getSystemExamplePrompts = () => {
       [
         ["_root_",":root","doConfig",{"path":"root/样式","style":{"background":"#f5f5f5"}}],
         ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex", "flexDirection": "column"}}],
-        ["_root_","_rootSlot_","addChild",{"title": "顶部导航", "ns": "mybricks.normal-pc.custom-container", "comId": "u_navs", "layout": {"width": "100%", "height": 60, "marginBottom": 24}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "space-between"}}] }],
+        ["_root_","_rootSlot_","addChild",{"title": "顶部导航", "ns": "${customContainerComponentNamespace}", "comId": "u_navs", "layout": {"width": "100%", "height": 60, "marginBottom": 24}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "space-between"}}] }],
         ["u_navs","content","addChild", {"title": "左侧菜单", "ns": "菜单", "comId": "u_leftMenu", "layout": {"width": '100%', "height": 'fit-content', "marginLeft": 12}, configs: [] }],
-        ["u_navs","content","addChild", {"title": "右侧头像昵称区域", "ns": "mybricks.normal-pc.custom-container", "comId": "u_rightProfile", "layout": {"width": 'fit-content', "height": '100%', "marginRight": 12}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "flex-end"}}] }],
-        ["_root_","_rootSlot_","addChild",{"title": "详情内容", "ns": "mybricks.normal-pc.custom-container", "comId": "u_detail", "layout": {"width": "100%", "height": 'fit-content', marginTop: 12, marginLeft: 12, marginRight: 12}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}] }],
-        ["u_detail","content","addChild",{"title": "文章头部", "ns": "mybricks.normal-pc.custom-container", "comId": "u_header", "layout": {"width": "100%", "height": fit-content'}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}] }],
-        ["u_detail","content","addChild",{"title": "文章内容", "ns": "mybricks.normal-pc.custom-container", "comId": "u_header", "layout": {"width": "100%", "height": 'fit-content', marginTop: 20}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}] }],
+        ["u_navs","content","addChild", {"title": "右侧头像昵称区域", "ns": "${customContainerComponentNamespace}", "comId": "u_rightProfile", "layout": {"width": 'fit-content', "height": '100%', "marginRight": 12}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "row", "alignItems": "center", "justifyContent": "flex-end"}}] }],
+        ["_root_","_rootSlot_","addChild",{"title": "详情内容", "ns": "${customContainerComponentNamespace}", "comId": "u_detail", "layout": {"width": "100%", "height": 'fit-content', marginTop: 12, marginLeft: 12, marginRight: 12}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}] }],
+        ["u_detail","content","addChild",{"title": "文章头部", "ns": "${customContainerComponentNamespace}", "comId": "u_header", "layout": {"width": "100%", "height": fit-content'}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}] }],
+        ["u_detail","content","addChild",{"title": "文章内容", "ns": "${customContainerComponentNamespace}", "comId": "u_header", "layout": {"width": "100%", "height": 'fit-content', marginTop: 20}, configs: [{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}] }],
         // ...
       ]
       \`\`\`
@@ -840,6 +857,7 @@ export const getSystemExamplePrompts = () => {
     </assistant_response>
   </example>
   `
+  }
 }
 
 const getAvailable = Services.getAvailable
