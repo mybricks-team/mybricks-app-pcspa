@@ -427,11 +427,17 @@ export default function appConfig(
     //     }
     //   : {}),
     // comLibLoader: comlibLoaderFunc(ctx),
-    // comLibLoader: () => {
-    //   return new Promise((resolve) => {
-    //     resolve(['https://assets.mybricks.world/comlibs/mybricks.basic-comlib.antd5/1.0.10/2025-09-12_18-46-51/edit.js', 'http://localhost:20000/comlib.js'])
+    // comLibLoader: appData.comLibLoader({
+    //   comlibs: ctx.comlibs.map((lib, index) => {
+    //     if (lib.namespace === 'mybricks.normal-pc.antd5') {
+    //       return {
+    //         ...lib,
+    //         editJs: 'http://localhost:20000/comlib.js',
+    //       }
+    //     }
+    //     return lib
     //   })
-    // },
+    // }),
     comLibAdder: appData.comLibAdder(ctx),
     comLibLoader: appData.comLibLoader({
       comlibs: ctx.comlibs
