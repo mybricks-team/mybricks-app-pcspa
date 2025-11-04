@@ -834,6 +834,16 @@ export default function appConfig(
       },
       layout: window._disableSmartLayout ? "flex-column" : "smart",
       toolbarContainer: '#sdk_toolbar_center',
+      useBreakpoints: [
+        {
+          title: '手机',
+          width: 375,
+        },
+        {
+          title: '平板',
+          width: 768,
+        }
+      ],
     },
   };
 }
