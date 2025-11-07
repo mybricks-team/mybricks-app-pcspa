@@ -9,6 +9,7 @@ import RuntimeUploadConfig from './RuntimeUploadConfig'
 import PublishApi from './PublishApi'
 import EmailConfigApi from './EmailConfigApi';
 import PageTimeReporter from './PageTimeReporter';
+import PageDepsAPI from './PageDepsAPI';
 // import PublishLocalize from '../ConfigBase/PublishLocalize';
 const { Meta } = Card;
 
@@ -22,6 +23,7 @@ export default (props: TConfigProps) => {
     {!isInGroup && <PublishApi {...props} />}
     {<EmailConfigApi {...props} />}
     {<PageTimeReporter {...props} />}
+    {<PageDepsAPI {...props} />}
     {/* <PublishLocalize {...props} /> */}
   </>
 }
