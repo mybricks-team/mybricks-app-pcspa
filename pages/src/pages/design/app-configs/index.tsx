@@ -524,6 +524,7 @@ export default function appConfig(
     },
     aiView: getAiView(ctx?.appConfig?.publishLocalizeConfig?.enableAI, {
       model: ctx?.appConfig?.publishLocalizeConfig?.selectAIModel,
+      scenePrompt: ctx?.appConfig?.publishLocalizeConfig?.systemScenePrompt,
       designerRef
     }),
     editView: editViewConfig({ ctx, envList }),
