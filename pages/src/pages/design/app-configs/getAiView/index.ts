@@ -89,36 +89,34 @@ const getAiView = (enableAI, option) => {
         //   cancelControl?.abort?.();
         // });
 
-        // let _message = Array.from(messages)
+        let _message = Array.from(messages)
 
-        // console.log(1, _message)
+        if (option.scenePrompt?.length && _message?.[1]?.content?.[0]?.type === 'text') {
+          _message.push({
+            role: 'user',
+            content: option.scenePrompt
+          })
+        }
 
-        // const isFirstOne = messages.length === 2
-        // if (isFirstOne) {
-        //   write(mock1Res);
-        //   complete();
-        //   return
-        //   _message[0].content = mock1Prompts
-        // }
+        const isFirstOne = messages.length === 2
+        if (isFirstOne) {
+          // write(mock1Res);
+          // complete();
+          // return
+          // _message[0].content = mock1Prompts
+        }
 
-        // const isScenond = messages.length > 2
-        // if (isScenond) {
-          // setTimeout(() => {
-          //   write(mock2Res);
-          //   complete();
-          // }, 1000)
-          // return 
-          // console.log('2prompts', _message[0].content);
-          // _message[0].content = mock2Prompts
-          // _message = [_message[0], _message[1], _message[2], _message[3]]
-        // }
+        const isScenond = messages.length > 2
+        if (isScenond) {
+          // console.log(_message)
+        }
 
         // console.log(2, _message)
 
         try {
           const { abort } = await getAIResponse({
             model,
-            messages,
+            messages: _message,
             role,
             tools
           }, {

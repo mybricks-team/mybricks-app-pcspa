@@ -27,7 +27,7 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         isEncode: !!values.isEncode,
         enableCompatible: !!values.enableCompatible,
         enableAI: !!values.enableAI,
-        selectAIModel: !!values.selectAIModel ? values.selectAIModel : undefined,
+        systemScenePrompt: values.systemScenePrompt ?? '',
         pcPageTemplateList: !!values.pcPageTemplateList ? values.pcPageTemplateList : [],
         updateTime,
         user: user?.email
@@ -81,10 +81,11 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
       </Form.Item>
       {
         enableAI && <Form.Item
-          name="selectAIModel"
-          label="指定AI模型"
+          name="systemScenePrompt"
+          label="AI场景提示词"
+          tooltip="AI场景提示词，输入的提示词将会补充到应用的系统提示词中，调整更符合场景的效果"
         >
-          <Input placeholder='不指定将使用默认模型' />
+          <Input.TextArea rows={5} placeholder="输入的提示词将会补充到应用的系统提示词中" />
         </Form.Item>
       }
       <Form.Item
