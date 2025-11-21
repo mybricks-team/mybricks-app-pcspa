@@ -48,16 +48,25 @@ function sendPageDeps(appData: any, content: string) {
     const deps = []
     comlibs.forEach(item => {
       if (item.id === '_myself_') {
-        deps.push([...item.comAray])
+        deps.push(...item.comAray.map((item: any) => ({
+          sourceId: item.materialId,
+          sourceType: 2,
+          namespace: item.namespace,
+          sourceVersion: item.version
+        })))
       } else {
         deps.push({
+          sourceId: item.id,
+          sourceType: 1,
           namespace: item.namespace,
-          version: item.version
+          sourceVersion: item.version
         })
       }
     })
     request(config.pageDepsAPI, {
-      deps
+      targetId: appData.fileId,
+      sourceList: deps,
+      targetType: 3  // 1-物料，2-云组件，3-页面
     });
   } catch {
     console.log("页面依赖上报失败");

@@ -186,7 +186,6 @@ export default function MyDesigner({ appData: originAppData }) {
           saveType?: string
         }
       ) {
-        console.log(param, '====')
         const { name, shareType, content, icon } = param
 
         const operationListStr = JSON.stringify(operationList.current.reverse())
