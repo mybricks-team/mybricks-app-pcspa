@@ -869,8 +869,6 @@ export const getSystemExamplePrompts = ({ designerRef }) => {
 
 const getAvailable = Services.getAvailable
 
-export const getAIResponse = Services.getAIResponse
-
 export default {
   getAvailable,
   getNewDSL,

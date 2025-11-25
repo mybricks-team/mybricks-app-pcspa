@@ -1,4 +1,5 @@
-import aiViewConfig, { getAIResponse } from './aiview'
+import aiViewConfig from './aiview'
+import { getAIResponse } from './utils/get-ai-response';
 // import { mock1Prompts } from './mock';
 import mock2Prompts from './mock/mock2Prompts';
 // import mock1Res from './mock/mock1Res'
