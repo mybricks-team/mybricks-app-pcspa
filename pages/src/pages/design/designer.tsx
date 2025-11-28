@@ -50,6 +50,7 @@ import {
 import { preview as preview_icon } from './icon/preview'
 import { publish as publish_icon } from './icon/publish'
 import classNames from 'classnames'
+import { sendPageDeps } from './utils/sendPageDeps'
 
 const msgSaveKey = 'save'
 
@@ -192,9 +193,9 @@ export default function MyDesigner({ appData: originAppData }) {
         const settings = await getAppSetting()
         const isEncode = !!settings?.publishLocalizeConfig?.isEncode
 
-        let httpStartTime = new Date().getTime()
-
         let res
+
+        sendPageDeps(ctx, content)
 
         try {
           res = await appData.save({
