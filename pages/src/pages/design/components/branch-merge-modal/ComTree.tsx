@@ -124,7 +124,7 @@ export function ComTree({
             >
               <div className={css.connectorTitle}>{connector.title}</div>
               <div className={css.connectorMeta}>
-                {connector.connectorName} ({connector.type})
+                {connector.type}
               </div>
             </div>
           )
