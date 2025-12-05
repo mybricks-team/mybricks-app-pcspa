@@ -63,6 +63,7 @@
     "webpackbar": "^5.0.2"
   },
   "dependencies": {
+    "@mybricks/file-parser": "^1.1.1",
     "@mybricks/plugin-connector-domain": "0.0.52",
     "@mybricks/plugin-connector-http": "^1.2.33",
     "@mybricks/plugin-domain": "^0.0.12",

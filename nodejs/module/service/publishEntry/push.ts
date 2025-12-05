@@ -10,6 +10,7 @@ export const pushProcessor: TProcessor = async (ctx) => {
   const {
     envType,
     fileId,
+    mainFileId,
     version,
     commitInfo,
     json,
@@ -25,6 +26,7 @@ export const pushProcessor: TProcessor = async (ctx) => {
   const params = {
     envType,
     fileId,
+    mainFileId,
     title,
     publisherEmail,
     publisherName,
@@ -58,6 +60,7 @@ export async function publishPush(
   const {
     envType,
     fileId,
+    mainFileId,
     title,
     publisherEmail,
     publisherName,
@@ -78,12 +81,13 @@ export async function publishPush(
     userId,
   } = params;
 
+  const realFileId = mainFileId || fileId
   let uploadfolderPath;
   if (projectId) {
     if (envType === 'staging') {
-      uploadfolderPath = `/staging/project/${projectId}/${fileId}`;
+      uploadfolderPath = `/staging/project/${projectId}/${realFileId}`;
     } else {
-      uploadfolderPath = `/project/${projectId}/${fileId}`;
+      uploadfolderPath = `/project/${projectId}/${realFileId}`;
     }
   } else {
     uploadfolderPath = `${folderPath}/${envType || "prod"}`;
@@ -104,7 +108,7 @@ export async function publishPush(
     try {
       publishMaterialInfo = await customPublish({
         envType,
-        fileId,
+        fileId: realFileId,
         title,
         publisherEmail,
         publisherName,
@@ -214,6 +218,18 @@ export async function publishPush(
 
   if (needPublishFile) {
     Logger.info("[publish] API.File.publish: begin ");
+    console.log('mainFileId,==========', mainFileId)
+    if (mainFileId) {
+      await API.File.publish({
+        userId,
+        fileId: mainFileId,
+        extName: "pc-page",
+        commitInfo,
+        content: JSON.stringify({ ...publishMaterialInfo, json }),
+        type: envType,
+      });
+    }
+
     const result = await API.File.publish({
       userId,
       fileId,

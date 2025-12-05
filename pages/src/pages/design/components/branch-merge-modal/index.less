@@ -1,0 +1,73 @@
+.myBranchMergeContainer {
+  .top {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 24px;
+
+    .icon {
+      margin: 0 16px;
+      font-size: 24px;
+      color: var(--mybricks-color-primary);
+    }
+  }
+
+  .content {
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+
+    .comInfo {
+      position: relative;
+      display: flex;
+      height: 50vh;
+      overflow: auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background-color: #ccc;
+        z-index: 1;
+      }
+
+      .left,
+      .right {
+        flex: 1;
+        padding: 12px;
+        overflow-x: auto;
+
+        .branchLabel {
+          font-size: 14px;
+          font-weight: bold;
+          color: #1890ff;
+          margin-bottom: 12px;
+          padding: 8px 12px;
+          background: #e6f7ff;
+          border-radius: 4px;
+          border-left: 3px solid #1890ff;
+        }
+
+        .emptyState {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 200px;
+          color: #999;
+          font-size: 14px;
+        }
+      }
+    }
+
+
+  }
+}

@@ -28,6 +28,7 @@ type TContext = {
     images?: ILocalizationInfo[]
     imagesPath: Set<string>;
     result?: any
+    mainFileId?: number
 }
 
 type TJson = {

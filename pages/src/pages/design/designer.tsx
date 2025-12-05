@@ -27,7 +27,7 @@ import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
 import { createFromIconfontCN, InfoCircleTwoTone } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
-import {usePageStayTime} from './utils/sendPageTimer'
+import { usePageStayTime } from './utils/sendPageTimer'
 
 import { DESIGNER_STATIC_PATH } from '../../constants'
 import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
@@ -49,8 +49,10 @@ import {
 
 import { preview as preview_icon } from './icon/preview'
 import { publish as publish_icon } from './icon/publish'
+import { branch as branch_icon } from './icon/branch'
 import classNames from 'classnames'
 import { sendPageDeps } from './utils/sendPageDeps'
+import { BranchMergeModal } from './components/branch-merge-modal'
 
 const msgSaveKey = 'save'
 
@@ -180,7 +182,7 @@ export default function MyDesigner({ appData: originAppData }) {
         ctx.save({ content })
       },
       async save(
-        param: { name?; shareType?; content?; icon? },
+        param: { name?; shareType?; content?; icon?},
         options?: {
           skipMessage?: boolean
           saveType?: string
@@ -275,6 +277,7 @@ export default function MyDesigner({ appData: originAppData }) {
   const [remotePlugins, setRemotePlugins] = useState(null)
   const [builtPlugins, setBuildPlugins] = useState(null);
   const [publishModalVisible, setPublishModalVisible] = useState(false)
+  const [branchModalVisible, setBranchModalVisible] = useState(false)
   const [isDebugMode, setIsDebugMode] = useState(false)
   const operationList = useRef<any[]>([])
   const fileDBRef = useRef(null)
@@ -326,7 +329,7 @@ export default function MyDesigner({ appData: originAppData }) {
       script.src = designer
       document.head.appendChild(script)
       script.onload = () => {
-        ;(window as any).mybricks.SPADesigner &&
+        ; (window as any).mybricks.SPADesigner &&
           setSPADesigner((window as any).mybricks.SPADesigner)
       }
     }
@@ -915,7 +918,7 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [])
 
   // 上报页面的开发数据
-  usePageStayTime({operable, appData: ctx, currentRef:designerRef})
+  usePageStayTime({ operable, appData: ctx, currentRef: designerRef })
 
   const TrueDesigner = useMemo(() => {
     return (
@@ -965,6 +968,20 @@ export default function MyDesigner({ appData: originAppData }) {
         {!isPreview && RenderLocker}
         {!isPreview && (
           <>
+            <div
+              data-mybricks-tip={`{content:'分支合并',position:'bottom'}`}
+              className={
+                classNames({
+                  [css.publish_btn]: true,
+                  [css.btn_disable]: !operable || isDebugMode
+                })
+              }
+              onClick={() => {
+                if (!operable || isDebugMode) return
+                setBranchModalVisible(true)
+              }}>
+              {branch_icon}
+            </div>
             <Toolbar.Save
               disabled={!operable || isDebugMode}
               loading={saveLoading}
@@ -978,21 +995,21 @@ export default function MyDesigner({ appData: originAppData }) {
               预览
             </Toolbar.Button> */}
 
-              <div
-              data-mybricks-tip={`{content:'预览',position:'bottom'}`} 
+            <div
+              data-mybricks-tip={`{content:'预览',position:'bottom'}`}
               className={
                 classNames({
-                [css.preview_btn]: true,
-                [css.btn_disable]: isDebugMode
-              })
-              } 
-              onClick={()=>{
-                if(isDebugMode) return
+                  [css.preview_btn]: true,
+                  [css.btn_disable]: isDebugMode
+                })
+              }
+              onClick={() => {
+                if (isDebugMode) return
                 //在调试模式，不给点击
                 preview()
-                }}>
+              }}>
               {preview_icon}
-              </div>
+            </div>
 
             {/* <Toolbar.Button
               disabled={!operable || isDebugMode}
@@ -1002,21 +1019,21 @@ export default function MyDesigner({ appData: originAppData }) {
               发布
             </Toolbar.Button> */}
 
-              <div
-              data-mybricks-tip={`{content:'发布',position:'bottom'}`} 
+            <div
+              data-mybricks-tip={`{content:'发布',position:'bottom'}`}
               className={
                 classNames({
-                [css.publish_btn]: true,
-                [css.btn_disable]: !operable || isDebugMode
-              })
-              } 
+                  [css.publish_btn]: true,
+                  [css.btn_disable]: !operable || isDebugMode
+                })
+              }
               onClick={() => {
-                if(!operable || isDebugMode) return
+                if (!operable || isDebugMode) return
                 //在调试模式，不给点击
                 setPublishModalVisible(true)
               }}>
-                {publish_icon}
-              </div>
+              {publish_icon}
+            </div>
 
           </>
         )}
@@ -1049,6 +1066,12 @@ export default function MyDesigner({ appData: originAppData }) {
           setPublishModalVisible(false)
         }}
         onCancel={() => setPublishModalVisible(false)}
+      />
+      <BranchMergeModal
+        open={branchModalVisible}
+        designerInstance={designerRef.current}
+        onCancel={() => setBranchModalVisible(false)}
+        onConfirm={() => setBranchModalVisible(false)}
       />
     </div>
   )

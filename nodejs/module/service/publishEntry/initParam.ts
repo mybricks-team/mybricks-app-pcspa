@@ -23,7 +23,7 @@ const initParam: TProcessor = async (ctx) => {
 
   const latestPub = (
     await API.File.getLatestPub({
-      fileId: ctx.fileId,
+      fileId: ctx.mainFileId || ctx.fileId,
       type: ctx.envType,
     })
   )?.[0];
