@@ -31,9 +31,11 @@
   }
 
   .nodeContent {
+    display: flex;
+    justify-content: space-between;
     padding: 6px 10px;
     border-radius: 3px;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
     border: 1px solid transparent;
 
     &:hover {
@@ -52,6 +54,21 @@
     color: #999;
     cursor: pointer;
     user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s;
+    border-radius: 2px;
+
+    &:hover {
+      background-color: #e8e8e8;
+    }
+
+    &.expanded {
+      transform: rotate(90deg);
+    }
   }
 
   .nodeTitle {
@@ -68,6 +85,8 @@
   }
 
   .comDefInfo {
+    display: flex;
+    align-items: center;
     font-size: 12px;
     color: #999;
     margin-top: 4px;
@@ -87,8 +106,7 @@
     border: 1px solid #e8e8e8;
     background: white;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
     transition: all 0.2s;
 
     &:hover {
@@ -109,18 +127,9 @@
     margin-top: 4px;
   }
 
-  // Diff 状态标识
-  .diffBadge {
-    padding: 2px 8px;
-    border-radius: 2px;
-    font-size: 12px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
   // 新增状态 - 绿色
   .added {
-    background-color: #f6ffed;
+    background-color: #f6ffed !important;
     border-color: #b7eb8f !important;
 
     .nodeTitle,
@@ -128,46 +137,31 @@
     .moduleTitle {
       color: #52c41a;
     }
-
-    .diffBadge {
-      background-color: #52c41a;
-      color: white;
-    }
   }
 
   // 删除状态 - 红色
   .removed {
-    background-color: #fff2f0;
+    background-color: #fff2f0 !important;
     border-color: #ffccc7 !important;
-    text-decoration: line-through;
     opacity: 0.75;
 
     .nodeTitle,
     .connectorTitle,
     .moduleTitle {
       color: #ff4d4f;
-    }
-
-    .diffBadge {
-      background-color: #ff4d4f;
-      color: white;
+      text-decoration: line-through;
     }
   }
 
-  // 修改状态 - 黄色/橙色
+  // 修改状态 - 蓝色
   .modified {
-    background-color: #fffbe6;
-    border-color: #ffe58f !important;
+    background-color: #e6f7ff !important;
+    border-color: #91d5ff !important;
 
     .nodeTitle,
     .connectorTitle,
     .moduleTitle {
-      color: #fa8c16;
-    }
-
-    .diffBadge {
-      background-color: #fa8c16;
-      color: white;
+      color: #1890ff;
     }
   }
 

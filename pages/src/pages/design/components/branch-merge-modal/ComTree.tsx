@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
+import { InfoCircleOutlined } from '@ant-design/icons'
 import { DumpJSONInfo, Scene } from './parser'
 import { DiffResult, DiffItem } from './diff'
 import css from './ComTree.less'
+import { Tooltip } from 'antd'
 
 interface ComTreeProps {
   data: DumpJSONInfo
@@ -12,6 +14,31 @@ export function ComTree({
   data,
   diffRes
 }: ComTreeProps) {
+  // 创建初始展开集合（包含所有有子节点的节点）
+  const getInitialExpandedIds = (): Set<string> => {
+    const expandedIds = new Set<string>()
+
+    const collectNodeIds = (nodes: Scene[]) => {
+      nodes.forEach(node => {
+        if (node.children && node.children.length > 0) {
+          expandedIds.add(node.id)
+          collectNodeIds(node.children)
+        }
+      })
+    }
+
+    if (data.scenes) {
+      collectNodeIds(data.scenes)
+    }
+    if (data.coms) {
+      collectNodeIds(data.coms)
+    }
+
+    return expandedIds
+  }
+
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(getInitialExpandedIds())
+
   // 创建一个 Map 方便快速查找每个节点的 diff 状态
   const diffMap = useMemo(() => {
     const map = new Map<string, DiffItem<any>>()
@@ -30,33 +57,49 @@ export function ComTree({
     return diffItem ? diffItem.type : null
   }
 
+  // 切换展开/收缩状态
+  const toggleExpanded = (id: string) => {
+    const newExpanded = new Set(expandedIds)
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id)
+    } else {
+      newExpanded.add(id)
+    }
+    setExpandedIds(newExpanded)
+  }
+
   // 渲染树节点
   const renderTreeNode = (node: Scene, level: number = 0): React.ReactNode => {
     const diffType = getDiffType(node.id)
     const hasChildren = node.children && node.children.length > 0
+    const isExpanded = expandedIds.has(node.id)
 
     return (
       <div key={node.id} className={css.treeNode} style={{ paddingLeft: level * 20 }}>
         <div className={`${css.nodeContent} ${diffType ? css[diffType] : ''}`}>
           <div className={css.nodeInfo}>
-            {hasChildren && <span className={css.expandIcon}>▼</span>}
-            <span className={css.nodeTitle}>{node.title || '未命名'}</span>
-            {node.type && <span className={css.nodeType}>{node.type}</span>}
-            {diffType && (
-              <span className={css.diffBadge}>
-                {diffType === 'added' && '新增'}
-                {diffType === 'removed' && '删除'}
-                {diffType === 'modified' && '修改'}
+            {hasChildren && (
+              <span
+                className={`${css.expandIcon} ${isExpanded ? css.expanded : ''}`}
+                onClick={() => toggleExpanded(node.id)}
+              >
+                ▶
               </span>
             )}
+            {!hasChildren && <span className={css.expandIcon} style={{ visibility: 'hidden' }}>▶</span>}
+            <span className={css.nodeTitle}>{node.title || '未命名'}</span>
+            {/* {node.type && <span className={css.nodeType}>{node.type}</span>} */}
           </div>
           {node.comDef && (
             <div className={css.comDefInfo}>
-              {node.comDef.namespace}@{node.comDef.version}
+              {node.comDef.version}
+              <Tooltip title={node.comDef.namespace}>
+                <InfoCircleOutlined style={{ fontSize: 16, marginLeft: 8, cursor: 'pointer' }} />
+              </Tooltip>
             </div>
           )}
         </div>
-        {hasChildren && (
+        {hasChildren && isExpanded && (
           <div className={css.children}>
             {node.children!.map(child => renderTreeNode(child, level + 1))}
           </div>
@@ -83,13 +126,6 @@ export function ComTree({
               <div className={css.connectorMeta}>
                 {connector.connectorName} ({connector.type})
               </div>
-              {diffType && (
-                <span className={css.diffBadge}>
-                  {diffType === 'added' && '新增'}
-                  {diffType === 'removed' && '删除'}
-                  {diffType === 'modified' && '修改'}
-                </span>
-              )}
             </div>
           )
         })}
@@ -112,13 +148,6 @@ export function ComTree({
               className={`${css.moduleItem} ${diffType ? css[diffType] : ''}`}
             >
               <div className={css.moduleTitle}>{module.title}</div>
-              {diffType && (
-                <span className={css.diffBadge}>
-                  {diffType === 'added' && '新增'}
-                  {diffType === 'removed' && '删除'}
-                  {diffType === 'modified' && '修改'}
-                </span>
-              )}
             </div>
           )
         })}

@@ -977,7 +977,7 @@ export default function MyDesigner({ appData: originAppData }) {
                 })
               }
               onClick={() => {
-                if (!operable || isDebugMode) return
+                if (!operable || isDebugMode || !designerRef.current) return
                 setBranchModalVisible(true)
               }}>
               {branch_icon}
