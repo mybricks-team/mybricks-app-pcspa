@@ -73,7 +73,7 @@ export function BranchMergeModal({
     try {
       onConfirm(sourceDump.current)
     } catch (e) {
-      console.error('save error': e)
+      console.error('save error', e)
     }
     setLoading(false)
   }
