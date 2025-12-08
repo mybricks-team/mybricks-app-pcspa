@@ -1071,7 +1071,10 @@ export default function MyDesigner({ appData: originAppData }) {
         open={branchModalVisible}
         designerInstance={designerRef.current}
         onCancel={() => setBranchModalVisible(false)}
-        onConfirm={() => setBranchModalVisible(false)}
+        onConfirm={async (dump: string) => {
+          await importDump(dump)
+          setBranchModalVisible(false)
+        }}
       />
     </div>
   )

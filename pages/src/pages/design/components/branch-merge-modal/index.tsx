@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Button, Modal, Select } from 'antd'
 import { SwapLeftOutlined, CheckCircleFilled } from '@ant-design/icons'
 import { ComTree } from './ComTree'
@@ -10,7 +10,7 @@ interface BranchMergeModalProps {
   open: boolean
   designerInstance?: any
   onCancel: () => void
-  onConfirm: () => void
+  onConfirm: (dump: string) => Promise<void>
 }
 
 export function BranchMergeModal({
@@ -22,6 +22,8 @@ export function BranchMergeModal({
 }: BranchMergeModalProps) {
   const [sourceBranch, setSourceBranch] = useState('dev')
   const [selectCurrentVersion, setSelectCurrentVersion] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const sourceDump = useRef()
 
   // 当前分支（目标分支）的数据
   const [targetData, setTargetData] = useState<DumpJSONInfo | null>(null)
@@ -30,7 +32,7 @@ export function BranchMergeModal({
   // diff 结果
   const [diffResult, setDiffResult] = useState<DiffResult | null>(null)
 
-   useEffect(() => {
+  useEffect(() => {
     if (open) {
       // 获取当前分支（main）的数据
       const dumpJSON = designerInstance.dump()
@@ -59,15 +61,21 @@ export function BranchMergeModal({
     // 这里返回 null 或模拟数据
     console.log('Fetching data for branch:', branch)
     const dumpJSON = designerInstance.dump()
-      const currentData = parseDumpJSON(dumpJSON)
-      currentData.coms[0].data = { a: 1}
+    const currentData = parseDumpJSON(dumpJSON)
+    currentData.coms[0].data = { a: 1 }
     // 临时返回当前数据作为示例
     // 实际应该从服务端 API 获取
     return currentData
   }
 
   const handleConfirm = () => {
-    onConfirm()
+    setLoading(true)
+    try {
+      onConfirm(sourceDump.current)
+    } catch (e) {
+      console.error('save error': e)
+    }
+    setLoading(false)
   }
 
   return (
@@ -78,7 +86,8 @@ export function BranchMergeModal({
       cancelText="取消"
       okText="合并"
       okButtonProps={{
-        disabled: !selectCurrentVersion
+        disabled: !selectCurrentVersion,
+        loading
       }}
       onCancel={onCancel}
       onOk={handleConfirm}
