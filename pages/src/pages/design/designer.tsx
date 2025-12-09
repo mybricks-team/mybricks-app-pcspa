@@ -53,6 +53,7 @@ import { branch as branch_icon } from './icon/branch'
 import classNames from 'classnames'
 import { sendPageDeps } from './utils/sendPageDeps'
 import { BranchMergeModal } from './components/branch-merge-modal'
+import { useBranch } from './hooks/useBranch'
 
 const msgSaveKey = 'save'
 
@@ -69,6 +70,8 @@ const getAppSetting = async () => {
 export default function MyDesigner({ appData: originAppData }) {
   window.fileId = originAppData.fileId
   window._disableSmartLayout = originAppData?.config?.['mybricks-app-pcspa']?.config?.feature?.disableSmartLayout; // 是否禁用智能布局
+
+  const { branchInfo, getBranchInfoByMainFileId } = useBranch()
 
   const appData = useMemo(() => {
     let data = { ...originAppData }
@@ -87,6 +90,12 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return data
   }, [originAppData])
+
+  useEffect(() => {
+    if (appData?.fileId) {
+      getBranchInfoByMainFileId(appData.fileId)
+    }
+  }, [appData?.fileId])
 
   // 查看特定版本或者指定为预览态时，展示预览态
   const isPreview =
@@ -968,20 +977,22 @@ export default function MyDesigner({ appData: originAppData }) {
         {!isPreview && RenderLocker}
         {!isPreview && (
           <>
-            <div
-              data-mybricks-tip={`{content:'分支合并',position:'bottom'}`}
-              className={
-                classNames({
-                  [css.publish_btn]: true,
-                  [css.btn_disable]: !operable || isDebugMode
-                })
-              }
-              onClick={() => {
-                if (!operable || isDebugMode || !designerRef.current) return
-                setBranchModalVisible(true)
-              }}>
-              {branch_icon}
-            </div>
+            {branchInfo && branchInfo.length > 0 && (
+              <div
+                data-mybricks-tip={`{content:'分支合并',position:'bottom'}`}
+                className={
+                  classNames({
+                    [css.publish_btn]: true,
+                    [css.btn_disable]: !operable || isDebugMode
+                  })
+                }
+                onClick={() => {
+                  if (!operable || isDebugMode || !designerRef.current) return
+                  setBranchModalVisible(true)
+                }}>
+                {branch_icon}
+              </div>
+            )}
             <Toolbar.Save
               disabled={!operable || isDebugMode}
               loading={saveLoading}
@@ -1069,6 +1080,7 @@ export default function MyDesigner({ appData: originAppData }) {
       />
       <BranchMergeModal
         open={branchModalVisible}
+        fileId={appData?.fileId}
         designerInstance={designerRef.current}
         onCancel={() => setBranchModalVisible(false)}
         onConfirm={async (dump: string) => {
