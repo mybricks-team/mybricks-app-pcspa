@@ -1091,6 +1091,7 @@ export default function MyDesigner({ appData: originAppData }) {
           onConfirm={async (dump: any) => {
             await importDump(dump)
             setBranchModalVisible(false)
+            await save({ saveType: 'import' })
           }}
         />
       }

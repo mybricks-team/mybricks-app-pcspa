@@ -37,6 +37,8 @@ export function BranchMergeModal({
     fileContent,
     loadingFileContent,
     branchInfo,
+    originalFileContent,
+    
     getBranchInfoByMainFileId,
     getFileContent
   } = useBranch()
@@ -78,7 +80,7 @@ export function BranchMergeModal({
   const handleConfirm = async () => {
     setLoading(true)
     try {
-      await onConfirm(fileContent)
+      await onConfirm(originalFileContent.current)
     } catch (e) {
       console.error('save error', e)
     }

@@ -1,5 +1,5 @@
 import axios from "axios"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { DumpJSONInfo } from "../components/branch-merge-modal/parser"
 
 export interface BranchInfo {
@@ -23,6 +23,7 @@ export const useBranch = () => {
   const [branchName, setBranchName] = useState('')
   const [loadingBranchInfo, setLoadingBranchInfo] = useState(false)
   const [loadingFileContent, setLoadingFileContent] = useState(false)
+  const originalFileContent = useRef('')
 
   const getBranchInfoByMainFileId = async (mainFileId: string | number) => {
     setLoadingBranchInfo(true)
@@ -41,6 +42,7 @@ export const useBranch = () => {
     setLoadingFileContent(true)
     try {
       const res = await axios.get('/paas/api/workspace/getFullFile?fileId=' + fileId)
+      originalFileContent.current = res.data?.data?.content
       setFileContent(JSON.parse(res.data?.data?.content || '{}'))
     }catch(e) {
       console.error('getBranchInfoByMainFileId Error', e)
@@ -67,6 +69,7 @@ export const useBranch = () => {
     fileContent,
     branchName,
     mainFileId,
+    originalFileContent,
 
     getBranchInfoByMainFileId,
     getFileContent,
