@@ -766,7 +766,7 @@ export default function MyDesigner({ appData: originAppData }) {
           setPublishLoading(false)
         })
     },
-    [appData, ctx]
+    [appData, ctx, mainFileId]
   )
 
   const publishAndDownload = async (publishConfig) => {
