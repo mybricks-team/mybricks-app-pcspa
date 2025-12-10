@@ -8,10 +8,9 @@ import publishToCom from "./publishToCom";
 
 @Injectable()
 export default class PcPageService {
-  async publish(req, { json, userId, fileId, envType, commitInfo, appConfig }) {
+  async publish(req, { json, userId, fileId, envType, commitInfo, appConfig, mainFileId }) {
     // return await publish(req, { json, userId, fileId, envType, commitInfo, appConfig });
-    // TODO: get mainFileId
-    return await publish({ req, json, userId, envType: '开发分支', fileId, mainFileId: 766273268199493, commitInfo, appConfig, imagesPath: new Set() })
+    return await publish({ req, json, userId, envType, fileId, mainFileId, commitInfo, appConfig, imagesPath: new Set() })
   }
 
   async upload(req, { file }, { groupId = "" } = {}) {

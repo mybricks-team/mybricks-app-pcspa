@@ -11,12 +11,14 @@ export enum EnumMode {
 
 export default ({
   visible,
+  branchName,
+
   onOk,
   onCancel,
   onOkAndDownload,
   envList,
   projectId
-}: ModalProps & { envList: Array<any>, projectId?: string, onOk: (publishConfig: any) => void, onOkAndDownload: (publishConfig: any) => void}) => {
+}: ModalProps & { envList: Array<any>, branchName?: string, projectId?: string, onOk: (publishConfig: any) => void, onOkAndDownload: (publishConfig: any) => void}) => {
 
   const [mode, setMode] = useState(envList.length > 0 ? EnumMode.ENV : EnumMode.DEFAULT)
   const [form] = Form.useForm();
@@ -30,7 +32,7 @@ export default ({
           envType = USE_CUSTOM_HOST
         }
         onOk({
-          envType,
+          envType: branchName|| envType,
           commitInfo
         });
       })
@@ -106,7 +108,7 @@ export default ({
             </Radio.Group>
           </Form.Item>
         }
-        {mode === EnumMode.ENV && <Form.Item
+        {mode === EnumMode.ENV && !branchName && <Form.Item
           label="发布环境"
           name="envType"
           required

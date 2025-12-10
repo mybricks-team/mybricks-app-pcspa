@@ -4,21 +4,23 @@ import { DumpJSONInfo } from "../components/branch-merge-modal/parser"
 
 export interface BranchInfo {
   id: number
-  main_file_id: number
-  branch_file_id: number
-  branch_name: string
+  mainFileId: number
+  branchFileId: number
+  branchName: string
   description: string
-  content: string
-  creator_id: number
-  creator_name: string
-  create_time: number
-  update_time: number
+  content?: string
+  creatorId: number
+  creatorName: string
+  createTime: number
+  updateTime: number
   status: number
 }
 
 export const useBranch = () => {
   const [branchInfo, setBranchInfo] = useState<BranchInfo[]>()
-  const [fileContent, setFileContent] = useState<DumpJSONInfo>()
+  const [fileContent, setFileContent] = useState<any>()
+  const [mainFileId, setMainFileId] = useState<number>()
+  const [branchName, setBranchName] = useState('')
   const [loadingBranchInfo, setLoadingBranchInfo] = useState(false)
   const [loadingFileContent, setLoadingFileContent] = useState(false)
 
@@ -28,7 +30,6 @@ export const useBranch = () => {
       const res = await axios.get('/paas/api/file/getBranchInfo?id=' + mainFileId)
       console.log('getBranchInfoByMainFileId', res)
       setBranchInfo(res.data?.data)
-      return res.data?.data
     }catch(e) {
       console.error('getBranchInfoByMainFileId Error', e)
     }
@@ -48,13 +49,27 @@ export const useBranch = () => {
     setLoadingFileContent(false)
   }
 
+  const getMainFileId = async (fileId: number) => {
+    try {
+      const res = await axios.get('/paas/api/file/getMainFileId?id=' + fileId)
+      setMainFileId(res.data?.data?.id)
+      setBranchName(res.data?.data?.branchName)
+      return res.data?.data
+    }catch(e) {
+      console.error('getMainFileId Error', e)
+    }
+  }
+
   return {
     branchInfo,
     loadingBranchInfo,
     loadingFileContent,
     fileContent,
+    branchName,
+    mainFileId,
 
     getBranchInfoByMainFileId,
     getFileContent,
+    getMainFileId,
   }
 }

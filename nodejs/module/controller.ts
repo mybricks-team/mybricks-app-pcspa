@@ -47,6 +47,7 @@ export default class PcPageController {
   async publish(
     @Body("userId") userId: string,
     @Body("fileId") fileId: number,
+    @Body("mainFileId") mainFileId: number,
     @Body("json") json: any,
     @Body("envType") envType: string,
     @Body("commitInfo") commitInfo: string,
@@ -90,6 +91,7 @@ export default class PcPageController {
         envType,
         commitInfo,
         appConfig,
+        mainFileId,
       });
 
       Logger.info("[publish] 发布成功！");

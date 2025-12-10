@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Modal, Select, Spin } from 'antd'
 import { SwapLeftOutlined, CheckCircleFilled } from '@ant-design/icons'
 import { ComTree } from './ComTree'
@@ -28,6 +28,7 @@ export function BranchMergeModal({
   const [loading, setLoading] = useState(false)
   // 当前分支（目标分支）的数据
   const [targetData, setTargetData] = useState<DumpJSONInfo | null>(null)
+  const [sourceData, setSourceData] = useState<DumpJSONInfo | null>(null)
   // diff 结果
   const [diffResult, setDiffResult] = useState<DiffResult | null>(null)
 
@@ -39,6 +40,13 @@ export function BranchMergeModal({
     getBranchInfoByMainFileId,
     getFileContent
   } = useBranch()
+
+  const currentBranch = useMemo(() => {
+    if (sourceBranch && branchInfo?.length) {
+      return branchInfo.find(item => item.branchFileId === sourceBranch)
+    }
+    return null
+  }, [sourceBranch, branchInfo])
 
   useEffect(() => {
     if (fileId && open) {
@@ -57,18 +65,20 @@ export function BranchMergeModal({
       // 获取当前分支（main）的数据
       const dumpJSON = designerInstance.dump()
       const currentData = parseDumpJSON(dumpJSON)
+      const sourceData = parseDumpJSON(fileContent)
       setTargetData(currentData)
+      setSourceData(sourceData)
 
-      const diffRes = diff(fileContent, currentData)
+      const diffRes = diff(currentData, sourceData)
       setDiffResult(diffRes)
       console.log('Diff Result:', diffRes)
     }
   }, [open, fileContent, designerInstance])
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     setLoading(true)
     try {
-      onConfirm(JSON.stringify(fileContent))
+      await onConfirm(fileContent)
     } catch (e) {
       console.error('save error', e)
     }
@@ -107,43 +117,64 @@ export function BranchMergeModal({
             <Select
               style={{ width: 200 }}
               value={sourceBranch}
+              placeholder="请选择目标分支"
               onChange={(value) => setSourceBranch(value)}
               options={branchInfo?.map((item) => ({
-                label: item.branch_name,
-                value: item.branch_file_id
+                label: item.branchName,
+                value: item.branchFileId
               }))}
             />
           </div>
-          <Spin spinning={loadingFileContent}>
-            <div className={css.content}>
-              <div className={css.actions}>
-                {
-                  selectCurrentVersion && (
-                    <CheckCircleFilled style={{ color: '#52c41a', fontSize: 18 }} />
-                  )
-                }
-                <Button type='link' size='small' onClick={() => setSelectCurrentVersion(true)}>选择当前版本</Button>
-              </div>
-              <div className={css.comInfo}>
-                <div className={css.left}>
-                  <div className={css.branchLabel}>当前分支: main</div>
-                  {targetData ? (
-                    <ComTree data={targetData} diffRes={diffResult} />
-                  ) : (
-                    <div className={css.emptyState}>加载当前分支数据...</div>
-                  )}
+          {
+            sourceBranch && (
+              <Spin spinning={loadingFileContent}>
+                <div className={css.content}>
+                  <div className={css.actions}>
+                    <div className={css.left}>
+                      <div className={css.item}>
+                        <div className={css.colorBlock} style={{ backgroundColor: '#f6ffed', border: '1px solid #b7eb8f' }}></div>
+                        新增
+                      </div>
+                      <div className={css.item}>
+                        <div className={css.colorBlock} style={{ backgroundColor: '#e6f7ff', border: '1px solid #91d5ff' }}></div>
+                        编辑
+                      </div>
+                      <div className={css.item}>
+                        <div className={css.colorBlock} style={{ backgroundColor: '#fff2f0', border: '1px solid #ffccc7' }}></div>
+                        删除
+                      </div>
+                    </div>
+                    <div className={css.right}>
+                      {
+                        selectCurrentVersion && (
+                          <CheckCircleFilled style={{ color: '#52c41a', fontSize: 18 }} />
+                        )
+                      }
+                      <Button type='link' size='small' onClick={() => setSelectCurrentVersion(true)}>选择当前版本</Button>
+                    </div>
+                  </div>
+                  <div className={css.comInfo}>
+                    <div className={css.left}>
+                      <div className={css.branchLabel}>当前分支: main</div>
+                      {targetData ? (
+                        <ComTree data={targetData} diffRes={diffResult} />
+                      ) : (
+                        <div className={css.emptyState}>加载当前分支数据...</div>
+                      )}
+                    </div>
+                    <div className={css.right}>
+                      <div className={css.branchLabel}>源分支: {currentBranch?.branchName}</div>
+                      {sourceData ? (
+                        <ComTree data={sourceData} diffRes={diffResult} />
+                      ) : (
+                        <div className={css.emptyState}>加载目标分支数据...</div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className={css.right}>
-                  <div className={css.branchLabel}>源分支: dev</div>
-                  {fileContent ? (
-                    <ComTree data={fileContent} diffRes={diffResult} />
-                  ) : (
-                    <div className={css.emptyState}>加载目标分支数据...</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Spin>
+              </Spin>
+            )
+          }
         </div>
       </Spin>
     </Modal>

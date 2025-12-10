@@ -46,6 +46,7 @@ function flattenScenesToMap(scenes: Scene[]): Map<string, Scene> {
   const map = new Map<string, Scene>();
   
   const traverse = (nodes: Scene[]) => {
+    if (!nodes || nodes.length === 0) return
     nodes.forEach(node => {
       // 浅拷贝对象，移除 children 以避免比对时递归死循环或误判
       // 我们只关心当前节点自身的属性变化，子节点的变化由子节点自己的 ID 判定
@@ -66,7 +67,7 @@ function flattenScenesToMap(scenes: Scene[]): Map<string, Scene> {
  * 将普通数组转为 Map
  */
 function arrayToMap<T extends { id: string }>(list: T[]): Map<string, T> {
-  return new Map(list.map(item => [item.id, item]));
+  return new Map(list?.map(item => [item.id, item]));
 }
 
 // --- 3. 核心 Diff 逻辑 ---
@@ -85,7 +86,7 @@ function calculateDiff<T extends { id: string; data?: any }>(
   const diffs: DiffItem<T>[] = [];
 
   // 1. 检查 新增 (Added) 和 修改 (Modified)
-  targetMap.forEach((targetItem, id) => {
+  targetMap?.forEach((targetItem, id) => {
     const sourceItem = sourceMap.get(id);
 
     if (!sourceItem) {
@@ -116,7 +117,7 @@ function calculateDiff<T extends { id: string; data?: any }>(
             const keys = Array.from(new Set([...Object.keys(sourceItem), ...Object.keys(targetItem)]));
             for (const key of keys) {
                 if (key === 'data') continue;
-                if (sourceItem[key as keyof T] !== targetItem[key as keyof T]) {
+                if (!isDeepEqual(sourceItem[key as keyof T], targetItem[key as keyof T])) {
                     isModified = true;
                     break;
                 }
@@ -136,7 +137,7 @@ function calculateDiff<T extends { id: string; data?: any }>(
   });
 
   // 2. 检查 删除 (Removed)
-  sourceMap.forEach((sourceItem, id) => {
+  sourceMap?.forEach((sourceItem, id) => {
     if (!targetMap.has(id)) {
       diffs.push({ id, type: 'removed', data: sourceItem });
     }

@@ -71,7 +71,7 @@ export default function MyDesigner({ appData: originAppData }) {
   window.fileId = originAppData.fileId
   window._disableSmartLayout = originAppData?.config?.['mybricks-app-pcspa']?.config?.feature?.disableSmartLayout; // 是否禁用智能布局
 
-  const { branchInfo, getBranchInfoByMainFileId } = useBranch()
+  const { branchInfo, branchName, mainFileId, getBranchInfoByMainFileId, getMainFileId } = useBranch()
 
   const appData = useMemo(() => {
     let data = { ...originAppData }
@@ -94,6 +94,7 @@ export default function MyDesigner({ appData: originAppData }) {
   useEffect(() => {
     if (appData?.fileId) {
       getBranchInfoByMainFileId(appData.fileId)
+      getMainFileId(appData.fileId)
     }
   }, [appData?.fileId])
 
@@ -702,6 +703,7 @@ export default function MyDesigner({ appData: originAppData }) {
         } = await fAxios.post('/api/pcpage/publish', {
           userId: ctx.user?.id,
           fileId: ctx.fileId,
+          mainFileId,
           json: toJSON,
           envType,
           commitInfo,
@@ -870,7 +872,8 @@ export default function MyDesigner({ appData: originAppData }) {
 
   const importDump = async (value) => {
     try {
-      const { content, pageConfig } = JSON.parse(value)
+      value = typeof value === 'string' ? JSON.parse(value) : value
+      const { content, pageConfig } = value
       let newPageConfig
       if (!pageConfig || !pageConfig?.comlibs?.length) {
         // 无 pageConfig 或comlibs数组为空，导入时放入默认组件库 以及我的组件库，去更新到ctx.comlibs
@@ -1066,6 +1069,7 @@ export default function MyDesigner({ appData: originAppData }) {
       <div className={css.designer}>{TrueDesigner}</div>
       <PublishModal
         envList={ctx.envList}
+        branchName={branchName}
         projectId={ctx.sdk.projectId}
         visible={publishModalVisible}
         onOk={(publishConfig) => {
@@ -1078,16 +1082,18 @@ export default function MyDesigner({ appData: originAppData }) {
         }}
         onCancel={() => setPublishModalVisible(false)}
       />
-      <BranchMergeModal
-        open={branchModalVisible}
-        fileId={appData?.fileId}
-        designerInstance={designerRef.current}
-        onCancel={() => setBranchModalVisible(false)}
-        onConfirm={async (dump: string) => {
-          await importDump(dump)
-          setBranchModalVisible(false)
-        }}
-      />
+      {
+        branchModalVisible && <BranchMergeModal
+          open={branchModalVisible}
+          fileId={appData?.fileId}
+          designerInstance={designerRef.current}
+          onCancel={() => setBranchModalVisible(false)}
+          onConfirm={async (dump: any) => {
+            await importDump(dump)
+            setBranchModalVisible(false)
+          }}
+        />
+      }
     </div>
   )
 }
