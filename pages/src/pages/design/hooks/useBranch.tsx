@@ -1,6 +1,5 @@
 import axios from "axios"
 import { useRef, useState } from "react"
-import { DumpJSONInfo } from "../components/branch-merge-modal/parser"
 
 export interface BranchInfo {
   id: number

@@ -12,7 +12,7 @@ interface BranchMergeModalProps {
   fileId?: number
   designerInstance?: any
   onCancel: () => void
-  onConfirm: (dump: string) => Promise<void>
+  onConfirm: (dump: any) => Promise<void>
 }
 
 export function BranchMergeModal({
@@ -80,7 +80,15 @@ export function BranchMergeModal({
   const handleConfirm = async () => {
     setLoading(true)
     try {
-      await onConfirm(originalFileContent.current)
+      const obj = JSON.parse(originalFileContent.current)
+      const dump = {
+        content: obj.content,
+        pageConfig: {
+          ...obj,
+          content: undefined
+        }
+      }
+      await onConfirm(dump)
     } catch (e) {
       console.error('save error', e)
     }
