@@ -48,6 +48,7 @@ import { compareVersionLatest } from "../utils/saveContent";
 const { confirm } = Modal;
 import editViewConfig from "./editView";
 import getAiView from "./getAiView";
+import AIPlugin from './getAiView/utils/get-ai-plugin'
 import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
 import cloudTpt from "./cloudTpt";
 
@@ -236,6 +237,13 @@ export default function appConfig(
   //     })
   //   )
   // }
+
+  const aiViewConfig = getAiView(ctx?.appConfig?.publishLocalizeConfig?.enableAI, {
+    model: ctx?.appConfig?.publishLocalizeConfig?.selectAIModel,
+    scenePrompt: ctx?.appConfig?.publishLocalizeConfig?.systemScenePrompt,
+    designerRef
+  })
+
   return {
     // debugger(json, opts) {
     //   return renderUI(json, opts)
@@ -340,6 +348,16 @@ export default function appConfig(
         onUsedIdChanged: ({ ids }) => {
           ctx.i18nUsedIdList = ids;
         },
+      }),
+      AIPlugin({
+        user: {
+          name: appData.user.name || appData.user.email || "user",
+          avatar: appData.user.avatar
+        },
+        requestAsStream: ({ messages, emits, aiRole }) => {
+          return aiViewConfig.requestAsStream(messages, undefined, emits, { aiRole });
+        },
+        key: ctx.fileId
       }),
       ...remotePlugins,
       themePlugin.use({ sdk: appData }),
@@ -522,11 +540,7 @@ export default function appConfig(
       useStrict: false,
       useExtendedInput: true, // 开启场景卡片的扩展输入
     },
-    aiView: getAiView(ctx?.appConfig?.publishLocalizeConfig?.enableAI, {
-      model: ctx?.appConfig?.publishLocalizeConfig?.selectAIModel,
-      scenePrompt: ctx?.appConfig?.publishLocalizeConfig?.systemScenePrompt,
-      designerRef
-    }),
+    aiView: aiViewConfig,
     editView: editViewConfig({ ctx, envList }),
     com: {
       env: {

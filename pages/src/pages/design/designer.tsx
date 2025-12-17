@@ -298,6 +298,7 @@ export default function MyDesigner({ appData: originAppData }) {
     if (ctx.debug && localStorage.getItem('__DEBUG_DESIGNER__')) {
       return localStorage.getItem('__DEBUG_DESIGNER__')
     }
+    // return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.842.r3/index.min.js'
     return appConfig.designer?.url || DESIGNER_STATIC_PATH
   }, [appConfig])
 

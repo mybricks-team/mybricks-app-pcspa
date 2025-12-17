@@ -6,8 +6,14 @@ import mock2Prompts from './mock/mock2Prompts';
 // import mock2Res from './mock/mock2Res'
 // import { aiUtils } from "./utils/get-ai-encrypt-data"
 
-// const DEFAULT_MODEL = 'deepseek-chat';
-const DEFAULT_MODEL = 'openai/gpt-4.1-mini-2025-04-14';
+const DEFAULT_MODEL = 'google/gemini-2.5-flash';
+// const DEFAULT_MODEL = 'openai/gpt-5.1-codex-max';
+// const DEFAULT_MODEL = 'minimax/minimax-m2';
+// const DEFAULT_MODEL = 'z-ai/glm-4.6'
+// const DEFAULT_MODEL = 'openai/gpt-4.1-mini'
+// const DEFAULT_MODEL = 'anthropic/claude-haiku-4.5'
+// const DEFAULT_MODEL = 'openai/gpt-5-mini'
+// const DEFAULT_MODEL = 'x-ai/grok-4.1-fast'
 function getDesignerParams(args, { defaultModel }) {
   let context = args[0];
   let tools = undefined;
