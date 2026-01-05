@@ -238,9 +238,9 @@ export default function appConfig(
   //   )
   // }
 
-  const aiViewConfig = getAiView(ctx?.appConfig?.publishLocalizeConfig?.enableAI, {
+  const aiViewConfig = getAiView(true, {
     model: ctx?.appConfig?.publishLocalizeConfig?.selectAIModel,
-    scenePrompt: ctx?.appConfig?.publishLocalizeConfig?.systemScenePrompt,
+    scenePrompt: ctx?.appConfig?.ai?.systemScenePrompt,
     designerRef
   })
 
@@ -357,6 +357,7 @@ export default function appConfig(
         requestAsStream: ({ messages, emits, aiRole }) => {
           return aiViewConfig.requestAsStream(messages, undefined, emits, { aiRole });
         },
+        guidePrompt: ctx?.appConfig?.ai?.systemScenePrompt,
         key: ctx.fileId
       }),
       ...remotePlugins,

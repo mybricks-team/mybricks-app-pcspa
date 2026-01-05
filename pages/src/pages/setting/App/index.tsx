@@ -6,6 +6,7 @@ import ConfigEnv from "./ConfigEnv";
 import useConfig from "./useConfig";
 import ConfigPlugin from "./ConfigPlugin";
 import ConfigBase from "./ConfigBase";
+import ConfigAI from "./ConfigAI";
 import ConfigDesigner from "./ConfigDesigner";
 import ConfigComponent from "./ConfigComponent";
 export const _NAMESPACE_ = APP_NAME;
@@ -37,6 +38,9 @@ export default (props) => {
             <ConfigBase {...configContext} />
           </Collapse.Panel>
         )}
+        <Collapse.Panel key={0} header="AI助手">
+          <ConfigAI {...configContext} />
+        </Collapse.Panel>
         {isInGroup && (
           <Collapse.Panel key={2} header="多语言配置">
             <I18nConfig {...configContext} />

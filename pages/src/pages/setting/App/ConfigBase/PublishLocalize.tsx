@@ -72,23 +72,6 @@ export default ({ config, mergeUpdateConfig, loading, user }: TConfigProps) => {
         <Switch />
       </Form.Item>
       <Form.Item
-        name="enableAI"
-        label="启用AI服务"
-        tooltip="开启后在页面上添加AI客服和辅助搭建能力"
-        valuePropName="checked"
-      >
-        <Switch />
-      </Form.Item>
-      {
-        enableAI && <Form.Item
-          name="systemScenePrompt"
-          label="AI场景提示词"
-          tooltip="AI场景提示词，输入的提示词将会补充到应用的系统提示词中，调整更符合场景的效果"
-        >
-          <Input.TextArea rows={5} placeholder="输入的提示词将会补充到应用的系统提示词中" />
-        </Form.Item>
-      }
-      <Form.Item
         name="enableCompatible"
         label="兼容低版本浏览器"
         tooltip="开启后对发布后的产物开启兼容模式，兼容IE11和火狐52版本"

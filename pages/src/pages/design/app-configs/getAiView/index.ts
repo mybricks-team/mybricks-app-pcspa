@@ -45,7 +45,7 @@ function getDesignerParams(args, { defaultModel }) {
       break
     }
     case ['architect'].includes(extraOption.aiRole): {
-      model = 'google/gemini-2.5-pro-preview';
+      model = 'google/gemini-3-pro-preview';
       // model = 'openai/gpt-4.1'
       // model = 'deepseek/deepseek-r1-0528'
       role = 'architect'
