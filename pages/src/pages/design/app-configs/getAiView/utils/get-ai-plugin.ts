@@ -9,7 +9,6 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
   prompts: {
     guidePrompt,
     enableDefaultEventFlow,
-    canvasWidth: '1024',
     systemAppendPrompts: systemAppendPrompts(),
     prdExamplesPrompts: prdExamplesPrompts(),
     generatePageActionExamplesPrompts: generatePageActionExamplesPrompts(),
@@ -169,12 +168,14 @@ function systemAppendPrompts() {
   return `
 <对于当前搭建有以下特殊上下文>
   <搭建画布信息>
-    当前搭建画布的宽度为1024，所有元素的尺寸需要关注此信息，且尽可能自适应布局。1024只是在MyBricks搭建时的画布宽度，实际运行时可能会更宽。
+    搭建画布的宽度一般建议在 1024 - 1920之间，所有元素的尺寸需要关注此信息，且尽可能自适应布局。
+    
+    搭建画布的宽度只是在MyBricks搭建时的画布宽度，实际运行时可能会更宽。
     
     搭建内容必须参考PC端网站进行设计，内容必须考虑左右排列的丰富度，以及以下PC的特性
       比如:
         1. 布局需要自适应画布宽度，实际运行的电脑宽度不固定；
-        2. 宽度和间距配置的时候要注意，画布只有1024，特别注意总宽度不可以超过1024；
+        2. 宽度和间距配置的时候要注意画布的宽度，不要超出，也不要让内容间距太大；
         3. 页面可以配置backgroundColor；
   </搭建画布信息>
 
@@ -555,7 +556,7 @@ function generatePageActionExamplesPrompts() {
 <example>
   <user_query>搭建一个知乎个人中心页面</user_query>
   <assistant_response>
-    首先，必须根据页面内容设置一个合适的页面的高度。
+    首先，必须根据页面内容设置一个合适的页面高度和宽度。
     其次，必须对页面布局设置一个合理的布局。
     然后
     基于用户当前的选择上下文，我们来实现一个知乎个人中心页面，思考过程如下：
@@ -566,7 +567,7 @@ function generatePageActionExamplesPrompts() {
     5. 核心内容也是左右布局，左侧是最近浏览记录，展示浏览/点赞的帖子（有特殊的已点赞标记），右侧分为上下两个部分，上面是个人成就，勋章等荣誉信息，下方是帮助中心、举报中心、关于知乎等页脚入口；
 
     ${fileFormat({
-      content: `["_root_",":root","setLayout",{"height": 820}]
+      content: `["_root_",":root","setLayout",{"height": 820,"width": 1440}]
       ["_root_",":root","doConfig",{"path":"root/标题","value":"个人中心页面框架"}]
       ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex","flexDirection":"column","alignItems":"center"}}]
       ["_root_",":root","doConfig",{"path":"root/样式","style":{"background":"#F5F5F5"}}]
@@ -595,7 +596,7 @@ function generatePageActionExamplesPrompts() {
     基于用户当前的需求，我们来实现一个云服务器管理中后台页面，思考过程如下：
 
     分析下布局，这是一个经典的顶部导航+中间内容（左侧菜单 + 右侧内容）+ 底部页脚的中后台页面。
-    必须先确认_root_的情况，必须先配置 页面高度 和 设置布局为垂直布局，然后开始搭建。
+    必须先确认_root_的情况，必须先配置 页面高度、宽度 和 设置布局为垂直布局，然后开始搭建。
     
     首先，用一个左右布局的容器，完成顶部导航的左右部分内容；
     然后是中间内容，这是一个典型的左侧固定宽度菜单 + 右侧自适应内容的布局，我们用直接用容器来实现
@@ -607,7 +608,7 @@ function generatePageActionExamplesPrompts() {
     最后是底部页脚，配置一个纯色背景，同时添加一个居中的容器来放置各类页脚内容，包含（产品和定价、支持与服务、文档与社区、关注我们等等）。
 
     \`\`\`json file="actions.json"
-    ["_root_",":root","setLayout",{"height": 1600}]
+    ["_root_",":root","setLayout",{"height": 1600,"width": 1440}]
     ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex", "flexDirection": "column"}}]
     ["_root_",":root","doConfig",{"path":"root/样式","style":{"background":"#f5f5f5"}}]
     ["_root_","_rootSlot_","addChild",{"title":"顶部导航","ns":"some.container","comId":"u_head","enhance": true,"layout":{"width":"100%","height":64},"configs":[{"path":"常规/布局","value":{"display":"flex", "justifyContent": "space-between", "alignItems": "center"}}]}]
@@ -639,11 +640,11 @@ function generatePageActionExamplesPrompts() {
     好的，一行三列的导航考察的是我们布局的关键知识，一行三列，就是均分布局，均分我们一般选择使用flex布局。
     所以提供一个flex容器，确定子组件的宽度，并将内容平铺上去。
     
-    首先，必须根据页面内容设置一个合适的页面的高度。
+    首先，必须根据页面内容设置一个合适的页面的高度和宽度。
     其次，必须对页面布局设置一个合理的布局。
     
     ${fileFormat({
-      content: `["_root_",":root","setLayout",{"height": 360}]
+      content: `["_root_",":root","setLayout",{"height": 360, "width": 520}]
       ["_root_",":root","doConfig",{"path":"root/标题","value":"一行三列的导航"}]
       ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex","flexDirection":"column","alignItems":"center"}}]
       ["_root_","_rootSlot_","addChild",{"title":"Flex容器","ns":"some.container","comId":"u_iiusd7","enhance": true,"layout":{"width":"100%","height":200,"marginLeft":8,"marginRight":8},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"row","justifyContent":"space-between","alignItems":"center","flexWrap":"wrap"}}]}]
