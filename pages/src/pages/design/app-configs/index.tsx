@@ -358,6 +358,7 @@ export default function appConfig(
           return aiViewConfig.requestAsStream(messages, undefined, emits, { aiRole });
         },
         guidePrompt: ctx?.appConfig?.ai?.systemScenePrompt,
+        enableDefaultEventFlow: ctx?.appConfig?.ai?.enableDefaultEventFlow,
         key: ctx.fileId
       }),
       ...remotePlugins,

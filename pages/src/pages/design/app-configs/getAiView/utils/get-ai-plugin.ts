@@ -1,13 +1,14 @@
 import AIPlugin, { fileFormat } from '@mybricks/plugin-ai'
 
 
-export default ({ requestAsStream, user, key, guidePrompt }: any) => AIPlugin({
+export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow }: any) => AIPlugin({
   requestAsStream,
   user,
   isMutiCanvas: false,
   deviceType: 'desktop',
   prompts: {
     guidePrompt,
+    enableDefaultEventFlow,
     canvasWidth: '1024',
     systemAppendPrompts: systemAppendPrompts(),
     prdExamplesPrompts: prdExamplesPrompts(),
