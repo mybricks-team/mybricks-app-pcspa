@@ -575,7 +575,7 @@ function generatePageActionExamplesPrompts() {
       ["u_a2fer", "content", "addChild",{"title":"用户信息","ns":"some.container","comId":"u_info4","ignore":true,"layout":{"width":"fit-content","height":"fit-content"},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"row","alignItems":"center"}}]}]
       ["_root_","_rootSlot_","addChild",{"title":"核心内容","ns":"some.container","comId":"u_iiusd7","enhance":true,"layout":{"width":"100%","height":200,"marginLeft":8,"marginRight":8},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"column"}}]}]
       ["u_iiusd7", "content", "addChild",{"title":"最近浏览","ns":"some.list","comId":"u_rev","layout":{"width":"100%","height":"fit-content"},"configs":[]}]
-      ["u_iiusd7", "content", "addChild",{"title":"右侧容器","ns":"some.container","comId":"u_rcont","layout":{"width":"100%","height":"fit-content","marginTop":8},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"column"}}]}]
+      ["u_iiusd7", "content", "addChild",{"title":"右侧容器","ns":"some.container","comId":"u_rcont","layout":{"width":"auto","height":"fit-content","marginTop":8},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"column"}}]}]
       ["u_rcont", "content", "addChild",{"title":"个人成就区域","ns":"some.container","comId":"u_achieveCont","enhance":true,"layout":{"width":"100%","height":"fit-content"},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"column"}}]}]
       ["u_rcont", "content", "addChild",{"title":"页脚区域","ns":"some.container","comId":"u_fcont","layout":{"width":"100%","height":"fit-content","marginTop":8},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"column"}}]}]`,
       fileName: '生成个人中心页面操作步骤.json'
@@ -601,7 +601,7 @@ function generatePageActionExamplesPrompts() {
       - 添加一个垂直的容器布局，注意图片上内容有左右和上下的间距，配置margin；
       - 添加左侧菜单部分，使用一个固定宽度的容器，配置合理的marginRight间距；
         - 添加左侧内容...
-      - 添加右侧内容部分，使用一个自适应宽度（width=100%）的容器；
+      - 添加右侧内容部分，使用一个自适应宽度（width=auto）的容器；
         - 添加右侧内容...
     最后是底部页脚，配置一个纯色背景，同时添加一个居中的容器来放置各类页脚内容，包含（产品和定价、支持与服务、文档与社区、关注我们等等）。
 
@@ -616,7 +616,7 @@ function generatePageActionExamplesPrompts() {
     ["_root_","_rootSlot_","addChild",{"title":"中间内容","ns":"some.container","comId":"u_main","layout":{"width":"100%","height":1452,"marginTop":12,"marginBottom":12},"configs":[{"path":"常规/布局","value":{"display":"flex"}}]}]
     ...TODO...
     ["u_main","content","addChild",{"title":"左侧菜单","ns":"some.container","comId":"u_bar","layout":{"width":200,"height":"fit-content","marginRight":12},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}]}]
-    ["u_main","content","addChild",{"title":"右侧内容","ns":"some.container","comId":"u_rcont","layout":{"width":"100%","height":"fit-content"},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}]}]
+    ["u_main","content","addChild",{"title":"右侧内容","ns":"some.container","comId":"u_rcont","layout":{"width":"auto","height":"fit-content"},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}]}]
     ["_root_","_rootSlot_","addChild",{"title":"底部页脚","ns":"some.container","comId":"u_foot","enhance": true,"layout":{"width":"100%","height":80,"backgroundColor":"#222222"},"configs":[{"path":"常规/布局","value":{"display":"flex", "justifyContent": "center", "alignItems": "center"}}]}]
     ...TODO...
     \`\`\`
@@ -625,7 +625,7 @@ function generatePageActionExamplesPrompts() {
     我们遵循了以下关键事项：
     流程：从「根组件高度和布局配置」-> 从上往下分区开始搭建内容 -> 。
     特别注意点：
-      - 在中间内容中的布局中，右侧内容使用了自适应内容宽度的布局，宽度设置为100%，左侧固定，完成了自适应页面宽度的要求；
+      - 在中间内容中的布局中，右侧内容使用了自适应内容宽度的布局，宽度设置为auto，左侧固定，完成了自适应页面宽度的要求；
       - 「左侧菜单」和「右侧内容」，使用了关键性的自适应宽度，我们不能打上ignore标记，「左侧Logo容器」很有可能也会有点击时间，不能打上ignore标记；
       - 「顶部导航」、「左侧Logo容器」、「底部页脚」为信息展示的flex布局，且没有ignore标记，可以打上enhance标记；
       
