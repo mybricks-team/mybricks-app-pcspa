@@ -10,6 +10,7 @@ export default (props: TConfigProps) => {
 
   const aiConfig = config?.ai || {}
   useEffect(() => {
+    console.log("[aiConfig]", aiConfig)
     form.setFieldsValue(aiConfig)
   }, [aiConfig])
 
