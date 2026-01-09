@@ -74,17 +74,22 @@ function treverse(list: any[], level: number = 1, scene?: { id: string, title: s
 }
 
 export function parseDumpJSON(json: Record<string, any>) {
+  const res: DumpJSONInfo = {
+    scenes: [],
+    connectors: [],
+    modules: [],
+    coms: [],
+  }
+
+  if (!json?.content?.['xg.desn.stageview']) return res
+
   const resultContent = parsePage(json.content['xg.desn.stageview'])
 
   const { modules, mainModule, connectors = [] } = resultContent
   const coms: Scene[] = []
 
-  const res: DumpJSONInfo = {
-    scenes: [],
-    connectors: [...connectors],
-    modules: [],
-    coms,
-  }
+  res.connectors = [...connectors]
+  res.coms = coms
 
   if (modules) {
     for (const key in modules) {
