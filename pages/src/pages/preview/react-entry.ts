@@ -113,34 +113,7 @@ async function render(props) {
     comlibs.forEach((comlib) => {
       getLibExternalsFill(comlib);
     })
-    await insertDeps([{
-      externals: [
-        {
-          "name": "@ant-design/icons",
-          "library": "icons",
-          "urls": [
-            "public/ant-design-icons@4.7.0.min.js"
-          ]
-        },
-        {
-          "name": "moment",
-          "library": "moment",
-          "urls": [
-            "public/moment/moment@2.29.4.min.js",
-            "public/moment/locale/zh-cn.min.js"
-          ]
-        },
-        {
-          "name": "antd",
-          "library": "antd",
-          "urls": [
-            "public/antd/antd@4.21.6.variable.min.css",
-            "public/antd/antd@4.21.6.min.js",
-            "public/antd/locale/zh_CN.js"
-          ]
-        }
-      ]
-    }].concat(comlibs))
+    await insertDeps(comlibs);
     // if (!window.antd) {
     //   console.log("没有antd，默认加载")
     //   console.log("兼容通用PC组件库（老版本没有配置externals）")
