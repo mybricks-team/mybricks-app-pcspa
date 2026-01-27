@@ -99,13 +99,6 @@ const getAiView = (enableAI, option) => {
 
         let _message = Array.from(messages)
 
-        if (option.scenePrompt?.length && _message?.[1]?.content?.[0]?.type === 'text') {
-          _message.push({
-            role: 'user',
-            content: option.scenePrompt
-          })
-        }
-
         const isFirstOne = messages.length === 2
         if (isFirstOne) {
           // write(mock1Res);

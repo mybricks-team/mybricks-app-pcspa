@@ -31,10 +31,17 @@ export default (props: TConfigProps) => {
       >
         <Input.TextArea rows={5} placeholder="输入的提示词将会补充到应用的系统提示词中" />
       </Form.Item>
-      <Form.Item
+      {/* <Form.Item
         name="enableDefaultEventFlow"
         label="生成事件流程"
         tooltip="开启后，执行「生成页面」操作时，会自动生成对应的事件流程"
+      >
+        <Switch />
+      </Form.Item> */}
+      <Form.Item
+        name="enabledActionTags"
+        label="自动智能布局转换"
+        tooltip="开启后，A生成UI内容时，会自动将一些布局转换为智能布局，方便用户进行调整"
       >
         <Switch />
       </Form.Item>
