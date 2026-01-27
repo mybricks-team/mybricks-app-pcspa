@@ -2,23 +2,23 @@
 // 升级版本的时候直接用 shift + command + F 全局搜索替换
 export default {
   react: [
-    {
-      tag: "script",
-      path: "public/moment/moment@2.29.4.min.js",
-      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443543399.2.29.4_moment.min.js",
-    },
-    {
-      tag: "script",
-      path: "public/moment/locale/zh-cn.min.js",
-      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443577599.2.29.4_locale_zh-cn.min.js",
-    },
-    {
-      tag: "link",
-      path: "public/antd/antd@4.21.6.variable.min.css",
-      CDN: "//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/antd.variable.min.css",
-      path_compatible: "public/antd/antd@4.15.3.min.css",
-      CDN_COMPATIBLE: "//f2.eckwai.com/kos/nlav12333/fangzhou/pub/pkg/antd-4.15.3/antd.min.css",
-    },
+    // {
+    //   tag: "script",
+    //   path: "public/moment/moment@2.29.4.min.js",
+    //   CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443543399.2.29.4_moment.min.js",
+    // },
+    // {
+    //   tag: "script",
+    //   path: "public/moment/locale/zh-cn.min.js",
+    //   CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690443577599.2.29.4_locale_zh-cn.min.js",
+    // },
+    // {
+    //   tag: "link",
+    //   path: "public/antd/antd@4.21.6.variable.min.css",
+    //   CDN: "//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/antd.variable.min.css",
+    //   path_compatible: "public/antd/antd@4.15.3.min.css",
+    //   CDN_COMPATIBLE: "//f2.eckwai.com/kos/nlav12333/fangzhou/pub/pkg/antd-4.15.3/antd.min.css",
+    // },
     {
       tag: "script",
       path: "public/react@18.0.0.production.min.js",
@@ -33,23 +33,23 @@ export default {
       path_compatible: "public/react-dom@17.0.2.production.min.js",
       CDN_COMPATIBLE: "//f2.eckwai.com/kos/nlav12333/fangzhou/pub/pkg/react-17.0.2/react-dom.production.min.js",
     },
-    {
-      tag: "script",
-      path: "public/antd/antd@4.21.6.min.js",
-      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444184854.4.21.6_antd.min.js",
-      path_compatible: "public/antd/antd@4.15.3.min.js",
-      CDN_COMPATIBLE: "//f2.eckwai.com/kos/nlav12333/fangzhou/pub/pkg/antd-4.15.3/antd.min.js",
-    },
-    {
-      tag: "script",
-      path: "public/antd/locale/zh_CN.js",
-      CDN: "//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js",
-    },
-    {
-      tag: "script",
-      path: "public/ant-design-icons@4.7.0.min.js",
-      CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444248634.ant-design-icons_4.7.0_min.js",
-    },
+    // {
+    //   tag: "script",
+    //   path: "public/antd/antd@4.21.6.min.js",
+    //   CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444184854.4.21.6_antd.min.js",
+    //   path_compatible: "public/antd/antd@4.15.3.min.js",
+    //   CDN_COMPATIBLE: "//f2.eckwai.com/kos/nlav12333/fangzhou/pub/pkg/antd-4.15.3/antd.min.js",
+    // },
+    // {
+    //   tag: "script",
+    //   path: "public/antd/locale/zh_CN.js",
+    //   CDN: "//f2.eckwai.com/udata/pkg/eshop/fangzhou/pub/pkg/antd-4.21.6/locale/zh_CN.js",
+    // },
+    // {
+    //   tag: "script",
+    //   path: "public/ant-design-icons@4.7.0.min.js",
+    //   CDN: "//f2.eckwai.com/kos/nlav11092/fangzhou/pub/temp/1690444248634.ant-design-icons_4.7.0_min.js",
+    // },
     // {
     //   tag: "script",
     //   path: "public/ant-design-charts@1.3.5.min.js",
@@ -77,31 +77,31 @@ export default {
     },
 
 
-    {
-      tag: "script",
-      path: "public/antd/cssinjs.min.js",
-      CDN: "//f2.eckwai.com/kos/nlav12333/antd/cssinjs/cssinjs.min.js",
-    },
-    {
-      tag: "script",
-      path: "public/dayjs/dayjs@1.11.13.min.js",
-      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/dayjs_1.11.13.min.js",
-    },
-    {
-      tag: "script",
-      path: "public/dayjs/locale/zh-cn.min.js",
-      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/zh-cn.min.js",
-    },
-    {
-      tag: "script",
-      path: "public/antd/antd@5.21.4.min.js",
-      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/antd_5.21.4.min.js",
-    },
-    {
-      tag: "script",
-      path: "public/echarts@5.5.1.min.js",
-      CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/echarts_5.5.1.min.js",
-    },
+    // {
+    //   tag: "script",
+    //   path: "public/antd/cssinjs.min.js",
+    //   CDN: "//f2.eckwai.com/kos/nlav12333/antd/cssinjs/cssinjs.min.js",
+    // },
+    // {
+    //   tag: "script",
+    //   path: "public/dayjs/dayjs@1.11.13.min.js",
+    //   CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/dayjs_1.11.13.min.js",
+    // },
+    // {
+    //   tag: "script",
+    //   path: "public/dayjs/locale/zh-cn.min.js",
+    //   CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/zh-cn.min.js",
+    // },
+    // {
+    //   tag: "script",
+    //   path: "public/antd/antd@5.21.4.min.js",
+    //   CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/antd_5.21.4.min.js",
+    // },
+    // {
+    //   tag: "script",
+    //   path: "public/echarts@5.5.1.min.js",
+    //   CDN: "//f2.beckwai.com/kos/nlav12333/mybricks/assets/echarts_5.5.1.min.js",
+    // },
   ],
   vue2: [
     {
