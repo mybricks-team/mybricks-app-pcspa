@@ -449,28 +449,28 @@ export default function appConfig(
     //     }
     //   : {}),
     // comLibLoader: comlibLoaderFunc(ctx),
-    comLibLoader: appData.comLibLoader({
-      comlibs: ctx.comlibs.map((lib, index) => {
-        if (lib.namespace === 'mybricks.ai-comlib-pc') {
-          return {
-            ...lib,
-            // editJs: 'https://assets.mybricks.world/comlibs/mybricks.ai-comlib-pc/1.0.42/2026-02-09_17-29-59/edit.js',
-            editJs: 'http://localhost:20000/comlib.js',
-          }
-        }
-        if (lib.namespace === 'mybricks.normal-pc.antd5') {
-          return {
-            ...lib,
-            editJs: 'https://p66-ec.becukwai.com/udata/pkg/eshop/fangzhou/mybricks.pc-normal-lite/1.0.6/edit.js',
-          }
-        }
-        return lib
-      })
-    }),
-    comLibAdder: appData.comLibAdder(ctx),
     // comLibLoader: appData.comLibLoader({
-    //   comlibs: ctx.comlibs
+    //   comlibs: ctx.comlibs.map((lib, index) => {
+    //     if (lib.namespace === 'mybricks.ai-comlib-pc') {
+    //       return {
+    //         ...lib,
+    //         // editJs: 'https://assets.mybricks.world/comlibs/mybricks.ai-comlib-pc/1.0.42/2026-02-09_17-29-59/edit.js',
+    //         editJs: 'http://localhost:20000/comlib.js',
+    //       }
+    //     }
+    //     if (lib.namespace === 'mybricks.normal-pc.antd5') {
+    //       return {
+    //         ...lib,
+    //         editJs: 'https://p66-ec.becukwai.com/udata/pkg/eshop/fangzhou/mybricks.pc-normal-lite/1.0.6/edit.js',
+    //       }
+    //     }
+    //     return lib
+    //   })
     // }),
+    comLibAdder: appData.comLibAdder(ctx),
+    comLibLoader: appData.comLibLoader({
+      comlibs: ctx.comlibs
+    }),
     pageContentLoader() {
       //加载页面内容
       return new Promise(async (resolve, reject) => {
