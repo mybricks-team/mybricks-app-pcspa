@@ -50,6 +50,7 @@ import {
 import { preview as preview_icon } from './icon/preview'
 import { publish as publish_icon } from './icon/publish'
 import { branch as branch_icon } from './icon/branch'
+import { code as code_icon } from './icon/code'
 import classNames from 'classnames'
 import { sendPageDeps } from './utils/sendPageDeps'
 import { BranchMergeModal } from './components/branch-merge-modal'
@@ -298,7 +299,7 @@ export default function MyDesigner({ appData: originAppData }) {
     if (ctx.debug && localStorage.getItem('__DEBUG_DESIGNER__')) {
       return localStorage.getItem('__DEBUG_DESIGNER__')
     }
-    // return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.842.r3/index.min.js'
+    // return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.899.t9/index.min.js'
     return appConfig.designer?.url || DESIGNER_STATIC_PATH
   }, [appConfig])
 
@@ -1048,6 +1049,33 @@ export default function MyDesigner({ appData: originAppData }) {
                 setPublishModalVisible(true)
               }}>
               {publish_icon}
+            </div>
+
+            <div
+              data-mybricks-tip={`{content:'在 IDE 中打开',position:'bottom'}`}
+              className={
+                classNames({
+                  [css.code_btn]: true,
+                  [css.btn_disable]: isDebugMode
+                })
+              }
+              onClick={() => {
+                if (isDebugMode) return
+                const json = getDumpJson()
+                const content = JSON.stringify(json, null, 2)
+                const baseName = ctx.fileName ? ctx.fileName.replace(/\.[^.]+$/, '') : 'export'
+                const fileName = `${baseName}.mybricks`
+                const blob = new Blob([content], { type: 'application/json' })
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = fileName
+                document.body.appendChild(a)
+                a.click()
+                window.URL.revokeObjectURL(url)
+                document.body.removeChild(a)
+              }}>
+              {code_icon}
             </div>
 
           </>
