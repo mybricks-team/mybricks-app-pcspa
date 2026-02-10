@@ -1,5 +1,16 @@
 import AIPlugin, { fileFormat } from '@mybricks/plugin-ai'
 
+const COMLIB_NAMESPACE_LITE = 'mybricks.normal-pc-lite'
+const COMLIB_NAMESPACE_AI = 'mybricks.ai-comlib-pc'
+
+/** Returns 'ai' when both lite and ai comlib namespaces exist in window.__comlibs_edit_, otherwise 'atomic'. */
+function getGenerationStrategy(): 'ai' | 'atomic' {
+  const comlibs = (typeof window !== 'undefined' && (window as any).__comlibs_edit_) as Array<{ namespace?: string }> | undefined
+  if (!Array.isArray(comlibs) || comlibs.length === 0) return 'ai'
+  const hasLite = comlibs.some((lib) => lib?.namespace === COMLIB_NAMESPACE_LITE)
+  const hasAi = comlibs.some((lib) => lib?.namespace === COMLIB_NAMESPACE_AI)
+  return hasLite && hasAi ? 'ai' : 'atomic'
+}
 
 export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config }: any) => AIPlugin({
   requestAsStream,
@@ -7,14 +18,15 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
   isMutiCanvas: false,
   deviceType: 'desktop',
   config,
-  guidePrompt,
+  guidePrompt: getGenerationStrategy() === 'ai' ? `建议用大块的AI区域组件来完成，容器只需要做布局和AI区域间的间距使用，不允许拆分过细的AI区域组件。` : guidePrompt,
   prompts: {
     enableDefaultEventFlow,
-    systemAppendPrompts: systemAppendPrompts(),
+    systemAppendPrompts: getGenerationStrategy() === 'ai' ? systemAppendPromptsForAi() : systemAppendPrompts(),
     prdExamplesPrompts: prdExamplesPrompts(),
-    generatePageActionExamplesPrompts: generatePageActionExamplesPrompts(),
+    generatePageActionExamplesPrompts: getGenerationStrategy() === 'ai' ? generatePageActionExamplesPromptsForAi() : generatePageActionExamplesPrompts(),
   },
   key,
+  mode: APP_ENV,
   createTemplates: {
     page: ({ title }) => {
       return {
@@ -164,6 +176,28 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
 //   ]
 })
 
+
+/** Used when getGenerationStrategy() === 'ai'. Replace with your AI comlib system append content. */
+function systemAppendPromptsForAi() {
+  return `
+<对于当前搭建有以下特殊上下文>
+  <搭建画布信息>
+    搭建画布的宽度一般建议在 1024 - 1920之间，所有元素的尺寸需要关注此信息，且尽可能自适应布局。
+    
+    搭建画布的宽度只是在MyBricks搭建时的画布宽度，实际运行时可能会更宽。
+    
+    搭建内容必须参考PC端网站进行设计，内容必须考虑左右排列的丰富度，以及以下PC的特性
+      比如:
+        1. 布局需要自适应画布宽度，实际运行的电脑宽度不固定；
+        2. 宽度和间距配置的时候要注意画布的宽度，不要超出，也不要让内容间距太大；
+  </搭建画布信息>
+
+  <对于图片或原型>
+    可能会存在明显异于UI的评论、标注信息，注意筛选后去除。
+  </对于图片或原型>
+</对于当前搭建有以下特殊上下文>
+`
+}
 
 function systemAppendPrompts() {
   return `
@@ -559,6 +593,92 @@ ${fileFormat({
 ]`,
   fileName: '还原审批页面所需要的组件信息.json'
 })}
+  </assistant_response>
+</example>
+`
+}
+
+/** Used when getGenerationStrategy() === 'ai'. Replace with your AI comlib prompt content. */
+function generatePageActionExamplesPromptsForAi() {
+  return `
+<example>
+  <user_query>搭建一个知乎个人中心页面</user_query>
+  <assistant_response>
+    首先，必须根据页面内容设置一个数字类型的宽度和高度，必须为具体数字。
+    其次，必须对页面布局设置一个合理的布局。
+    然后
+    基于用户当前的选择上下文，我们来实现一个知乎个人中心页面，思考过程如下：
+    1. 搭建页面时一般用从上到下的搭建方式，我们推荐在页面最外层设置为flex的垂直布局，这样好调整位置；
+    2. 将页面从上到下分成顶部信息、个人资料、核心内容三个区域来拆分。
+
+    ${fileFormat({
+      content: `["_root_",":root","setLayout",{"height": 820,"width": 1440}]
+      ["_root_",":root","doConfig",{"path":"root/标题","value":"个人中心页面框架"}]
+      ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex","flexDirection":"column","alignItems":"center"}}]
+      ["_root_",":root","doConfig",{"path":"root/样式","style":{"background":"#F5F5F5"}}]
+      ["_root_","_rootSlot_","addChild",{"title":"顶部导航","ns":"some.ai-mix","comId":"u_top32","layout":{"width":"100%","height":80},"configs":[{"path":"常规/需求文档","value":"# 顶部导航区域 背景和间距：背景白色，无间距。 内容：包含左侧的菜单和右侧的头像+消息入口"}]}]
+      ["_root_","_rootSlot_","addChild",{"title":"个人资料","ns":"some.ai-mix","comId":"u_a2fer","layout":{"width":"100%","height":"fit-content","marginTop":12, "marginLeft":12, "marginRight":12},"configs":[{"path":"常规/需求文档","value":"# 个人资料区域 背景和间距：白色，间距无（外层已处理）。内容：包含头像、昵称、登记、性别等集合信息，左侧是头像、昵称、登记、性别等集合信息，右侧是编辑按钮"}]}]
+      ["_root_","_rootSlot_","addChild",{"title":"核心内容","ns":"some.ai-mix","comId":"u_iiusd7","layout":{"width":"100%","height":"fit-content","marginTop":12, "marginLeft":12, "marginRight":12},"configs":[{"path":"常规/需求文档,"value":"#核心内容区域 背景和间距：白色，间距无（外层已处理）。 内容：左侧是最近浏览记录，展示浏览/点赞的帖子（有特殊的已点赞标记），右侧分为上下两个部分，上面是个人成就，勋章等荣誉信息，下方是帮助中心、举报中心、关于知乎等页脚入口"}]}]`,
+      fileName: '生成个人中心页面操作步骤.json'
+    })}
+
+    注意：
+    - flex布局优先使用fit-content来计算内容高度；
+    - 三个区域有明显的卡片UI区分，所以间距在外层处理。
+  </assistant_response>
+</example>
+
+<example>
+  <user_query>还原设计稿效果</user_query>
+  <assistant_response>
+    好的，还原设计稿效果，首先必须根据页面内容设置一个数字类型的宽度和高度，必须为具体数字。
+    其次，必须对页面布局设置一个合理的布局。
+    然后
+    基于用户当前的选择上下文，我们来实现一个知乎云服务器页面，思考过程如下：
+    1. 整体结构为顶部导航栏 + 左侧菜单 + 右侧内容的经典布局，采用flex布局来实现；
+    2. 将页面从上到下，从左到右分成多个部分；
+
+    ${fileFormat({
+      content: `["_root_",":root","setLayout",{"height": 1080, "width": 1600}]
+      ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex","flexDirection":"column"}}]
+      ["_root_","_rootSlot_","addChild",{"title":"顶部导航栏","ns":"some.ai-mix","comId":"u_top32","layout":{"width":"100%","height":60},"configs":[{"path":"常规/需求文档","value":"# 顶部导航栏 背景和间距：背景白色，无间距。 内容：包含左侧的菜单、中间搜索框、右侧的头像入口"}}]}]
+      ["_root_, "_rootSlot_","addChild",{"title":"横向左右布局","ns": "some.container","comId":"u_2h32d","layout":{"width":"100%","height":"fit-content"},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "row", "justifyContent": "space-between", "alignItems": "center"}}]}]
+      ["u_2h32d","content","addChild",{"title":"左侧菜单","ns":"some.ai-mix","comId":"u_leftMenu","layout":{"width":200,"height":"fit-content"},"configs":[{"path":"常规/需求文档","value":"# 左侧菜单 背景和间距：背景白色，无间距。 内容：包含左侧的菜单、中间搜索框、右侧的头像入口"}}]}]
+      ["u_2h32d","content","addChild",{"title":"右侧核心内容","ns":"some.container","comId":"u_rightContent","layout":{"width":"auto","height":"fit-content", "marginLeft": 12, "marginRight": 12, "marginTop": 12, "marginBottom": 12},"configs":[{"path":"常规/布局","value":{"display":"flex", "flexDirection": "column"}}]}]
+      ["u_rightContent", "content", "addChild",{"title":"指标卡片区","ns":"some.ai-mix","comId":"u_data","layout":{"width":"100%","height":"fit-content"},"configs":[{"path":"常规/需求文档","value":"# 指标卡片区 背景和间距：背景白色，无间距。 内容：从左到右包含四个指标卡，每个指标卡包含一个标题、一个数值、一个图标"}}]}]
+      ["u_rightContent", "content", "addChild",{"title":"表格片区","ns":"some.ai-mix","comId":"u_table","layout":{"width":"100%","height":"fit-content", "mariginTop": 12},"configs":[{"path":"常规/需求文档","value":"# 表格片区 背景和间距：背景白色。 内容：包含一个服务器价格表格，表格包含多个列"}}]}]`,
+      fileName: '还原云服务器页面操作步骤.json'
+    })}
+
+    注意：
+    - flex布局优先使用fit-content来计算内容高度；
+    - 布局用于提供布局和间距，让AI组件不用关心宏观间距和布局，只需要考虑自身即可；
+      - 左右布局容器左侧为固定宽度，右侧为auto自适应宽度，这样更适合自适应页面宽度；
+      - 核心内容包揽了间距，简化AI组件内部样式逻辑；
+  </assistant_response>
+</example>
+
+<example>
+  <user_query>添加一个两行三列的导航</user_query>
+  <assistant_response>
+    好的，两行三列，就是均分网格布局，考虑到导航往往是动态数据，我们一般使用列表 + 间距来实现。
+    所以提供一个列表容器，添加一个宽度=100%的flex布局容器，将内容添加进去即可。
+    
+    首先，必须根据页面内容设置一个数字类型的宽度和高度，必须为具体数字。
+    其次，必须对页面布局设置一个合理的布局。
+    
+    ${fileFormat({
+      content: `["_root_",":root","setLayout",{"height": 360, "width": 520}]
+      ["_root_",":root","doConfig",{"path":"root/标题","value":"两行三列的导航"}]
+      ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex","flexDirection":"column","alignItems":"center"}}]
+      ["_root_","_rootSlot_","addChild",{"title":"循环列表","ns":"some.list","comId":"u_list","layout":{"width":"100%","height":"fit-contennt","marginLeft":8,"marginRight":8},"configs":[{ "path": "常规/列间距", "value": 8 }]}]
+      ["u_list","item","addChild",{"title":"Flex容器","ns":"some.container","comId":"u_iiusd7","enhance": true,"layout":{"width":"100%","height":200},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"row","justifyContent":"center", "alignItems":"center"}}]}]
+      ["u_iiusd7","content","addChild",{"title":"导航1","ns":"some.icon","comId":"u_icon1","layout":{"width":120,"height":120,"marginTop":8},"configs":[{"path":"样式/文本","style":{"background":"#0000FF"}}]}]`,
+      fileName: '两行三列导航操作步骤.json'
+    })}
+
+  注意：
+    - 这个Flex容器很有可能后续提供点击事件，所以不允许添加ignore标记，同时他属于图文展示，可以添加enhance标记。
   </assistant_response>
 </example>
 `
