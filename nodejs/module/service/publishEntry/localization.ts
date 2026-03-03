@@ -333,6 +333,9 @@ const collectExternal = (
       }
     });
   });
+
+  TEMP_SCRIPT({ htmlStrSet });
+
   return {
     onlineChunkAssets: [...onlineHtmlStrSet].join("\n"),
     chunkAssets: [...htmlStrSet].join("\n"),
@@ -361,3 +364,11 @@ const filterComLibFromComponent = (comLib, componentModules) => {
     return pre;
   }, []);
 };
+
+const TEMP_SCRIPT = ({ htmlStrSet }) => {
+  const localeScript = '<script src="public/antd/locale/zh_CN.js"></script>';
+  if (htmlStrSet.has(localeScript)) {
+    htmlStrSet.delete(localeScript);
+    htmlStrSet.add(localeScript);
+  }
+}
