@@ -138,48 +138,77 @@ export default function appConfig(
     // },
   ];
 
-  if (isReact) {
-    // adder.push({
-    //   type: 'defined',
-    //   title: 'AI生成...',
-    //   // @ts-ignore
-    //   load: () => {
-    //     return new Promise((resolve, reject) => {
-    //       const destroy = showAIPageModal({
-    //         onGenerateFinish({ templateJson }) {
-    //           resolve(templateJson)
-    //           destroy?.()
-    //         },
-    //       })
-    //     })
-    //   }
-    // })
-    // @ts-ignore
-    // adder.push({})
+  // if (isReact) {
+  //   // adder.push({
+  //   //   type: 'defined',
+  //   //   title: 'AI生成...',
+  //   //   // @ts-ignore
+  //   //   load: () => {
+  //   //     return new Promise((resolve, reject) => {
+  //   //       const destroy = showAIPageModal({
+  //   //         onGenerateFinish({ templateJson }) {
+  //   //           resolve(templateJson)
+  //   //           destroy?.()
+  //   //         },
+  //   //       })
+  //   //     })
+  //   //   }
+  //   // })
+  //   // @ts-ignore
+  //   // adder.push({})
 
-    const { adderAntd4Ary, adderAntd5Ary } = getAdders(ctx.comlibs);
+  //   const { adderAntd4Ary, adderAntd5Ary } = getAdders(ctx.comlibs);
 
-    adder.push(
-      ...[
+  //   adder.push(
+  //     ...[
+  //       {
+  //         type: "normal",
+  //         title: "页面",
+  //         inputs: [
+  //           {
+  //             id: "open",
+  //             title: "打开",
+  //             schema: {
+  //               type: "any",
+  //             },
+  //           },
+  //         ],
+  //       },
+  //       ...adderAntd4Ary,
+  //       ...adderAntd5Ary
+  //     ]
+  //   );
+
+  //   adder.push(null, cloudTpt({ ctx }))
+  // }
+
+  if (ctx.hasAIComlib) {
+    adder.unshift( {
+      type: 'normal',
+      title: 'AI页面',
+      template: {
+        namespace: 'mybricks.basic-comlib.ai-mix',
+        deletable: false,
+        asRoot: true,
+      },
+      // width: 300,
+      // height: 200,
+      widthAuto: true,
+      configs: [//自定义编辑项
         {
-          type: "normal",
-          title: "页面",
-          inputs: [
-            {
-              id: "open",
-              title: "打开",
-              schema: {
-                type: "any",
-              },
+          title: '唯一标识',
+          type: 'text',
+          value: {
+            get({sceneId}) {
+              //return context._useRem;
             },
-          ],
+            set({sceneId}, v: boolean) {
+              //context._useRem = v;
+            },
+          },
         },
-        ...adderAntd4Ary,
-        ...adderAntd5Ary
       ]
-    );
-
-    adder.push(null, cloudTpt({ ctx }))
+    },)
   }
 
   const getCurrentLocale = () => {
@@ -248,6 +277,7 @@ export default function appConfig(
     // debugger(json, opts) {
     //   return renderUI(json, opts)
     // },
+    desnMode: 'vibeCoding',
     shortcuts: {
       "ctrl+s": [save],
     },
@@ -468,8 +498,32 @@ export default function appConfig(
     //   })
     // }),
     comLibAdder: appData.comLibAdder(ctx),
+    // comLibLoader: appData.comLibLoader({
+    //   comlibs: ctx.comlibs
+    // }),
     comLibLoader: appData.comLibLoader({
-      comlibs: ctx.comlibs
+      comlibs: (() => {
+        const baseComlibs = ctx.comlibs.filter(
+          (lib) => lib.namespace !== "mybricks.ai-comlib-pc"
+        );
+        const pcAiComlib = {
+          title: "PC-AI组件库",
+          type: "com_lib",
+          namespace: "mybricks.normal-pc-lite",
+          editJs: 'https://p4-ec.eckwai.com/kos/nlav12333/mybricks/comlib-lite/edit.js',
+        };
+        const existing = baseComlibs.find(
+          (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
+        );
+        if (existing) {
+          return baseComlibs.map((lib) =>
+            lib.namespace === pcAiComlib.namespace && lib.editJs
+              ? { ...lib, editJs: pcAiComlib.editJs }
+              : lib
+          );
+        }
+        return baseComlibs.concat(pcAiComlib);
+      })(),
     }),
     pageContentLoader() {
       //加载页面内容
