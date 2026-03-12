@@ -925,9 +925,36 @@ export default function MyDesigner({ appData: originAppData }) {
   /** 通知父页面渲染完成 */
   useEffect(() => {
     designerIsComplete().then(() => {
-      window.parent.postMessage({ type: 'RENDER_COMPLETE' }, '*')
+      console.log('publish-ready')
+      window.parent.postMessage({ action: 'publish-ready', data: { fileId: ctx.fileId } }, '*')
     })
   }, [])
+
+  /** 监听 auto-publish 事件 */
+  useEffect(() => {
+    const handler = async (event: MessageEvent) => {
+      console.log('designer receive message', event.data)
+      if (event.data?.action === 'auto-publish') {
+        try {
+          const res = await publish(event.data.data)
+          console.log('自动发布结果', res)
+          const data = {
+                fileId: ctx.fileId,
+                ...(res || {})
+              }
+          if (res && res.code === 1) {
+            window.parent.postMessage({ action: 'publish-success', data }, '*')
+          } else {
+            window.parent.postMessage({ action: 'publish-error', data }, '*')
+          }
+        } catch (e) {
+          window.parent.postMessage({ action: 'publish-error', data: { message: e.message || '发布失败' } }, '*')
+        }
+      }
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [ctx?.fileId, publish])
 
   // 上报页面的开发数据
   usePageStayTime({ operable, appData: ctx, currentRef: designerRef })
