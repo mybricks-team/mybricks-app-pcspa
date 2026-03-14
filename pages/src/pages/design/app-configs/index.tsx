@@ -510,7 +510,7 @@ export default function appConfig(
           title: "PC-AI组件库",
           type: "com_lib",
           namespace: "mybricks.normal-pc-lite",
-          editJs: 'https://p2-ec.eckwai.com/kos/nlav12333/mybricks/comlib-lite/edit.5a8ef13f605b056d.js',
+          editJs: 'https://p2-ec.eckwai.com/kos/nlav12333/mybricks/comlib-lite/edit.6ccc6087ff041539.js',
         };
         const existing = baseComlibs.find(
           (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
