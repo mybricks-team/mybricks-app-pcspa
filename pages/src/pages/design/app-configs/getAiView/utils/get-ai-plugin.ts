@@ -26,7 +26,7 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
     generatePageActionExamplesPrompts: getGenerationStrategy() === 'ai' ? generatePageActionExamplesPromptsForAi() : generatePageActionExamplesPrompts(),
   },
   key,
-  mode: APP_ENV,
+  codingMode: true,
   createTemplates: {
     page: ({ title }) => {
       return {

@@ -207,6 +207,34 @@ export default function appConfig(
             },
           },
         },
+        {
+          type: 'normal',
+          title: 'AI页面',
+          template: {
+            namespace: 'mybricks.basic-comlib.ai-mix',
+            deletable: false,
+            asRoot: true,
+          },
+          // width: 300,
+          // height: 200,
+          // widthAuto: true,
+          configs: [//自定义编辑项
+            {
+              title: '唯一标识',
+              type: 'text',
+              value: {
+                get({sceneId}) {
+                  //return context._useRem;
+                },
+                set({sceneId}, v: boolean) {
+                  //context._useRem = v;
+                },
+              },
+            },
+          ]
+        },
+        // ...adderAntd4Ary,
+        // ...adderAntd5Ary
       ]
     },)
   }
@@ -281,6 +309,7 @@ export default function appConfig(
     shortcuts: {
       "ctrl+s": [save],
     },
+    desnMode: 'vibeCoding',
     plugins: [
       ...connetorPlugins,
       notePlugin.default({
@@ -480,22 +509,23 @@ export default function appConfig(
     //   : {}),
     // comLibLoader: comlibLoaderFunc(ctx),
     // comLibLoader: appData.comLibLoader({
-    //   comlibs: ctx.comlibs.map((lib, index) => {
-    //     if (lib.namespace === 'mybricks.ai-comlib-pc') {
-    //       return {
-    //         ...lib,
-    //         // editJs: 'https://assets.mybricks.world/comlibs/mybricks.ai-comlib-pc/1.0.42/2026-02-09_17-29-59/edit.js',
-    //         editJs: 'http://localhost:20000/comlib.js',
-    //       }
-    //     }
-    //     if (lib.namespace === 'mybricks.normal-pc.antd5') {
-    //       return {
-    //         ...lib,
-    //         editJs: 'https://p66-ec.becukwai.com/udata/pkg/eshop/fangzhou/mybricks.pc-normal-lite/1.0.6/edit.js',
-    //       }
-    //     }
-    //     return lib
-    //   })
+    //   comlibs: ['http://localhost:20000/comlib.js'],
+    //   // comlibs: ctx.comlibs.map((lib, index) => {
+    //   //   // if (lib.namespace === 'mybricks.ai-comlib-pc') {
+    //   //   //   return {
+    //   //   //     ...lib,
+    //   //   //     // editJs: 'https://assets.mybricks.world/comlibs/mybricks.ai-comlib-pc/1.0.42/2026-02-09_17-29-59/edit.js',
+    //   //   //     editJs: 'https://assets.mybricks.world/comlibs/mybricks.normal-pc-lite/1.0.12/2026-02-26_20-04-38/edit.js',
+    //   //   //   }
+    //   //   // }
+    //   //   if (lib.namespace === 'mybricks.normal-pc.antd5') {
+    //   //     return {
+    //   //       ...lib,
+    //   //       editJs: 'https://p66-ec.becukwai.com/udata/pkg/eshop/fangzhou/mybricks.pc-normal-lite/1.0.6/edit.js',
+    //   //     }
+    //   //   }
+    //   //   return lib
+    //   // })
     // }),
     comLibAdder: appData.comLibAdder(ctx),
     // comLibLoader: appData.comLibLoader({
@@ -510,7 +540,7 @@ export default function appConfig(
           title: "PC-AI组件库",
           type: "com_lib",
           namespace: "mybricks.normal-pc-lite",
-          editJs: 'https://p2-ec.eckwai.com/kos/nlav12333/mybricks/comlib-lite/edit.6ccc6087ff041539.js',
+          editJs: 'https://p2-ec.eckwai.com/kos/nlav12333/mybricks/comlib-lite/edit.e47b6b176e6ae76f.js',
         };
         const existing = baseComlibs.find(
           (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
