@@ -299,7 +299,7 @@ export default function MyDesigner({ appData: originAppData }) {
     if (ctx.debug && localStorage.getItem('__DEBUG_DESIGNER__')) {
       return localStorage.getItem('__DEBUG_DESIGNER__')
     }
-    // return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.911.t0/index.min.js'
+    // return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.916.t1/index.min.js'
     return appConfig.designer?.url || DESIGNER_STATIC_PATH
   }, [appConfig])
 
@@ -912,6 +912,16 @@ export default function MyDesigner({ appData: originAppData }) {
 
   window.importDump = importDump
   window.designerRef = designerRef
+
+  useEffect(() => {
+    /** 供外部调用，模拟一次编辑以触发保存按钮的未保存状态（* 号） */
+    ;(window as any)._mybricksOnEdit_ = (info?: { title?: string; [key: string]: any }) => {
+      onEdit({ title: '手动触发编辑', ...info })
+    }
+    return () => {
+      delete (window as any)._mybricksOnEdit_
+    }
+  }, [onEdit])
 
   async function designerIsComplete() {
     return new Promise((resolve) => {
