@@ -305,11 +305,9 @@ export default function appConfig(
     // debugger(json, opts) {
     //   return renderUI(json, opts)
     // },
-    desnMode: 'vibeCoding',
     shortcuts: {
       "ctrl+s": [save],
     },
-    desnMode: 'vibeCoding',
     plugins: [
       ...connetorPlugins,
       notePlugin.default({
