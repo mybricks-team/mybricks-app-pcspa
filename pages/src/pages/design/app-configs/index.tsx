@@ -526,32 +526,8 @@ export default function appConfig(
     //   // })
     // }),
     comLibAdder: appData.comLibAdder(ctx),
-    // comLibLoader: appData.comLibLoader({
-    //   comlibs: ctx.comlibs
-    // }),
     comLibLoader: appData.comLibLoader({
-      comlibs: (() => {
-        const baseComlibs = ctx.comlibs.filter(
-          (lib) => lib.namespace !== "mybricks.ai-comlib-pc"
-        );
-        const pcAiComlib = {
-          title: "PC-AI组件库",
-          type: "com_lib",
-          namespace: "mybricks.normal-pc-lite",
-          editJs: 'https://p2-ec.eckwai.com/kos/nlav12333/mybricks/comlib-lite/edit.2a3ed3f393677924.js',
-        };
-        const existing = baseComlibs.find(
-          (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
-        );
-        if (existing) {
-          return baseComlibs.map((lib) =>
-            lib.namespace === pcAiComlib.namespace && lib.editJs
-              ? { ...lib, editJs: pcAiComlib.editJs }
-              : lib
-          );
-        }
-        return baseComlibs.concat(pcAiComlib);
-      })(),
+      comlibs: ctx.comlibs
     }),
     pageContentLoader() {
       //加载页面内容
