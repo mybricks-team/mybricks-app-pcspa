@@ -1087,34 +1087,6 @@ export default function MyDesigner({ appData: originAppData }) {
               }}>
               {publish_icon}
             </div>
-
-            <div
-              data-mybricks-tip={`{content:'在 IDE 中打开',position:'bottom'}`}
-              className={
-                classNames({
-                  [css.code_btn]: true,
-                  [css.btn_disable]: isDebugMode
-                })
-              }
-              onClick={() => {
-                if (isDebugMode) return
-                const json = getDumpJson()
-                const content = JSON.stringify(json, null, 2)
-                const baseName = ctx.fileName ? ctx.fileName.replace(/\.[^.]+$/, '') : 'export'
-                const fileName = `${baseName}.mybricks`
-                const blob = new Blob([content], { type: 'application/json' })
-                const url = window.URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = fileName
-                document.body.appendChild(a)
-                a.click()
-                window.URL.revokeObjectURL(url)
-                document.body.removeChild(a)
-              }}>
-              {code_icon}
-            </div>
-
           </>
         )}
         <div className={`${isPreview ? css.toolbarWrapperPreview : ''}`}>
