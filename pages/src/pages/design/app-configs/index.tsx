@@ -138,7 +138,7 @@ export default function appConfig(
     // },
   ];
 
-  // if (isReact) {
+  if (isReact) {
   //   // adder.push({
   //   //   type: 'defined',
   //   //   title: 'AI生成...',
@@ -157,30 +157,30 @@ export default function appConfig(
   //   // @ts-ignore
   //   // adder.push({})
 
-  //   const { adderAntd4Ary, adderAntd5Ary } = getAdders(ctx.comlibs);
+    const { adderAntd4Ary, adderAntd5Ary } = getAdders(ctx.comlibs);
 
-  //   adder.push(
-  //     ...[
-  //       {
-  //         type: "normal",
-  //         title: "页面",
-  //         inputs: [
-  //           {
-  //             id: "open",
-  //             title: "打开",
-  //             schema: {
-  //               type: "any",
-  //             },
-  //           },
-  //         ],
-  //       },
-  //       ...adderAntd4Ary,
-  //       ...adderAntd5Ary
-  //     ]
-  //   );
+    adder.push(
+      ...[
+        {
+          type: "normal",
+          title: "页面",
+          inputs: [
+            {
+              id: "open",
+              title: "打开",
+              schema: {
+                type: "any",
+              },
+            },
+          ],
+        },
+        ...adderAntd4Ary,
+        ...adderAntd5Ary
+      ]
+    );
 
-  //   adder.push(null, cloudTpt({ ctx }))
-  // }
+    adder.push(null, cloudTpt({ ctx }))
+  }
 
   if (ctx.hasAIComlib) {
     adder.unshift( {
