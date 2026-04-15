@@ -23,6 +23,16 @@ module.exports = {
       APP_NAME: JSON.stringify(appInfo.name),
       APP_TYPE: JSON.stringify('react'),
       APP_VERSION: JSON.stringify(appInfo.version),
+      
+      // ------ taro ------
+      'ANTD_VERSION': JSON.stringify(5),
+      'DEPRECATED_ADAPTER_COMPONENT': JSON.stringify(false),
+      'process.env.TARO_VERSION': JSON.stringify('4.1.11'),
+      'process.env.TARO_ENV': JSON.stringify('h5'),
+      'process.env.FRAMEWORK': JSON.stringify('react'),
+      'process.env.TARO_PLATFORM': JSON.stringify('web'),
+      'process.env.SUPPORT_TARO_POLYFILL': JSON.stringify('disabled'),
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
     }),
     new CopyWebpackPlugin({
       patterns: [
@@ -38,8 +48,10 @@ module.exports = {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
       '@': path.resolve(__dirname, '../../../src'),
-      "@mybricks/rxai": '/Users/cocolbell/Desktop/projects/mybricks/rxai/src/index',
-      "@mybricks/plugin-ai": '/Users/cocolbell/Desktop/projects/mybricks/plugin-ai/src/index'
+      // "@mybricks/sdk-for-app": "/Users/lianglihao/Documents/GitHub/sdk-for-app/src",
+      // ------ taro ------
+      '@tarojs/components$': '@tarojs/components/lib/react',
+      '@tarojs/taro$': path.resolve(__dirname, './taro-api-h5-polyfill/index.ts')
     },
   },
   externals: [
@@ -62,6 +74,7 @@ module.exports = {
       '@ant-design/icons': 'icons',
       '@mybricks/sdk-for-ai': 'mybricks_sdk_for_ai',
       '@mybricks/ai-utils': 'mybricks_ai_utils',
+      "@mybricks/plugin-ai": "MyBricksPluginAI",
     },
   ],
   module: {
@@ -144,6 +157,14 @@ module.exports = {
       {
         test: /\.(xml|txt|html|cjs|theme|md)$/i,
         use: [{ loader: 'raw-loader' }],
+      },
+
+
+      // ------ taro ------
+      {
+        test: /\.cjs$/,
+        include: /node_modules/,
+        type: 'javascript/auto',
       },
     ],
   },

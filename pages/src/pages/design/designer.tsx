@@ -338,7 +338,7 @@ export default function MyDesigner({ appData: originAppData }) {
   const loadDesigner = useCallback(() => {
     if (designer) {
       const script = document.createElement('script')
-      script.src = designer
+      script.src = 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.935.t6/index.min.js'
       document.head.appendChild(script)
       script.onload = () => {
         ; (window as any).mybricks.SPADesigner &&

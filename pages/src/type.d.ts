@@ -19,6 +19,7 @@ declare interface Window {
   designerRef: any
   mybricks: any
   importDump: Function
+  Babel: any
 }
 
 declare type RenderWeb = {

@@ -531,30 +531,39 @@ export default function appConfig(
     // comLibLoader: appData.comLibLoader({
     //   comlibs: ctx.comlibs
     // }),
-    comLibLoader: appData.comLibLoader({
-      comlibs: (() => {
-        const baseComlibs = ctx.comlibs.filter(
-          (lib) => lib.namespace !== "mybricks.ai-comlib-pc"
-        );
-        const pcAiComlib = {
-          title: "PC-AI组件库",
-          type: "com_lib",
-          namespace: "mybricks.normal-pc-lite",
-          editJs: 'https://p2-ec.eckwai.com/kos/nlav12333/mybricks/comlib-lite/edit.2a3ed3f393677924.js',
-        };
-        const existing = baseComlibs.find(
-          (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
-        );
-        if (existing) {
-          return baseComlibs.map((lib) =>
-            lib.namespace === pcAiComlib.namespace && lib.editJs
-              ? { ...lib, editJs: pcAiComlib.editJs }
-              : lib
-          );
-        }
-        return baseComlibs.concat(pcAiComlib);
-      })(),
-    }),
+    // comLibLoader: appData.comLibLoader({
+    //   comlibs: (() => {
+    //     const baseComlibs = ctx.comlibs.filter(
+    //       (lib) => lib.namespace !== "mybricks.ai-comlib-pc"
+    //     );
+    //     console.log('baseComlibs', baseComlibs);
+    //     const pcAiComlib = {
+    //       title: "PC-AI组件库",
+    //       type: "com_lib",
+    //       namespace: "mybricks.normal-pc-lite",
+    //       editJs: 'http://localhost:20000/comlib.js',
+    //     };
+    //     const existing = baseComlibs.find(
+    //       (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
+    //     );
+    //     if (existing) {
+    //       return baseComlibs.map((lib) =>
+    //         lib.namespace === pcAiComlib.namespace && lib.editJs
+    //           ? { ...lib, editJs: pcAiComlib.editJs }
+    //           : lib
+    //       );
+    //     }
+    //     return baseComlibs.concat(pcAiComlib);
+    //   })(),
+    // }),
+    comLibLoader: () => {
+      return new Promise((resolve) => {
+        // http://localhost:20000/comlib.js,
+        resolve(['public/edit.js'])
+        // resolve(['http://localhost:20000/comlib.js'])
+        // resolve(['https://p2-ec.ecukwai.com/udata/pkg/eshop/mybricks/comlib-lite/1.0.51/edit.js'])
+      })
+    },
     pageContentLoader() {
       //加载页面内容
       return new Promise(async (resolve, reject) => {
@@ -937,6 +946,7 @@ export default function appConfig(
       } : {}),
       theme: {
         css: [
+          // "https://h2.static.yximgs.com/kos/nlav10749/@m-ui/react@1.12.2/dist/@m-ui/react.variable.min.css"
           // 去除默认的样式文件
           // "public/antd/antd@4.21.6.variable.min.css",
           ///...(!isReact ? ['./public/elementUI/element@2.15.14.css'] : []),
