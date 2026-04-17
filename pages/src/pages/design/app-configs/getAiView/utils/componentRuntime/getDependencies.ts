@@ -8,8 +8,16 @@ console.log('[TaroHooks]', TaroHooks)
 const getDependencies = (params) => {
   console.log('[getDependencies - params]', params)
   return {
-    '@tarojs/components': TaroComponents,
-    '@tarojs/taro': TaroHooks,
+    '@tarojs/components': {
+      version: '4.2.0',
+      readme: '',
+      module: TaroComponents
+    },
+    '@tarojs/taro': {
+      version: '4.2.0',
+      readme: '',
+      module: TaroHooks
+    },
   }
 }
 

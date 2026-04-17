@@ -338,7 +338,7 @@ export default function MyDesigner({ appData: originAppData }) {
   const loadDesigner = useCallback(() => {
     if (designer) {
       const script = document.createElement('script')
-      script.src = 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.935.t6/index.min.js'
+      script.src = 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.936.t3/index.min.js'
       document.head.appendChild(script)
       script.onload = () => {
         ; (window as any).mybricks.SPADesigner &&
@@ -937,7 +937,6 @@ export default function MyDesigner({ appData: originAppData }) {
   /** 通知父页面渲染完成 */
   useEffect(() => {
     designerIsComplete().then(() => {
-      console.log('publish-ready')
       window.parent.postMessage({ action: 'publish-ready', data: { fileId: ctx.fileId } }, '*')
     })
   }, [])
@@ -945,11 +944,9 @@ export default function MyDesigner({ appData: originAppData }) {
   /** 监听 auto-publish 事件 */
   useEffect(() => {
     const handler = async (event: MessageEvent) => {
-      console.log('designer receive message', event.data)
       if (event.data?.action === 'auto-publish') {
         try {
           const res = await publish(event.data.data)
-          console.log('自动发布结果', res)
           const data = {
                 fileId: ctx.fileId,
                 ...(res || {})

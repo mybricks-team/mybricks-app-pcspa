@@ -3,17 +3,37 @@
 const promptSections = {
   developeGuide: {
     firstOfAll: `- 开发宪章
-> 基于 react、taro、less 技术栈开发
-> 参考「开发指南」+「源代码」进行代码开发任务，完成代码任务后，参考「文档同步规范」进行文档的同步。
-- 总体规则
-  - 功能：生产级别的功能性；
-  - 细节：在每个细节都精心完善；
-  - 响应式：保证合理统一的间距，以及支持宽度变化自适应的代码；
-  - 当前每一个设计态画布默认宽度为414px，可以通过样式文件中使用 :frame { width: 414px; height: 896px; } 统一配置画布宽度；
-    - 如果是移动端界面，画布宽度建议配置414宽度；
-- 拆分逻辑
-  - 精准识别到底是页面还是弹窗，对其进行拆分，如果是页面，需要使用Route渲染，如果是弹窗，需要使用popupRef；
-  - 我们特别希望在设计态能够展示所有页面和弹窗，方便用户进行调试；`,
+  > 技术栈：React 18 + Taro 4.x + Less，面向移动端软件开发
+  > 工作流：参考「开发指南」和「源代码」完成编码任务；编码完成后，参考「文档同步规范」同步文档
+
+- 作用范围
+  - 【必须】只开发 src 文件夹下的代码；所有文件路径以 src 为根路径书写，路径中不包含 src 前缀
+    - 正确：pages/index/index.config.ts
+    - 错误：src/pages/index/index.config.ts
+  - 忽略编译、脚手架、构建配置等一切非源码内容，不输出也不讨论
+
+- 代码质量底线
+  - 完整性：所有功能必须实现，禁止出现空函数体、TODO 注释、占位逻辑
+  - 健壮性：所有异步操作必须有错误处理（try-catch + logger.error）
+  - 样式精确：间距、颜色、圆角与设计稿保持一致；没有设计稿时保证视觉整洁、合理统一
+  - 宽度自适应：布局需支持宽度变化，使用百分比或 flex 布局，避免硬编码宽度
+
+- 画布尺寸配置
+  - 每个设计态画布默认宽度为 414px、高度为 896px
+  - 【必须】每个页面（page）和浮层类组件（popupRef）的 less 文件顶部必须配置 :frame，写法统一如下：
+    \`\`\`less
+    :frame {
+      width: 414px;
+      height: 896px;
+    }
+    \`\`\`
+  - :frame 只控制设计态画布尺寸，不影响运行时布局；必须放在所有 CSS 类定义之前；普通组件不需要配置
+
+- 弹窗的识别
+  - 精准判断每个 UI 单元是否「浮层（弹窗/抽屉）」：
+    - 浮层：使用 popupRef 创建，并为其控制显隐的 store 字段添加 @PopupVisible 装饰器
+  - 【必须】设计态下所有浮层必须可见，方便用户直接在画布中查看以及选中元素进行配置
+    - 浮层通过 @PopupVisible 装饰器在设计态默认处于打开状态，无需额外控制`,
     assetsUsageSection: `- 对于图标：为了保证视觉的统一与专业性，我们的共识是统一使用图标组件。
   - 如果没有图标组件，则使用 placehold.co，禁止使用 Emoji 或特殊字符，它们可能导致在不同设备上的显示差异。
 - 对于图片：图片是传递信息与氛围的关键。我们建议根据其用途选择合适的来源：
@@ -174,7 +194,7 @@ PopupVisible 装饰器说明：
 - 实现：每个独立区块写成 \`const 区块名 = comRef(...)\`；
 - 区块独立性：父组件只负责布局与子区块挂载，不向子区块传递 value、onChange、onClick 等受控属性；子区块自行从 store 读数据并调用 store 方法；
 `,
-  extraSection: `#### 开发示例
+  examplesSection: `#### 开发示例
 
 <examples>
 
@@ -247,7 +267,7 @@ PopupVisible 装饰器说明：
 
 节点顺序与类型：
 - 按「在 JSX 中依赖顺序」依次写出所有节点，层级用标题级别表示；
-- appRef 应用节点、通过 Route 注册的 comRef 组件视为页面节点（page）、未通过 Route 注册的 comRef 视为组件节点（com）；
+- appRef 应用节点、通过 defineAppConfig 注册的 pages 视为页面节点（page）、其余的均视为组件节点（com）；
 - 根节点对应 export default ...，文档中根节点标题固定为「# default」；
 
 标题层级规则（全文最多三级）：
@@ -285,7 +305,7 @@ Mermaid 流程图规则：
 
 更新时机：
 - 必须更新（强约束）：目录下不存在 README.md；或现有文档内容与上述规范不符；或需求明确要求更新文档；
-- 建议更新（结构或内容变化）：在 jsx 中新增、删除或重命名了 appRef/comRef 节点，或 Route 中注册的页面组件发生变化；export default 的根节点类型或子节点类型组合发生变化导致标题层级需调整；JSX 中新增、删除或修改了带 /** onXXX:事件名 */ 注释的事件；某节点的 UI 结构、交互或业务含义发生明显变化；
+- 建议更新（结构或内容变化）：在 jsx 中新增、删除或重命名了 appRef/comRef 节点，或 defineAppConfig 注册的 pages 组件发生变化；export default 的根节点类型或子节点类型组合发生变化导致标题层级需调整；JSX 中新增、删除或修改了带 /** onXXX:事件名 */ 注释的事件；某节点的 UI 结构、交互或业务含义发生明显变化；
 - 无需更新：jsx、store.ts 未被修改，且现有 README.md 已正确反映当前源码的节点结构、事件与说明；仅修改了 style.less、service.ts 等与节点行为无关的文件；
 
 <README.md示例>
@@ -308,7 +328,7 @@ Mermaid 流程图规则：
     - title: 登录
     - mermaid: flowchart LR; A["校验登录参数"] --> B{"参数是否有效"} -->|有效| C["设置loading状态"] --> D["请求登录接口"] --> E{"请求是否成功"} -->|成功| F["更新用户状态"] --> G["取消loading状态"]; E -->|失败| H["提示错误信息"] --> G; B -->|无效| I["提示参数错误"]
 
-（SignIn 是通过 Route index 注册的页面组件，因此 type 为 page）
+（SignIn 是通过 defineAppConfig 注册的页面，因此 type 为 page）
 
 ---
 
@@ -318,7 +338,7 @@ Mermaid 流程图规则：
 - summary: 用户注册入口页，内嵌注册表单组件完成填写与提交。
 - type: page
 
-（SignUp 是通过 Route path="signup" 注册的页面组件，因此 type 为 page）
+（SignUp 是通过 defineAppConfig 注册的页面，因此 type 为 page）
 
 ---
 
