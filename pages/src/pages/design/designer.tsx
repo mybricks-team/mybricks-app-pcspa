@@ -815,7 +815,7 @@ export default function MyDesigner({ appData: originAppData }) {
   const RenderLocker = useMemo(() => {
     return (
       <Locker
-        statusChange={(status) => {
+        statusChange={({status}) => {
           setOperable(status === 1)
           ctx.operable = status === 1
         }}
