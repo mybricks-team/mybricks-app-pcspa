@@ -51,7 +51,9 @@ module.exports = {
       // "@mybricks/sdk-for-app": "/Users/lianglihao/Documents/GitHub/sdk-for-app/src",
       // ------ taro ------
       '@tarojs/components$': '@tarojs/components/lib/react',
-      '@tarojs/taro$': path.resolve(__dirname, './taro-api-h5-polyfill/index.ts')
+      '@tarojs/taro$': path.resolve(__dirname, './taro-api-h5-polyfill/index.ts'),
+      "@mybricks/rxai": 'E:/myBricks/rxai/src/index.ts',
+      "@mybricks/plugin-ai": 'E:/myBricks/plugin-ai/index.tsx'
     },
   },
   externals: [
@@ -74,7 +76,7 @@ module.exports = {
       '@ant-design/icons': 'icons',
       '@mybricks/sdk-for-ai': 'mybricks_sdk_for_ai',
       '@mybricks/ai-utils': 'mybricks_ai_utils',
-      "@mybricks/plugin-ai": "MyBricksPluginAI",
+      // "@mybricks/plugin-ai": "MyBricksPluginAI",
     },
   ],
   module: {
