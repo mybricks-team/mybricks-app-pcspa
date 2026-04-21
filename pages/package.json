@@ -75,6 +75,7 @@
     "@mybricks/publish-to-com-sdk": "^1.0.0",
     "@mybricks/render-web": "1.3.23",
     "@mybricks/sdk-for-app": "^1.0.69",
+    "@nutui/icons-react-taro": "^3.0.2-cpp.3.beta.9",
     "@tarojs/components": "^4.2.0",
     "@tarojs/taro": "^4.2.0",
     "@tarojs/taro-h5": "^4.2.0",

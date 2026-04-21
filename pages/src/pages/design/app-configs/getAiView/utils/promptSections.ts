@@ -34,12 +34,13 @@ const promptSections = {
     - 浮层：使用 popupRef 创建，并为其控制显隐的 store 字段添加 @PopupVisible 装饰器
   - 【必须】设计态下所有浮层必须可见，方便用户直接在画布中查看以及选中元素进行配置
     - 浮层通过 @PopupVisible 装饰器在设计态默认处于打开状态，无需额外控制`,
-    assetsUsageSection: `- 对于图标：为了保证视觉的统一与专业性，我们的共识是统一使用图标组件。
-  - 如果没有图标组件，则使用 placehold.co，禁止使用 Emoji 或特殊字符，它们可能导致在不同设备上的显示差异。
+    assetsUsageSection: `- 对于图标：为了保证视觉的统一与专业性，我们的共识是统一使用图标组件库(@nutui/icons-react-taro)。
+  - <允许使用的图标>Add/AddToCart/AddToCartF/AddToHome/AlwaysBuyF/ArrowDecline/ArrowDotLeft/ArrowDown/ArrowDownF/ArrowDownSize6/ArrowDownSmall/ArrowLeft/ArrowLeftF/ArrowLeftSmall/ArrowRadius/ArrowRight/ArrowRightAlign/ArrowRightF/ArrowRightSize6/ArrowRightSize8/ArrowRightSmall/ArrowTransfer/ArrowUp/ArrowUpF/ArrowUpSize6/ArrowUpSmall/Articles/Ask/AskF/Backtop/BacktopF/Cart/CartF/Category/CategoryF/Check/CheckChecked/CheckClose/CheckDisabled/Checked/CheckNormal/CheckRight/Clock/ClockF/Close/Close2/Comment/CommentF/Complaint/Copy/Coupon/Del/DelF/Designer/Doctor/Dongdong/Dongdong2/Dongdong3/DongdongPlus/Edit/EditF/Eye/EyeF/Fabulous/Failure/FailureF/Feedback/FeedbackF/Filter/FilterF/FollowAdd/FollowAdded/FollowAddedF/FollowAddF/Footprint/Gardener/Gift/GiftOrder/Health/Heart/HeartF/HeartFill/Hi/Home/HomeF/Icon12Back/Icon16Back/Image/ImageError/ImageF/Instocks/Internation/InternationF/Jd/Jianqudingceng/Jingdou/Joy/JoySmile/Link/List/List2/Loading/Loading1/Location/LocationF/LogisticsError/LogisticsErrorF/Mail/MailF/Marshalling/MaskClose/Message/MessageF/Microphone/Minus/More/NetworkError/NoReceive/Notice/NoticeF/Order/OrderF/Phone/Phone2/PhoneF/Photograph/PhotographF/PickedUp/Pin/Play/PlayCircleFill/PlayDoubleBack/PlayDoubleForward/PlayStart/PlayStop/Plus/Prices/Processing/QrCode/Received/Refresh/Refund/RefundF/Reload/Repairman/Retweet/Right/Save/SaveF/Scan/ScanF/Search/SearchF/Service/Setting/SettingF/Share/Share2/ShareF/ShieldCheck/ShieldCheckF/Star/Star2/Star3/StarF/StarFill/Store/StoreF/Success/SuccessF/Tips/TipsF/Top/ToPay/ToPayF/ToReceive/ToReceiveF/Transit/TriangleDown/TriangleUp/User/UserAdd/UserF/Video/VideoF/Videos/Voice/VolumeMax/VolumeMaxF/VolumeMute/VolumeMuteF/WaitReceive/Wallet/Warning/WarningF/Weixin/Zoom</允许使用的图标>
+  - 如果组件库没有合适的图标，则使用 https://api.iconify.design/fluent-emoji-flat/alarm-clock.svg?color=%23ff0000&height=32，可配置图标库、图标、颜色、高度等参数。
 - 对于图片：图片是传递信息与氛围的关键。我们建议根据其用途选择合适的来源：
   - https://placehold.co/600x400/orange/ffffff?text=hello，可以配置一个橙色背景带白色hello文字的色块占位图片，请注意text需要使用英文字符；
   - https://ai.mybricks.world/image-search?term=searchWord&w=20&h=20，可以配置一个高质量的摄影图片；
-  对于海报/写实图片：我们建议使用高质量的摄影图片；
+  对于海报/写实图片/产品图片/头像：我们建议使用高质量的摄影图片；
   对于品牌/Logo：我们建议使用色块占位图片；
   对于插画/装饰性图形：我们优先推荐使用简单的svg来占位，避免使用图片过于跳脱；`,
     architectureSection: `\`\`\`
@@ -229,11 +230,13 @@ PopupVisible 装饰器说明：
 
   \`\`\`tsx file="pages/index/index.tsx"
   import { View, Text } from '@tarojs/components'
+  import { Tips } from '@nutui/icons-react-taro'
   import css from './index.less'
 
   export default function Index () {
     return (
       <View className={css.index}>
+        <Tips color='#fa2c19' size={20}></Tips>
         <Text>Hello world!</Text>
       </View>
     )
