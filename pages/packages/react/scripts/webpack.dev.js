@@ -24,6 +24,7 @@ module.exports = merge(common, {
     hot: true,
     client: {
       logging: 'info',
+      overlay: false,
     },
     // open: `http://localhost:8001`,
     proxy: [
@@ -44,7 +45,7 @@ module.exports = merge(common, {
       },
       {
         context: ['/biz/'],
-        target: 'http://dev.manateeai.com/',
+        target: 'https://my.mybricks.world/',
         secure: false,
         changeOrigin: true,
         logLevel:'debug',

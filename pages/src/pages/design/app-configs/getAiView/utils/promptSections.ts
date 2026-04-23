@@ -48,6 +48,8 @@ const promptSections = {
 ├─ app.tsx                # 根组件渲染入口，有且仅有一个，必须写在根路径，文件名必须为app.tsx
 ├─ app.less               # 可选，按需
 ├─ store.ts               # 全局 store（可选）
+├─ dataSource.js       # 项目唯一文件，必须
+├─ setup.js            # 项目唯一文件，必须
 ├─ pages                  # 页面
 |  └── index
 |  |  ├── index.tsx
