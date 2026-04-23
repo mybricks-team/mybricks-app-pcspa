@@ -560,6 +560,7 @@ export default function appConfig(
       return new Promise((resolve) => {
         // http://localhost:20000/comlib.js,
         resolve(['public/edit.js'])
+        // comlib-pc-normal-lite本地调试，注意tsconfig.json中的compilerOptions.moduleResolution改为node
         // resolve(['http://localhost:20000/comlib.js'])
         // resolve(['https://p2-ec.ecukwai.com/udata/pkg/eshop/mybricks/comlib-lite/1.0.51/edit.js'])
       })
