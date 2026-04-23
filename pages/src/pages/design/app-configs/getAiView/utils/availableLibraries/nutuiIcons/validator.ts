@@ -5,7 +5,7 @@ import type { LibraryValidator, ValidationError } from '../types';
  * 后续可在此处添加库的组件合法性校验、API 用法校验等。
  */
 const validator: LibraryValidator = {
-  libraryName: '@tarojs/taro',
+  libraryName: '@nutui/icons-react-taro',
 
   validate(_code: string): ValidationError[] {
     return [];
