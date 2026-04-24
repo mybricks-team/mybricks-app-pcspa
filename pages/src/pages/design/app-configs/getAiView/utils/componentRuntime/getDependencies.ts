@@ -1,28 +1,73 @@
 // ------ taro ------
-import * as TaroComponents from '@tarojs/components'
-import * as TaroHooks from '@tarojs/taro'
 import * as NutuiIcons from '@nutui/icons-react-taro'
-
-console.log('[TaroComponents]', TaroComponents)
-console.log('[TaroHooks]', TaroHooks)
+import * as TaroRuntime from './@tarojs/runtime/dist'
+import * as TaroComponentsReact from '@tarojs/components/lib/react'
+import * as TaroComponents from '@tarojs/components/dist/components/index'
+import * as TaroFrameworkReact from './@tarojs/plugin-framework-react/dist/runtime'
+import * as TaroRouter from './@tarojs/router/dist/index'
+import * as ReactDOMClient from 'react-dom/client'
+import * as Taro from '@tarojs/plugin-platform-h5/dist/runtime/apis'
+import * as TaroShared from '@tarojs/shared'
+import TaroStacks from '@tarojs/router/dist/router/stack.js'
 
 const getDependencies = (params) => {
-  console.log('[getDependencies - params]', params)
   return {
     '@tarojs/components': {
       version: '4.2.0',
       readme: '',
-      module: TaroComponents
+      module: TaroComponentsReact
     },
     '@tarojs/taro': {
       version: '4.2.0',
       readme: '',
-      module: TaroHooks
+      module: {
+        ...Taro,
+        ...TaroFrameworkReact,
+        default: {
+          ...Taro,
+          ...TaroFrameworkReact
+        }
+      }
     },
     '@nutui/icons-react-taro': {
       version: '3.0.2-cpp.3.beta.9',
       readme: '',
       module: NutuiIcons
+    },
+    '@tarojs/runtime': {
+      version: '4.2.0',
+      readme: '',
+      module: TaroRuntime
+    },
+    '@tarojs/components/dist/components': {
+      version: '4.2.0',
+      readme: '',
+      module: TaroComponents
+    },
+    '@tarojs/plugin-framework-react/dist/runtime': {
+      version: '4.2.0',
+      readme: '',
+      module: TaroFrameworkReact
+    },
+    '@tarojs/router': {
+      version: '4.2.0',
+      readme: '',
+      module: TaroRouter
+    },
+    'react-dom/client': {
+      version: '18.3.1',
+      readme: '',
+      module: ReactDOMClient
+    },
+    '@tarojs/shared': {
+      version: '4.2.0',
+      readme: '',
+      module: TaroShared
+    },
+    '@tarojs/router/dist/router/stack.js': {
+      version: '4.2.0',
+      readme: '',
+      module: TaroStacks
     },
   }
 }

@@ -33,6 +33,7 @@ module.exports = {
       'process.env.TARO_PLATFORM': JSON.stringify('web'),
       'process.env.SUPPORT_TARO_POLYFILL': JSON.stringify('disabled'),
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+      'process.env.SUPPORT_DINGTALK_NAVIGATE': JSON.stringify('disabled'),
     }),
     new CopyWebpackPlugin({
       patterns: [
@@ -50,8 +51,9 @@ module.exports = {
       '@': path.resolve(__dirname, '../../../src'),
       // "@mybricks/sdk-for-app": "/Users/lianglihao/Documents/GitHub/sdk-for-app/src",
       // ------ taro ------
-      '@tarojs/components$': '@tarojs/components/lib/react',
-      '@tarojs/taro$': path.resolve(__dirname, './taro-api-h5-polyfill/index.ts'),
+      '@tarojs/taro$': '@tarojs/taro-h5',
+      '@tarojs/runtime$': path.resolve(__dirname, '../../../src/pages/design/app-configs/getAiView/utils/componentRuntime/@tarojs/runtime/dist/index.js'),
+
       "@mybricks/rxai": 'E:/myBricks/rxai/src/index.ts',
       "@mybricks/plugin-ai": 'E:/myBricks/plugin-ai/index.tsx'
     },

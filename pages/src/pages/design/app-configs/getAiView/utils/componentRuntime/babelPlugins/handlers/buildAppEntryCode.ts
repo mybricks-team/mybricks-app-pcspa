@@ -1,0 +1,118 @@
+const getPageComponentName = (page: string) => {
+  return `Page_${page.replace(/[^a-zA-Z0-9]/g, '_')}`
+}
+
+const buildAppEntryCode = (appConfig: Taro.AppConfig, ) => {
+  const { pages } = appConfig;
+
+  return `import { appRef, Routes, Route, logger } from 'mybricks'
+  import App from './app'
+  ${pages.reduce((pre, page) => {
+    return pre + `import ${getPageComponentName(page)} from './${page}'\n`
+  }, "")}
+
+  import { EMPTY_OBJ } from '@tarojs/shared'
+  import { createRouter, createMemoryHistory, handleAppMountWithTabbar } from '@tarojs/router'
+  import { window, Current } from '@tarojs/runtime'
+  import { createReactApp, reactMeta } from '@tarojs/plugin-framework-react/dist/runtime'
+
+  import * as React from 'react'
+  import ReactDOM from 'react-dom/client'
+
+  import { findDOMNode, render, unstable_batchedUpdates } from 'react-dom'
+  import { defineCustomElementTaroPullToRefreshCore } from '@tarojs/components/dist/components'
+  import stacks from '@tarojs/router/dist/router/stack.js';
+
+  let Render = () => {
+    const _debugTarget = process.env.DEBUG_TARGET
+
+    React.useLayoutEffect(() => {
+      // 初始化
+      reactMeta.PageContext = EMPTY_OBJ
+      reactMeta.destroy()
+      reactMeta.destroy = () => {}
+
+      stacks.stacks = []
+      stacks.backDelta = 0
+      stacks.tabs = {}
+      stacks.methodName = ''
+
+      Current.app = null
+      Current.router = null
+      Current.page = null
+
+      var config = ${JSON.stringify(appConfig)}
+      window.__taroAppConfig = config
+      var tabbarIconPath = []
+      var tabbarSelectedIconPath = []
+
+      if (config.tabBar) {
+        var tabbarList = config.tabBar.list
+        for (var i = 0; i < tabbarList.length; i++) {
+          var t = tabbarList[i]
+          if (t.iconPath) {
+            t.iconPath = tabbarIconPath[i]
+          }
+          if (t.selectedIconPath) {
+            t.selectedIconPath = tabbarSelectedIconPath[i]
+          }
+        }
+      }
+
+      config.routes = [
+        ${pages.reduce((pre, page) => {
+          return pre + `Object.assign({
+            path: '${page}',
+            load: function(context, params) {
+              const page = import("./${page}")
+              return [page, context, params]
+            }
+          }, {}),`
+        }, "")}
+      ]
+      Object.assign(ReactDOM, { findDOMNode, render, unstable_batchedUpdates })
+      defineCustomElementTaroPullToRefreshCore()
+
+      var inst = createReactApp(App, React, ReactDOM, config)
+      var history = createMemoryHistory(({ initialEntries: [_debugTarget.pageIndex] }))
+      handleAppMountWithTabbar(config, history)
+      createRouter(history, inst, config, React)
+    }, [])
+
+    return (
+      <div
+        style={{
+          ..._debugTarget?.rootStyle,
+          '--taro-tabbar-height': '50px'
+        }}
+      >
+        <div style={{
+          ..._debugTarget?.style,
+          height: '100vh',
+          overflow: 'hidden'
+        }}>
+          <div id="${appConfig.appId}"></div>
+        </div>
+      </div>
+    )
+  }
+
+  if (process.env.MODE === 'design') {
+    Render = () => {
+      return (
+        <App>
+          <Routes>
+            ${pages.reduce((pre, page) => {
+              return pre + `<Route path={'${page}'} element={<${getPageComponentName(page)}/>}/>\n`
+            }, "")}
+          </Routes>
+        </App>
+      )
+    }
+  }
+
+  export default Render
+  `
+}
+
+export default buildAppEntryCode

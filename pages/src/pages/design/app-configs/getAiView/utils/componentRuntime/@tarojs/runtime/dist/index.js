@@ -1,0 +1,38 @@
+import '@tarojs/runtime/dist/dom-external/index.js';
+export { default as env } from '@tarojs/runtime/dist/env.js';
+export { Events, hooks } from '@tarojs/shared';
+export { taroDocumentProvider as document } from '@tarojs/runtime/dist/bom/document.js';
+export { taroGetComputedStyleProvider as getComputedStyle } from '@tarojs/runtime/dist/bom/getComputedStyle.js';
+export { History } from '@tarojs/runtime/dist/bom/history.js';
+export { Location } from '@tarojs/runtime/dist/bom/location.js';
+export { nav as navigator } from '@tarojs/runtime/dist/bom/navigator.js';
+export { caf as cancelAnimationFrame, now, raf as requestAnimationFrame } from '@tarojs/runtime/dist/bom/raf.js';
+export { TaroURLProvider as URL, parseUrl } from '@tarojs/runtime/dist/bom/URL.js';
+export { URLSearchParams } from '@tarojs/runtime/dist/bom/URLSearchParams.js';
+export { taroHistoryProvider as history, taroLocationProvider as location, taroWindowProvider as window } from '@tarojs/runtime/dist/bom/window.js';
+export { TaroElement } from '@tarojs/runtime/dist/dom/element.js';
+export { TaroEvent, createEvent, eventHandler, eventHandlerTTDom } from '@tarojs/runtime/dist/dom/event.js';
+export { FormElement } from '@tarojs/runtime/dist/dom/form.js';
+export { TaroNode } from '@tarojs/runtime/dist/dom/node.js';
+export { TaroRootElement } from '@tarojs/runtime/dist/dom/root.js';
+export { Style } from '@tarojs/runtime/dist/dom/style.js';
+export { SVGElement } from '@tarojs/runtime/dist/dom/svg.js';
+export { TaroText } from '@tarojs/runtime/dist/dom/text.js';
+export { setInnerHTML } from '@tarojs/runtime/dist/dom-external/inner-html/html.js';
+export { MutationObserver } from '@tarojs/runtime/dist/dom-external/mutation-observer/index.js';
+export { A, APP, BEHAVIORS, BODY, CATCHMOVE, CATCH_VIEW, CHANGE, CLASS, CLICK_VIEW, COMMENT, COMPILE_MODE, CONFIRM, CONTAINER, CONTEXT_ACTIONS, CURRENT_TARGET, CUSTOM_WRAPPER, DATASET, DATE, DOCUMENT_ELEMENT_NAME, DOCUMENT_FRAGMENT, EVENT_CALLBACK_RESULT, EXTERNAL_CLASSES, FOCUS, HEAD, HOOKS_APP_ID, HTML, ID, INPUT, KEY_CODE, OBJECT, ON_HIDE, ON_LOAD, ON_READY, ON_SHOW, OPTIONS, PAGE_INIT, PROPERTY_THRESHOLD, PROPS, PURE_VIEW, ROOT_STR, SET_DATA, SET_TIMEOUT, STATIC_VIEW, STYLE, TARGET, TARO_RUNTIME, TIME_STAMP, TOUCHMOVE, TYPE, UID, VALUE, VIEW } from '@tarojs/runtime/dist/constants/index.js';
+export { Current, getCurrentInstance } from '@tarojs/runtime/dist/current.js';
+export { eventSource } from '@tarojs/runtime/dist/dom/event-source.js';
+// export { createComponentConfig, createPageConfig, createRecursiveComponentConfig, getOnHideEventKey, getOnReadyEventKey, getOnShowEventKey, getPageInstance, getPath, injectPageInstance, removePageInstance, safeExecute, stringify } from '@tarojs/runtime/dist/dsl/common.js';
+// [MyBricks.ai]
+export { createComponentConfig, createPageConfig, createRecursiveComponentConfig, getOnHideEventKey, getOnReadyEventKey, getOnShowEventKey, getPageInstance, getPath, injectPageInstance, removePageInstance, safeExecute, stringify } from './dsl/common.js';
+export { eventCenter } from '@tarojs/runtime/dist/emitter/emitter.js';
+export { hydrate } from '@tarojs/runtime/dist/hydrate.js';
+export { nextTick } from '@tarojs/runtime/dist/next-tick.js';
+export { options } from '@tarojs/runtime/dist/options.js';
+export { perf } from '@tarojs/runtime/dist/perf.js';
+export { convertNumber2PX, customWrapperCache, extend, getComponentsAlias, incrementId, isComment, isElement, isHasExtractProp, isParentBound, isText, shortcutAttr } from '@tarojs/runtime/dist/utils/index.js';
+export { handlePolyfill } from '@tarojs/runtime/dist/polyfill/index.js';
+export { debounce, throttle } from '@tarojs/runtime/dist/utils/lodash.js';
+export { addLeadingSlash, getCurrentPage, getHomePage, hasBasename, stripBasename, stripSuffix, stripTrailing } from '@tarojs/runtime/dist/utils/router.js';
+//# sourceMappingURL=index.js.map

@@ -1,5 +1,4 @@
 import AIPlugin, { createCustomRequest } from '@mybricks/plugin-ai'
-console.log('[AIPlugin]', AIPlugin)
 import componentRuntime from './componentRuntime'
 import promptSections from './promptSections'
 import availableLibraries from './availableLibraries'

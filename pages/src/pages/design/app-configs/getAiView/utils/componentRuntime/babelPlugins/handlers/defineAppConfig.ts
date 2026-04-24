@@ -1,3 +1,4 @@
+import buildAppEntryCode from './buildAppEntryCode'
 import { astToValue, codeToAst } from '../utils/ast'
 
 export default function handleDefineAppConfig(callPath, programPath) {
@@ -13,23 +14,12 @@ export default function handleDefineAppConfig(callPath, programPath) {
     routeCode += `<Route path={'${page}'} element={<${componentName} />}/>`
   })
 
-  const newCode = `
-  import { appRef, Routes, Route } from 'mybricks'
-  ${importCode}
-
-  import App from './app'
-
-  export default function () {
-    return (
-      <App>
-        <Routes>
-          ${routeCode}
-        </Routes>
-      </App>
-    )
-  }
-  `
-
-  const result = codeToAst(newCode)
+  const result = codeToAst(buildAppEntryCode(Object.assign(
+    {
+      router: {},
+      appId: "MyBricksAITaro"
+    },
+    appConfig
+  )))
   programPath.node.body = result.ast.program.body
 }
