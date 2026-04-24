@@ -33,3 +33,8 @@ declare const APP_NAME: string;
 declare const APP_VERSION: string;
 
 declare const APP_ENV: 'development' | 'production';
+
+declare module '@mybricks/plugin-ai' {
+  export default any;
+  export function createCustomRequest(val: any): Function;
+}

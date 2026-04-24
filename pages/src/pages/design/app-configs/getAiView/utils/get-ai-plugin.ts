@@ -1,7 +1,6 @@
 import AIPlugin, { createCustomRequest } from '@mybricks/plugin-ai'
 import componentRuntime from './componentRuntime'
 import promptSections from './promptSections'
-import availableLibraries from './availableLibraries'
 
 const requestCustom = typeof createCustomRequest === 'function'
   ? createCustomRequest({
@@ -20,8 +19,5 @@ export default ({ user, key }: any) => AIPlugin({
   },
   // ------ taro ------
   componentRuntime,
-  promptSections,
-  codingConfig: {
-    availableLibraries
-  }
+  promptSections
 })

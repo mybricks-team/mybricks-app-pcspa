@@ -9,6 +9,8 @@ import * as ReactDOMClient from 'react-dom/client'
 import * as Taro from '@tarojs/plugin-platform-h5/dist/runtime/apis'
 import * as TaroShared from '@tarojs/shared'
 import TaroStacks from '@tarojs/router/dist/router/stack.js'
+import TaroJsTaroLibs from './availableLibraries/taro'
+import NutuiIconsReactTaroLibs from './availableLibraries/nutuiIcons'
 
 const getDependencies = (params) => {
   return {
@@ -19,7 +21,6 @@ const getDependencies = (params) => {
     },
     '@tarojs/taro': {
       version: '4.2.0',
-      readme: '',
       module: {
         ...Taro,
         ...TaroFrameworkReact,
@@ -27,12 +28,13 @@ const getDependencies = (params) => {
           ...Taro,
           ...TaroFrameworkReact
         }
-      }
+      },
+      ...TaroJsTaroLibs
     },
     '@nutui/icons-react-taro': {
       version: '3.0.2-cpp.3.beta.9',
-      readme: '',
-      module: NutuiIcons
+      module: NutuiIcons,
+      ...NutuiIconsReactTaroLibs
     },
     '@tarojs/runtime': {
       version: '4.2.0',
