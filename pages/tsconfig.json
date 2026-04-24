@@ -6,12 +6,7 @@
     "jsx": "react",
     "module": "es2020",
     "moduleResolution": "node",
-    "lib": [
-      "dom",
-      "es6",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "es6", "dom.iterable", "esnext"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowJs": true,
@@ -23,14 +18,10 @@
       "@": ["src"],
       "@/*": ["src/*"]
     },
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true
   },
   "compileOnSave": true,
-  "include": [
-    "./src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

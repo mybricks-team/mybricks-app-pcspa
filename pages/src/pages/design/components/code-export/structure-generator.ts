@@ -1,4 +1,5 @@
 import { tramsform } from "./codeTransform";
+import taroTemplateJson from './taro-template.json'
 
 /**
  * 代码结构生成器
@@ -33,7 +34,10 @@ export interface ComponentData {
 }
 
 export function generateCodeStructure(data: ComponentData): FileItem[] {
-  const files: FileItem[] = [];
+  const files: Map<string, FileItem> = new Map();
+  taroTemplateJson.forEach((file) => {
+    files.set(file.fileName, file)
+  })
 
   data.files.forEach((file) => {
     const { fileName, source } = file;
@@ -45,13 +49,14 @@ export function generateCodeStructure(data: ComponentData): FileItem[] {
     let name = fileName;
 
     const suffix = fileName.split('.').pop()
-    if (suffix === 'jsx' || suffix === 'js') {
+    const jsFiles = ['js', 'jsx', 'ts', 'tsx']
+    if (jsFiles.includes(suffix)) {
       code = tramsform(code)
     } else if (suffix === 'less') {
       name = name.replace('.less', '.module.less')
     }
 
-    files.push({
+    files.set(`src/${name}`, {
       fileName: `src/${name}`,
       content: code
     })
@@ -60,7 +65,7 @@ export function generateCodeStructure(data: ComponentData): FileItem[] {
   // files.push(themesFile(data))
   // files.push(entryFile())
 
-  return files;
+  return Array.from(files.values());
 }
 
 const themesFile = (data: ComponentData) => {

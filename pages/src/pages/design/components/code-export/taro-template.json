@@ -1,0 +1,86 @@
+[
+  {
+    "fileName": "config/dev.ts",
+    "content": "import type { UserConfigExport } from \"@tarojs/cli\"\r\n\r\nexport default {\r\n   logger: {\r\n    quiet: false,\r\n    stats: true\r\n  },\r\n  mini: {},\r\n  h5: {}\r\n} satisfies UserConfigExport<'webpack5'>\r\n"
+  },
+  {
+    "fileName": "config/index.ts",
+    "content": "import { defineConfig, type UserConfigExport } from '@tarojs/cli'\r\nimport path from 'path'\r\nimport devConfig from './dev'\r\nimport prodConfig from './prod'\r\n\r\n// https://taro-docs.jd.com/docs/next/config#defineconfig-辅助函数\r\nexport default defineConfig<'webpack5'>(async (merge, { command, mode }) => {\r\n  const baseConfig: UserConfigExport<'webpack5'> = {\r\n    projectName: 'taro_template',\r\n    date: '2025-12-24',\r\n    designWidth: 375,\r\n    deviceRatio: {\r\n      640: 2.34 / 2,\r\n      750: 1,\r\n      375: 2,\r\n      828: 1.81 / 2\r\n    },\r\n    sourceRoot: 'src',\r\n    outputRoot: 'dist',\r\n    plugins: [\r\n      \"@tarojs/plugin-generator\"\r\n    ],\r\n    defineConstants: {\r\n    },\r\n    copy: {\r\n      patterns: [\r\n      ],\r\n      options: {\r\n      }\r\n    },\r\n    framework: 'react',\r\n    compiler: {\r\n      type: 'webpack5',\r\n      prebundle: {\r\n        exclude: ['brickd-mobile', '@taroify/icons', '@mybricks/taro-components']\r\n      }\r\n    },\r\n    cache: {\r\n      enable: false // Webpack 持久化缓存配置，建议开启。默认配置请参考：https://docs.taro.zone/docs/config-detail#cache\r\n    },\r\n    mini: {\r\n      optimizeMainPackage: {\r\n        enable: true\r\n      },\r\n      postcss: {\r\n        pxtransform: {\r\n          enable: true,\r\n          config: {\r\n\r\n          }\r\n        },\r\n        cssModules: {\r\n          enable: true, // 默认为 false，如需使用 css modules 功能，则设为 true\r\n          config: {\r\n            namingPattern: 'module', // 转换模式，取值为 global/module\r\n            generateScopedName: '[local]___[hash:base64:5]'\r\n          }\r\n        }\r\n      },\r\n      webpackChain(chain) {\r\n        chain.resolve.alias\r\n          .set('@', path.resolve(__dirname, '../src'))\r\n        chain.resolve.modules\r\n          .add(path.resolve(__dirname, '../node_modules'))\r\n          .add('node_modules')\r\n      },\r\n    },\r\n    h5: {\r\n      publicPath: '/',\r\n      staticDirectory: 'static',\r\n      output: {\r\n        filename: 'js/[name].[hash:8].js',\r\n        chunkFilename: 'js/[name].[chunkhash:8].js'\r\n      },\r\n      miniCssExtractPluginOption: {\r\n        ignoreOrder: true,\r\n        filename: 'css/[name].[hash].css',\r\n        chunkFilename: 'css/[name].[chunkhash].css'\r\n      },\r\n      postcss: {\r\n        autoprefixer: {\r\n          enable: true,\r\n          config: {}\r\n        },\r\n        cssModules: {\r\n          enable: true, // 默认为 false，如需使用 css modules 功能，则设为 true\r\n          config: {\r\n            namingPattern: 'module', // 转换模式，取值为 global/module\r\n            generateScopedName: '[local]___[hash:base64:5]'\r\n          }\r\n        }\r\n      },\r\n      webpackChain(chain) {\r\n        chain.resolve.alias\r\n          .set('@', path.resolve(__dirname, '../src'))\r\n        chain.resolve.modules\r\n          .add(path.resolve(__dirname, '../node_modules'))\r\n          .add('node_modules')\r\n              }\r\n    },\r\n    rn: {\r\n      appName: 'taroDemo',\r\n      postcss: {\r\n        cssModules: {\r\n          enable: false, // 默认为 false，如需使用 css modules 功能，则设为 true\r\n        }\r\n      }\r\n    }\r\n  }\r\n\r\n  process.env.BROWSERSLIST_ENV = process.env.NODE_ENV\r\n\r\n  if (process.env.NODE_ENV === 'development') {\r\n    // 本地开发构建配置（不混淆压缩）\r\n    return merge({}, baseConfig, devConfig)\r\n  }\r\n  // 生产构建配置（默认开启压缩混淆等）\r\n  return merge({}, baseConfig, prodConfig)\r\n})\r\n"
+  },
+  {
+    "fileName": "config/prod.ts",
+    "content": "import type { UserConfigExport } from \"@tarojs/cli\"\r\n\r\nexport default {\r\n  mini: {},\r\n  h5: {\r\n    compile: {\r\n      include: [\r\n        // 确保产物为 es5\r\n        filename => /node_modules\\/(?!(@babel|core-js|style-loader|css-loader|react|react-dom))/.test(filename)\r\n      ]\r\n    },\r\n    /**\r\n     * WebpackChain 插件配置\r\n     * @docs https://github.com/neutrinojs/webpack-chain\r\n     */\r\n    // webpackChain (chain) {\r\n    //   /**\r\n    //    * 如果 h5 端编译后体积过大，可以使用 webpack-bundle-analyzer 插件对打包体积进行分析。\r\n    //    * @docs https://github.com/webpack-contrib/webpack-bundle-analyzer\r\n    //    */\r\n    //   chain.plugin('analyzer')\r\n    //     .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin, [])\r\n    //   /**\r\n    //    * 如果 h5 端首屏加载时间过长，可以使用 prerender-spa-plugin 插件预加载首页。\r\n    //    * @docs https://github.com/chrisvfritz/prerender-spa-plugin\r\n    //    */\r\n    //   const path = require('path')\r\n    //   const Prerender = require('prerender-spa-plugin')\r\n    //   const staticDir = path.join(__dirname, '..', 'dist')\r\n    //   chain\r\n    //     .plugin('prerender')\r\n    //     .use(new Prerender({\r\n    //       staticDir,\r\n    //       routes: [ '/pages/index/index' ],\r\n    //       postProcess: (context) => ({ ...context, outputPath: path.join(staticDir, 'index.html') })\r\n    //     }))\r\n    // }\r\n  }\r\n} satisfies UserConfigExport<'webpack5'>\r\n"
+  },
+  {
+    "fileName": "src/pages/index/index.config.ts",
+    "content": "export default definePageConfig({\n  \"navigationBarTitleText\": \"index\"\n})"
+  },
+  {
+    "fileName": "src/pages/index/index.tsx",
+    "content": "export default function Index() {\n  return 'index'\n}"
+  },
+  {
+    "fileName": "src/app.config.ts",
+    "content": "export default defineAppConfig({\r\n  pages: [],\r\n  window: {\r\n    backgroundTextStyle: 'light',\r\n    navigationBarBackgroundColor: '#fff',\r\n    navigationBarTitleText: 'template',\r\n    navigationBarTextStyle: 'black'\r\n  }\r\n})\r\n"
+  },
+  {
+    "fileName": "src/app.ts",
+    "content": "import { PropsWithChildren } from 'react'\r\n\r\nfunction App({ children }: PropsWithChildren<any>) {\r\n  return children\r\n}\r\n\r\nexport default App\r\n"
+  },
+  {
+    "fileName": "src/index.html",
+    "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n  <meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\">\r\n  <meta content=\"width=device-width,initial-scale=1,user-scalable=no\" name=\"viewport\">\r\n  <meta name=\"apple-mobile-web-app-capable\" content=\"yes\">\r\n  <meta name=\"apple-touch-fullscreen\" content=\"yes\">\r\n  <meta name=\"format-detection\" content=\"telephone=no,address=no\">\r\n  <meta name=\"apple-mobile-web-app-status-bar-style\" content=\"white\">\r\n  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\" >\r\n  <title>templateTaro</title>\r\n  <script><%= htmlWebpackPlugin.options.script %></script>\r\n</head>\r\n<body>\r\n  <div id=\"app\"></div>\r\n</body>\r\n</html>\r\n"
+  },
+  {
+    "fileName": "types/global.d.ts",
+    "content": "/// <reference types=\"@tarojs/taro\" />\r\n\r\ndeclare module '*.png';\r\ndeclare module '*.gif';\r\ndeclare module '*.jpg';\r\ndeclare module '*.jpeg';\r\ndeclare module '*.svg';\r\ndeclare module '*.css';\r\ndeclare module '*.less';\r\ndeclare module '*.module.less' {\r\n  const classes: { [key: string]: string };\r\n  export default classes;\r\n}\r\ndeclare module '*.scss';\r\ndeclare module '*.sass';\r\ndeclare module '*.styl';\r\n\r\ndeclare namespace NodeJS {\r\n  interface ProcessEnv {\r\n    /** NODE 内置环境变量, 会影响到最终构建生成产物 */\r\n    NODE_ENV: 'development' | 'production',\r\n    /** 当前构建的平台 */\r\n    TARO_ENV: 'weapp' | 'swan' | 'alipay' | 'h5' | 'rn' | 'tt' | 'qq' | 'jd' | 'harmony' | 'jdrn'\r\n    /**\r\n     * 当前构建的小程序 appid\r\n     * @description 若不同环境有不同的小程序，可通过在 env 文件中配置环境变量`TARO_APP_ID`来方便快速切换 appid， 而不必手动去修改 dist/project.config.json 文件\r\n     * @see https://taro-docs.jd.com/docs/next/env-mode-config#特殊环境变量-taro_app_id\r\n     */\r\n    TARO_APP_ID: string\r\n  }\r\n}\r\n\r\n\r\n"
+  },
+  {
+    "fileName": ".editorconfig",
+    "content": "# http://editorconfig.org\r\nroot = true\r\n\r\n[*]\r\nindent_style = space\r\nindent_size = 2\r\ncharset = utf-8\r\ntrim_trailing_whitespace = true\r\ninsert_final_newline = true\r\n\r\n[*.md]\r\ntrim_trailing_whitespace = false\r\n"
+  },
+  {
+    "fileName": ".env.development",
+    "content": "# 配置文档参考 https://taro-docs.jd.com/docs/next/env-mode-config\r\n# TARO_APP_ID=\"开发环境下的小程序 AppID\"\r\n"
+  },
+  {
+    "fileName": ".env.production",
+    "content": "# TARO_APP_ID=\"生产环境下的小程序 AppID\"\r\n"
+  },
+  {
+    "fileName": ".env.test",
+    "content": "# TARO_APP_ID=\"测试环境下的小程序 AppID\"\r\n"
+  },
+  {
+    "fileName": ".eslintrc",
+    "content": "{\r\n  \"extends\": [\"taro/react\"],\r\n  \"rules\": {\r\n    \"react/jsx-uses-react\": \"off\",\r\n    \"react/react-in-jsx-scope\": \"off\"\r\n  }\r\n}\r\n"
+  },
+  {
+    "fileName": ".gitignore",
+    "content": "dist/\r\ndeploy_versions/\r\n.temp/\r\n.rn_temp/\r\nnode_modules/\r\n.DS_Store\r\n.swc\r\n*.local\r\n"
+  },
+  {
+    "fileName": "babel.config.js",
+    "content": "// babel-preset-taro 更多选项和默认值：\r\n// https://docs.taro.zone/docs/next/babel-config\r\nmodule.exports = {\r\n  presets: [\r\n    ['taro', {\r\n      framework: 'react',\r\n      ts: true,\r\n      compiler: 'webpack5',\r\n      useBuiltIns: process.env.TARO_ENV === 'h5' ? 'usage' : false\r\n    }]\r\n  ]\r\n}\r\n"
+  },
+  {
+    "fileName": "commitlint.config.mjs",
+    "content": "export default { extends: [\"@commitlint/config-conventional\"] };\r\n"
+  },
+  {
+    "fileName": "package.json",
+    "content": "{\r\n  \"name\": \"taro_template\",\r\n  \"version\": \"1.0.0\",\r\n  \"private\": true,\r\n  \"description\": \"\",\r\n  \"templateInfo\": {\r\n    \"name\": \"default\",\r\n    \"typescript\": true,\r\n    \"css\": \"Less\",\r\n    \"framework\": \"React\"\r\n  },\r\n  \"scripts\": {\r\n    \"new\": \"taro new\",\r\n    \"build:weapp\": \"taro build --type weapp\",\r\n    \"build:swan\": \"taro build --type swan\",\r\n    \"build:alipay\": \"taro build --type alipay\",\r\n    \"build:tt\": \"taro build --type tt\",\r\n    \"build:h5\": \"taro build --type h5\",\r\n    \"build:rn\": \"taro build --type rn\",\r\n    \"build:qq\": \"taro build --type qq\",\r\n    \"build:jd\": \"taro build --type jd\",\r\n    \"build:harmony-hybrid\": \"taro build --type harmony-hybrid\",\r\n    \"dev:weapp\": \"npm run build:weapp -- --watch\",\r\n    \"dev:swan\": \"npm run build:swan -- --watch\",\r\n    \"dev:alipay\": \"npm run build:alipay -- --watch\",\r\n    \"dev:tt\": \"npm run build:tt -- --watch\",\r\n    \"dev:h5\": \"npm run build:h5 -- --watch\",\r\n    \"dev:rn\": \"npm run build:rn -- --watch\",\r\n    \"dev:qq\": \"npm run build:qq -- --watch\",\r\n    \"dev:jd\": \"npm run build:jd -- --watch\",\r\n    \"dev:harmony-hybrid\": \"npm run build:harmony-hybrid -- --watch\"\r\n  },\r\n  \"browserslist\": {\r\n    \"development\": [\r\n      \"defaults and fully supports es6-module\",\r\n      \"maintained node versions\"\r\n    ],\r\n    \"production\": [\r\n      \"last 3 versions\",\r\n      \"Android >= 4.1\",\r\n      \"ios >= 8\"\r\n    ]\r\n  },\r\n  \"author\": \"\",\r\n  \"dependencies\": {\r\n    \"@babel/runtime\": \"^7.24.4\",\r\n    \"@mybricks/ai-render\": \"^0.0.5\",\r\n    \"@nutui/icons-react-taro\": \"^3.0.2-cpp.3.beta.9\",\r\n    \"@tarojs/components\": \"4.2.0\",\r\n    \"@tarojs/helper\": \"4.2.0\",\r\n    \"@tarojs/plugin-framework-react\": \"4.2.0\",\r\n    \"@tarojs/plugin-platform-alipay\": \"4.2.0\",\r\n    \"@tarojs/plugin-platform-h5\": \"4.2.0\",\r\n    \"@tarojs/plugin-platform-harmony-hybrid\": \"4.2.0\",\r\n    \"@tarojs/plugin-platform-jd\": \"4.2.0\",\r\n    \"@tarojs/plugin-platform-qq\": \"4.2.0\",\r\n    \"@tarojs/plugin-platform-swan\": \"4.2.0\",\r\n    \"@tarojs/plugin-platform-tt\": \"4.2.0\",\r\n    \"@tarojs/plugin-platform-weapp\": \"4.2.0\",\r\n    \"@tarojs/react\": \"4.2.0\",\r\n    \"@tarojs/runtime\": \"4.2.0\",\r\n    \"@tarojs/shared\": \"4.2.0\",\r\n    \"@tarojs/taro\": \"4.2.0\",\r\n    \"react\": \"^18.0.0\",\r\n    \"react-dom\": \"^18.0.0\",\r\n    \"react-router-dom\": \"^7.14.2\"\r\n  },\r\n  \"devDependencies\": {\r\n    \"@babel/core\": \"^7.24.4\",\r\n    \"@babel/plugin-transform-class-properties\": \"7.25.9\",\r\n    \"@babel/preset-react\": \"^7.24.1\",\r\n    \"@commitlint/cli\": \"^19.8.1\",\r\n    \"@commitlint/config-conventional\": \"^19.8.1\",\r\n    \"@pmmmwh/react-refresh-webpack-plugin\": \"^0.5.5\",\r\n    \"@tarojs/cli\": \"4.2.0\",\r\n    \"@tarojs/plugin-generator\": \"4.2.0\",\r\n    \"@tarojs/taro-loader\": \"4.2.0\",\r\n    \"@tarojs/webpack5-runner\": \"4.2.0\",\r\n    \"@types/minimatch\": \"^5\",\r\n    \"@types/node\": \"^18\",\r\n    \"@types/react\": \"^18.0.0\",\r\n    \"@types/webpack-env\": \"^1.13.6\",\r\n    \"babel-preset-taro\": \"4.2.0\",\r\n    \"eslint\": \"^8.57.0\",\r\n    \"eslint-config-taro\": \"4.2.0\",\r\n    \"eslint-plugin-react\": \"^7.34.1\",\r\n    \"eslint-plugin-react-hooks\": \"^4.4.0\",\r\n    \"less\": \"^4.2.0\",\r\n    \"lint-staged\": \"^16.1.2\",\r\n    \"postcss\": \"^8.5.6\",\r\n    \"react-refresh\": \"^0.14.0\",\r\n    \"stylelint\": \"^16.4.0\",\r\n    \"stylelint-config-standard\": \"^38.0.0\",\r\n    \"tsconfig-paths-webpack-plugin\": \"^4.1.0\",\r\n    \"typescript\": \"^5.4.5\",\r\n    \"webpack\": \"5.91.0\"\r\n  }\r\n}\r\n"
+  },
+  {
+    "fileName": "project.config.json",
+    "content": "{\r\n  \"miniprogramRoot\": \"./dist\",\r\n  \"projectname\": \"taro-project\",\r\n  \"description\": \"\",\r\n  \"appid\": \"touristappid\",\r\n  \"setting\": {\r\n    \"urlCheck\": false,\r\n    \"es6\": false,\r\n    \"enhance\": false,\r\n    \"compileHotReLoad\": false,\r\n    \"postcss\": false,\r\n    \"minified\": false\r\n  },\r\n  \"compileType\": \"miniprogram\"\r\n}\r\n"
+  },
+  {
+    "fileName": "stylelint.config.mjs",
+    "content": "/** @type {import('stylelint').Config} */\r\nexport default {\r\n  extends: \"stylelint-config-standard\",\r\n};\r\n"
+  },
+  {
+    "fileName": "tsconfig.json",
+    "content": "{\r\n  \"compilerOptions\": {\r\n    \"target\": \"es2017\",\r\n    \"module\": \"commonjs\",\r\n    \"removeComments\": false,\r\n    \"preserveConstEnums\": true,\r\n    \"moduleResolution\": \"node\",\r\n    \"experimentalDecorators\": true,\r\n    \"noImplicitAny\": false,\r\n    \"allowSyntheticDefaultImports\": true,\r\n    \"outDir\": \"lib\",\r\n    \"noUnusedLocals\": true,\r\n    \"noUnusedParameters\": true,\r\n    \"strictNullChecks\": true,\r\n    \"sourceMap\": true,\r\n    \"rootDir\": \".\",\r\n    \"jsx\": \"react-jsx\",\r\n    \"allowJs\": true,\r\n    \"resolveJsonModule\": true,\r\n    \"typeRoots\": [\r\n      \"node_modules/@types\"\r\n    ],\r\n    \"paths\": {\r\n      // TS5090 leading './'\r\n      \"@/*\": [\"./src/*\"]\r\n    }\r\n  },\r\n  \"include\": [\"./src\", \"./types\", \"./config\"],\r\n  \"compileOnSave\": false\r\n}\r\n"
+  }
+]
