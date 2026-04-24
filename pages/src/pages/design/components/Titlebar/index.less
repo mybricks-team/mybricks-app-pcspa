@@ -1,0 +1,125 @@
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.toolbar-left-editting { 
+  margin-left: -10px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.brand-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-info {
+  cursor: pointer;
+  margin-right: 4px;
+  display: flex;
+  align-items: center; 
+}
+
+.divider {
+  margin: 0 8px;
+  color: #cbd5e1;
+}
+
+.page-slogan-title {
+  color: rgb(24, 24, 27);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  line-height: 16px;
+}
+
+// 可编辑时显示悬停提示光标
+.page-slogan-title-editable {
+  cursor: text;
+
+  &:hover {
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+  }
+}
+
+// dark 模式：通过 isDarkMode 动态添加的类名
+.page-slogan-title-dark {
+  color: white;
+}
+
+.edit-title-wrap {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+// 隐藏的镜像 span，用于动态测量文本宽度
+.title-input-mirror {
+  position: absolute;
+  visibility: hidden;
+  white-space: pre;
+  font-size: inherit;
+  font-weight: 500;
+  padding: 0 4px;
+  pointer-events: none;
+}
+
+// 行内编辑 input 样式
+.title-input {
+  font-size: inherit;
+  font-weight: 500;
+  color: rgb(24, 24, 27);
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--mybricks-color-primary);
+  outline: none;
+  padding: 0 4px;
+  height: 20px;
+  line-height: 20px;
+  min-width: 60px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+// dark 模式：通过 isDarkMode 动态添加的类名
+.title-input-dark {
+  color: white;
+  border-bottom-color: var(--mybricks-color-primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  .title-input {
+    color: white;
+    border-bottom-color: var(--mybricks-color-primary);
+  }
+  .title-input-mirror {
+    color: white;
+  }
+  .page-slogan-title {
+    color: white;
+  }
+}
+
+.edit-icon {
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  color: #18181b;
+}
