@@ -56,6 +56,8 @@ import { sendPageDeps } from './utils/sendPageDeps'
 import { BranchMergeModal } from './components/branch-merge-modal'
 import { useBranch } from './hooks/useBranch'
 import CodeExportButton from './components/code-export'
+import Titlebar from './components/Titlebar'
+import Toolbar2, { type TitlebarRef } from './components/Toolbar'
 
 const msgSaveKey = 'save'
 
@@ -70,6 +72,7 @@ const getAppSetting = async () => {
 }
 
 export default function MyDesigner({ appData: originAppData }) {
+  const toolbarRef = useRef<TitlebarRef>()
   window.fileId = originAppData.fileId
   window._disableSmartLayout = originAppData?.config?.['mybricks-app-pcspa']?.config?.feature?.disableSmartLayout; // 是否禁用智能布局
 
@@ -227,6 +230,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
           if (content) {
             setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
+            toolbarRef.current.setSavedTime(Date.now())
           }
 
           // if (!options?.skipMessage) {
@@ -813,26 +817,19 @@ export default function MyDesigner({ appData: originAppData }) {
     }) as Promise<boolean>
   }
 
-  const RenderLocker = useMemo(() => {
-    return (
-      <Locker
-        statusChange={(props) => {
-
-          if (typeof props === 'number') {
-            setOperable(props === 1)
-            ctx.operable = props === 1
-          } else {
-            const { status } = props
-            setOperable(status === 1)
-            ctx.operable = status === 1
-          }
-        }}
-        beforeToggleUnLock={beforeToggleUnLock}
-        compareVersion={true}
-        autoLock={true}
-      />
-    )
-  }, [])
+  // const RenderLocker = useMemo(() => {
+  //   return (
+  //     <Locker
+  //       statusChange={(status) => {
+  //         setOperable(status === 1)
+  //         ctx.operable = status === 1
+  //       }}
+  //       beforeToggleUnLock={beforeToggleUnLock}
+  //       compareVersion={true}
+  //       autoLock={true}
+  //     />
+  //   )
+  // }, [])
 
   const onMessage = useCallback((type, msg) => {
     message.destroy()
@@ -985,6 +982,42 @@ export default function MyDesigner({ appData: originAppData }) {
         <>
           <SPADesigner
             ref={designerRef}
+            titlebar={() => {
+              return (
+                <Titlebar
+                  title={ctx.fileName}
+                />
+              )
+            }}
+            toolbar={() => {
+              return (
+                <Toolbar2
+                  ref={toolbarRef}
+                  appData={appData}
+                  downloadVibeUI={() => {
+                    const json = getDumpJson()
+                    const content = JSON.stringify(json, null, 2)
+                    const baseName = ctx.fileName ? ctx.fileName.replace(/\.[^.]+$/, '') : 'export'
+                    const fileName = `${baseName}.mybricks`
+                    const blob = new Blob([content], { type: 'application/json' })
+                    const url = window.URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = fileName
+                    document.body.appendChild(a)
+                    a.click()
+                    window.URL.revokeObjectURL(url)
+                    document.body.removeChild(a)
+                  }}
+                  beforeToggleUnLock={beforeToggleUnLock}
+                  onOperableChange={(operable) => {
+                    setOperable(operable)
+                    ctx.operable = operable
+                  }}
+                  onSave={save}
+                />
+              )
+            }}
             config={config(
               window?.mybricks?.createObservable(ctx),
               appData,
@@ -1008,9 +1041,22 @@ export default function MyDesigner({ appData: originAppData }) {
     )
   }, [SPADesigner, remotePlugins, builtPlugins, window?.mybricks?.createObservable])
 
+
+  useEffect(() => {
+    toolbarRef.current?.setCanSave(!(!operable || isDebugMode))
+  }, [operable, isDebugMode])
+
+  useEffect(() => {
+    toolbarRef.current?.setIsSaving(saveLoading)
+  }, [saveLoading])
+
+  useEffect(() => {
+    toolbarRef.current?.setHasUnsaved(beforeunload)
+  }, [beforeunload])
+
   return (
     <div className={`${css.view} fangzhou-theme`}>
-      <Toolbar
+      {/* <Toolbar
         title={ctx.fileName}
         updateInfo={
           <Toolbar.LastUpdate
@@ -1056,9 +1102,9 @@ export default function MyDesigner({ appData: originAppData }) {
               }}
             />
 
-            {/* <Toolbar.Button disabled={isDebugMode} onClick={preview}>
+            <Toolbar.Button disabled={isDebugMode} onClick={preview}>
               预览
-            </Toolbar.Button> */}
+            </Toolbar.Button>
 
             <div
               data-mybricks-tip={`{content:'预览',position:'bottom'}`}
@@ -1075,14 +1121,6 @@ export default function MyDesigner({ appData: originAppData }) {
               }}>
               {preview_icon}
             </div>
-
-            {/* <Toolbar.Button
-              disabled={!operable || isDebugMode}
-              loading={publishLoading}
-              onClick={() => setPublishModalVisible(true)}
-            >
-              发布
-            </Toolbar.Button> */}
 
             <div
               data-mybricks-tip={`{content:'发布',position:'bottom'}`}
@@ -1143,7 +1181,7 @@ export default function MyDesigner({ appData: originAppData }) {
             }}
           />
         </div>
-      </Toolbar>
+      </Toolbar> */}
       <div className={css.designer}>{TrueDesigner}</div>
       <PublishModal
         envList={ctx.envList}

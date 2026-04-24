@@ -531,40 +531,30 @@ export default function appConfig(
     // comLibLoader: appData.comLibLoader({
     //   comlibs: ctx.comlibs
     // }),
-    // comLibLoader: appData.comLibLoader({
-    //   comlibs: (() => {
-    //     const baseComlibs = ctx.comlibs.filter(
-    //       (lib) => lib.namespace !== "mybricks.ai-comlib-pc"
-    //     );
-    //     console.log('baseComlibs', baseComlibs);
-    //     const pcAiComlib = {
-    //       title: "PC-AI组件库",
-    //       type: "com_lib",
-    //       namespace: "mybricks.normal-pc-lite",
-    //       editJs: 'http://localhost:20000/comlib.js',
-    //     };
-    //     const existing = baseComlibs.find(
-    //       (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
-    //     );
-    //     if (existing) {
-    //       return baseComlibs.map((lib) =>
-    //         lib.namespace === pcAiComlib.namespace && lib.editJs
-    //           ? { ...lib, editJs: pcAiComlib.editJs }
-    //           : lib
-    //       );
-    //     }
-    //     return baseComlibs.concat(pcAiComlib);
-    //   })(),
-    // }),
-    comLibLoader: () => {
-      return new Promise((resolve) => {
-        // http://localhost:20000/comlib.js,
-        resolve(['public/edit.js'])
-        // comlib-pc-normal-lite本地调试，注意tsconfig.json中的compilerOptions.moduleResolution改为node
-        // resolve(['http://localhost:20000/comlib.js'])
-        // resolve(['https://p2-ec.ecukwai.com/udata/pkg/eshop/mybricks/comlib-lite/1.0.51/edit.js'])
-      })
-    },
+    comLibLoader: appData.comLibLoader({
+      comlibs: (() => {
+        const baseComlibs = ctx.comlibs.filter(
+          (lib) => lib.namespace !== "mybricks.ai-comlib-pc"
+        );
+        const pcAiComlib = {
+          title: "PC-AI组件库",
+          type: "com_lib",
+          namespace: "mybricks.normal-pc-lite",
+          editJs: 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.18/edit.js',
+        };
+        const existing = baseComlibs.find(
+          (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
+        );
+        if (existing) {
+          return baseComlibs.map((lib) =>
+            lib.namespace === pcAiComlib.namespace && lib.editJs
+              ? { ...lib, editJs: pcAiComlib.editJs }
+              : lib
+          );
+        }
+        return baseComlibs.concat(pcAiComlib);
+      })(),
+    }),
     pageContentLoader() {
       //加载页面内容
       return new Promise(async (resolve, reject) => {
