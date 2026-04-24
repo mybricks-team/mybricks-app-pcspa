@@ -815,9 +815,16 @@ export default function MyDesigner({ appData: originAppData }) {
   const RenderLocker = useMemo(() => {
     return (
       <Locker
-        statusChange={({status}) => {
-          setOperable(status === 1)
-          ctx.operable = status === 1
+        statusChange={(props) => {
+
+          if (typeof props === 'number') {
+            setOperable(props === 1)
+            ctx.operable = props === 1
+          } else {
+            const { status } = props
+            setOperable(status === 1)
+            ctx.operable = status === 1
+          }
         }}
         beforeToggleUnLock={beforeToggleUnLock}
         compareVersion={true}
