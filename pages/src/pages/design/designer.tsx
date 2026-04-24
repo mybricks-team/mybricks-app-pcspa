@@ -55,6 +55,7 @@ import classNames from 'classnames'
 import { sendPageDeps } from './utils/sendPageDeps'
 import { BranchMergeModal } from './components/branch-merge-modal'
 import { useBranch } from './hooks/useBranch'
+import CodeExportButton from './components/code-export'
 
 const msgSaveKey = 'save'
 
@@ -1046,6 +1047,13 @@ export default function MyDesigner({ appData: originAppData }) {
                 save()
               }}
               dotTip={beforeunload}
+            />
+
+            <CodeExportButton
+              disabled={isDebugMode}
+              getExportToJSON={() => {
+                return designerRef.current.toJSON()
+              }}
             />
 
             {/* <Toolbar.Button disabled={isDebugMode} onClick={preview}>
