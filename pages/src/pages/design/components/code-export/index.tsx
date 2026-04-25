@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { message } from 'antd'
-import { Toolbar } from '@mybricks/sdk-for-app/ui'
+import { message, Button } from 'antd'
 import { exportCode, isExportSupported } from './export'
 import { generateCodeStructure } from './structure-generator';
 
@@ -59,8 +58,8 @@ export default function CodeExportButton({ disabled = false, getExportToJSON, }:
     setLoading(false)
   }
   return (
-    <Toolbar.Button onClick={handleClick} loading={loading} disabled={disabled}>
-      {progress > 0 ? `${progress}%` : '导出代码'}
-    </Toolbar.Button>
+    <Button onClick={handleClick} loading={loading} disabled={disabled}>
+      {progress > 0 ? `${progress}%` : '导出'}
+    </Button>
   )
 }

@@ -13,6 +13,7 @@ import { Locker, GlobalContext } from '@mybricks/sdk-for-app/ui'
 import SaveTimeDisplay from './SaveTimeDisplay'
 import { code } from './icon'
 import styles from './index.less'
+import CodeExportButton from '../code-export'
 
 interface ToolbarProps {
   appData: {
@@ -27,6 +28,7 @@ interface ToolbarProps {
   onOperableChange: (operable: boolean) => void
   beforeToggleUnLock: () => Promise<boolean>
   onSave: () => Promise<void>
+  getExportToJSON: () => any
 }
 
 export interface TitlebarRef {
@@ -41,7 +43,8 @@ const ToolBar = forwardRef<TitlebarRef, ToolbarProps>((props, ref) =>{
     onSave,
     downloadVibeUI,
     onOperableChange,
-    beforeToggleUnLock
+    beforeToggleUnLock,
+    getExportToJSON
   } = props
 
   const [savedTime, setSavedTime] = useState(appData.fileContent._updateTime)
@@ -109,6 +112,9 @@ const ToolBar = forwardRef<TitlebarRef, ToolbarProps>((props, ref) =>{
                 保存
               </Button>
             </Badge>
+            <CodeExportButton
+              getExportToJSON={getExportToJSON}
+            />
             <div
               data-mybricks-tip={`{content:'在 IDE 中打开',position:'bottom'}`}
               className={styles['code_btn']}

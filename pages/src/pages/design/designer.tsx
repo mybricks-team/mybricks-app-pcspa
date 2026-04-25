@@ -55,7 +55,6 @@ import classNames from 'classnames'
 import { sendPageDeps } from './utils/sendPageDeps'
 import { BranchMergeModal } from './components/branch-merge-modal'
 import { useBranch } from './hooks/useBranch'
-import CodeExportButton from './components/code-export'
 import Titlebar from './components/Titlebar'
 import Toolbar2, { type TitlebarRef } from './components/Toolbar'
 
@@ -1015,6 +1014,9 @@ export default function MyDesigner({ appData: originAppData }) {
                     ctx.operable = operable
                   }}
                   onSave={save}
+                  getExportToJSON={() => {
+                    return designerRef.current.toJSON()
+                  }}
                 />
               )
             }}
