@@ -941,6 +941,7 @@ export default function appConfig(
           // 去除默认的样式文件
           // "public/antd/antd@4.21.6.variable.min.css",
           ///...(!isReact ? ['./public/elementUI/element@2.15.14.css'] : []),
+          "./public/style.css"
         ],
       },
       layout: window._disableSmartLayout ? "flex-column" : "smart",
