@@ -32,7 +32,7 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
     compiler: {
       type: 'webpack5',
       prebundle: {
-        exclude: ['brickd-mobile', '@taroify/icons', '@mybricks/taro-components']
+        enable: false
       }
     },
     cache: {
