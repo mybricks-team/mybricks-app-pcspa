@@ -45,6 +45,9 @@ node_modules
 assets
 *.zip
 
-// 发布模版
+# 发布模版
 nodejs/module/template
 nodejs/module/public
+
+# taro模版JSON文件
+taro-template.json

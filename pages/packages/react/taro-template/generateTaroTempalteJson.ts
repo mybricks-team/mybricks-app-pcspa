@@ -7,13 +7,14 @@ interface TemplateFile {
 }
 
 
-const _templateDir = path.join(__dirname, './_template');
+const TEMPLATE_PATH = path.join(__dirname, './_template');
+const JSON_FILE_PATH = path.join(__dirname, '../../../src/pages/design/components/code-export/taro-template.json');
 
 /**
  * 递归遍历目录并生成文件树结构
  * @param templateDir 模板目录路径，默认为当前文件所在目录下的 template 目录
  */
-const generateTaroTemplateJson = (templateDir: string = _templateDir): TemplateFile[] => {
+const generateTaroTemplateJson = (templateDir: string = TEMPLATE_PATH): TemplateFile[] => {
   const files: TemplateFile[] = [];
 
   // 需要忽略的目录和文件
@@ -72,11 +73,10 @@ const generateTaroTemplateJson = (templateDir: string = _templateDir): TemplateF
   readDirectory(templateDir);
 
   // 写入 JSON 文件，如果已存在则先删除
-  const jsonFilePath = path.join(__dirname, '../../../src/pages/design/components/code-export/taro-template.json');
-  if (fs.existsSync(jsonFilePath)) {
-    fs.unlinkSync(jsonFilePath);
+  if (fs.existsSync(JSON_FILE_PATH)) {
+    fs.unlinkSync(JSON_FILE_PATH);
   }
-  fs.writeFileSync(jsonFilePath, JSON.stringify(files, null, 2));
+  fs.writeFileSync(JSON_FILE_PATH, JSON.stringify(files, null, 2));
 
   return files;
 };
