@@ -1,154 +1,179 @@
-import { requestJson } from './request'
+import { createRequestStream } from "./request-stream";
 
-export const OPERATE_API_TOOL_NAME = 'operate-api'
-const OPERATE_API_URL = '/v1/api-schemes/operate'
-const FILE_WHITELIST = ['dataSource.js', 'datasourceScheme.js', 'setup.js', 'requirement.md', 'README.md']
-const DEFAULT_BASE_URL = 'http://localhost:3000'
+export const OPERATE_API_TOOL_NAME = "operate-api";
+const API_DOC_URL = "/v2/ai/batchGenerateModuleStream";
+const FILE_WHITELIST = [
+  "dataSource.js",
+  "scheme.js",
+  "setup.js",
+  "requirement.md",
+  "README.md",
+];
+const DEFAULT_BASE_URL = "http://dev.manateeai.com/biz";
+import CodeFiles from "./codeFiles";
 
 type ApiDocItem = {
-  id: string
-  cnName: string
-  name: string
-  originName?: string // 用于删除和更新接口时，标识被操作的接口原始名称
-  baseUrl: string
-  method: string
-  path: string
-  response?: any
+  id: string;
+  cnName: string;
+  name: string;
+  baseUrl: string;
+  method: string;
+  path: string;
+  response?: any;
+  request?: any;
+};
+
+function formatShemeObj(content: string) {
+  const match = content.match(
+    /const\s+\w+\s*=\s*(\[[\s\S]*?\])\s*export\s+default\s+\w+/,
+  );
+  if (!match?.[1]) return [];
+
+  try {
+    return JSON.parse(match[1]);
+  } catch {
+    return [];
+  }
 }
 
-type OperateApiResponse = {
-  addList?: ApiDocItem[]
-  updateList?: ApiDocItem[]
-  deprecatedList?: ApiDocItem[]
-}
-
-function normalizeOperateApiResponse(payload: any): OperateApiResponse {
-  const data = payload?.data ?? payload ?? {}
+function formatFiles() {
+  const codeFiles = new CodeFiles(FILE_WHITELIST);
+  const files = codeFiles.getFilesJson();
+  const schemeFile = files.find((file: any) => file.fileName === "scheme.js");
+  const scheme = formatShemeObj(schemeFile?.content || "");
+  const requirement = files.find(
+    (file: any) => file.fileName === "requirement.md",
+  );
   return {
-    addList: Array.isArray(data?.addList) ? data.addList : [],
-    updateList: Array.isArray(data?.updateList) ? data.updateList : [],
-    deprecatedList: Array.isArray(data?.deprecatedList) ? data.deprecatedList : [],
-  }
+    scheme,
+    requirement: requirement?.content || "",
+  };
 }
 
-async function getWhitelistedFileContent(toolContext: any) {
-  const agent = toolContext.getAgent?.()
-  const sandbox = agent?.options?.sandbox
-  const files = await sandbox?.getFiles?.()
+/**
+ *  根据接口文档生成简要总结，供用户查看
+ * @param apiDocs
+ * @returns
+ */
+function summarizeApi(apiDocs: ApiDocItem[]) {
+  if (!Array.isArray(apiDocs) || apiDocs.length === 0) {
+    return "未获取到接口文档。";
+  }
 
-
-
-  return FILE_WHITELIST.map((path) => {
-    const matchedFile = Array.isArray(files)
-      ? files.find((file: any) => file?.path === path)
-      : null
-
-    return {
-      path,
-      content: matchedFile?.content ?? '',
-    }
-  })
+  return [
+    "已获取后端返回的真实接口信息，做一次写入scheme.js、dataSource.js、setup.js的变更，完成后流程结束：",
+    ...apiDocs.map((item, index) => {
+      const response = ` \`\`\`js 返回参数shceme定义
+      ${item.response ? JSON.stringify(item.response, null, 2) : ""}
+      \`\`\ `;
+      const request = ` \`\`\`js 请求参数shceme定义
+      ${item.request ? JSON.stringify(item.request, null, 2) : ""}
+      \`\`\ `;
+      return [
+        `${index + 1}. ${item.cnName || item.name}`,
+        `- id: ${item.id}`,
+        `- baseUrl: ${item.baseUrl}`,
+        `- name: ${item.name}`,
+        `- method: ${item.method}`,
+        `- path: ${item.path}`,
+        `- request: ${request}`,
+        `- response: ${response}`,
+      ].join("\n");
+    }),
+  ].join("\n\n");
 }
 
-function summarizeOperateApiResult(result: OperateApiResponse) {
-  const { addList = [], updateList = [], deprecatedList = [] } = result
-
-  if (addList.length === 0 && updateList.length === 0 && deprecatedList.length === 0) {
-    return '未获取到接口操作结果。无需更新接口'
-  }
-
-  const sections: string[] = ['接口文档操作结果如下：']
-
-  if (addList.length > 0) {
-    sections.push(
-      '新增接口：',
-      ...addList.map((item, index) => `${index + 1}. ${item.cnName || item.name} (${item.method} ${item.path})`)
-    )
-  }
-
-  if (updateList.length > 0) {
-    sections.push(
-      '更新接口：',
-      ...updateList.map((item, index) => `${index + 1}. ${item.cnName || item.name} (${item.method} ${item.path})${item.originName ? `，originName: ${item.originName}` : ''}`)
-    )
-  }
-
-  if (deprecatedList.length > 0) {
-    sections.push(
-      '废弃接口：',
-      ...deprecatedList.map((item, index) => `${index + 1}. ${item.cnName || item.name || item.id || '未命名接口'}`)
-    )
-  }
-
-  return sections.join('\n')
-}
-
-export function createOperateApiTool(projectId: string) {
+/**
+ *
+ * @param projectId 项目页面的唯一ID 取自上下文的fileId
+ * @returns
+ */
+export function createOperateApiTool(fileId: string) {
   return {
     name: OPERATE_API_TOOL_NAME,
-    title: '接口操作',
-    description: '根据当前用户需求和项目文件内容，调用后端服务对接口文档执行新增、更新、废弃等操作。',
+    title: "操作接口",
+    description: "根据当前用户需求请求后端服务，操作接口，保持前后端的一致性。",
     parameters: {
-      type: 'object',
+      type: "object",
       properties: {},
     },
     async execute(_params: any, toolContext: any) {
       toolContext.emitProgress?.({
-        stage: 'pending',
-        message: '正在收集接口操作所需的上下文信息',
-      })
+        stage: "pending",
+        message: "正在收集接口操作所需的上下文信息",
+      });
 
-      const turns = toolContext.getAgent().getTurns()
-      const summary = turns[turns.length - 1]?.summary ?? turns[turns.length - 1]?.coontent;
-      console.log('121212====',toolContext.getAgent())
-      const files = await getWhitelistedFileContent(toolContext)
-      const fileContent = JSON.stringify(files, null, 2)
+      const filesObj = formatFiles();
 
       toolContext.emitProgress?.({
-        stage: 'pending',
-        message: '正在请求接口操作服务',
-      })
+        stage: "pending",
+        message: "正在请求接口操作服务",
+      });
 
       try {
-        const rawResponse = await requestJson<any>({
-          baseUrl: DEFAULT_BASE_URL,
-          url: OPERATE_API_URL,
-          method: 'POST',
-          body: {
-            summary,
-            fileContent,
-            projectId,
-          },
-        })
+        const rawResponse = await new Promise<any>((resolve, reject) => {
+          let accumulated = "";
 
-        const result = normalizeOperateApiResponse(rawResponse)
+          const requestStream = createRequestStream({
+            baseUrl: DEFAULT_BASE_URL,
+            url: API_DOC_URL,
+            method: "POST",
+            body: {
+              mybricksGroupId: "816814702252101", // 先写死，后续可以根据业务需要调整
+              sessionId: fileId,
+              apiSchemes: filesObj.scheme || [],
+              requirement: filesObj.requirement,
+            },
+            headers: {
+              session: "b25ab8ae308db8aab977a90c63893abc",
+              token: "ea153b4ff6a5422a938b21d835b53250",
+            },
+          });
+
+          requestStream({
+            emits: {
+              write: (chunk) => {
+                accumulated += chunk;
+              },
+              complete: () => {
+                try {
+                  resolve(JSON.parse(accumulated));
+                } catch {
+                  resolve(accumulated);
+                }
+              },
+              error: reject,
+              cancel: () => {},
+            },
+          });
+        });
 
         toolContext.emitProgress?.({
-          stage: 'success',
-          message: '接口操作执行成功',
-        })
+          stage: "success",
+          message: "接口操作成功",
+        });
+
+        console.log("接口操作服务原始返回=======", summarizeApi(rawResponse));
 
         return {
-          output: summarizeOperateApiResult(result),
+          output: summarizeApi(rawResponse),
           metadata: {
-            ...result,
+            rawResponse,
           },
-        }
+        };
       } catch (error) {
         toolContext.emitProgress?.({
-          stage: 'error',
-          message: `接口操作失败：${error instanceof Error ? error.message : String(error)}`,
-        })
+          stage: "error",
+          message: `操作接口失败：${error instanceof Error ? error.message : String(error)}`,
+        });
 
         return {
-          output: `操作接口文档失败：${error instanceof Error ? error.message : String(error)}`,
+          output: `操作接口失败：${error instanceof Error ? error.message : String(error)}`,
           metadata: {
-            addList: [],
-            updateList: [],
-            deprecatedList: [],
+            apiDocs: [],
           },
-        }
+        };
       }
     },
-  }
+  };
 }

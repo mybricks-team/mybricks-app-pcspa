@@ -5,63 +5,154 @@
 ### 数据类型
 对于正式数据和mock数据源进行数据定义
 
-dataSourceScheme.js 文件示例：
-```js
-const dataSourceScheme = [
+### 接口操作规范
+- `scheme.js` 是 `dataSource.js` 和 `setup.js` 的接口约束基准，三者必须保持一致。
+
+更新时机：
+- 用户新增、删除或修改了接口相关功能时，必须同步更新；
+- 后端返回了新的真实接口定义、字段结构、业务约束或接口映射关系时，必须立即同步更新；
+- `scheme.js`、`dataSource.js`、`setup.js` 任一文件发生接口相关变更时，必须检查其余两个文件是否需要同步更新；
+- 页面功能与接口绑定关系发生变化时，必须同步更新接口使用说明和对应实现；
+
+```js scheme.js 文件示例
+const scheme = [
   {
-            "id": "user.detail",
-            "cnName": "获取用户详情",
-            "name": "GetUserDetail",
-            "baseUrl": "https://api.example.com",
-            "method": "GET",
-            "path": "/api/users/{id}",
-            "response": {
-                "code": "number",
-                "message": "string",
-                "data": {
-                    "id": "string",
-                    "username": "string",
-                    "email": "string",
-                    "role": "string",
-                    "status": "string",
-                    "createdAt": "string",
-                    "updatedAt": "string"
-                }
+    "id": "user.info.scheme",
+    "cnName": "获取用户信息scheme",
+    "name": "GetUserInfoScheme",
+    "baseUrl": "https://api.example.com",
+    "method": "GET",
+    "path": "/api/user/info",
+    "request": {
+      "id": {
+        "required": true,
+        "type": "string",
+        "description": "用户ID"
+      },
+      "name": {
+        "required": true,
+        "type": "string",
+        "description": "提示信息"
+      },
+    },
+    "response": {
+      "code": {
+        "required": true,
+        "type": "number",
+        "description": "状态码"
+      },
+      "message": {
+        "required": true,
+        "type": "string",
+        "description": "提示信息"
+      },
+      "data": {
+        "type": "object",
+        "description": "返回数据主体",
+        "properties": {
+          "id": {
+            "required": true,
+            "type": "string",
+            "description": "用户ID"
+          },
+          "comment": {
+            "required": false,
+            "type": "string",
+            "description": "用户评论"
+          },
+          "direction": {
+            "required": false,
+            "type": "array",
+            "description": "方向列表",
+            "items": {
+              "type": "string"
             }
-        },
-        {
-            "id": "user.create",
-            "cnName": "创建用户",
-            "name": "CreateUser",
-            "baseUrl": "https://api.example.com",
-            "method": "POST",
-            "path": "/api/users",
-            "response": {
-                "code": "number",
-                "message": "string",
-                "data": {
-                    "id": "string",
-                    "username": "string",
-                    "email": "string",
-                    "role": "string",
-                    "status": "string"
-                }
-            }
+          }
         }
+      }
+    }
+  },
+  {
+    "id": "product.list.scheme",
+    "cnName": "获取商品列表scheme",
+    "name": "GetProductListScheme",
+    "baseUrl": "https://api.example.com",
+    "method": "GET",
+    "path": "/api/product/list",
+    "response": {
+      "code": {
+        "required": true,
+        "type": "number",
+        "description": "状态码"
+      },
+      "message": {
+        "required": true,
+        "type": "string",
+        "description": "提示信息"
+      },
+      "data": {
+        "type": "object",
+        "description": "返回数据主体",
+        "properties": {
+          "id": {
+            "required": true,
+            "type": "string",
+            "description": "用户ID"
+          },
+          "userInfo": {
+            "required": true,
+            "type": "object",
+            "description": "用户信息",
+            "properties": {
+              "province": {
+                "required": true,
+                "type": "string",
+                "description": "省"
+              },
+              "city": {
+                "required": true,
+                "type": "string",
+                "description": "市"
+              },
+              "district": {
+                "required": true,
+                "type": "string",
+                "description": "区"
+              }
+            }
+          },
+          "auditStatus": {
+            "required": true,
+            "type": "array",
+            "description": "审核状态选项列表",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "required": true,
+                  "type": "string",
+                  "description": "状态值"
+                },
+                "value": {
+                  "required": true,
+                  "type": "string",
+                  "description": "状态名称"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 ]
 ```
-### 接口操作规范
-- 优先复用已有接口；只有现有接口无法满足需求时，才新增、更新或废弃接口。
-- 涉及接口变更时，先调用对应工具获取接口文档或执行接口操作，不要凭空虚构接口名、字段、返回结构。
-- 接口变更后，必须同步更新 dataSource.js、datasourceScheme.js、setup.js 以及相关文档内容。
-- 新增或更新接口时，命名、路径、method 和返回结构要清晰一致，避免重复语义和冲突定义。
-- 废弃接口时，明确标记废弃对象，并同步清理或替换相关引用，避免遗留无效调用。
 
 
 
 ### 数据源使用
 所有正式数据（接口请求、静态数据）必须维护在 `dataSource.js` 文件中。
-必须根据dataSourceScheme中的生成的数据类型定义接口
+必须根据scheme中的生成的数据类型定义接口
 通过继承 `DataSource` 基类并 `export default new MyDatasource()` 来声明数据源；
 
 怎么声明数据源：
@@ -107,7 +198,7 @@ export default new MyDatasource()
 1. 搭建环境：使用 mock 定义，由于axios在设计态无法调用，我们需要劫持动态数据的接口以保证设计态的正常返回
 2. 正式环境：使用 dataSource.js 中定义的静态数据和接口请求；
 3. N套自定义环境：用户需要时声明，比如特殊环境和特殊测试场景；
-4. 必须根据dataSourceScheme中的生成的数据类型数据
+4. 必须根据scheme中的生成的数据类型数据
 
 比如下面的代码，虽然 dataSource.js 有两个方法，但是对于mock环境来说，只需要增量劫持：
 1. getConfig 返回的是静态数据，设计态可以展示，无需spy；
