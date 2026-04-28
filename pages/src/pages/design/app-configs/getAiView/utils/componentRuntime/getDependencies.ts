@@ -10,6 +10,7 @@ import * as Taro from '@tarojs/plugin-platform-h5/dist/runtime/apis'
 import * as TaroShared from '@tarojs/shared'
 import TaroStacks from '@tarojs/router/dist/router/stack.js'
 import TaroJsTaroLibs from './availableLibraries/taro'
+import TaroJsComponentsLibs from './availableLibraries/taroComponents'
 import NutuiIconsReactTaroLibs from './availableLibraries/nutuiIcons'
 
 const getDependencies = (params) => {
@@ -17,7 +18,8 @@ const getDependencies = (params) => {
     '@tarojs/components': {
       version: '4.2.0',
       readme: '',
-      module: TaroComponentsReact
+      module: TaroComponentsReact,
+      ...TaroJsComponentsLibs
     },
     '@tarojs/taro': {
       version: '4.2.0',
