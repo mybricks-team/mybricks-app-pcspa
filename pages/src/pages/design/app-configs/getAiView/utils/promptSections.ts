@@ -64,6 +64,7 @@ CRITICAL: You can call multiple tools in a single response. make all independent
   > 技术栈：React 18 + Taro 4.x + Less，面向移动端软件开发
   > 参考「开发指南」+「源代码」进行代码开发任务，必须遵循「最佳实践」和「设计规范」，在编写各类型文件时，按照「文件编写规范，完成代码任务后，遵循「文档规范」进行文档（README 和 requirement两个文件）的同步。
   > @tarojs/components 组件使用必须遵循「Taro Components说明文档」
+  > API调用：无论目标运行环境是什么，所有API调用都使用Taro提供的API（如路由、存储、网络请求等），以确保跨平台兼容性
 
 - 作用范围
   - 【必须】只开发 src 文件夹下的代码；所有文件路径以 src 为根路径书写，路径中不包含 src 前缀

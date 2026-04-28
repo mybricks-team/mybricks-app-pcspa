@@ -157,10 +157,7 @@ class PageHandler {
         // NOTE: 页面栈推入太晚可能导致 getCurrentPages 无法获取到当前页面实例
         stacks.push(page);
         const param = this.getQuery(stampId, '', page.options);
-        console.log('[page]', page)
-        console.log('[param]', param)
         let pageEl = this.getPageContainer(page);
-        console.log('[pageEl]', pageEl)
         if (pageEl) {
             pageEl.classList.remove('taro_page_shade');
             this.isTabBar(this.pathname) && pageEl.classList.add('taro_tabbar_page');
