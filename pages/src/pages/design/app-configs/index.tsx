@@ -115,130 +115,6 @@ export default function appConfig(
 
   getExecuteEnvByMode(ctx.debugMode, ctx, envList);
 
-  const adder: Array<{
-    type: string;
-    title: string;
-    inputs?: { id: string; title: string; schema: Record<string, string> }[];
-    outputs?: { id: string; title: string; schema: Record<string, string> }[];
-    template?: Record<string, any>;
-    load?: () => Promise<any>
-  }> = [
-    // {
-    //   type: 'normal',
-    //   title: '页面',
-    //   inputs: [
-    //     {
-    //       id: 'open',
-    //       title: '打开',
-    //       schema: {
-    //         type: 'any',
-    //       },
-    //     },
-    //   ],
-    // },
-  ];
-
-  // if (isReact) {
-  //   // adder.push({
-  //   //   type: 'defined',
-  //   //   title: 'AI生成...',
-  //   //   // @ts-ignore
-  //   //   load: () => {
-  //   //     return new Promise((resolve, reject) => {
-  //   //       const destroy = showAIPageModal({
-  //   //         onGenerateFinish({ templateJson }) {
-  //   //           resolve(templateJson)
-  //   //           destroy?.()
-  //   //         },
-  //   //       })
-  //   //     })
-  //   //   }
-  //   // })
-  //   // @ts-ignore
-  //   // adder.push({})
-
-  //   const { adderAntd4Ary, adderAntd5Ary } = getAdders(ctx.comlibs);
-
-  //   adder.push(
-  //     ...[
-  //       {
-  //         type: "normal",
-  //         title: "页面",
-  //         inputs: [
-  //           {
-  //             id: "open",
-  //             title: "打开",
-  //             schema: {
-  //               type: "any",
-  //             },
-  //           },
-  //         ],
-  //       },
-  //       ...adderAntd4Ary,
-  //       ...adderAntd5Ary
-  //     ]
-  //   );
-
-  //   adder.push(null, cloudTpt({ ctx }))
-  // }
-
-  if (ctx.hasAIComlib) {
-    adder.unshift( {
-      type: 'normal',
-      title: 'AI页面',
-      template: {
-        namespace: 'mybricks.basic-comlib.ai-mix',
-        deletable: false,
-        asRoot: true,
-      },
-      // width: 300,
-      // height: 200,
-      widthAuto: true,
-      configs: [//自定义编辑项
-        {
-          title: '唯一标识',
-          type: 'text',
-          value: {
-            get({sceneId}) {
-              //return context._useRem;
-            },
-            set({sceneId}, v: boolean) {
-              //context._useRem = v;
-            },
-          },
-        },
-        {
-          type: 'normal',
-          title: 'AI页面',
-          template: {
-            namespace: 'mybricks.basic-comlib.ai-mix',
-            deletable: false,
-            asRoot: true,
-          },
-          // width: 300,
-          // height: 200,
-          // widthAuto: true,
-          configs: [//自定义编辑项
-            {
-              title: '唯一标识',
-              type: 'text',
-              value: {
-                get({sceneId}) {
-                  //return context._useRem;
-                },
-                set({sceneId}, v: boolean) {
-                  //context._useRem = v;
-                },
-              },
-            },
-          ]
-        },
-        // ...adderAntd4Ary,
-        // ...adderAntd5Ary
-      ]
-    },)
-  }
-
   const getCurrentLocale = () => {
     return getLocaleLang(ctx?.appConfig?.localeConfig);
   };
@@ -500,61 +376,10 @@ export default function appConfig(
       pluginToCode({
         type: "spa",
       }),
-      // pluginDomain()
     ],
-    // ...(ctx.hasMaterialApp
-    //   ? {
-    //       comLibAdder: comLibAdderFunc(ctx),
-    //     }
-    //   : {}),
-    // comLibLoader: comlibLoaderFunc(ctx),
-    // comLibLoader: appData.comLibLoader({
-    //   comlibs: ['http://localhost:20000/comlib.js'],
-    //   // comlibs: ctx.comlibs.map((lib, index) => {
-    //   //   // if (lib.namespace === 'mybricks.ai-comlib-pc') {
-    //   //   //   return {
-    //   //   //     ...lib,
-    //   //   //     // editJs: 'https://assets.mybricks.world/comlibs/mybricks.ai-comlib-pc/1.0.42/2026-02-09_17-29-59/edit.js',
-    //   //   //     editJs: 'https://assets.mybricks.world/comlibs/mybricks.normal-pc-lite/1.0.12/2026-02-26_20-04-38/edit.js',
-    //   //   //   }
-    //   //   // }
-    //   //   if (lib.namespace === 'mybricks.normal-pc.antd5') {
-    //   //     return {
-    //   //       ...lib,
-    //   //       editJs: 'https://p66-ec.becukwai.com/udata/pkg/eshop/fangzhou/mybricks.pc-normal-lite/1.0.6/edit.js',
-    //   //     }
-    //   //   }
-    //   //   return lib
-    //   // })
-    // }),
-    comLibAdder: appData.comLibAdder(ctx),
-    // comLibLoader: appData.comLibLoader({
-    //   comlibs: ctx.comlibs
-    // }),
-    comLibLoader: appData.comLibLoader({
-      comlibs: (() => {
-        const baseComlibs = ctx.comlibs.filter(
-          (lib) => lib.namespace !== "mybricks.ai-comlib-pc"
-        );
-        const pcAiComlib = {
-          title: "PC-AI组件库",
-          type: "com_lib",
-          namespace: "mybricks.normal-pc-lite",
-          editJs: 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.18/edit.js',
-        };
-        const existing = baseComlibs.find(
-          (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
-        );
-        if (existing) {
-          return baseComlibs.map((lib) =>
-            lib.namespace === pcAiComlib.namespace && lib.editJs
-              ? { ...lib, editJs: pcAiComlib.editJs }
-              : lib
-          );
-        }
-        return baseComlibs.concat(pcAiComlib);
-      })(),
-    }),
+    comLibLoader() {
+      return ['https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.18/edit.js']
+    },
     pageContentLoader() {
       //加载页面内容
       return new Promise(async (resolve, reject) => {
@@ -918,7 +743,17 @@ export default function appConfig(
     },
     geoView: {
       scenes: {
-        adder,
+        adder: [
+          {
+            type: 'normal',
+            title: 'AI页面',
+            template: {
+              namespace: 'mybricks.basic-comlib.ai-mix',
+              deletable: false,
+              asRoot: true,
+            },
+          }
+        ],
       },
       ...(!!ctx.hasAIComlib ? {
         nav: {
@@ -958,141 +793,4 @@ export default function appConfig(
       ],
     },
   };
-}
-
-function getAdders(comlibs) {
-  const { hasAntd4Normal, hasAntd4Basic, hasAntd5Normal, hasAntd5Basic } = comlibs.reduce((pre, { namespace }) => {
-    if (namespace === "mybricks.basic-comlib.antd5") pre.hasAntd5Basic = true;
-    else if (namespace === "mybricks.normal-pc.antd5") pre.hasAntd5Normal = true;
-    else if (namespace === "mybricks.normal-pc") pre.hasAntd4Normal = true;
-    else if (namespace === "mybricks.basic-comlib") pre.hasAntd4Basic = true;
-    return pre;
-  }, { hasAntd4Normal: false, hasAntd4Basic: false, hasAntd5Normal: false, hasAntd5Basic: false });
-
-  const template = ({ namespace, title, type }) => ({
-    type,
-    title,
-    template: { namespace: namespace, deletable: false, asRoot: true }
-  });
-  const silentPrintIO = {
-    inputs: [
-      {
-        id: "print",
-        title: "打印",
-        schema: {
-          type: "any",
-        },
-      },
-    ],
-    outputs: [
-      {
-        id: "printed",
-        title: "打印完成",
-        schema: {
-          type: "any",
-        },
-      },
-    ],
-  }
-
-  const adderAntd4Ary = [];
-  const adderAntd5Ary = [];
-
-  if (hasAntd4Basic) {
-    adderAntd4Ary.push(
-      template({
-        type: "popup",
-        title: "对话框",
-        namespace: "mybricks.basic-comlib.popup"
-      }),
-      template({
-        type: "popup",
-        title: "抽屉",
-        namespace: "mybricks.basic-comlib.drawer"
-      })
-    )
-    if (hasAntd5Basic) {
-      adderAntd5Ary.push(
-        template({
-          type: "popup",
-          title: "对话框(antd5)",
-          namespace: "mybricks.basic-comlib.antd5.popup"
-        }),
-        template({
-          type: "popup",
-          title: "抽屉(antd5)",
-          namespace: "mybricks.basic-comlib.antd5.drawer"
-        }),
-      )
-    }
-  } else if (hasAntd5Basic) {
-    adderAntd5Ary.push(
-      template({
-        type: "popup",
-        title: "对话框",
-        namespace: "mybricks.basic-comlib.antd5.popup"
-      }),
-      template({
-        type: "popup",
-        title: "抽屉",
-        namespace: "mybricks.basic-comlib.antd5.drawer"
-      }),
-    )
-  }
-
-  if (hasAntd4Normal) {
-    adderAntd4Ary.push(
-      template({
-        type: "popup",
-        title: "打印对话框",
-        namespace: "mybricks.normal-pc.print",
-      }),
-      {
-        ...template({
-          type: "normal",
-          title: "静默打印",
-          namespace: "mybricks.normal-pc.silent-print",
-        }),
-        ...silentPrintIO
-      }
-    )
-    if (hasAntd5Normal) {
-      adderAntd5Ary.push(
-        template({
-          type: "popup",
-          title: "打印对话框(antd5)",
-          namespace: "mybricks.normal-pc.antd5.print",
-        }),
-        {
-          ...template({
-            type: "normal",
-            title: "静默打印(antd5)",
-            namespace: "mybricks.normal-pc.antd5.silent-print",
-          }),
-          ...silentPrintIO
-        }
-      )
-    }
-  } else if (hasAntd5Normal) {
-    adderAntd5Ary.push(
-      template({
-        type: "popup",
-        title: "打印对话框",
-        namespace: "mybricks.normal-pc.antd5.print",
-      }),
-      {
-        ...template({
-          type: "normal",
-          title: "静默打印",
-          namespace: "mybricks.normal-pc.antd5.silent-print",
-        }),
-        ...silentPrintIO
-      }
-    )
-  }
-
-  return {
-    adderAntd4Ary,
-    adderAntd5Ary
-  }
 }
