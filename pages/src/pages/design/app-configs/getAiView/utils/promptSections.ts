@@ -27,7 +27,7 @@ const promptSections = {
 <常用工作流>
 常用工作流：分析 -> 设计 -> 生成/修改代码(不断修改直至结束) -> LSP检查 -> 文档同步（特别是README.md 和 requirement.md） ->同步操作接口，然后流程结束。
 1. 意图识别 / 需求分析：尽量收集信息以确定用户的意图；
-2. 视觉方案：根据用户意图，调用 \`${FRONTEND_DESIGN_SK_NAME}\` 设计视觉效果出色且独具特色的界面；
+2. 视觉方案：根据用户意图，调用 \`${FRONTEND_DESIGN_SK_NAME}\` 进行设计或者拓展，设计视觉效果出色且独具特色的界面；
 3. 代码开发：
 - 使用 \`${EDIT_TOOL_NAME}\` 修改已有文件。这是修改文件的首选工具，因为它只更新差异部分。
 - 使用 \`${WRITE_TOOL_NAME}\` 或 \`${MULTI_WRITE_TOOL_NAME}\` 新建文件，或在需要完整重写文件时使用。对已有文件优先使用编辑操作。
@@ -79,8 +79,8 @@ CRITICAL: You can call multiple tools in a single response. make all independent
 - 拆分逻辑
   - 精准识别到底是页面还是弹窗，对其进行拆分，如果是页面，需要使用Route渲染，如果是弹窗，需要使用popupRef；
   - 我们特别希望在设计态能够展示所有页面和弹窗，方便用户进行调试；`,
-    assetsUsageSection: `- 对于图标：为了保证视觉的统一与专业性，我们的共识是统一使用图标组件库(@nutui/icons-react-taro)。
-  - 如果组件库没有合适的图标，则使用 https://api.iconify.design/material-symbols/home.svg?color=%23ff0000&height=32，可配置图标库、图标、颜色、高度等参数。
+    assetsUsageSection: `- 对于图标：为了保证视觉的统一与专业性，我们的共识是统一使用图标组件库(@nutui/icons-react-taro)
+  - 组件库没有合适的图标，才使用 https://api.iconify.design/material-symbols/home.svg?color=%23ff0000&height=32，可配置图标库、图标、颜色、高度等参数，不要全局都使用
   - 禁止使用emoji
 - 对于图片：图片是传递信息与氛围的关键。我们建议根据其用途选择合适的来源：
   - https://placehold.co/600x400/orange/ffffff?text=hello，可以配置一个橙色背景带白色hello文字的色块占位图片，请注意text需要使用英文字符；
@@ -91,7 +91,7 @@ CRITICAL: You can call multiple tools in a single response. make all independent
     architectureSection: `\`\`\`
 ├─ app.config.ts          # 模块入口，app配置，有且仅有一个，必须写在根路径，文件名必须为app.config.ts
 ├─ app.tsx                # 根组件渲染入口，有且仅有一个，必须写在根路径，文件名必须为app.tsx
-├─ app.less               # 可选，按需
+├─ app.less               # 全局样式（项目唯一文件且必须）
 ├─ store.ts               # 全局 store（可选）
 ├─ scheme.js    # 接口 scheme （项目唯一文件且必须，而且在dataSource.js和 setup.js之前写入）
 ├─ dataSource.js          # 真实接口（项目唯一文件且必须）
@@ -279,6 +279,7 @@ PopupVisible 装饰器说明：
 
   \`\`\`tsx file="app.tsx"
   import { appRef } from 'mybricks'
+  import './app.less'
     
   export default appRef(({ children }) => {
     return children
@@ -507,9 +508,8 @@ related: NewModalButton,ItemNewModal
 `
   },
   designGuide: {
-    firstOfAll: `美学指南：调用 \`${FRONTEND_DESIGN_SK_NAME}\` 技能设计视觉效果出色且独具特色的界面。
-注意：
-- APP顶部状态栏和小程序右上角胶囊按钮不需要设计`
+    firstOfAll: `注意：
+- APP顶部状态栏和小程序右上角系统胶囊按钮区域（… / ○，返回/更多），它不是页面设计的一部分，不需要设计。`
   }
 }
 
