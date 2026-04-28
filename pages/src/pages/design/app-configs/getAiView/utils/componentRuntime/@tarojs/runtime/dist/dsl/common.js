@@ -118,7 +118,6 @@ function createPageConfig(component, pageName, data, pageConfig) {
                         // pageElement = env.document.getElementById($taroPath);
                         // [MyBricks.ai]
                         pageElement = document.getElementById('_mybricks-geo-webview_').shadowRoot.getElementById($taroPath);
-                        console.log('[pageElement]', pageElement)
                     }
                     ensure(pageElement !== null, '没有找到页面实例。');
                     safeExecute($taroPath, ON_LOAD, this.$taroParams);

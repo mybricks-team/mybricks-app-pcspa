@@ -261,10 +261,6 @@ function connectReactPage(R, id) {
                     ? []
                     : h$1(reactMeta.PageContext.Provider, { value: id }, h$1(Page, Object.assign(Object.assign({}, this.props), refs)));
                 if (process.env.TARO_PLATFORM === 'web') {
-                    console.log('[PageWrapper]', {
-                        id,
-                        children
-                    })
                     return h$1('div', { id, className: 'taro_page' }, children);
                 }
                 else {

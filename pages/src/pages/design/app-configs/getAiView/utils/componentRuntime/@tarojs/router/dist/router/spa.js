@@ -187,9 +187,13 @@ function createRouter(history, app, config, framework) {
             else {
                 pageStampId = createStampId();
             }
-            const page = createPageConfig(enablePullDownRefresh ? hooks.call('createPullDownComponent', el, pathname, framework, handler.PullDownRefresh, pageStampId) : el, pathname + stringify(handler.getQuery(pageStampId)), {}, loadConfig);
-            if (params)
-                page.options = params;
+            const page = createPageConfig(enablePullDownRefresh ? hooks.call('createPullDownComponent', el, pathname, framework, handler.PullDownRefresh, pageStampId) : el, pathname + stringify(handler.getQuery(pageStampId, location.search)), {}, loadConfig);
+            // if (params)
+            //     page.options = params;
+            // [MyBricks.ai]
+            page.options = params || {}
+            const pageQuery = handler.getQuery(pageStampId, location.search)
+            Object.assign(page.options, pageQuery)
             handler.load(page, pageConfig, pageStampId, stacksIndex);
         }
     });

@@ -5,7 +5,9 @@ const getPageComponentName = (page: string) => {
 const buildAppEntryCode = (appConfig: Taro.AppConfig, ) => {
   const { pages } = appConfig;
 
-  return `import { appRef, Routes, Route, logger } from 'mybricks'
+  return `
+  import { MyBricksElement } from '@tarojs/components'
+  import { appRef, Routes, Route, logger } from 'mybricks'
   import App from './app'
   ${pages.reduce((pre, page) => {
     return pre + `import ${getPageComponentName(page)} from './${page}'\n`
@@ -22,6 +24,8 @@ const buildAppEntryCode = (appConfig: Taro.AppConfig, ) => {
   import { findDOMNode, render, unstable_batchedUpdates } from 'react-dom'
   import { defineCustomElementTaroPullToRefreshCore } from '@tarojs/components/dist/components'
   import stacks from '@tarojs/router/dist/router/stack.js';
+
+  const appConfig = ${JSON.stringify(appConfig)}
 
   let Render = () => {
     const _debugTarget = process.env.DEBUG_TARGET
@@ -43,21 +47,6 @@ const buildAppEntryCode = (appConfig: Taro.AppConfig, ) => {
 
       var config = ${JSON.stringify(appConfig)}
       window.__taroAppConfig = config
-      var tabbarIconPath = []
-      var tabbarSelectedIconPath = []
-
-      if (config.tabBar) {
-        var tabbarList = config.tabBar.list
-        for (var i = 0; i < tabbarList.length; i++) {
-          var t = tabbarList[i]
-          if (t.iconPath) {
-            t.iconPath = tabbarIconPath[i]
-          }
-          if (t.selectedIconPath) {
-            t.selectedIconPath = tabbarSelectedIconPath[i]
-          }
-        }
-      }
 
       config.routes = [
         ${pages.reduce((pre, page) => {
@@ -88,7 +77,7 @@ const buildAppEntryCode = (appConfig: Taro.AppConfig, ) => {
       >
         <div style={{
           ..._debugTarget?.style,
-          height: '100vh',
+          height: '896px',
           overflow: 'hidden'
         }}>
           <div id="${appConfig.appId}"></div>
@@ -103,7 +92,20 @@ const buildAppEntryCode = (appConfig: Taro.AppConfig, ) => {
         <App>
           <Routes>
             ${pages.reduce((pre, page) => {
-              return pre + `<Route path={'${page}'} element={<${getPageComponentName(page)}/>}/>\n`
+              if (appConfig.tabBar?.list?.length > 1) {
+                const tabBarItem = appConfig.tabBar.list.find((tabBarItem) => tabBarItem.pagePath === page)
+                if (tabBarItem) {
+                  return pre + `<Route path={'${page}'} element={
+                    <MyBricksElement
+                      page={'${page}'}
+                      appConfig={appConfig}
+                    >
+                      <${getPageComponentName(page)}/>
+                    </MyBricksElement>}/>\n`
+                }
+              }
+
+              return pre + `<Route path={'${page}'} element={<${getPageComponentName(page)}/>}/>`
             }, "")}
           </Routes>
         </App>
