@@ -926,6 +926,65 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }, [onEdit])
 
+  useEffect(() => {
+    ;(window as any).__vibeCodingCallbacks__ = {
+      onStart() {
+        // vibe coding 开始
+      },
+      async onComplete() {
+        // 1. 打印 designer toJSON 数据
+        let json: any
+        try {
+          json = designerRef.current?.toJSON()
+        } catch (e) {
+          console.error('[vibeCoding onComplete] toJSON failed:', e)
+        }
+
+        // 2. 从 json 中提取文件名并保存（仅当当前文件名为「未命名文件」时）
+        if (json && ctx.fileName === '未命名文件') {
+          try {
+            // 从所有 scenes 的 coms 中收集 files
+            const allFiles: any[] = []
+            const scenes: any[] = json.scenes ?? []
+            for (const scene of scenes) {
+              const coms = scene.coms ?? {}
+              for (const comId of Object.keys(coms)) {
+                const files = coms[comId]?.model?.data?.files
+                if (Array.isArray(files)) {
+                  allFiles.push(...files)
+                }
+              }
+            }
+
+            // 优先从 requirement.md 的 compiled.title 获取
+            let newName: string | undefined
+            const requirementFile = allFiles.find((f) => f.fileName === 'requirement.md')
+            if (requirementFile?.compiled?.title) {
+              newName = requirementFile.compiled.title
+            }
+
+            // 退而从 README.md 的 compiled.default.title 获取
+            if (!newName) {
+              const readmeFile = allFiles.find((f) => f.fileName === 'README.md')
+              if (readmeFile?.compiled?.default?.title) {
+                newName = readmeFile.compiled.default.title
+              }
+            }
+
+            if (newName) {
+              await ctx.save({ name: newName })
+            }
+          } catch (e) {
+            console.error('[vibeCoding onComplete] 更新文件名失败:', e)
+          }
+        }
+      },
+    }
+    return () => {
+      delete (window as any).__vibeCodingCallbacks__
+    }
+  }, [ctx])
+
   async function designerIsComplete() {
     return new Promise((resolve) => {
       const intervalId = setInterval(() => {
