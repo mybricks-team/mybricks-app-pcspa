@@ -1,13 +1,12 @@
 import CodeFiles from "../codeFiles";
-import { createRequestStream } from "../request-stream";
+import { createRequestStream } from "../request";
 import { renderOperateApiTool } from "./render";
 
 export const OPERATE_API_TOOL_NAME = "operate-api";
 
-const API_DOC_URL = "/v2/ai/batchGenerateModuleStream";
-const DEFAULT_BASE_URL = "http://dev.manateeai.com/biz";
+const OPERATE_API_URL = "/biz/v2/ai/batchGenerateModuleStream";
 const MYBRICKS_GROUP_ID = "816814702252101";
-const SESSION_ID = "123456-123456-123456-123456-123456";
+// const SESSION_ID = "123456-123456-123456-123456-123456";  // 测试用固定 sessionId，实际使用时可改为动态获取
 const REQUEST_HEADERS = {
   session: "b25ab8ae308db8aab977a90c63893abc",
   token: "ea153b4ff6a5422a938b21d835b53250",
@@ -200,8 +199,7 @@ async function requestApiDocs(fileId: string, content: string, filesObj: FilesRe
     let accumulated = "";
 
     const requestStream = createRequestStream({
-      baseUrl: DEFAULT_BASE_URL,
-      url: API_DOC_URL,
+      url: OPERATE_API_URL,
       method: "POST",
       body: {
         summary: content,
@@ -209,7 +207,6 @@ async function requestApiDocs(fileId: string, content: string, filesObj: FilesRe
         sessionId: fileId,
         ...filesObj,
       },
-      headers: REQUEST_HEADERS,
     });
 
     requestStream({

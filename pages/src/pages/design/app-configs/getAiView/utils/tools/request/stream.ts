@@ -1,11 +1,11 @@
-import { DEFAULT_BASE_URL, DEFAULT_TIMEOUT_MS } from "./constants";
+import { DEFAULT_TIMEOUT_MS } from "./constants";
 import { readSSEStream } from "./sse";
 import type {
   CreateRequestStreamConfig,
   StreamRequestFn,
   StreamRequestParams,
 } from "./types";
-import { buildUrl } from "./utils";
+import { getToken, getSession} from "./utils";
 
 export function createBaseRequestStream(
   config: CreateRequestStreamConfig,
@@ -13,7 +13,6 @@ export function createBaseRequestStream(
   return async function requestStream(params: StreamRequestParams) {
     const { emits } = params;
     const {
-      baseUrl = DEFAULT_BASE_URL,
       url,
       method = "POST",
       headers = {},
@@ -33,10 +32,12 @@ export function createBaseRequestStream(
 
     try {
       const resolvedBody = typeof body === "function" ? await body() : body;
-      const response = await fetch(buildUrl(baseUrl, url), {
+      const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
+          "token": getToken(),
+          "session": getSession(),
           ...headers,
         },
         body:
