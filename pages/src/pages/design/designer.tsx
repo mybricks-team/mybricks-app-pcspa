@@ -70,7 +70,8 @@ const getAppSetting = async () => {
 }
 
 export default function MyDesigner({ appData: originAppData }) {
-  const toolbarRef = useRef<TitlebarRef>()
+  const toolbarRef = useRef()
+  const titleRef = useRef()
   window.fileId = originAppData.fileId
   window._disableSmartLayout = originAppData?.config?.['mybricks-app-pcspa']?.config?.feature?.disableSmartLayout; // 是否禁用智能布局
 
@@ -972,6 +973,7 @@ export default function MyDesigner({ appData: originAppData }) {
             }
 
             if (newName) {
+              titleRef.current.setTitle(newName)
               await ctx.save({ name: newName })
             }
           } catch (e) {
@@ -1045,7 +1047,8 @@ export default function MyDesigner({ appData: originAppData }) {
             titlebar={() => {
               return (
                 <DesignerTitleBar
-                  title={ctx.fileName}
+                  ref={titleRef}
+                  appData={appData}
                 />
               )
             }}
