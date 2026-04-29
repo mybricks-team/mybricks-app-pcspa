@@ -1,5 +1,4 @@
-import { API_DOC_TOOL_NAME } from './tools/api-doc'
-import { OPERATE_API_TOOL_NAME } from './tools/operate-api'
+import { OPERATE_API_TOOL_NAME } from './tools/operate-api/index'
 import { FRONTEND_DESIGN_SK_NAME } from './skills/frontend-design'
 
 const  EDIT_TOOL_NAME = 'edit-file'
@@ -37,7 +36,7 @@ const promptSections = {
   - 检查渲染状态：检查渲染情况以及是否有报错，如果有报错或者渲染问题，需要再次回到流程3进行代码开发；
 5. 进入文档同步阶段
   - 检查文档是否需要更新，特别是README.md 和 requirement.md），如果要修改，则进行修改。文档的修改决策和思路基于后续提供的「文档规范」章节。
-6. 除非用户明确强调生成纯静态页面，否则必须操作接口。
+5. 除非用户明确强调生成纯静态页面，否则必须操作接口（同步接口到后端）。
   - 最后操作接口：如果在流程3中有涉及到scheme.js、dataSource.js、setup.js的变更，必须调用 \`${OPERATE_API_TOOL_NAME}\` 来操作接口，保持前后端的一致性遵循「接口操作规范」。
   - 流程结束：在\`${OPERATE_API_TOOL_NAME}\`工具返回成功时，跟真实接口再次同步一次scheme.js、dataSource.js、setup.js文件。完成后流程结束，等待用户的下一步指令。
 </常用工作流>
