@@ -15,7 +15,6 @@ function getPreviewContent(tool: ToolRecord) {
 }
 
 export function renderOperateApiTool(tool: ToolRecord) {
-  console.log("tool in renderOperateApiTool:====== ", tool);
   if (tool.status === "pending") {
     return <PendingCodeCard tool={tool} icon={<FileIcon />} title={tool?.progress?.message || "正在操作接口..."} />;
   }
