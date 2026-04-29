@@ -7,10 +7,7 @@ export const OPERATE_API_TOOL_NAME = "operate-api";
 const OPERATE_API_URL = "/biz/v2/ai/batchGenerateModuleStream";
 const MYBRICKS_GROUP_ID = "816814702252101";
 // const SESSION_ID = "123456-123456-123456-123456-123456";  // 测试用固定 sessionId，实际使用时可改为动态获取
-const REQUEST_HEADERS = {
-  session: "b25ab8ae308db8aab977a90c63893abc",
-  token: "ea153b4ff6a5422a938b21d835b53250",
-};
+
 const FILE_WHITELIST = [
   "dataSource.js",
   "scheme.js",
