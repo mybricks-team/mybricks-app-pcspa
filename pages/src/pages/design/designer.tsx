@@ -25,7 +25,7 @@ import {
 import { PreviewStorage } from './../../utils/previewStorage'
 import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
-import { createFromIconfontCN, InfoCircleTwoTone } from '@ant-design/icons'
+import { createFromIconfontCN, InfoCircleTwoTone, DownloadOutlined } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
 import { usePageStayTime } from './utils/sendPageTimer'
 
@@ -55,8 +55,7 @@ import classNames from 'classnames'
 import { sendPageDeps } from './utils/sendPageDeps'
 import { BranchMergeModal } from './components/branch-merge-modal'
 import { useBranch } from './hooks/useBranch'
-import Titlebar from './components/Titlebar'
-import Toolbar2, { type TitlebarRef } from './components/Toolbar'
+import { DesignerTitleBar, DesignerToolBar } from '@mybricks/sdk-for-app/ui'
 
 const msgSaveKey = 'save'
 
@@ -986,37 +985,43 @@ export default function MyDesigner({ appData: originAppData }) {
             ref={designerRef}
             titlebar={() => {
               return (
-                <Titlebar
+                <DesignerTitleBar
                   title={ctx.fileName}
                 />
               )
             }}
             toolbar={() => {
               return (
-                <Toolbar2
+                <DesignerToolBar
                   ref={toolbarRef}
                   appData={appData}
-                  downloadVibeUI={() => {
-                    const json = getDumpJson()
-                    const content = JSON.stringify(json, null, 2)
-                    const baseName = ctx.fileName ? ctx.fileName.replace(/\.[^.]+$/, '') : 'export'
-                    const fileName = `${baseName}.mybricks`
-                    const blob = new Blob([content], { type: 'application/json' })
-                    const url = window.URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = fileName
-                    document.body.appendChild(a)
-                    a.click()
-                    window.URL.revokeObjectURL(url)
-                    document.body.removeChild(a)
-                  }}
                   beforeToggleUnLock={beforeToggleUnLock}
                   onOperableChange={(operable) => {
                     setOperable(operable)
                     ctx.operable = operable
                   }}
                   onSave={save}
+                  moreActions={[
+                    {
+                      icon: <DownloadOutlined />,
+                      title: '导出ui文件',
+                      onClick: () => {
+                        const json = getDumpJson()
+                        const content = JSON.stringify(json, null, 2)
+                        const baseName = ctx.fileName ? ctx.fileName.replace(/\.[^.]+$/, '') : 'export'
+                        const fileName = `${baseName}.mybricks`
+                        const blob = new Blob([content], { type: 'application/json' })
+                        const url = window.URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = fileName
+                        document.body.appendChild(a)
+                        a.click()
+                        window.URL.revokeObjectURL(url)
+                        document.body.removeChild(a)
+                      }
+                    }
+                  ]}
                 />
               )
             }}

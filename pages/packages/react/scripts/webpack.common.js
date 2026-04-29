@@ -38,8 +38,8 @@ module.exports = {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
       '@': path.resolve(__dirname, '../../../src'),
-      "@mybricks/rxai": '/Users/cocolbell/Desktop/projects/mybricks/rxai/src/index',
-      "@mybricks/plugin-ai": '/Users/cocolbell/Desktop/projects/mybricks/plugin-ai/src/index'
+      '@mybricks/plugin-ai': path.resolve(__dirname, '../../../../../plugin-ai/packages/plugin/src/index'),
+      '@mybricks/sdk-for-app': path.resolve(__dirname, '../../../../../sdk-for-app/src')
     },
   },
   externals: [
