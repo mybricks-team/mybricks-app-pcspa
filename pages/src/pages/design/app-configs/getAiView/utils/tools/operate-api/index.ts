@@ -146,7 +146,7 @@ function summarizeApiDocs(apiDocs: ApiDocItem[]) {
   }
 
   return [
-    "已获取要接口信息，可用于后续 dataSource.js 和 setup.js 的生成：",
+    "已获取要接口信息，用于后续 dataSource.js 和 setup.js 的生成，此次作为服务端接口更新，之后不必再次调用\`operate-api\`（接口同步工具：",
     ...apiDocs.map((item, index) => {
       const response = ` \`\`\`js 返回参数shceme定义
       ${item.response ? JSON.stringify(item.response, null, 2) : ""}
