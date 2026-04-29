@@ -14,4 +14,4 @@ import { Input } from '@tarojs/components'
 
 - 当有样式需求时，所有组件都可以使用className属性，可以自定义样式。
 
-- `Input` 设置 height 样式后不垂直居中时，优先用 line-height=height，其次用外层 flex align-items:center，或用 padding 微调。
+- `Input` 必须设置 `line-height` css样式，否则内容不会垂直居中
