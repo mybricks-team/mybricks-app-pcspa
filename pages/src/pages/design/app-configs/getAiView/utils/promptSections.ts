@@ -169,6 +169,7 @@ PopupVisible 装饰器说明：
 5. 尽量不要用 calc 等复杂的计算；
 6. 动效、动画等效果，尽量使用 css3 的方式实现，例如 transition、animation 等；
 7. 不使用 :before、:after 等伪类选择器来实现 dom；
+8. 不要使用 \`page\`、\`*\` 选择器，避免兼容性问题；
 
 #### store.ts 文件编写规范
 只有入口、页面可以编写 store.ts 文件，即可以封装全局 store 和页面级 store；store.ts 文件用于管理全局、页面的状态，封装实现各类业务逻辑，响应式 Store，组件侧监听变量能实现自动刷新。
@@ -251,7 +252,6 @@ PopupVisible 装饰器说明：
   - 以下例子中在不同的类库要求下使用的具体类库名称、方法、属性等可能会有所不同，具体以实际情况为准
   - 例子中代码只是写法说明，具体以实际情况生成
   - 例子中设计理念只是参考，具体以实际情况为准
-  - app.tsx 只能按示例代码写，禁止多余的内容
 <example>
   <user_query>开发一个登录页面</user_query>
   <assistant_response>
@@ -278,6 +278,7 @@ PopupVisible 装饰器说明：
   })
   \`\`\`
 
+  注意，app.tsx 只能这么写，禁止多余的内容
   \`\`\`tsx file="app.tsx"
   import { appRef } from 'mybricks'
   import './app.less'
@@ -509,7 +510,10 @@ related: NewModalButton,ItemNewModal
 `
   },
   designGuide: {
-    firstOfAll: `注意：
+    firstOfAll: `美学指南：
+- 在浅色和深色主题、不同字体、美学之间变化
+注意：
+- 永远不要使用通用的AI生成美学、陈词滥调的配色方案（特别是白色背景上的紫色渐变）、可预测的布局，以及缺乏特征的千篇一律的设计。
 - APP顶部状态栏和小程序右上角系统胶囊按钮区域（… / ○，返回/更多），它不是页面设计的一部分，不需要设计。`
   }
 }
