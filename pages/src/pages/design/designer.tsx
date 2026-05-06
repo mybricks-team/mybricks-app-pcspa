@@ -227,6 +227,10 @@ export default function MyDesigner({ appData: originAppData }) {
 
           operationList.current = []
 
+          if (name) {
+            ctx.fileName = name
+          }
+
           if (content) {
             setSaveTip(`改动已保存-${moment(new Date()).format('HH:mm')}`)
             toolbarRef.current.setSavedTime(Date.now())
