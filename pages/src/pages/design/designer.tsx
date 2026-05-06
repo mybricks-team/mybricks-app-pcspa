@@ -25,7 +25,7 @@ import {
 import { PreviewStorage } from './../../utils/previewStorage'
 import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
-import { createFromIconfontCN, InfoCircleTwoTone, DownloadOutlined } from '@ant-design/icons'
+import { createFromIconfontCN, InfoCircleTwoTone, DownloadOutlined, UploadOutlined } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
 import { usePageStayTime } from './utils/sendPageTimer'
 
@@ -1075,7 +1075,7 @@ export default function MyDesigner({ appData: originAppData }) {
                         const json = getDumpJson()
                         const content = JSON.stringify(json, null, 2)
                         const baseName = ctx.fileName ? ctx.fileName.replace(/\.[^.]+$/, '') : 'export'
-                        const fileName = `${baseName}.mybricks`
+                        const fileName = `${baseName}.ui`
                         const blob = new Blob([content], { type: 'application/json' })
                         const url = window.URL.createObjectURL(blob)
                         const a = document.createElement('a')
@@ -1085,6 +1085,45 @@ export default function MyDesigner({ appData: originAppData }) {
                         a.click()
                         window.URL.revokeObjectURL(url)
                         document.body.removeChild(a)
+                      }
+                    },
+                    {
+                      icon: <UploadOutlined />,
+                      title: '导入ui文件',
+                      onClick: () => {
+                        if (!operable || isDebugMode) {
+                          message.warn(!operable ? '请先点击右上角个人头像上锁获取页面编辑权限' : '请退出调试模式，再进行导入')
+                          return
+                        }
+                        const input = document.createElement('input')
+                        input.type = 'file'
+                        input.accept = '.ui'
+                        input.onchange = async (e: any) => {
+                          const file = e.target.files[0]
+                          if (!file) return
+                          const reader = new FileReader()
+                          reader.onload = async (ev) => {
+                            try {
+                              const text = ev.target.result as string
+                              const json = JSON.parse(text)
+                              const { content, pageConfig } = json
+                              const contentStr = JSON.stringify({ content, ...pageConfig })
+                              setSaveLoading(true)
+                              try {
+                                await ctx.save({ content: contentStr }, { saveType: 'import' })
+                              } finally {
+                                setSaveLoading(false)
+                              }
+                            } catch (err) {
+                              message.error('导入失败：文件格式不正确')
+                              console.error(err)
+                            }
+                          }
+                          reader.readAsText(file)
+                        }
+                        document.body.appendChild(input)
+                        input.click()
+                        document.body.removeChild(input)
                       }
                     }
                   ]}
