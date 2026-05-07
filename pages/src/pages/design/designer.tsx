@@ -69,6 +69,35 @@ const getAppSetting = async () => {
   return settings[APP_NAME]?.config
 }
 
+async function getOrCreateDir(
+  root: FileSystemDirectoryHandle,
+  path: string,
+): Promise<FileSystemDirectoryHandle> {
+  const parts = path.split('/').filter(Boolean)
+  let current = root
+  for (const part of parts) {
+    current = await current.getDirectoryHandle(part, { create: true })
+  }
+  return current
+}
+
+async function writeFile(
+  root: FileSystemDirectoryHandle,
+  filePath: string,
+  content: string,
+): Promise<void> {
+  const parts = filePath.split('/')
+  const fileName = parts.pop() ?? ''
+  if (!fileName) return
+  const dir =
+    parts.length > 0 ? await getOrCreateDir(root, parts.join('/')) : root
+
+  const fileHandle = await dir.getFileHandle(fileName, { create: true })
+  const writable = await fileHandle.createWritable()
+  await writable.write(content)
+  await writable.close()
+}
+
 export default function MyDesigner({ appData: originAppData }) {
   const toolbarRef = useRef()
   const titleRef = useRef()
@@ -1126,6 +1155,117 @@ export default function MyDesigner({ appData: originAppData }) {
                         document.body.removeChild(input)
                       }
                     }
+                  ]}
+                  exportActions={[
+                    {
+                      title: '源代码',
+                      onClick: async () => {
+                        const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
+                        if (!coms) {
+                          return message.warn('源代码为空，暂无可下载的内容!')
+                        }
+
+                        const comId = Object.keys(coms)[0]
+                        if (!comId) {
+                          return message.warn('源代码为空，暂无可下载的内容!')
+                        }
+
+                        const files = (window as any)._forApp_[comId].getFiles()
+
+                        if (!files.length) {
+                          return message.warn('源代码为空，暂无可下载的内容!')
+                        }
+
+                        let rootDir: FileSystemDirectoryHandle
+                        try {
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          rootDir = await (window as any).showDirectoryPicker({
+                            mode: 'readwrite',
+                          })
+                        } catch {
+                          // 用户取消选择，静默退出
+                          return
+                        }
+
+                        // 5. 在选择的目录下创建 App 文件夹
+                        const projectName = 'App'
+                        const appDir = await rootDir.getDirectoryHandle(projectName, {
+                          create: true,
+                        })
+
+                        const messageKey = 'export-source-code'
+                        message.open({
+                          key: messageKey,
+                          type: 'loading',
+                          content: '正在导出源代码...',
+                          duration: 0,
+                        })
+
+                        try {
+                          for (let i = 0; i < files.length; i++) {
+                            const file = files[i]
+                            message.open({
+                              key: messageKey,
+                              type: 'loading',
+                              content: `正在导出源代码 (${i + 1}/${files.length})...`,
+                              duration: 0,
+                            })
+                            await writeFile(appDir, file.fileName, file.content)
+                          }
+                          message.open({
+                            key: messageKey,
+                            type: 'success',
+                            content: `源代码下载成功！共导出 ${files.length} 个文件`,
+                            duration: 2,
+                          })
+                        } catch (err) {
+                          message.open({
+                            key: messageKey,
+                            type: 'error',
+                            content: '源代码导出失败',
+                            duration: 2,
+                          })
+                          console.error(err)
+                        }
+                      }
+                    },
+                    {
+                      title: 'PRD',
+                      onClick: () => {
+                        const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
+                        if (!coms) {
+                          return message.warn('PRD文档不存在!')
+                        }
+
+                        const comId = Object.keys(coms)[0]
+                        if (!comId) {
+                          return message.warn('PRD文档不存在!')
+                        }
+
+                        const files = (window as any)._forApp_[comId].getFiles()
+                        const prdFile = files.find(item => item.fileName === 'requirement.md')
+                        if (!prdFile) {
+                          return message.warn('PRD文档不存在!')
+                        }
+                        const prdContent = prdFile.content
+
+                        // 从 front matter 中提取 title
+                        // 格式: ---\ntitle: xxx\ndesc: xxx\n---
+
+                        const title = ctx.fileName?.replace(/\.[^.]+$/, '')
+                        const titleMatch = prdContent.match(/^---[\s\S]*?^title:\s*(.+?)$/m)
+                        const prdTitle = titleMatch ? titleMatch[1].trim() : title || 'PRD文档'
+                        // 下载为 Markdown 文件
+                        const blob = new Blob([prdContent], { type: 'text/markdown;charset=utf-8' })
+                        const url = URL.createObjectURL(blob)
+                        const anchor = document.createElement('a')
+                        anchor.href = url
+                        anchor.download = `${prdTitle}-PRD文档.md`
+                        anchor.click()
+                        URL.revokeObjectURL(url)
+                        message.success('PRD 文档下载成功')
+                      }
+                    },
                   ]}
                 />
               )
