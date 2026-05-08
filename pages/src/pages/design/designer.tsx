@@ -975,7 +975,7 @@ export default function MyDesigner({ appData: originAppData }) {
         }
 
         // 2. 从 json 中提取文件名并保存（仅当当前文件名为「未命名文件」时）
-        if (json && ctx.fileName === '未命名文件') {
+        if (json) {
           try {
             // 从所有 scenes 的 coms 中收集 files
             const allFiles: any[] = []
