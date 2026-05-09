@@ -25,7 +25,7 @@ import {
 import { PreviewStorage } from './../../utils/previewStorage'
 import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
-import { createFromIconfontCN, InfoCircleTwoTone, DownloadOutlined, UploadOutlined } from '@ant-design/icons'
+import { createFromIconfontCN, InfoCircleTwoTone, DownloadOutlined, UploadOutlined, CloudUploadOutlined } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
 import { usePageStayTime } from './utils/sendPageTimer'
 
@@ -56,6 +56,7 @@ import { sendPageDeps } from './utils/sendPageDeps'
 import { BranchMergeModal } from './components/branch-merge-modal'
 import { useBranch } from './hooks/useBranch'
 import { DesignerTitleBar, DesignerToolBar } from '@mybricks/sdk-for-app/ui'
+import { usePublishPage } from './hooks/usePublishPage'
 
 const msgSaveKey = 'save'
 
@@ -469,6 +470,14 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     beforeUnloadRef.current = beforeunload
   }, [beforeunload])
+
+  const { handleDownloadHtml, downloadHtmlLoading } = usePublishPage({
+    vbDesignContext: {},
+    chatId: ctx.fileId,
+    getTitle() {
+      return ctx.fileName
+    }
+  })
 
   const getToJSON = () => {
     try {
@@ -1157,6 +1166,28 @@ export default function MyDesigner({ appData: originAppData }) {
                     }
                   ]}
                   exportActions={[
+                    {
+                      title: 'HTML',
+                      onClick: async () => {
+                        const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
+                        if (!coms) {
+                          return message.warn('源代码为空，暂无可下载的内容!')
+                        }
+
+                        const comId = Object.keys(coms)[0]
+                        if (!comId) {
+                          return message.warn('源代码为空，暂无可下载的内容!')
+                        }
+
+                        const files = (window as any)._forApp_[comId].getFiles()
+
+                        if (!files.length) {
+                          return message.warn('源代码为空，暂无可下载的内容!')
+                        }
+
+                        await handleDownloadHtml()
+                      }
+                    },
                     {
                       title: '源代码',
                       onClick: async () => {
