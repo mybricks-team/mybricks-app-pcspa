@@ -4,45 +4,26 @@ import { buildVibePreviewHtml } from './buildPreviewHtml'
 import {
   getVibePublishSourceList,
 } from './getPublishSource'
+import axios from 'axios'
 
 interface UsePublishPageOptions {
-  visible?: boolean
   chatId: number | string
-  userId?: string
-  target?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   vbDesignContext?: any
   getTitle: () => string
+  ctx: any
 }
 
 export function usePublishPage({
-  visible,
   chatId,
-  userId,
-  target,
   vbDesignContext,
-  getTitle
+  getTitle,
+  ctx
 }: UsePublishPageOptions) {
   const [downloadHtmlLoading, setDownloadHtmlLoading] = useState(false)
 
   const handleDownloadHtml = useCallback(async () => {
     setDownloadHtmlLoading(true)
     try {
-      // 先调用接口判断内容有效性
-      // try {
-      //   const contentRes = await getLatestContent(Number(chatId), userId)
-      //   const isNoValidContent = !contentRes?.id || !contentRes?.version
-      //   if (isNoValidContent) {
-      //     message.warning('请先编辑并保存后再下载 HTML')
-      //     return
-      //   }
-      // } catch {
-      //   message.warning('无有效内容，请先编辑并保存后再下载')
-      //   return
-      // }
-
-      // 获取源代码列表
-
       let sourceList: Awaited<ReturnType<typeof getVibePublishSourceList>>
       try {
         sourceList = await getVibePublishSourceList()
@@ -57,16 +38,14 @@ export function usePublishPage({
 
       const source = sourceList[0]
       const title = getTitle()
-      const pageName = source.name || title || '未命名页面'
+      const pageName = title || '未命名页面'
       const assetOwnerId = String(chatId)
       const finalTitle = pageName
 
       const htmlContent = await buildVibePreviewHtml({
         title: finalTitle,
         source,
-        target,
         chatId,
-        userId,
         assetOwnerId,
         vbDesignContext,
         enableVibeProxy: false,
@@ -87,10 +66,59 @@ export function usePublishPage({
     } finally {
       setDownloadHtmlLoading(false)
     }
-  }, [userId, chatId, target, vbDesignContext])
+  }, [chatId, vbDesignContext])
+
+  const [publishLoading, setPublishLoading] = useState(false)
+
+  const handlePublish = useCallback(async ({ next }) => {
+    setPublishLoading(true)
+    try {
+      let sourceList: Awaited<ReturnType<typeof getVibePublishSourceList>>
+      try {
+        sourceList = await getVibePublishSourceList()
+        if (!sourceList.length) {
+          message.warning('源代码为空，暂无可发布的内容')
+          return
+        }
+      } catch {
+        message.warning('获取源代码失败，源代码为空')
+        return
+      }
+
+      const source = sourceList[0]
+      const title = getTitle()
+      const pageName = title || '未命名页面'
+      const assetOwnerId = String(chatId)
+      const finalTitle = pageName
+
+      const htmlContent = await buildVibePreviewHtml({
+        title: finalTitle,
+        source,
+        chatId,
+        assetOwnerId,
+        vbDesignContext,
+        enableVibeProxy: false,
+      })
+
+      const publishRes = await axios.post('/api/pcpage/vibepublish', {
+        userId: ctx.user?.id,
+        fileId: ctx.fileId,
+        html: htmlContent
+      })
+      next(publishRes.data.data.url)
+      message.success('发布成功')
+    } catch (error) {
+      console.error('[usePublishPage] publish error:', error)
+      message.error('发布失败，请重试')
+    } finally {
+      setPublishLoading(false)
+    }
+  }, [chatId, vbDesignContext])
 
   return {
     handleDownloadHtml,
     downloadHtmlLoading,
+    handlePublish,
+    publishLoading
   }
 }

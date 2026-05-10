@@ -36,6 +36,7 @@ module.exports = merge(common, {
           '/api/pcpage/download-product',
           '/api/pcpage/publishToCom',
           '/api/pcpage/publishToComDownload',
+          '/api/pcpage/vibepublish'
         ],
         // target: 'https://my.mybricks.world',
         target: 'http://localhost:9002/mybricks-app-pcspa',

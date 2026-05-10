@@ -23,6 +23,7 @@ import { Response } from "express";
 import * as os from "os";
 import * as mkdirp from "mkdirp";
 import { rimrafSync } from "./tools";
+import API from '@mybricks/sdk-for-app/api'
 
 const archiver = require("archiver");
 
@@ -449,6 +450,56 @@ export default class PcPageController {
         code: -1,
         message: error.message || "出码失败",
       });
+    }
+  }
+
+  @Post('/vibepublish')
+  async vibepublish(
+    @Body('userId') userId: string,
+    @Body('fileId') fileId: number,
+    @Body('html') html: any,
+    @Req() req: any
+  ) {
+    Logger.info(`0:[vibepublish] ${userId} - ${fileId}`)
+
+    // const htmlToOSS: any = await API.Upload.toOss({
+    //   content: html,
+    //   folderPath: `/vibe/pc/publish/${fileId}`,
+    //   fileName: `helloworld.html`,
+    //   noHash: true
+    // });
+
+    const htmlToOSS: any = await API.Upload.staticServer({
+      content: html,
+      folderPath: `/vibe/pc/publish/${fileId}`,
+      fileName: 'index.html',
+      noHash: true
+    });
+
+    Logger.info(`1:[vibepublish] 上传html:${htmlToOSS.url}`)
+
+    const url = `https://my.mybricks.world${htmlToOSS.url}`
+
+    try {
+      // @ts-ignore
+      await API.File.publish({
+        userId,
+        fileId,
+        extName: 'pc-page',
+        content: url
+      })
+
+      Logger.info(`2:[vibepublish] 调用API.File.publish成功`)
+    } catch (e) {
+      Logger.info(`3-[vibepublish] 调用API.File.publish失败: ${e?.message || e}`)
+    }
+
+    return {
+      code: 1,
+      data: {
+        url
+      },
+      message: null
     }
   }
 }

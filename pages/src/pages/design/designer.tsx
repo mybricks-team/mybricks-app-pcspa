@@ -11,8 +11,6 @@ import { fAxios } from '../../services/http'
 import moment from 'moment'
 import { message, Modal, Tooltip } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
-// import API from '../../../../../sdk-for-app/src/api'
-import { Locker, Toolbar } from '@mybricks/sdk-for-app/ui'
 import config from './app-configs/index'
 import { fetchPlugins, removeBadChar } from '../../utils'
 import {
@@ -57,6 +55,7 @@ import { BranchMergeModal } from './components/branch-merge-modal'
 import { useBranch } from './hooks/useBranch'
 import { DesignerTitleBar, DesignerToolBar } from '@mybricks/sdk-for-app/ui'
 import { usePublishPage } from './hooks/usePublishPage'
+import PublishPageModal from './components/PublishPageModal'
 
 const msgSaveKey = 'save'
 
@@ -106,6 +105,8 @@ export default function MyDesigner({ appData: originAppData }) {
   window._disableSmartLayout = originAppData?.config?.['mybricks-app-pcspa']?.config?.feature?.disableSmartLayout; // 是否禁用智能布局
 
   const { branchInfo, branchName, mainFileId, getBranchInfoByMainFileId, getMainFileId } = useBranch()
+
+  const [publishPageModalVisible, setPublishPageModalVisible] = useState(false)
 
   const appData = useMemo(() => {
     let data = { ...originAppData }
@@ -325,8 +326,6 @@ export default function MyDesigner({ appData: originAppData }) {
   const [SPADesigner, setSPADesigner] = useState(null)
   const [remotePlugins, setRemotePlugins] = useState(null)
   const [builtPlugins, setBuildPlugins] = useState(null);
-  const [publishModalVisible, setPublishModalVisible] = useState(false)
-  const [branchModalVisible, setBranchModalVisible] = useState(false)
   const [isDebugMode, setIsDebugMode] = useState(false)
   const operationList = useRef<any[]>([])
   const fileDBRef = useRef(null)
@@ -476,7 +475,8 @@ export default function MyDesigner({ appData: originAppData }) {
     chatId: ctx.fileId,
     getTitle() {
       return ctx.fileName
-    }
+    },
+    ctx
   })
 
   const getToJSON = () => {
@@ -1163,6 +1163,28 @@ export default function MyDesigner({ appData: originAppData }) {
                         input.click()
                         document.body.removeChild(input)
                       }
+                    },
+                    {
+                      icon: <CloudUploadOutlined />,
+                      title: '发布',
+                      onClick: () => {
+                        const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
+                        if (!coms) {
+                          return message.warn('源代码为空，暂无可发布的内容!')
+                        }
+
+                        const comId = Object.keys(coms)[0]
+                        if (!comId) {
+                          return message.warn('源代码为空，暂无可发布的内容!')
+                        }
+
+                        const files = (window as any)._forApp_[comId].getFiles()
+
+                        if (!files.length) {
+                          return message.warn('源代码为空，暂无可发布的内容!')
+                        }
+                        setPublishPageModalVisible(true)
+                      }
                     }
                   ]}
                   exportActions={[
@@ -1339,150 +1361,18 @@ export default function MyDesigner({ appData: originAppData }) {
 
   return (
     <div className={`${css.view} fangzhou-theme`}>
-      {/* <Toolbar
-        title={ctx.fileName}
-        updateInfo={
-          <Toolbar.LastUpdate
-            content={saveTip}
-            onClick={handleSwitch2SaveVersion}
-            isModify={beforeunload}
-          />
-        }
-      >
-        <Toolbar.Tips />
-        {!isPreview && RenderLocker}
-        {!isPreview && (
-          <>
-            {branchInfo && branchInfo.length > 0 && (
-              <div
-                data-mybricks-tip={`{content:'分支合并',position:'bottom'}`}
-                className={
-                  classNames({
-                    [css.publish_btn]: true,
-                    [css.btn_disable]: !operable || isDebugMode
-                  })
-                }
-                onClick={() => {
-                  if (!operable || isDebugMode || !designerRef.current) return
-                  setBranchModalVisible(true)
-                }}>
-                {branch_icon}
-              </div>
-            )}
-            <Toolbar.Save
-              disabled={!operable || isDebugMode}
-              loading={saveLoading}
-              onClick={() => {
-                save()
-              }}
-              dotTip={beforeunload}
-            />
-
-            <div
-              data-mybricks-tip={`{content:'预览',position:'bottom'}`}
-              className={
-                classNames({
-                  [css.preview_btn]: true,
-                  [css.btn_disable]: isDebugMode
-                })
-              }
-              onClick={() => {
-                if (isDebugMode) return
-                //在调试模式，不给点击
-                preview()
-              }}>
-              {preview_icon}
-            </div>
-
-            <div
-              data-mybricks-tip={`{content:'发布',position:'bottom'}`}
-              className={
-                classNames({
-                  [css.publish_btn]: true,
-                  [css.btn_disable]: !operable || isDebugMode
-                })
-              }
-              onClick={() => {
-                if (!operable || isDebugMode) return
-                //在调试模式，不给点击
-                setPublishModalVisible(true)
-              }}>
-              {publish_icon}
-            </div>
-
-            <div
-              data-mybricks-tip={`{content:'在 IDE 中打开',position:'bottom'}`}
-              className={
-                classNames({
-                  [css.code_btn]: true,
-                  [css.btn_disable]: isDebugMode
-                })
-              }
-              onClick={() => {
-                if (isDebugMode) return
-                const json = getDumpJson()
-                const content = JSON.stringify(json, null, 2)
-                const baseName = ctx.fileName ? ctx.fileName.replace(/\.[^.]+$/, '') : 'export'
-                const fileName = `${baseName}.mybricks`
-                const blob = new Blob([content], { type: 'application/json' })
-                const url = window.URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = fileName
-                document.body.appendChild(a)
-                a.click()
-                window.URL.revokeObjectURL(url)
-                document.body.removeChild(a)
-              }}>
-              {code_icon}
-            </div>
-
-          </>
-        )}
-        <div className={`${isPreview ? css.toolbarWrapperPreview : ''}`}>
-          <Toolbar.Tools
-            onImport={async (dump) => {
-              await importDump(dump)
-              await save({ saveType: 'import' })
-            }}
-            getExportDumpJSON={() => {
-              return getDumpJson()
-            }}
-            getExportToJSON={() => {
-              return designerRef.current.toJSON()
-            }}
-          />
-        </div>
-      </Toolbar> */}
       <div className={css.designer}>{TrueDesigner}</div>
-      <PublishModal
-        envList={ctx.envList}
-        branchName={branchName}
-        projectId={ctx.sdk.projectId}
-        visible={publishModalVisible}
-        onOk={(publishConfig) => {
-          publish(publishConfig)
-          setPublishModalVisible(false)
+      <PublishPageModal
+        visible={publishPageModalVisible}
+        getTitle={() => {
+          return ctx.fileName
         }}
-        onOkAndDownload={async (publishConfig) => {
-          publishAndDownload(publishConfig)
-          setPublishModalVisible(false)
+        onCancel={() => {
+          setPublishPageModalVisible(false)
         }}
-        onCancel={() => setPublishModalVisible(false)}
+        ctx={ctx}
+        fileId={ctx.fileId}
       />
-      {
-        branchModalVisible && <BranchMergeModal
-          open={branchModalVisible}
-          fileId={appData?.fileId}
-          designerInstance={designerRef.current}
-          onCancel={() => setBranchModalVisible(false)}
-          onConfirm={async (dump: any) => {
-            await importDump(dump)
-            setBranchModalVisible(false)
-            await save({ saveType: 'import' })
-          }}
-        />
-      }
     </div>
   )
 }
