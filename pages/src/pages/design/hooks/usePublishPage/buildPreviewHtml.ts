@@ -438,12 +438,18 @@ function buildCodeMap(source: VibePublishSourceItem): Record<string, string> {
       if (file.path === 'index.jsx' || file.path === 'index.tsx') {
         acc[file.path] = `
         import {activate} from './mybricks-testing'
+        import { setAppContextDefaults } from '@mybricks/ai-render'
+
+        setAppContextDefaults({
+          _renderType: "application",
+          _router: "hash"
+        })
 
         ${source.files.some(f => f.path === 'setup.ts' || f.path === 'setup.js') ? `import "./setup"` : ''}
 
         // 初始化时读取 URL 参数
         const __vibeDesignEnv = new URLSearchParams(window.location.search).get('env')
-        if (__vibeDesignEnv === 'mock') {
+        if (!__vibeDesignEnv || __vibeDesignEnv === 'mock') {
           activate('mock')
         }
 
