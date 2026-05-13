@@ -524,11 +524,6 @@ export const buildVibePreviewHtml = async ({
   ${enableVibeProxy ? VIBE_PROXY_SCRIPT : ''}
   </script>
   ${headStyles}
-  <style>
-  body, html {
-    overflow: hidden;
-  }
-  </style>
   ${headScripts}
   <script>
   window.react_jsx_runtime = {
