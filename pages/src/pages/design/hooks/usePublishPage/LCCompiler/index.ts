@@ -116,8 +116,8 @@ import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
 import Component from './index';
-import zhCN from '@m-ui/react/es/locale/zh_CN';
-import { ConfigProvider } from '@m-ui/react';
+import zhCN from 'antd/es/locale/zh_CN';
+import { ConfigProvider } from 'antd';
 
 
 class ErrorBoundary extends React.Component {
@@ -155,48 +155,20 @@ const RenderTracker = ({ children }) => {
 };
 
 // props中会调用message，需要提前定义到windows中
-window.message = window['@m-ui/react'] ? window['@m-ui/react'].message : (msg) => { alert(msg); };
+window.message = window['antd'] ? window['antd'].message : (msg) => { alert(msg); };
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
       <RenderTracker>
-        ${target === 'react' ? `<ConfigProvider locale={zhCN}>` : ''}
-        <Component {...${this.getComponentPropsString(componentInfo)}} />
-        ${target === 'react' ? `</ConfigProvider>` : ''}
+        <ConfigProvider locale={zhCN}>
+          <Component {...${this.getComponentPropsString(componentInfo)}} />
+        </ConfigProvider>
       </RenderTracker>
     </ErrorBoundary>
   </React.StrictMode>
 );
 `
-
-    if (target === 'nexus') {
-      entryCode = `
-import React, { useState } from 'react'
-import ReactDOM from 'react-dom'
-import Component from './index'
-import { ConfigProvider } from '@m-ui/react';
-import zhCN from '@m-ui/react/es/locale/zh_CN';
-// props中会调用message，需要提前定义到windows中
-    window.message = window['@m-ui/react'] ? window['@m-ui/react'].message : (msg) => {alert(msg)}
-export const Entry = () => {
-  const [value, setValue] = useState(undefined)
-  const onChange = (v: any) => {
-    setValue(v)
-  }
-  return (
-    <ConfigProvider locale={zhCN}>
-      <Component {...${this.getComponentPropsString(componentInfo)}} value={value} onChange={onChange} />
-    </ConfigProvider>
-  )
-}
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <Entry />
-  </React.StrictMode>
-)
-`
-    }
     return entryCode
   }
 }
