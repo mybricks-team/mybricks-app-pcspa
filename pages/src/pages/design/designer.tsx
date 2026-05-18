@@ -23,7 +23,7 @@ import {
 import { PreviewStorage } from './../../utils/previewStorage'
 import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
-import { createFromIconfontCN, InfoCircleTwoTone, DownloadOutlined, UploadOutlined, CloudUploadOutlined } from '@ant-design/icons'
+import { createFromIconfontCN, InfoCircleTwoTone, DownloadOutlined, UploadOutlined, CloudUploadOutlined, DeleteOutlined } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
 import { usePageStayTime } from './utils/sendPageTimer'
 
@@ -336,7 +336,7 @@ export default function MyDesigner({ appData: originAppData }) {
     if (ctx.debug && localStorage.getItem('__DEBUG_DESIGNER__')) {
       return localStorage.getItem('__DEBUG_DESIGNER__')
     }
-    // return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.916.t1/index.min.js'
+    // return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.943.t5/index.min.js'
     return appConfig.designer?.url || DESIGNER_STATIC_PATH
   }, [appConfig])
 
@@ -1139,8 +1139,8 @@ export default function MyDesigner({ appData: originAppData }) {
                       icon: <UploadOutlined />,
                       title: '导入ui文件',
                       onClick: () => {
-                        if (!operable || isDebugMode) {
-                          message.warn(!operable ? '请先点击右上角个人头像上锁获取页面编辑权限' : '请退出调试模式，再进行导入')
+                        if (!ctx.operable || isDebugMode) {
+                          message.warn(!ctx.operable ? '请先点击右上角个人头像上锁获取页面编辑权限' : '请退出调试模式，再进行导入')
                           return
                         }
                         const input = document.createElement('input')
@@ -1174,6 +1174,22 @@ export default function MyDesigner({ appData: originAppData }) {
                         document.body.removeChild(input)
                       }
                     },
+                    // {
+                    //   icon: <DeleteOutlined />,
+                    //   title: '清空画布',
+                    //   onClick: async () => {
+                    //     if (!ctx.operable || isDebugMode) {
+                    //       message.warn(!ctx.operable ? '请先点击右上角个人头像上锁获取页面编辑权限' : '请退出调试模式，再进行操作')
+                    //       return
+                    //     }
+                    //     setSaveLoading(true)
+                    //     try {
+                    //       await ctx.save({ content: '{}' }, { saveType: 'import' })
+                    //     } finally {
+                    //       setSaveLoading(false)
+                    //     }
+                    //   }
+                    // },
                     {
                       icon: <CloudUploadOutlined />,
                       title: '发布',

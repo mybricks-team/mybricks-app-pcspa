@@ -12,13 +12,14 @@ function getGenerationStrategy(): 'ai' | 'atomic' {
   return hasLite && hasAi ? 'ai' : 'atomic'
 }
 
-export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config }: any) => AIPlugin({
+export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config, plugins = [] }: any) => AIPlugin({
   // requestAsStream,
   user,
   isMutiCanvas: false,
   deviceType: 'desktop',
   config,
   key,
+  plugins,
   onRequest: (params) => {
     return createRequestAsStream({ useInfra: false })?.(params)
   },
