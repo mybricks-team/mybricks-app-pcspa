@@ -378,7 +378,7 @@ export default function nocobaseConfigPlugin() {
   return {
     name: PLUGIN_NAME,
     namespace: PLUGIN_NAME,
-    title: "连接nocobase",
+    title: "示例插件",
     description: "让 AI 可以自主发现 NocoBase 的业务接口",
     data,
     onLoad({ data }) {

@@ -1174,22 +1174,22 @@ export default function MyDesigner({ appData: originAppData }) {
                         document.body.removeChild(input)
                       }
                     },
-                    // {
-                    //   icon: <DeleteOutlined />,
-                    //   title: '清空画布',
-                    //   onClick: async () => {
-                    //     if (!ctx.operable || isDebugMode) {
-                    //       message.warn(!ctx.operable ? '请先点击右上角个人头像上锁获取页面编辑权限' : '请退出调试模式，再进行操作')
-                    //       return
-                    //     }
-                    //     setSaveLoading(true)
-                    //     try {
-                    //       await ctx.save({ content: '{}' }, { saveType: 'import' })
-                    //     } finally {
-                    //       setSaveLoading(false)
-                    //     }
-                    //   }
-                    // },
+                    ...(APP_ENV !== 'production' ? [{
+                      icon: <DeleteOutlined />,
+                      title: '清空画布',
+                      onClick: async () => {
+                        if (!ctx.operable || isDebugMode) {
+                          message.warn(!ctx.operable ? '请先点击右上角个人头像上锁获取页面编辑权限' : '请退出调试模式，再进行操作')
+                          return
+                        }
+                        setSaveLoading(true)
+                        try {
+                          await ctx.save({ content: '{}' }, { saveType: 'import' })
+                        } finally {
+                          setSaveLoading(false)
+                        }
+                      }
+                    }] : []),
                     {
                       icon: <CloudUploadOutlined />,
                       title: '发布',
