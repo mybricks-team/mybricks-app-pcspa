@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { usePublishPage } from '../../hooks/usePublishPage'
 import style from './index.less'
 import axios from 'axios'
+import { copyText } from '@/utils'
 
 interface PublishPageModalProps {
   visible: boolean
@@ -37,11 +38,12 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
       setTitle(getTitle())
       if (!publishUrl) {
         axios.get(
-          `/paas/api/workspace/publish/versions?fileId=${fileId}&pageSize=${1}&pageIndex=${1}`
+          `/api/pcpage/getVibePublishUrl/${fileId}`
         ).then((res) => {
-          const list = res.data.data;
-          if (list.length) {
-            setPublishUrl(`https://my.mybricks.world/mfs/vibe/pc/publish/${fileId}/index.html?env=mock`)
+          console.log(res)
+          const data = res.data.data;
+          if (data && data.url) {
+            setPublishUrl(`${data.url}?env=mock`)
           }
         }).catch((e) => {
           console.error(e)
@@ -84,7 +86,7 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
 
   const onCopy = async (url: string) => {
     if (!url) return
-    await navigator.clipboard.writeText(url)
+    copyText(url)
     message.success('链接已复制到剪贴板')
   }
 

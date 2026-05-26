@@ -16,7 +16,7 @@ import Decorator from "@mybricks/sdk-for-app/decorator";
 import * as fs from "fs";
 import * as path from "path";
 import { getAppTypeFromTemplate } from "./tools/common";
-import { getAppAllConfig, getAppConfig, getGroupId } from "./tools/get-app-config";
+import { getAppAllConfig, getAppConfig, getCustomPublishApi, getGroupId } from "./tools/get-app-config";
 // import { generateToReactCode } from "@mybricks/to-code-react";
 
 import { Response } from "express";
@@ -24,6 +24,7 @@ import * as os from "os";
 import * as mkdirp from "mkdirp";
 import { rimrafSync } from "./tools";
 import API from '@mybricks/sdk-for-app/api'
+import { VIBE_ENV_TYPE } from "./service/vibePublish";
 
 const archiver = require("archiver");
 
@@ -460,47 +461,81 @@ export default class PcPageController {
     @Body('html') html: any,
     @Req() req: any
   ) {
-    Logger.info(`0:[vibepublish] ${userId} - ${fileId}`)
+    Logger.info(`0:[vibepublish] ${userId} - ${fileId}`);
 
-    // const htmlToOSS: any = await API.Upload.toOss({
-    //   content: html,
-    //   folderPath: `/vibe/pc/publish/${fileId}`,
-    //   fileName: `helloworld.html`,
-    //   noHash: true
-    // });
+    const referer = req.headers.referer || req.headers.referrer;
+    const baseUrl = referer || req.headers.origin;
+    const customApiUrl = await getCustomPublishApi()
+    let uploadUrl = '';
+    if (!customApiUrl) {
+      const htmlToOSS: any = await API.Upload.staticServer({
+        content: html,
+        folderPath: `/vibe/pc/publish/${fileId}`,
+        fileName: 'index.html',
+        noHash: true
+      });
 
-    const htmlToOSS: any = await API.Upload.staticServer({
-      content: html,
-      folderPath: `/vibe/pc/publish/${fileId}`,
-      fileName: 'index.html',
-      noHash: true
-    });
+      Logger.info(`1:[vibepublish] 上传html:${htmlToOSS.url}`)
 
-    Logger.info(`1:[vibepublish] 上传html:${htmlToOSS.url}`)
+      uploadUrl = `${baseUrl}${htmlToOSS.url}`
+    } else {
+      const groupId = await getGroupId(fileId);
+      const result = await this.service.vibepublish({
+        userId,
+        fileId,
+        html,
+        baseUrl,
+        groupId: String(groupId),
+        customApiUrl,
+      });
+      uploadUrl = result.uploadUrl || '';
+    }
 
-    const url = `https://my.mybricks.world${htmlToOSS.url}`
+    if (!uploadUrl) {
+      throw new Error('vibepublish 上传结果未包含有效 url');
+    }
 
     try {
       // @ts-ignore
       await API.File.publish({
         userId,
         fileId,
-        extName: 'pc-page',
-        content: url
-      })
+        extName: VIBE_ENV_TYPE,
+        content: uploadUrl,
+      });
 
-      Logger.info(`2:[vibepublish] 调用API.File.publish成功`)
+      Logger.info(`2:[vibepublish] 调用API.File.publish成功`);
     } catch (e) {
-      Logger.info(`3-[vibepublish] 调用API.File.publish失败: ${e?.message || e}`)
+      Logger.info(`3-[vibepublish] 调用API.File.publish失败: ${e?.message || e}`);
     }
 
     return {
       code: 1,
       data: {
-        url
+        url: uploadUrl,
       },
-      message: null
-    }
+      message: null,
+    };
+  }
+
+  @Get('/getVibePublishUrl/:fileId')
+  async getVibePublishUrl(
+    @Param('fileId') fileId: number,
+    @Req() req: any
+  ) {
+    const pubInfo = await API.File.getLatestPub({
+      fileId,
+    });
+
+    const latestPub = pubInfo?.[0];
+
+    return {
+      code: 1,
+      data: {
+        url: latestPub?.content || '',
+      },
+      message: null,
+    };
   }
 }
 

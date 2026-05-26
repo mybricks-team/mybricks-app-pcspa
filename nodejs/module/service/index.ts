@@ -5,6 +5,7 @@ import { upload } from "./upload";
 import { rollback } from "./rollback";
 import { downloadProduct } from "./download-product";
 import publishToCom from "./publishToCom";
+import { publishVibeHtml, VibePublishParams, VibePublishResult } from './vibePublish';
 
 @Injectable()
 export default class PcPageService {
@@ -40,5 +41,9 @@ export default class PcPageService {
     const { json, userId, envType, fileId, componentName, hostname, toLocalType, origin, staticResourceToCDN } = params
 
     return await publishToCom({ json, userId, envType, fileId, componentName, hostname, toLocalType, origin, staticResourceToCDN })
+  }
+
+  async vibepublish(params: VibePublishParams): Promise<VibePublishResult> {
+    return await publishVibeHtml(params);
   }
 }
