@@ -19,7 +19,7 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
   deviceType: 'desktop',
   config,
   key,
-  // plugins,
+  plugins,
   // onRequest: (params) => {
   //   return createRequestAsStream({ useInfra: false })?.(params)
   // },

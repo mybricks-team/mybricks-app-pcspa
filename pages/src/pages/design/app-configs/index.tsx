@@ -52,6 +52,7 @@ import AIPlugin from './getAiView/utils/get-ai-plugin'
 import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
 import cloudTpt from "./cloudTpt";
 import nocobaseConfigPlugin from "./nocobase";
+import manateeConfigPlugin  from './manateeai'
 
 // const getComs = () => {
 //   const comDefs = {}
@@ -303,6 +304,7 @@ export default function appConfig(
   })
 
   const nocobasePlugin = nocobaseConfigPlugin();
+  const manateeaiPlugin = manateeConfigPlugin();
 
   return {
     // debugger(json, opts) {
@@ -420,7 +422,7 @@ export default function appConfig(
         },
         guidePrompt: ctx?.appConfig?.ai?.systemScenePrompt,
         key: ctx.fileId,
-        plugins: [nocobasePlugin.ai],
+        plugins: [nocobasePlugin.ai, manateeaiPlugin.ai],
         config: {
           enabledActionTags: ctx?.appConfig?.ai?.enabledActionTags
         }
@@ -504,6 +506,7 @@ export default function appConfig(
       //   type: "spa",
       // }),
       nocobasePlugin,
+      manateeaiPlugin,
       // pluginDomain()
     ],
     // ...(ctx.hasMaterialApp
