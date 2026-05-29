@@ -31,7 +31,7 @@ const Titlebar = forwardRef<TitlebarRef, ToolbarProps>(
       <div
         className={`${styles['toolbar-left']}`}
       >
-        <div
+        {/* <div
           className={styles['brand']}
           onClick={handleToHome}
         >
@@ -52,7 +52,7 @@ const Titlebar = forwardRef<TitlebarRef, ToolbarProps>(
           >
             {title}
           </span>
-        </div>
+        </div> */}
       </div>
     )
   },
