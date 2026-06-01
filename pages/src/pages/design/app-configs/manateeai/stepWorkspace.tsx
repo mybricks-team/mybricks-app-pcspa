@@ -4,7 +4,6 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 import {
   ManateeConnector,
   ManateeWorkspaceOption,
-  MANATEE_ALL_WORKSPACE_VALUE,
 } from "./datasource";
 import styles from "./index.less";
 import { type ManateeConfigData } from "./index";
@@ -24,9 +23,8 @@ function getSelectedWorkspaceLabel(
   spaces: ManateeWorkspaceOption[],
   workspaceName: string,
 ): string {
-  if (workspaceName === MANATEE_ALL_WORKSPACE_VALUE) return "全部工作空间";
   const space = spaces.find((s) => s.label === workspaceName);
-  return space ? space.label : "全部工作空间";
+  return space ? space.label : "请指定工作空间";
 }
 
 function normalizeWorkspaceGroups(items: any[]): ManateeWorkspaceOption[] {
@@ -149,12 +147,13 @@ export const WorkspaceStep: React.FC<WorkspaceStepProps> = ({
     <div>
       {/* 返回第一步 */}
       
-      <div className={styles.subTitle}>
+      {/* <div className={styles.subTitle}>
          <span className={styles.sectionTitle}>工作空间</span>
          <Button className={styles.subTitleBtn} type="link" onClick={onBack} icon={<ArrowLeftOutlined />}>
           返回上一步
         </Button>
-      </div>
+      </div> */}
+      <div className={styles.sectionTitle} style={{ marginTop: 20 }}>工作空间</div>
       <div className={styles.description}>
         当前项目存在工作空间，接口将会以选择的工作空间来请求。
       </div>
@@ -168,7 +167,6 @@ export const WorkspaceStep: React.FC<WorkspaceStepProps> = ({
             value={workspaceName}
             onChange={(value:any, option) => handleWorkspaceChange(value, option)}
             options={[
-              { label: "全部工作空间", value: MANATEE_ALL_WORKSPACE_VALUE, key: MANATEE_ALL_WORKSPACE_VALUE },
               ...workspaces.map((workspace) => ({
                 label: workspace.label,
                 value: workspace.key,
@@ -184,7 +182,7 @@ export const WorkspaceStep: React.FC<WorkspaceStepProps> = ({
       </div>
 
       {/* 模块分组（可选） */}
-      <div className={styles.section} style={{ marginTop: 14 }}>
+       {/*<div className={styles.section} style={{ marginTop: 14 }}>
         <div className={styles.sectionTitle}>选择页面所属模块（可选）</div>
         <div className={styles.description}>
           进一步限定业务范围，让 AI 聚焦在特定分组上
@@ -204,7 +202,7 @@ export const WorkspaceStep: React.FC<WorkspaceStepProps> = ({
         {loadingGroups && (
           <div className={styles.fieldTip}>正在读取模块分组...</div>
         )}
-      </div>
+      </div> */}
 
       {/* 保存 */}
       <div className={styles.section} style={{ marginTop: 20 }}>

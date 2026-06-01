@@ -44,9 +44,9 @@ export function getSelectedWorkspaceLabel(
   spaces: ManateeWorkspaceOption[],
   workspaceName: string,
 ): string {
-  if (workspaceName === MANATEE_ALL_WORKSPACE_VALUE) return "全部工作空间";
+  if(!workspaceName) return "请指定工作空间";
   const space = spaces.find((s) => s.label === workspaceName);
-  return space ? getWorkspaceLabel(space) : "全部工作空间";
+  return space ? getWorkspaceLabel(space) : null;
 }
 
 // ==================== 步骤编排器 ====================
@@ -102,31 +102,23 @@ export function ManateeConfigPanel({ data }: { data: ManateeConfigData }) {
           <LinkOutlined style={{ marginRight: 6 }} />
           连接海牛
         </span>
-        {step === 2 && (
-          <span style={{ fontSize: 12, color: "#7a7f8a", fontWeight: 400 }}>
-            步骤 2/2
-          </span>
-        )}
       </div>
 
       <div className={styles.content}>
-        {step === 1 ? (
           <ConnectStep
             data={data}
             connector={connector}
             onChange={updateData}
             onSuccess={handleConnectSuccess}
           />
-        ) : (
-          <WorkspaceStep
+          {workspaces.length != 0 && <WorkspaceStep
             data={data}
             connector={connector}
             workspaces={workspaces}
             onChange={updateData}
             onBack={handleBack}
             onSave={handleSave}
-          />
-        )}
+          />}
       </div>
     </div>
   );
@@ -138,9 +130,9 @@ const PLUGIN_NAME = "@mybricks/plugins/manatee-connector";
 
 export default function manateeConfigPlugin() {
   const data: ManateeConfigData = {
-    domain: "http://localhost:9001/",
+    domain: "http://dev.manateeai.com/",
     apiKey: "27b6df7746667255824ccad97395b27b",
-    workspaceName: MANATEE_ALL_WORKSPACE_VALUE,
+    workspaceName: null,
   };
 
   // 插件级 connector（供 AI Tools 使用）

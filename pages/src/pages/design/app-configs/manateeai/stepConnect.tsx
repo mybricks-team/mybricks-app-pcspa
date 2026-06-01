@@ -127,7 +127,7 @@ export const ConnectStep: React.FC<ConnectStepProps> = ({
           status: "warning",
           title: "连接正常（未检测到工作空间）",
           detail: `未检测到工作空间。`,
-          suggestion: "如需使用工作空间隔离，请确认 API Key 有 workspaces:list 权限",
+          suggestion: "如需使用工作空间隔离，请确认 API Key 有权限",
         });
       }
 
@@ -232,7 +232,7 @@ export const ConnectStep: React.FC<ConnectStepProps> = ({
         disabled={testing}
         onClick={testConnection}
       >
-        {testing ? "测试中..." : "测试连接并继续"}
+        {testing ? "测试中..." : "测试连接"}
       </button>
 
       {/* 测试结果 */}
