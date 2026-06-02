@@ -547,7 +547,7 @@ export default function appConfig(
           title: "PC-AI组件库",
           type: "com_lib",
           namespace: "mybricks.normal-pc-lite",
-          editJs: 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.64/edit.6f4d84ae19038943.js',
+          editJs: 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.66/edit.js',
           // editJs: 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.52/edit.js',
         };
         const existing = baseComlibs.find(
