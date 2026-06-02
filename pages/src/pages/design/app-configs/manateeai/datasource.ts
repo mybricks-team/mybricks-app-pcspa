@@ -304,7 +304,6 @@ export class ManateeConnector {
 
       const headers = requestConfig.headers;
       if (headers instanceof axios.AxiosHeaders) {
-        headers.set("Token", config.apiKey);
         if (config.workspaceHeader) {
           headers.set("x-workspace-view", config.workspaceHeader);
         }
@@ -331,9 +330,12 @@ export class ManateeConnector {
     if(session) {
      session =  atob(atob(session))
     }
+    if(token) { 
+       token =  atob(atob(token))
+    }
     const headers = new Headers({
       Accept: "application/json",
-      Token: apiKey || token,
+      Token: token,
       Session: session
     });
 
@@ -353,7 +355,7 @@ export class ManateeConnector {
 
   async fetchSpaceTree(): Promise<ModuleTreeNode[]> {
     const config = this.getRuntimeConfig();
-    const cacheKey = `${config.baseUrl}:${config.workspaceHeader || "default"}:tree`;
+    const cacheKey = `${config.baseUrl}:tree`;
 
     const cached = this.moduleTreeCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
@@ -412,7 +414,7 @@ export class ManateeConnector {
 
   async fetchModuleTree(): Promise<ModuleTreeNode[]> {
     const config = this.getRuntimeConfig();
-    const cacheKey = `${config.baseUrl}:${config.workspaceHeader || "default"}:tree`;
+    const cacheKey = `${config.workspaceProjectId}:tree`;
 
     const cached = this.moduleTreeCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {

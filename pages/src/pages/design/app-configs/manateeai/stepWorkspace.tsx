@@ -13,18 +13,24 @@ interface WorkspaceStepProps {
   connector: ManateeConnector;
   workspaces: ManateeWorkspaceOption[];
   onChange: (updates: Partial<ManateeConfigData>) => void;
-  onBack: () => void;
   onSave: (updates: Partial<ManateeConfigData>) => void;
 }
 
 // ---------- 本地工具函数 ----------
 
-function getSelectedWorkspaceLabel(
+
+export function getSelectedWorkspaceLabel(
   spaces: ManateeWorkspaceOption[],
   workspaceName: string,
 ): string {
+  if(!workspaceName) return "请指定工作空间";
   const space = spaces.find((s) => s.label === workspaceName);
-  return space ? space.label : "请指定工作空间";
+  return space ? getWorkspaceLabel(space) : "请指定工作空间";
+}
+
+
+export function getWorkspaceLabel(space: ManateeWorkspaceOption): string {
+  return space.label;
 }
 
 function normalizeWorkspaceGroups(items: any[]): ManateeWorkspaceOption[] {
@@ -61,7 +67,6 @@ export const WorkspaceStep: React.FC<WorkspaceStepProps> = ({
   connector,
   workspaces,
   onChange,
-  onBack,
   onSave,
 }) => {
   const [workspaceName, setWorkspaceName] = useState(data.workspaceName);
@@ -77,10 +82,10 @@ export const WorkspaceStep: React.FC<WorkspaceStepProps> = ({
 
   // 加载模块分组（依赖当前选中的 workspaceName）
   useEffect(() => {
-    const currentDomain = data.domain?.trim() || "";
-    const currentApiKey = data.apiKey?.trim() || "";
+    // const currentDomain = data.domain?.trim() || "";
+    // const currentApiKey = data.apiKey?.trim() || "";
 
-    if (!/^https?:\/\/.+/i.test(currentDomain) || !currentApiKey || workspaces.length === 0) {
+    if (!data.workspaceProjectId || workspaces.length === 0) {
       setWorkspaceGroups([]);
       return;
     }
@@ -116,13 +121,13 @@ export const WorkspaceStep: React.FC<WorkspaceStepProps> = ({
   }, [data.domain, data.apiKey, data.workspaceHost, data.workspaceProjectId, workspaces.length, connector]);
 
   const handleWorkspaceChange = (value: any, option: any) => {
+    console.log(option)
     const selectedDatasource = typeof option?.datasource === "string" ? option.datasource : "";
-
-    setWorkspaceName( option?.label,);
+    setWorkspaceName(option?.label);
     onChange({
       workspaceName: option?.label,
       workspaceHost: selectedDatasource,
-      workspaceProjectId: option?.key != null ? option.key : undefined,
+      workspaceProjectId: value
     });
     setSelectedGroups([]);
   };
@@ -137,30 +142,22 @@ export const WorkspaceStep: React.FC<WorkspaceStepProps> = ({
     message.success("工作空间配置已保存");
   }, [workspaceName, selectedGroups, connector, onSave]);
 
-  const groupOptions = workspaceGroups.map((g) => ({
-    label: g.label,
-    value: g.key,
-    key: g.key,
-  }));
+
+useEffect(() => {
+  setSelectedGroups([]);
+}, [workspaceGroups]); 
+
 
   return (
     <div>
-      {/* 返回第一步 */}
-      
-      {/* <div className={styles.subTitle}>
-         <span className={styles.sectionTitle}>工作空间</span>
-         <Button className={styles.subTitleBtn} type="link" onClick={onBack} icon={<ArrowLeftOutlined />}>
-          返回上一步
-        </Button>
-      </div> */}
-      <div className={styles.sectionTitle} style={{ marginTop: 20 }}>工作空间</div>
+      <div className={styles.sectionTitle} style={{ marginTop: 20 }}>项目</div>
       <div className={styles.description}>
-        当前项目存在工作空间，接口将会以选择的工作空间来请求。
+        当前项目存在工作空间，接口将会以选择的项目来请求。
       </div>
 
       {/* 工作空间选择 */}
       <div className={styles.field}>
-        <label className={styles.label}>选择空间</label>
+        <label className={styles.label}>选择项目</label>
         <div className={styles.selectWrap}>
           <Select
             className={styles.select}
@@ -182,19 +179,28 @@ export const WorkspaceStep: React.FC<WorkspaceStepProps> = ({
       </div>
 
       {/* 模块分组（可选） */}
-       {/*<div className={styles.section} style={{ marginTop: 14 }}>
-        <div className={styles.sectionTitle}>选择页面所属模块（可选）</div>
+      <div className={styles.section} style={{ marginTop: 14 }}>
+        <div className={styles.sectionTitle}>选择分组（可选）</div>
         <div className={styles.description}>
           进一步限定业务范围，让 AI 聚焦在特定分组上
         </div>
         <div className={styles.field}>
           <Select
-            className={styles.select}
+            className={ `${styles.select} ${styles.multiSelect}` } // 添加多选样式styles.select}
             mode="multiple"
             style={{ width: "100%" }}
             value={selectedGroups}
-            onChange={(value: string[]) => setSelectedGroups(value)}
-            options={groupOptions}
+            onChange={(value: string[]) => {
+              console.log("Selected groups:", value);
+              setSelectedGroups(value)
+            }}
+             options={[
+              ...workspaceGroups.map((workspaceGroup) => ({
+                label: workspaceGroup.label,
+                value: workspaceGroup.key,
+                key: workspaceGroup.key,
+              })),
+            ]}
             placeholder="请选择模块分组"
             loading={loadingGroups}
           />
@@ -202,7 +208,7 @@ export const WorkspaceStep: React.FC<WorkspaceStepProps> = ({
         {loadingGroups && (
           <div className={styles.fieldTip}>正在读取模块分组...</div>
         )}
-      </div> */}
+      </div> 
 
       {/* 保存 */}
       <div className={styles.section} style={{ marginTop: 20 }}>

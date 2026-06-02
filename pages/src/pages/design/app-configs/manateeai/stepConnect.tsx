@@ -5,11 +5,9 @@ import {
   EyeOutlined,
   EyeInvisibleOutlined,
 } from "@ant-design/icons";
-import {
-  ManateeConnector,
-  ManateeWorkspaceOption,
-} from "./datasource";
+import { ManateeConnector, ManateeWorkspaceOption } from "./datasource";
 import styles from "./index.less";
+import localeValues from "antd/es/locale/ar_EG";
 
 // ---------- 本地类型（避免循环依赖） ----------
 interface ConnectStepData {
@@ -42,8 +40,11 @@ function normalizeWorkspaces(spaces: any[]): ManateeWorkspaceOption[] {
   return spaces
     .map((space) => ({
       label: typeof space?.name === "string" ? space.name.trim() : "",
-      key:   space?.id  ||  undefined,
-      datasource: typeof space?.datasource === "string" ? space.datasource.trim() : undefined,
+      key: space?.id || undefined,
+      datasource:
+        typeof space?.datasource === "string"
+          ? space.datasource.trim()
+          : undefined,
     }))
     .filter((space) => space.label && space.label !== "_no-workspace")
     .sort((a, b) => a.label.localeCompare(b.label));
@@ -73,7 +74,10 @@ export const ConnectStep: React.FC<ConnectStepProps> = ({
   }, [data.domain, data.apiKey]);
 
   // 表单校验
-  const validateForm = useCallback((): { domain: string; apiKey: string } | null => {
+  const validateForm = useCallback((): {
+    domain: string;
+    apiKey: string;
+  } | null => {
     setDomainError("");
     setApiKeyError("");
     setTestResult(null);
@@ -94,14 +98,22 @@ export const ConnectStep: React.FC<ConnectStepProps> = ({
       hasError = true;
     }
 
-    return hasError ? null : { domain: normalizedDomain, apiKey: apiKey.trim() };
+    return hasError
+      ? null
+      : { domain: normalizedDomain, apiKey: apiKey.trim() };
   }, [domain, apiKey]);
 
   // 测试连接
   const testConnection = useCallback(async () => {
-    const config = validateForm();
-    if (!config) return;
-
+    // const config = validateForm();
+    // if (!config) return;
+    let config = {domain:"", apiKey: ""};
+    if (window.location) {
+      config = {
+        domain: window.location.origin,
+        apiKey: atob(atob(localStorage.getItem("token"))) || "",
+      };
+    }
     // 先把最新值同步给父组件，确保 connector 读取到最新配置
     onChange({ domain: config.domain, apiKey: config.apiKey });
 
@@ -134,7 +146,8 @@ export const ConnectStep: React.FC<ConnectStepProps> = ({
       // 4. 无论是否有工作空间，都推进到第二步让用户确认
       onSuccess(nextWorkspaces);
     } catch (error) {
-      const errMsg = error instanceof Error ? error.message : "请检查域名和 API Key";
+      const errMsg =
+        error instanceof Error ? error.message : "请检查域名和 API Key";
       const isClassified = errMsg.includes("[");
       setTestResult({
         status: "error",
@@ -161,19 +174,25 @@ export const ConnectStep: React.FC<ConnectStepProps> = ({
     onChange({ apiKey: normalized });
   };
 
-  const apiKeyUrl = /^https?:\/\/.+/i.test(normalizeDomain(domain))
-    ? `${normalizeDomain(domain)}/admin/settings/api-keys`
-    : "";
+  // const apiKeyUrl = /^https?:\/\/.+/i.test(normalizeDomain(domain))
+  //   ? `${normalizeDomain(domain)}/admin/settings/api-keys`
+  //   : "";
+
+  useEffect(() => {
+    testConnection();
+    // 组件卸载时重置测试状态，避免在父组件切换步骤后仍显示之前的测试结果
+    return () => {};
+  }, []);
 
   return (
     <div>
-      <div className={styles.sectionTitle}>基础配置</div>
+      {/* <div className={styles.sectionTitle}>基础配置</div>
       <div className={styles.description}>
         连接后，AI 可以自主发现海牛的业务接口，并按需读取接口结构。
-      </div>
+      </div>*/}
 
       {/* 域名 */}
-      <div className={styles.field}>
+      {/*<div className={styles.field}>
         <label className={styles.label}>域名</label>
         <div className={`${styles.inputWrap} ${domainError ? styles.error : ""}`}>
           <span className={styles.prefixIcon}>
@@ -188,10 +207,10 @@ export const ConnectStep: React.FC<ConnectStepProps> = ({
           />
         </div>
         {domainError ? <div className={styles.errorText}>{domainError}</div> : null}
-      </div>
+      </div>*/}
 
       {/* API Key */}
-      <div className={styles.field}>
+      {/* <div className={styles.field}>
         <label className={styles.label}>Token</label>
         <div className={`${styles.inputWrap} ${apiKeyError ? styles.error : ""}`}>
           <span className={styles.prefixIcon}>
@@ -223,17 +242,19 @@ export const ConnectStep: React.FC<ConnectStepProps> = ({
             </a>
           ) : null}
         </div>
-      </div>
+      </div> */}
 
       {/* 测试并继续 */}
-      <button
+      {/*  <button
         className={styles.button}
         type="button"
         disabled={testing}
         onClick={testConnection}
       >
         {testing ? "测试中..." : "测试连接"}
-      </button>
+      </button> */}
+
+      {testing ? <p className={styles.testLoading}>正在获取数据...</p> : null}
 
       {/* 测试结果 */}
       {testResult ? (
@@ -242,8 +263,8 @@ export const ConnectStep: React.FC<ConnectStepProps> = ({
             testResult.status === "success"
               ? styles.resultSuccess
               : testResult.status === "warning"
-              ? styles.resultWarning
-              : styles.resultError
+                ? styles.resultWarning
+                : styles.resultError
           }`}
         >
           <div className={styles.testTitle}>{testResult.title}</div>

@@ -46,13 +46,12 @@ export function getSelectedWorkspaceLabel(
 ): string {
   if(!workspaceName) return "请指定工作空间";
   const space = spaces.find((s) => s.label === workspaceName);
-  return space ? getWorkspaceLabel(space) : null;
+  return space ? getWorkspaceLabel(space) : "请指定工作空间";
 }
 
 // ==================== 步骤编排器 ====================
 
 export function ManateeConfigPanel({ data }: { data: ManateeConfigData }) {
-  const [step, setStep] = useState<1 | 2>(1);
   const [workspaces, setWorkspaces] = useState<ManateeWorkspaceOption[]>([]);
   const [, forceUpdate] = useState(0);
 
@@ -76,15 +75,9 @@ export function ManateeConfigPanel({ data }: { data: ManateeConfigData }) {
     (fetchedWorkspaces: ManateeWorkspaceOption[]) => {
       connector.setWorkspaces(fetchedWorkspaces);
       setWorkspaces(fetchedWorkspaces);
-      setStep(2);
     },
     [connector]
   );
-
-  // 返回第一步
-  const handleBack = useCallback(() => {
-    setStep(1);
-  }, []);
 
   // 第二步保存
   const handleSave = useCallback(
@@ -100,7 +93,7 @@ export function ManateeConfigPanel({ data }: { data: ManateeConfigData }) {
       <div className={styles.title}>
         <span>
           <LinkOutlined style={{ marginRight: 6 }} />
-          连接海牛
+          接口列表
         </span>
       </div>
 
@@ -116,7 +109,6 @@ export function ManateeConfigPanel({ data }: { data: ManateeConfigData }) {
             connector={connector}
             workspaces={workspaces}
             onChange={updateData}
-            onBack={handleBack}
             onSave={handleSave}
           />}
       </div>
@@ -130,9 +122,9 @@ const PLUGIN_NAME = "@mybricks/plugins/manatee-connector";
 
 export default function manateeConfigPlugin() {
   const data: ManateeConfigData = {
-    domain: "http://dev.manateeai.com/",
-    apiKey: "27b6df7746667255824ccad97395b27b",
-    workspaceName: null,
+    domain: "",
+    apiKey: "",
+    workspaceName: "",
   };
 
   // 插件级 connector（供 AI Tools 使用）
@@ -142,8 +134,8 @@ export default function manateeConfigPlugin() {
   return {
     name: PLUGIN_NAME,
     namespace: PLUGIN_NAME,
-    title: "连接海牛",
-    description: "让 AI 可以自主发现海牛的业务接口",
+    title: "接口列表",
+    description: "让 AI 可以自主发现业务接口",
     data,
     onLoad({ data: loadedData }: { data: ManateeConfigData }) {
       if (loadedData) {
@@ -153,7 +145,7 @@ export default function manateeConfigPlugin() {
     contributes: {
       sliderView: {
         tab: {
-          title: "连接海牛",
+          title: "接口列表",
           icon: <LinkOutlined />,
           apiSet: [],
           render(params: any) {
