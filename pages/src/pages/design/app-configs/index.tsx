@@ -52,6 +52,7 @@ import AIPlugin from './getAiView/utils/get-ai-plugin'
 import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
 import cloudTpt from "./cloudTpt";
 import nocobaseConfigPlugin from "./nocobase";
+import manateeConfigPlugin  from './manateeai'
 
 // const getComs = () => {
 //   const comDefs = {}
@@ -303,6 +304,7 @@ export default function appConfig(
   })
 
   const nocobasePlugin = nocobaseConfigPlugin();
+  const manateeaiPlugin = manateeConfigPlugin();
 
   return {
     // debugger(json, opts) {
@@ -420,7 +422,7 @@ export default function appConfig(
         },
         guidePrompt: ctx?.appConfig?.ai?.systemScenePrompt,
         key: ctx.fileId,
-        plugins: [nocobasePlugin.ai],
+        plugins: [nocobasePlugin.ai, manateeaiPlugin.ai],
         config: {
           enabledActionTags: ctx?.appConfig?.ai?.enabledActionTags
         }
@@ -504,6 +506,7 @@ export default function appConfig(
       //   type: "spa",
       // }),
       nocobasePlugin,
+      manateeaiPlugin,
       // pluginDomain()
     ],
     // ...(ctx.hasMaterialApp
@@ -544,7 +547,7 @@ export default function appConfig(
           title: "PC-AI组件库",
           type: "com_lib",
           namespace: "mybricks.normal-pc-lite",
-          editJs: 'public/comlibs/edit.js',
+          editJs: 'public/comlibs/0528/edit.js',
           // editJs: 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.52/edit.js',
         };
         const existing = baseComlibs.find(
