@@ -1,4 +1,4 @@
-import AIPlugin, { commonCodePreset } from '@mybricks/plugin-ai'
+import AIPlugin, { IDBHistory } from '@mybricks/plugin-ai'
 
 const COMLIB_NAMESPACE_LITE = 'mybricks.normal-pc-lite'
 const COMLIB_NAMESPACE_AI = 'mybricks.ai-comlib-pc'
@@ -20,6 +20,26 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
   config,
   key,
   plugins,
+  // componentRuntime: {
+  //   chat: {
+  //     agent: {
+  //       key: "simple-chat",
+  //       request: requestAsStreamInfra,
+  //       history: new IDBHistory({
+  //         dbName: "@plugin-ai/simple-chat",
+  //       }),
+  //       system: "你是一个闲聊助手",
+  //     },
+  //     panel: {
+  //       user: {
+  //         name: 'user',
+  //         avatar: 'https://my.mybricks.world/default_avatar.png',
+  //       },
+  //       header: false,
+  //       copilot: { name: 'MyBricks', avatar: 'https://my.mybricks.world/image/icon.png' }
+  //     }
+  //   }
+  // }
   // onRequest: (params) => {
   //   return createRequestAsStream({ useInfra: false })?.(params)
   // },
