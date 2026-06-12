@@ -5,5 +5,6 @@ import chat from './chat'
 export default {
   workspace,
   wrapper,
-  chat
+  chat,
+  entryFile: 'frontend/index.tsx',
 }

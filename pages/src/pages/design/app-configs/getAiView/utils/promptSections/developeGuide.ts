@@ -14,15 +14,18 @@ export default {
   /** 项目目录结构、jsx/less/store 等文件编写规范 */
   architectureSection: `\`\`\`
 ├─ frontend                           # 前端卡片代码目录
+|  ├─ index.tsx                       # MyBricks 前端入口，有且仅有一个，必须写在 frontend/index.tsx
+|  ├─ dataSource.ts                   # 前端数据源，项目唯一文件，必须，调用本项目服务端使用 /api/xxx 路径调用
+|  ├─ setup.ts                        # 前端 mock 或初始化逻辑，项目唯一文件，必须
 |  ├─ components                      # 可选，跨卡片可复用组件，封装在此目录统一管理
 |  ├─ {分类名}                         # 按业务分类组织，例如 user、order、product 等
 |  |  ├─ components                   # 可选，该分类下的可复用组件，封装在此目录统一管理
 |  |  ├─ {功能名}                      # 该分类下具体的功能卡片，例如 UserProfile、OrderList
+|  |  |  ├─ index.config.ts           # 必选，卡片配置文件，描述卡片元信息与属性面板配置
 |  |  |  ├─ index.tsx                 # 必选，卡片组件入口，导出默认 React 组件
 |  |  |  ├─ index.module.less         # 可选，卡片样式文件，使用 CSS Modules
 |  |  |  ├─ {子组件名}.tsx             # 可选，当 index.tsx 中组件过多时，适当拆分为同级子组件文件
 |  |  |  ├─ {子组件名}.module.less     # 可选，子组件样式文件，使用 CSS Modules
-|  |  ├─ dataSource.ts                # 必选，前端数据源，项目唯一文件，必须，调用本项目服务端使用 /api/xxx 路径调用
 |  |  └─ ...                          # 其他功能卡片目录
 |  └─ ...                             # 其他分类目录
 ├─ backend                            # 必选，服务端代码入口，自动渲染MyBricks 前端项目
@@ -48,6 +51,8 @@ export default {
 2. 开发优先统一使用 \`*.module.less\` 编写样式；
 3. 选择器中多个单词之间使用驼峰方式，不能使用 - 连接；
 4. 不使用 :before、:after 等伪类选择器来实现 dom。
+5. 开发的是一个个功能卡片，而非页面，样式上需要适应不同尺寸画布，保证在不同缩放比例下都能正常显示内容
+6. 卡片通常不会设置一个固定的高度，而是根据内容自定义高度
 
 ### hooks 文件夹编写规范
 - hooks 以文件夹形式存放，目录名必须是 \`hooks\`；
@@ -131,191 +136,76 @@ export default todoRoutes;
   `,
   /** 示例代码块，展示典型开发模式 */
   examplesSection: `
-<example>
-  <user_query>开发一个产品列表卡片，展示产品名称、价格、库存，支持收藏操作</user_query>
-  <assistant_response>
-  好的，我将按照前端卡片规范，在 \`frontend/product/ProductList/\` 目录下创建产品列表卡片组件。
+\`\`\`tsx frontend/index.tsx
+import { appRef } from 'mybricks'
 
-  卡片包含：产品信息展示（名称、价格、库存状态）、收藏按钮（点击切换收藏状态并打印日志）。
+/**
+ * @mybricks
+ * name: default
+ * title: 入口文件
+ * summary: 入口文件
+ * type: app
+ */
+export default appRef(({ children }) => {
+  return children
+})
+\`\`\`
 
-  \`\`\`tsx
-  // frontend/product/ProductList/index.tsx
-  import { useState } from 'react';
-  import { logger } from 'mybricks';
-  import css from './index.module.less';
+\`\`\`tsx frontend/student/GradeCard.tsx
+import { comRef } from 'mybricks'
 
-  interface Product {
-    id: string;
-    name: string;
-    price: number;
-    stock: number;
-  }
+/**
+ * @mybricks
+ * name: GradeCard
+ * title: 学生成绩查看卡片
+ * summary: 卡片主体，展示学生基本信息、各科目成绩列表与总分/平均分统计，支持刷新加载。
+ * type: com
+ */
+export default comRef(() => {
+  return <div>学生成绩卡片</div>
+})
+\`\`\`
 
-  const mockProducts: Product[] = [
-    { id: 'p001', name: '无线蓝牙耳机', price: 299, stock: 128 },
-    { id: 'p002', name: '机械键盘', price: 599, stock: 0 },
-    { id: 'p003', name: '人体工学椅', price: 1299, stock: 45 },
-  ];
+\`\`\`tsx frontend/student/GradeCard/index.tsx
+import { comRef } from 'mybricks'
 
-  interface ProductCardProps {
-    product: Product;
-    isFavorited: boolean;
-    onToggleFavorite: (id: string) => void;
-  }
+/**
+ * @mybricks
+ * name: GradeCard
+ * title: 学生成绩查看卡片
+ * summary: 卡片主体，展示学生基本信息、各科目成绩列表与总分/平均分统计，支持刷新加载。
+ * type: com
+ */
+export default comRef(({ studentId, showAverage }) => {
+  return <div>学生成绩卡片</div>
+})
+\`\`\`
 
-  const ProductCard = ({ product, isFavorited, onToggleFavorite }: ProductCardProps) => {
-    const isOutOfStock = product.stock === 0;
+\`\`\`ts frontend/student/GradeCard/index.config.ts
+import { defineConfig } from 'mybricks'
 
-    return (
-      <div className={css.productCard}>
-        <div className={css.productInfo}>
-          <span className={css.productName}>{product.name}</span>
-          <span className={css.productPrice}>¥{product.price.toFixed(2)}</span>
-          <span className={isOutOfStock ? css.stockOut : css.stockIn}>
-            {isOutOfStock ? '已售罄' : \`库存 \${product.stock}\`}
-          </span>
-        </div>
-        <button
-          className={isFavorited ? css.favoriteActive : css.favorite}
-          onClick={() => {
-            logger.info(\`[ProductList/onToggleFavorite] 切换收藏状态 id=\${product.id} current=\${isFavorited}\`);
-            onToggleFavorite(product.id);
-          }}
-        >
-          {isFavorited ? '★ 已收藏' : '☆ 收藏'}
-        </button>
-      </div>
-    );
-  };
-
-  export default function ProductList() {
-    const [favoritedIds, setFavoritedIds] = useState<Set<string>>(new Set());
-
-    const handleToggleFavorite = (id: string) => {
-      setFavoritedIds(prev => {
-        const next = new Set(prev);
-        if (next.has(id)) {
-          next.delete(id);
-          logger.info(\`[ProductList] 取消收藏 id=\${id}\`);
-        } else {
-          next.add(id);
-          logger.info(\`[ProductList] 添加收藏 id=\${id}\`);
-        }
-        return next;
-      });
-    };
-
-    return (
-      <div className={css.productList}>
-        <h2 className={css.listTitle}>产品列表</h2>
-        {mockProducts.map(product => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            isFavorited={favoritedIds.has(product.id)}
-            onToggleFavorite={handleToggleFavorite}
-          />
-        ))}
-      </div>
-    );
-  }
-  \`\`\`
-
-  \`\`\`less
-  /* frontend/product/ProductList/index.module.less */
-  .productList {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-  }
-
-  .listTitle {
-    font-size: 18px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0 0 8px;
-  }
-
-  .productCard {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    border: 1px solid #e8e8e8;
-    border-radius: 8px;
-    background: #fff;
-    transition: box-shadow 0.2s;
-
-    &:hover {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-  }
-
-  .productInfo {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .productName {
-    font-size: 14px;
-    color: #333;
-    font-weight: 500;
-  }
-
-  .productPrice {
-    font-size: 15px;
-    color: #e85c00;
-    font-weight: 600;
-  }
-
-  .stockIn {
-    font-size: 12px;
-    color: #52c41a;
-  }
-
-  .stockOut {
-    font-size: 12px;
-    color: #999;
-  }
-
-  .favorite {
-    padding: 6px 14px;
-    border: 1px solid #d9d9d9;
-    border-radius: 4px;
-    background: #fff;
-    color: #666;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      border-color: #faad14;
-      color: #faad14;
-    }
-  }
-
-  .favoriteActive {
-    padding: 6px 14px;
-    border: 1px solid #faad14;
-    border-radius: 4px;
-    background: #fffbe6;
-    color: #faad14;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  \`\`\`
-
-  已完成产品列表卡片开发：
-  - 文件位于 \`frontend/product/ProductList/\`，遵循「分类名/功能名」两层目录规范；
-  - 收藏状态通过 \`useState<Set<string>>\` 管理，不使用固定值；
-  - 所有用户交互均通过 \`logger.info\` 打印日志，格式为 \`[组件/事件] 描述\`；
-  - 列表渲染以 \`product.id\` 作为 key，不使用 index；
-  - 所有元素均带有语义化唯一 className，样式使用 \`*.module.less\` CSS Modules；
-  - 子组件 \`ProductCard\` props 有完整 TypeScript 类型定义。
-  </assistant_response>
-</example>
+export default defineConfig({
+  title: '学生成绩查看卡片',
+  description: '展示学生基本信息、各科目成绩列表与总分/平均分统计，支持刷新加载。',
+  props: {
+    type: 'object',
+    properties: {
+      studentId: {
+        type: 'string',
+        title: '学生 ID',
+        description: '需要展示成绩的学生唯一标识',
+      },
+      showAverage: {
+        type: 'boolean',
+        title: '显示平均分',
+        description: '是否在成绩列表底部展示平均分统计行',
+        default: true,
+      },
+    },
+    required: ['studentId'],
+  },
+})
+\`\`\`
 `,
   /** 追加到本节末尾 */
   end: ''
