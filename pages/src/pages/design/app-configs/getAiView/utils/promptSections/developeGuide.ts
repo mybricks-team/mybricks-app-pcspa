@@ -21,7 +21,7 @@ export default {
 |  ├─ {分类名}                         # 按业务分类组织，例如 user、order、product 等
 |  |  ├─ components                   # 可选，该分类下的可复用组件，封装在此目录统一管理
 |  |  ├─ {功能名}                      # 该分类下具体的功能卡片，例如 UserProfile、OrderList
-|  |  |  ├─ index.config.ts           # 必选，卡片配置文件，描述卡片元信息与属性面板配置
+|  |  |  ├─ index.config.ts           # 必选，卡片配置文件，描述卡片元信息；若卡片对外暴露 API，必须在此文件的 apis 字段声明
 |  |  |  ├─ index.tsx                 # 必选，卡片组件入口，导出默认 React 组件
 |  |  |  ├─ index.module.less         # 可选，卡片样式文件，使用 CSS Modules
 |  |  |  ├─ {子组件名}.tsx             # 可选，当 index.tsx 中组件过多时，适当拆分为同级子组件文件
@@ -45,6 +45,7 @@ export default {
 7. 禁止出现直接引用标签的写法，例如 \`<Tags[XX] property={'aa'}/>\`，正确写法是先定义 \`const XX = Tag[XX]; <XX property={'aa'}/>\`；
 8. 所有列表中的组件必须通过 key 属性做唯一标识，不要使用 index 作为 key；
 9. 前端调用本项目服务端接口时，统一在 \`dataSource.ts\` 中通过 MyBricks DataSource 的 \`this.axios\` 调用相对路径 \`api/xxx\` 请求。
+10. 若卡片需要对外暴露 API（供其他卡片或宿主调用），必须同时满足两个条件：① 在 \`index.config.ts\` 的 \`apis\` 字段中声明所有 API 名称与描述；② 在 \`index.tsx\` 运行时通过 \`useCardApis\`（从 \`mybricks\` 导入）注册对应的实现函数，二者必须保持一致。**API 仅用于对外提供只读信息（getter），禁止暴露任何会修改卡片内部状态的操作类方法；卡片内部状态只能由卡片自身管理，不允许通过 API 被外部写入或变更。**
 
 ### less 文件编写规范
 1. 样式文件命名规则：\`*.module.less\` 编译时自动启用 CSS Module，\`*.less\` 编译时不开启 CSS Module；
@@ -151,23 +152,19 @@ export default appRef(({ children }) => {
 })
 \`\`\`
 
-\`\`\`tsx frontend/student/GradeCard.tsx
-import { comRef } from 'mybricks'
-
-/**
- * @mybricks
- * name: GradeCard
- * title: 学生成绩查看卡片
- * summary: 卡片主体，展示学生基本信息、各科目成绩列表与总分/平均分统计，支持刷新加载。
- * type: com
- */
-export default comRef(() => {
-  return <div>学生成绩卡片</div>
-})
-\`\`\`
-
 \`\`\`tsx frontend/student/GradeCard/index.tsx
-import { comRef } from 'mybricks'
+import { comRef, useCardApis } from 'mybricks'
+import { useState } from 'react'
+
+interface GradeItem {
+  subject: string
+  score: number
+}
+
+interface StudentInfo {
+  name: string
+  className: string
+}
 
 /**
  * @mybricks
@@ -177,6 +174,25 @@ import { comRef } from 'mybricks'
  * type: com
  */
 export default comRef(({ studentId, showAverage }) => {
+  const [studentInfo, setStudentInfo] = useState<StudentInfo | null>(null)
+  const [gradeList, setGradeList] = useState<GradeItem[]>([])
+  const [loaded, setLoaded] = useState(false)
+
+  const total = gradeList.reduce((sum, item) => sum + item.score, 0)
+  const average = gradeList.length > 0 ? (total / gradeList.length).toFixed(1) : null
+
+  useCardApis({
+    /** 获取当前展示的学生基本信息，数据未加载完成时返回 null */
+    getStudentInfo: () => (loaded ? studentInfo : null),
+    /** 获取学生各科目成绩列表，数据未加载完成时返回空数组 */
+    getGradeList: () => (loaded ? gradeList : []),
+    /** 获取成绩统计摘要，包含总分和平均分，数据未加载完成时返回 null */
+    getSummary: () =>
+      loaded && studentInfo
+        ? \`\${studentInfo.name}：总分 \${total} 分，平均分 \${average} 分\`
+        : null,
+  })
+
   return <div>学生成绩卡片</div>
 })
 \`\`\`
@@ -204,6 +220,20 @@ export default defineConfig({
     },
     required: ['studentId'],
   },
+  apis: [
+    {
+      name: 'getStudentInfo',
+      description: '获取当前展示的学生基本信息，包括姓名、班级等，数据未加载完成时返回 null',
+    },
+    {
+      name: 'getGradeList',
+      description: '获取学生各科目成绩列表，数据未加载完成时返回空数组',
+    },
+    {
+      name: 'getSummary',
+      description: '获取成绩统计摘要，包含总分和平均分，数据未加载完成时返回 null',
+    },
+  ],
 })
 \`\`\`
 `,
