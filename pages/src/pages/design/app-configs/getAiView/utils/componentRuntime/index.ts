@@ -7,4 +7,6 @@ export default {
   wrapper,
   chat,
   entryFile: 'frontend/index.tsx',
+  disallowedDebugEnvs: ['mock'],
+  mode: 'gui_card',
 }
