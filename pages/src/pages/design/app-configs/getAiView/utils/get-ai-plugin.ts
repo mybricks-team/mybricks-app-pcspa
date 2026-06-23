@@ -21,9 +21,7 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
   deviceType: 'desktop',
   config,
   key,
-  // onRequest: (params) => {
-  //   return createRequestAsStream({ useInfra: false })?.(params)
-  // },
+  plugins,
   componentRuntime,
   promptSections
 })

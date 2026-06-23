@@ -54,6 +54,7 @@ export default {
 4. 不使用 :before、:after 等伪类选择器来实现 dom。
 5. 开发的是一个个功能卡片，而非页面，样式上需要适应不同尺寸画布，保证在不同缩放比例下都能正常显示内容
 6. 卡片通常不会设置一个固定的高度，而是根据内容自定义高度
+7. 卡片的根容器必须设置 \`width: 100%\`，确保卡片能撑满宿主分配的横向空间，适应不同画布宽度
 
 ### hooks 文件夹编写规范
 - hooks 以文件夹形式存放，目录名必须是 \`hooks\`；
@@ -152,9 +153,16 @@ export default appRef(({ children }) => {
 })
 \`\`\`
 
+\`\`\`less frontend/student/GradeCard/index.module.less
+.gradeCard {
+  width: 100%;
+}
+\`\`\`
+
 \`\`\`tsx frontend/student/GradeCard/index.tsx
 import { comRef, useCardApis } from 'mybricks'
 import { useState } from 'react'
+import styles from './index.module.less'
 
 interface GradeItem {
   subject: string
@@ -193,7 +201,7 @@ export default comRef(({ studentId, showAverage }) => {
         : null,
   })
 
-  return <div>学生成绩卡片</div>
+  return <div className={styles.gradeCard}>学生成绩卡片</div>
 })
 \`\`\`
 
