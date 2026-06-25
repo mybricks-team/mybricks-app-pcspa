@@ -1,37 +1,83 @@
 export default {
   /** 总体开发规则、画布宽度、页面/弹窗拆分等基础规范 */
   firstOfAll: `- 开发宪章
-> 参考「开发指南」+「源代码」进行代码开发任务，必须遵循「最佳实践」和「设计规范」，在编写各类型文件时，按照「文件编写规范」完成代码任务；JSDoc 注释属于代码的一部分，需要在编写节点代码时同步维护；完成代码任务后，遵循「文档规范」同步 requirement.md。
+参考「开发指南」和「源代码」进行代码开发任务，必须遵循最佳实践和设计规范；JSDoc 注释属于代码的一部分，需要在编写节点代码时同步维护。
 
-- 总体规则
-  - 功能：生产级别的功能性；
-  - 细节：在每个细节都精心完善；
-  - 响应式：ui需要适应不同尺寸画布，保证在不同缩放比例下都能正常显示内容；
-- 拆分逻辑
-  - 以功能卡片维度来编写前端组件；`,
+## 总体规则
+- 功能要达到生产级别，不能只做静态样子或半成品交互。
+- 细节要完整，状态、异常、空数据、加载态、交互反馈都要按需求补齐。
+- 响应式要保证合理统一的间距，并支持宽度变化下的自适应。
+- 卡片必须通过 \`useCardApis\` 暴露读数据、读状态的接口，任何有数据、状态的卡片都不得省略。
+
+## 拆分逻辑
+- 以功能卡片维度来编写前端组件。
+- 精准识别出弹窗、抽屉等浮层组件，必须使用 \`popupRef\`。
+- 设计态需要尽量展示所有卡片和弹窗，方便用户调试和选中内部元素。
+- 项目支持渐进式渲染。初始化项目时，建议先初始化 frontend 入口、公共文件和 backend 入口。
+- 拆分仅作为结构处理，推荐开发顺序是先完成基础架构代码，再按卡片和接口维度逐个完成需求。
+
+## 核心概念：卡片（Card）vs 工具（Tool）
+卡片和工具是两类完全不同的前端产物，开发时须严格区分：
+
+**卡片（Card）** — 有界面的功能单元
+- 位于 \`frontend/cards/{分类名}/{功能名}/\` 目录，是有可视界面的 React 组件。
+- 入口为 \`index.tsx\`（使用 \`comRef\` 定义），配置文件为 \`index.config.ts\`（使用 \`defineConfig\` 定义）。
+- 必须通过 \`useCardApis\` 向外暴露只读数据接口，供其他卡片或宿主调用。
+- 适用场景：需要向用户展示信息或提供交互操作时使用，例如数据列表、图表、表单、详情面板等一切需要渲染到页面上的功能单元。
+
+**工具（Tool）** — 无界面的函数能力
+- 位于 \`frontend/tools/{工具名}/\` 目录，是注册给 AI Agent 按需调用的 Function Calling 工具。
+- 入口为 \`index.ts\`（使用 \`defineTool\` 默认导出），无对应的 \`index.config.ts\`，不渲染任何 UI。
+- 必须定义 \`name\`、\`title\`、\`description\`、\`parameters\`、\`validate\` 和 \`execute\` 字段。
+- 适用场景：需要执行计算、查询、转换等纯逻辑操作时使用，例如单位换算、数据格式化、调用外部 API 获取信息等无需渲染界面的能力。
+
+
+## 严格的交付边界规则：
+- 用户需求描述中出现「工具」「xxx工具」（如查询工具、转换工具、计算工具、时间工具等）时，识别为 Tool，只交付工具，禁止附带卡片。
+- 用户明确要求开发「卡片」时，只交付 卡片。
+- 用户没有明确说明时（例如只描述功能，未提到「卡片」或「工具」），优先交付 卡片。
+
+## 美学指南：
+- 在浅色和深色主题、不同字体、美学之间变化；
+注意：永远不要使用通用的AI生成美学、陈词滥调的配色方案（特别是白色背景上的紫色渐变）、可预测的布局，以及缺乏特征的千篇一律的设计。`,
   /** 图标与图片资源的使用规范 */
   // assetsUsageSection: '',
   /** 项目目录结构、jsx/less/store 等文件编写规范 */
   architectureSection: `\`\`\`
-├─ frontend                           # 前端卡片代码目录
+├─ frontend                           # 前端代码目录
 |  ├─ index.tsx                       # MyBricks 前端入口，有且仅有一个，必须写在 frontend/index.tsx
+|  ├─ index.module.less
 |  ├─ dataSource.ts                   # 前端数据源，项目唯一文件，必须，调用本项目服务端使用 /api/xxx 路径调用
-|  ├─ setup.ts                        # 前端 mock 或初始化逻辑，项目唯一文件，必须
-|  ├─ components                      # 可选，跨卡片可复用组件，封装在此目录统一管理
-|  ├─ {分类名}                         # 按业务分类组织，例如 user、order、product 等
-|  |  ├─ components                   # 可选，该分类下的可复用组件，封装在此目录统一管理
-|  |  ├─ {功能名}                      # 该分类下具体的功能卡片，例如 UserProfile、OrderList
-|  |  |  ├─ index.config.ts           # 必选，卡片配置文件，描述卡片元信息；若卡片对外暴露 API，必须在此文件的 apis 字段声明
-|  |  |  ├─ index.tsx                 # 必选，卡片组件入口，导出默认 React 组件
-|  |  |  ├─ index.module.less         # 可选，卡片样式文件，使用 CSS Modules
-|  |  |  ├─ {子组件名}.tsx             # 可选，当 index.tsx 中组件过多时，适当拆分为同级子组件文件
-|  |  |  ├─ {子组件名}.module.less     # 可选，子组件样式文件，使用 CSS Modules
-|  |  └─ ...                          # 其他功能卡片目录
-|  └─ ...                             # 其他分类目录
-├─ backend                            # 必选，服务端代码入口，自动渲染MyBricks 前端项目
+|  ├─ tools                           # 可选，Agent 工具目录，注册供 AI 按需调用的函数工具（Function Calling）
+|  |  ├─ {工具名}                      # 单个工具目录，以工具功能命名，例如 calculateSquare、queryWeather
+|  |  |  ├─ index.ts                  # 必选，工具定义入口，默认导出使用 defineTool 定义的工具创建函数
+|  ├─ cards
+|  |  └─ components                   # 前端可复用公共组件目录
+|  |  |  └── SharedComponent
+|  |  |  |  ├── index.tsx
+|  |  |  |  ├── index.module.less
+|  |  |  |  └── hooks
+|  |  |  |     └── useXxx.ts
+|  |  ├─ hooks                        # 可选，可复用的全局自定义 hooks 目录
+|  |  |  ├── useXxx.ts
+|  |  |  └── useYyy.ts
+|  |  ├─ {分类名}                      # 按业务分类组织，例如 user、order、product 等
+|  |  |  ├─ components                # 可选，该分类下的可复用组件，封装在此目录统一管理
+|  |  |  ├─ {功能名}                   # 该分类下具体的功能卡片，例如 UserProfile、OrderList
+|  |  |  |  ├─ index.config.ts        # 必选，卡片配置文件，描述卡片元信息；若卡片对外暴露 API，必须在此文件的 apis 字段声明
+|  |  |  |  ├─ index.tsx              # 必选，卡片组件入口，导出默认 React 组件
+|  |  |  |  ├─ index.module.less      # 可选，卡片样式文件，使用 CSS Modules
+|  |  |  |  ├─ {子组件名}.tsx          # 可选，当 index.tsx 中组件过多时，适当拆分为同级子组件文件
+|  |  |  |  ├─ {子组件名}.module.less  # 可选，子组件样式文件，使用 CSS Modules
+|  |  |  |  ├─ hooks                  # 可选，可复用的自定义 hooks 目录
+|  |  |  |  |  ├── useXxx.ts
+|  |  |  └─ ...                       # 其他功能卡片目录
+|  |  └─ ...                          # 其他分类目录
+├─ backend                            # 必选，服务端代码入口，自动渲染 MyBricks 前端项目
 |  ├─ index.ts                        # 必选，服务入口，在这里创建 Hono app
 |  ├─ db.ts                           # 可选，数据库连接文件，仅在需要数据库时创建
-|  ├─ routes                          # 可选，按业务域和路由拆分，一个文件一个业务路由，比如 /api/user 存放到 user.ts中 
+|  ├─ middlewares                     # 可选，服务端中间件目录，仅在需要时创建
+|  ├─ routes                          # 可选，按业务域和路由拆分，一个文件一个业务路由，比如 /api/user 存放到 user.ts 中
 |  |  └── user.ts
 \`\`\`
 
@@ -153,13 +199,13 @@ export default appRef(({ children }) => {
 })
 \`\`\`
 
-\`\`\`less frontend/student/GradeCard/index.module.less
+\`\`\`less frontend/cards/student/GradeCard/index.module.less
 .gradeCard {
   width: 100%;
 }
 \`\`\`
 
-\`\`\`tsx frontend/student/GradeCard/index.tsx
+\`\`\`tsx frontend/cards/student/GradeCard/index.tsx
 import { comRef, useCardApis } from 'mybricks'
 import { useState } from 'react'
 import styles from './index.module.less'
@@ -205,7 +251,7 @@ export default comRef(({ studentId, showAverage }) => {
 })
 \`\`\`
 
-\`\`\`ts frontend/student/GradeCard/index.config.ts
+\`\`\`ts frontend/cards/student/GradeCard/index.config.ts
 import { defineConfig } from 'mybricks'
 
 export default defineConfig({
@@ -242,6 +288,57 @@ export default defineConfig({
       description: '获取成绩统计摘要，包含总分和平均分，数据未加载完成时返回 null',
     },
   ],
+})
+\`\`\`
+
+\`\`\`ts frontend/tools/calculateSquare/index.ts
+import { defineTool } from 'mybricks'
+
+interface SquareParams {
+  value: number;
+}
+
+export default defineTool(function () {
+  return {
+    name: "calculate_square",
+    title: "计算数字的平方",
+    description: \`计算一个数字的平方（即该数字乘以自身）。
+
+用法：
+- 传入一个数字 value
+- 返回该数字的平方结果\`,
+    parameters: {
+      type: "object",
+      properties: {
+        value: {
+          type: "number",
+          description: "需要计算平方的数字",
+        },
+      },
+      required: ["value"],
+    },
+    validate(params: SquareParams): void {
+      if (params.value === undefined || params.value === null) {
+        throw new Error("value is required");
+      }
+      if (typeof params.value !== "number") {
+        throw new Error(\`value must be a number, got: \${typeof params.value}\`);
+      }
+      if (!isFinite(params.value)) {
+        throw new Error(\`value must be a finite number, got: \${params.value}\`);
+      }
+    },
+    async execute(params: SquareParams) {
+      const result = params.value * params.value;
+      return {
+        output: \`\${params.value} 的平方为 \${result}\`,
+        metadata: {
+          input: params.value,
+          result,
+        },
+      };
+    },
+  };
 })
 \`\`\`
 `,

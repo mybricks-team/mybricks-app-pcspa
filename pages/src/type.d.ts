@@ -3,6 +3,11 @@ declare module '*.less' {
   export default classes;
 }
 
+declare module '*.md' {
+  const content: string;
+  export default content;
+}
+
 declare interface Window {
   _mybricks_render_web: RenderWeb;
   _mybricks_render_web_vue2: RenderWeb;
