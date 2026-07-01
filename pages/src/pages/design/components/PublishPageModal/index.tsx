@@ -19,6 +19,7 @@ interface PublishPageModalProps {
   fileId: number
   getTitle: () => string
   ctx: any
+  getDesignerJSON?: () => any
 }
 
 const PublishPageModal: React.FC<PublishPageModalProps> = ({
@@ -27,6 +28,7 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
   getTitle,
   fileId,
   ctx,
+  getDesignerJSON,
 }) => {
   const [title, setTitle] = useState(getTitle())
   const [initLoading, setInitLoading] = useState(false)
@@ -56,7 +58,8 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
     vbDesignContext: {},
     chatId: fileId,
     getTitle,
-    ctx
+    ctx,
+    getDesignerJSON,
   })
 
   const renderPublishButton = ({ block = false }: { block?: boolean }) => (

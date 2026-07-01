@@ -126,6 +126,7 @@ class ErrorBoundary extends React.Component {
     this.state = { hasError: false, error: null, info: null };
   }
   componentDidCatch(error, info) {
+    console.error('[vibe-publish] React render error', error, info);
     this.setState({ hasError: true, error, info });
     try {
       window.parent.postMessage({
@@ -157,7 +158,13 @@ const RenderTracker = ({ children }) => {
 // props中会调用message，需要提前定义到windows中
 window.message = window['antd'] ? window['antd'].message : (msg) => { alert(msg); };
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  console.error('[vibe-publish] root element #root not found');
+  throw new Error('[vibe-publish] root element #root not found');
+}
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <ErrorBoundary>
       <RenderTracker>

@@ -11,7 +11,6 @@ import {
 } from 'antd'
 import { Locker, GlobalContext } from '@mybricks/sdk-for-app/ui'
 import SaveTimeDisplay from './SaveTimeDisplay'
-import { code } from './icon'
 import styles from './index.less'
 
 interface ToolbarProps {
@@ -23,7 +22,7 @@ interface ToolbarProps {
     user: any
     fileId: number
   }
-  downloadVibeUI: () => void
+  onPublish: () => void
   onOperableChange: (operable: boolean) => void
   beforeToggleUnLock: () => Promise<boolean>
   onSave: () => Promise<void>
@@ -39,7 +38,7 @@ const ToolBar = forwardRef<TitlebarRef, ToolbarProps>((props, ref) =>{
   const {
     appData,
     onSave,
-    downloadVibeUI,
+    onPublish,
     onOperableChange,
     beforeToggleUnLock
   } = props
@@ -109,13 +108,13 @@ const ToolBar = forwardRef<TitlebarRef, ToolbarProps>((props, ref) =>{
                 保存
               </Button>
             </Badge>
-            <div
-              data-mybricks-tip={`{content:'在 IDE 中打开',position:'bottom'}`}
-              className={styles['code_btn']}
-              onClick={() => downloadVibeUI()}
+            <Button
+              type='primary'
+              disabled={!canSave}
+              onClick={onPublish}
             >
-              {code}
-            </div>
+              发布
+            </Button>
           </div>
         </div>
         <SaveTimeDisplay savedTime={savedTime}/>

@@ -53,7 +53,8 @@ import classNames from 'classnames'
 import { sendPageDeps } from './utils/sendPageDeps'
 import { BranchMergeModal } from './components/branch-merge-modal'
 import { useBranch } from './hooks/useBranch'
-import { DesignerTitleBar, DesignerToolBar } from '@mybricks/sdk-for-app/ui'
+import { DesignerTitleBar } from '@mybricks/sdk-for-app/ui'
+import DesignerToolBar from './components/Toolbar'
 import { usePublishPage } from './hooks/usePublishPage'
 import PublishPageModal from './components/PublishPageModal'
 
@@ -476,7 +477,10 @@ export default function MyDesigner({ appData: originAppData }) {
     getTitle() {
       return ctx.fileName
     },
-    ctx
+    ctx,
+    getDesignerJSON() {
+      return designerRef.current?.toJSON()
+    },
   })
 
   const getToJSON = () => {
@@ -1109,6 +1113,9 @@ export default function MyDesigner({ appData: originAppData }) {
                   ref={toolbarRef}
                   appData={appData}
                   beforeToggleUnLock={beforeToggleUnLock}
+                  onPublish={() => {
+                    setPublishPageModalVisible(true)
+                  }}
                   onOperableChange={(operable) => {
                     setOperable(operable)
                     ctx.operable = operable
@@ -1397,6 +1404,7 @@ export default function MyDesigner({ appData: originAppData }) {
         }}
         ctx={ctx}
         fileId={ctx.fileId}
+        getDesignerJSON={getToJSON}
       />
     </div>
   )

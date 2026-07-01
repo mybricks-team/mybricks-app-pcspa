@@ -1,12 +1,11 @@
 // import { uploadAssets } from '@/utils/shareUtils'
 import { LCCompiler } from './LCCompiler'
-import dayjs from 'dayjs'
 import type {
   VibePublishSourceItem,
   VibePublishThemeVar,
 } from './getPublishSource'
 import { mockMybricksTesting } from './mockMybricksTesting'
-import API from '@mybricks/sdk-for-app/api'
+import { vibeAppCodeMap } from './vibeAppCodeMap'
 
 const uploadAssets = () => {
   // 上传cdn
@@ -19,6 +18,19 @@ const PRE_SCRIPTS = [
   `https://f2.eckwai.com/kos/nlav12333/web-assets/lib/react/18.2.0/react.production.min.js`,
   `https://f2.eckwai.com/kos/nlav12333/web-assets/lib/react-dom/18.2.0/react-dom.production.min.js`,
 ]
+
+const VIBE_APP_CONTAINER_UMD =
+  'https://p4-ec.eckwai.com/kos/nlav12333/aicode/assets/vibe-app-container/index.umd.0.0.1.min.a09036485ddd145a.js'
+
+const VIBE_APP_SCRIPTS = [
+  'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/plugin-ai/2.1.4/index.umd.js',
+  VIBE_APP_CONTAINER_UMD,
+]
+
+const VIBE_APP_EXTERNALS = {
+  'mybricks/vibe-app-container': 'VibeAppContainer',
+  '@mybricks/plugin-ai': 'MyBricksPluginAI',
+}
 
 /**
  * fetch 请求代理脚本（IIFE）
@@ -361,6 +373,7 @@ interface BuildVibePreviewHtmlParams {
   assetOwnerId: string
   vbDesignContext?: BizCenterContext
   enableVibeProxy?: boolean
+  designerJSON?: any
 }
 
 export const loadBizCenterAssets = async (
@@ -429,7 +442,10 @@ export const loadBizCenterAssets = async (
 }
 
 // 添加测试所需要的mock环境，并加载 setup文件
-function buildCodeMap(source: VibePublishSourceItem): Record<string, string> {
+function buildCodeMap(
+  source: VibePublishSourceItem,
+  designerJSON?: any,
+): Record<string, string> {
   const codeMap = source.files.reduce(
     (acc, file) => {
       acc[file.path] = file.content
@@ -462,6 +478,7 @@ function buildCodeMap(source: VibePublishSourceItem): Record<string, string> {
   )
 
   codeMap['mybricks-testing.ts'] = mockMybricksTesting
+  Object.assign(codeMap, vibeAppCodeMap({ source, designerJSON }))
   return codeMap
 }
 
@@ -474,8 +491,9 @@ export const buildVibePreviewHtml = async ({
   assetOwnerId,
   vbDesignContext,
   enableVibeProxy = true,
+  designerJSON,
 }: BuildVibePreviewHtmlParams): Promise<string> => {
-  const codeMap = buildCodeMap(source)
+  const codeMap = buildCodeMap(source, designerJSON)
   const compiler = new LCCompiler()
   const ctx = vbDesignContext
   const dynamicAssets = await loadBizCenterAssets(ctx).catch(() => ({
@@ -489,16 +507,14 @@ export const buildVibePreviewHtml = async ({
     { name: source.name || 'component', props: {} },
     {
       target,
-      extraExternal: dynamicAssets.external,
+      extraExternal: {
+        ...dynamicAssets.external,
+        ...VIBE_APP_EXTERNALS,
+      },
     },
   )
 
-  const bundleJsUrl: any = await API.Upload.toOss({
-    content: bundleCode,
-    folderPath: `/vibe/pc/${chatId}`,
-    fileName: `index.${dayjs().format('YYYY-MM-DD-HH-mm-ss')}.js`,
-    noHash: true
-  });
+  const inlineBundleCode = bundleCode.replace(/<\/script/gi, '<\\/script')
 
   const headStyles = dynamicAssets.styles
     .map(url => `<link rel="stylesheet" href="${url}" />`)
@@ -509,8 +525,11 @@ export const buildVibePreviewHtml = async ({
   //   ? `<style id="vibe-design-theme-vars">\n${themeStyleText}\n</style>`
   //   : ''
 
-  const headScripts = [...PRE_SCRIPTS, ...dynamicAssets.scripts]
-    .map(url => `<script src="${url}"></script>`)
+  const headScripts = [...PRE_SCRIPTS, ...dynamicAssets.scripts, ...VIBE_APP_SCRIPTS]
+    .map(
+      url =>
+        `<script src="${url}" onerror="console.error('[vibe-publish] runtime script failed:', '${url}')"></script>`,
+    )
     .join('\n')
 
   return `<!DOCTYPE html>
@@ -520,6 +539,18 @@ export const buildVibePreviewHtml = async ({
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${title}</title>
   <script>
+  window.addEventListener('error', function(event) {
+    console.error('[vibe-publish] window error', {
+      message: event.message,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+      error: event.error
+    });
+  });
+  window.addEventListener('unhandledrejection', function(event) {
+    console.error('[vibe-publish] unhandled rejection', event.reason);
+  });
   /* VIBE_DESIGN_PROXY_SCRIPT - fetch 请求代理（必须在所有业务脚本之前执行） */
   ${enableVibeProxy ? VIBE_PROXY_SCRIPT : ''}
   </script>
@@ -533,10 +564,22 @@ export const buildVibePreviewHtml = async ({
     jsxDEV: window.React.createElement,
   };
 </script>
+<style>
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f7;
+  }
+</style>
 </head>
 <body>
   <div id="root" class="aicode-preview-container"></div>
-  <script defer src="${bundleJsUrl.url}"></script>
+  <script>
+${inlineBundleCode}
+  </script>
 </body>
 </html>`
 }

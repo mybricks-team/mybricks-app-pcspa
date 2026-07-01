@@ -11,13 +11,15 @@ interface UsePublishPageOptions {
   vbDesignContext?: any
   getTitle: () => string
   ctx: any
+  getDesignerJSON?: () => any
 }
 
 export function usePublishPage({
   chatId,
   vbDesignContext,
   getTitle,
-  ctx
+  ctx,
+  getDesignerJSON,
 }: UsePublishPageOptions) {
   const [downloadHtmlLoading, setDownloadHtmlLoading] = useState(false)
 
@@ -49,6 +51,7 @@ export function usePublishPage({
         assetOwnerId,
         vbDesignContext,
         enableVibeProxy: false,
+        designerJSON: getDesignerJSON?.(),
       })
 
       // 下载为 HTML 文件
@@ -66,7 +69,7 @@ export function usePublishPage({
     } finally {
       setDownloadHtmlLoading(false)
     }
-  }, [chatId, vbDesignContext])
+  }, [chatId, vbDesignContext, getDesignerJSON])
 
   const [publishLoading, setPublishLoading] = useState(false)
 
@@ -98,6 +101,7 @@ export function usePublishPage({
         assetOwnerId,
         vbDesignContext,
         enableVibeProxy: false,
+        designerJSON: getDesignerJSON?.(),
       })
 
       const publishRes = await axios.post('/api/pcpage/vibepublish', {
@@ -113,7 +117,7 @@ export function usePublishPage({
     } finally {
       setPublishLoading(false)
     }
-  }, [chatId, vbDesignContext])
+  }, [chatId, vbDesignContext, getDesignerJSON])
 
   return {
     handleDownloadHtml,
