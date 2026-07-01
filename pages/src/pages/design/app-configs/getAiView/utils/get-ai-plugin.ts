@@ -1,4 +1,5 @@
-import AIPlugin from '@mybricks/plugin-ai'
+import AIPlugin, { fullStackAppPromptSection } from '@mybricks/plugin-ai'
+import { fullStackAppPromptBuilder } from './prompt-builder'
 
 const COMLIB_NAMESPACE_LITE = 'mybricks.normal-pc-lite'
 const COMLIB_NAMESPACE_AI = 'mybricks.ai-comlib-pc'
@@ -12,7 +13,7 @@ function getGenerationStrategy(): 'ai' | 'atomic' {
   return hasLite && hasAi ? 'ai' : 'atomic'
 }
 import componentRuntime from './componentRuntime'
-import promptSections from './promptSections'
+// import promptSections from './promptSections'
 
 export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config, plugins = [] }: any) => AIPlugin({
   // requestAsStream,
@@ -23,5 +24,18 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
   key,
   plugins,
   componentRuntime,
-  promptSections
+  // promptSections,
+  ...fullStackAppPromptBuilder(fullStackAppPromptSection),
+  // llm: {
+  //   providers: [{
+  //     providerId: 'kimi',
+  //     format: 'openai',
+  //     baseUrl: 'https://api.moonshot.cn/v1/chat/completions',
+  //     apiKey: 'sk-J3LpWl67Uzg5sBCH8CFdcKrEDTfiAncLb808D8ByCwfDAU1u',
+  //     models: [{
+  //       id: 'kimi-k2.6',
+  //       name: 'kimi-k2.6'
+  //     }]
+  //   }]
+  // },
 })

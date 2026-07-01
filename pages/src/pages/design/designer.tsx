@@ -1061,7 +1061,6 @@ export default function MyDesigner({ appData: originAppData }) {
   /** 监听 auto-publish 事件 */
   useEffect(() => {
     const handler = async (event: MessageEvent) => {
-      console.log('designer receive message', event.data)
       if (event.data?.action === 'auto-publish') {
         try {
           const res = await publish(event.data.data)
@@ -1115,237 +1114,237 @@ export default function MyDesigner({ appData: originAppData }) {
                     ctx.operable = operable
                   }}
                   onSave={save}
-                  moreActions={[
-                    {
-                      icon: <DownloadOutlined />,
-                      title: '导出ui文件',
-                      onClick: () => {
-                        const json = getDumpJson()
-                        const content = JSON.stringify(json, null, 2)
-                        const baseName = ctx.fileName ? ctx.fileName.replace(/\.[^.]+$/, '') : 'export'
-                        const fileName = `${baseName}.ui`
-                        const blob = new Blob([content], { type: 'application/json' })
-                        const url = window.URL.createObjectURL(blob)
-                        const a = document.createElement('a')
-                        a.href = url
-                        a.download = fileName
-                        document.body.appendChild(a)
-                        a.click()
-                        window.URL.revokeObjectURL(url)
-                        document.body.removeChild(a)
-                      }
-                    },
-                    {
-                      icon: <UploadOutlined />,
-                      title: '导入ui文件',
-                      onClick: () => {
-                        if (!ctx.operable || isDebugMode) {
-                          message.warn(!ctx.operable ? '请先点击右上角个人头像上锁获取页面编辑权限' : '请退出调试模式，再进行导入')
-                          return
-                        }
-                        const input = document.createElement('input')
-                        input.type = 'file'
-                        input.accept = '.ui'
-                        input.onchange = async (e: any) => {
-                          const file = e.target.files[0]
-                          if (!file) return
-                          const reader = new FileReader()
-                          reader.onload = async (ev) => {
-                            try {
-                              const text = ev.target.result as string
-                              const json = JSON.parse(text)
-                              const { content, pageConfig } = json
-                              const contentStr = JSON.stringify({ content, ...pageConfig })
-                              setSaveLoading(true)
-                              try {
-                                await ctx.save({ content: contentStr }, { saveType: 'import' })
-                              } finally {
-                                setSaveLoading(false)
-                              }
-                            } catch (err) {
-                              message.error('导入失败：文件格式不正确')
-                              console.error(err)
-                            }
-                          }
-                          reader.readAsText(file)
-                        }
-                        document.body.appendChild(input)
-                        input.click()
-                        document.body.removeChild(input)
-                      }
-                    },
-                    ...(APP_ENV !== 'production' ? [{
-                      icon: <DeleteOutlined />,
-                      title: '清空画布',
-                      onClick: async () => {
-                        if (!ctx.operable || isDebugMode) {
-                          message.warn(!ctx.operable ? '请先点击右上角个人头像上锁获取页面编辑权限' : '请退出调试模式，再进行操作')
-                          return
-                        }
-                        setSaveLoading(true)
-                        try {
-                          await ctx.save({ content: '{}' }, { saveType: 'import' })
-                        } finally {
-                          setSaveLoading(false)
-                        }
-                      }
-                    }] : []),
-                    {
-                      icon: <CloudUploadOutlined />,
-                      title: '发布',
-                      onClick: () => {
-                        const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
-                        if (!coms) {
-                          return message.warn('源代码为空，暂无可发布的内容!')
-                        }
+                  // moreActions={[
+                  //   {
+                  //     icon: <DownloadOutlined />,
+                  //     title: '导出ui文件',
+                  //     onClick: () => {
+                  //       const json = getDumpJson()
+                  //       const content = JSON.stringify(json, null, 2)
+                  //       const baseName = ctx.fileName ? ctx.fileName.replace(/\.[^.]+$/, '') : 'export'
+                  //       const fileName = `${baseName}.ui`
+                  //       const blob = new Blob([content], { type: 'application/json' })
+                  //       const url = window.URL.createObjectURL(blob)
+                  //       const a = document.createElement('a')
+                  //       a.href = url
+                  //       a.download = fileName
+                  //       document.body.appendChild(a)
+                  //       a.click()
+                  //       window.URL.revokeObjectURL(url)
+                  //       document.body.removeChild(a)
+                  //     }
+                  //   },
+                  //   {
+                  //     icon: <UploadOutlined />,
+                  //     title: '导入ui文件',
+                  //     onClick: () => {
+                  //       if (!ctx.operable || isDebugMode) {
+                  //         message.warn(!ctx.operable ? '请先点击右上角个人头像上锁获取页面编辑权限' : '请退出调试模式，再进行导入')
+                  //         return
+                  //       }
+                  //       const input = document.createElement('input')
+                  //       input.type = 'file'
+                  //       input.accept = '.ui'
+                  //       input.onchange = async (e: any) => {
+                  //         const file = e.target.files[0]
+                  //         if (!file) return
+                  //         const reader = new FileReader()
+                  //         reader.onload = async (ev) => {
+                  //           try {
+                  //             const text = ev.target.result as string
+                  //             const json = JSON.parse(text)
+                  //             const { content, pageConfig } = json
+                  //             const contentStr = JSON.stringify({ content, ...pageConfig })
+                  //             setSaveLoading(true)
+                  //             try {
+                  //               await ctx.save({ content: contentStr }, { saveType: 'import' })
+                  //             } finally {
+                  //               setSaveLoading(false)
+                  //             }
+                  //           } catch (err) {
+                  //             message.error('导入失败：文件格式不正确')
+                  //             console.error(err)
+                  //           }
+                  //         }
+                  //         reader.readAsText(file)
+                  //       }
+                  //       document.body.appendChild(input)
+                  //       input.click()
+                  //       document.body.removeChild(input)
+                  //     }
+                  //   },
+                  //   ...(APP_ENV !== 'production' ? [{
+                  //     icon: <DeleteOutlined />,
+                  //     title: '清空画布',
+                  //     onClick: async () => {
+                  //       if (!ctx.operable || isDebugMode) {
+                  //         message.warn(!ctx.operable ? '请先点击右上角个人头像上锁获取页面编辑权限' : '请退出调试模式，再进行操作')
+                  //         return
+                  //       }
+                  //       setSaveLoading(true)
+                  //       try {
+                  //         await ctx.save({ content: '{}' }, { saveType: 'import' })
+                  //       } finally {
+                  //         setSaveLoading(false)
+                  //       }
+                  //     }
+                  //   }] : []),
+                  //   {
+                  //     icon: <CloudUploadOutlined />,
+                  //     title: '发布',
+                  //     onClick: () => {
+                  //       const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
+                  //       if (!coms) {
+                  //         return message.warn('源代码为空，暂无可发布的内容!')
+                  //       }
 
-                        const comId = Object.keys(coms)[0]
-                        if (!comId) {
-                          return message.warn('源代码为空，暂无可发布的内容!')
-                        }
+                  //       const comId = Object.keys(coms)[0]
+                  //       if (!comId) {
+                  //         return message.warn('源代码为空，暂无可发布的内容!')
+                  //       }
 
-                        const files = (window as any)._forApp_[comId].getFiles()
+                  //       const files = (window as any)._forApp_[comId].getFiles()
 
-                        if (!files.length) {
-                          return message.warn('源代码为空，暂无可发布的内容!')
-                        }
-                        setPublishPageModalVisible(true)
-                      }
-                    }
-                  ]}
-                  exportActions={[
-                    {
-                      title: 'HTML',
-                      onClick: async () => {
-                        const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
-                        if (!coms) {
-                          return message.warn('源代码为空，暂无可下载的内容!')
-                        }
+                  //       if (!files.length) {
+                  //         return message.warn('源代码为空，暂无可发布的内容!')
+                  //       }
+                  //       setPublishPageModalVisible(true)
+                  //     }
+                  //   }
+                  // ]}
+                  // exportActions={[
+                  //   {
+                  //     title: 'HTML',
+                  //     onClick: async () => {
+                  //       const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
+                  //       if (!coms) {
+                  //         return message.warn('源代码为空，暂无可下载的内容!')
+                  //       }
 
-                        const comId = Object.keys(coms)[0]
-                        if (!comId) {
-                          return message.warn('源代码为空，暂无可下载的内容!')
-                        }
+                  //       const comId = Object.keys(coms)[0]
+                  //       if (!comId) {
+                  //         return message.warn('源代码为空，暂无可下载的内容!')
+                  //       }
 
-                        const files = (window as any)._forApp_[comId].getFiles()
+                  //       const files = (window as any)._forApp_[comId].getFiles()
 
-                        if (!files.length) {
-                          return message.warn('源代码为空，暂无可下载的内容!')
-                        }
+                  //       if (!files.length) {
+                  //         return message.warn('源代码为空，暂无可下载的内容!')
+                  //       }
 
-                        await handleDownloadHtml()
-                      }
-                    },
-                    {
-                      title: '源代码',
-                      onClick: async () => {
-                        const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
-                        if (!coms) {
-                          return message.warn('源代码为空，暂无可下载的内容!')
-                        }
+                  //       await handleDownloadHtml()
+                  //     }
+                  //   },
+                  //   {
+                  //     title: '源代码',
+                  //     onClick: async () => {
+                  //       const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
+                  //       if (!coms) {
+                  //         return message.warn('源代码为空，暂无可下载的内容!')
+                  //       }
 
-                        const comId = Object.keys(coms)[0]
-                        if (!comId) {
-                          return message.warn('源代码为空，暂无可下载的内容!')
-                        }
+                  //       const comId = Object.keys(coms)[0]
+                  //       if (!comId) {
+                  //         return message.warn('源代码为空，暂无可下载的内容!')
+                  //       }
 
-                        const files = (window as any)._forApp_[comId].getFiles()
+                  //       const files = (window as any)._forApp_[comId].getFiles()
 
-                        if (!files.length) {
-                          return message.warn('源代码为空，暂无可下载的内容!')
-                        }
+                  //       if (!files.length) {
+                  //         return message.warn('源代码为空，暂无可下载的内容!')
+                  //       }
 
-                        let rootDir: FileSystemDirectoryHandle
-                        try {
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          rootDir = await (window as any).showDirectoryPicker({
-                            mode: 'readwrite',
-                          })
-                        } catch {
-                          // 用户取消选择，静默退出
-                          return
-                        }
+                  //       let rootDir: FileSystemDirectoryHandle
+                  //       try {
+                  //         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  //         rootDir = await (window as any).showDirectoryPicker({
+                  //           mode: 'readwrite',
+                  //         })
+                  //       } catch {
+                  //         // 用户取消选择，静默退出
+                  //         return
+                  //       }
 
-                        // 5. 在选择的目录下创建 App 文件夹
-                        const projectName = 'App'
-                        const appDir = await rootDir.getDirectoryHandle(projectName, {
-                          create: true,
-                        })
+                  //       // 5. 在选择的目录下创建 App 文件夹
+                  //       const projectName = 'App'
+                  //       const appDir = await rootDir.getDirectoryHandle(projectName, {
+                  //         create: true,
+                  //       })
 
-                        const messageKey = 'export-source-code'
-                        message.open({
-                          key: messageKey,
-                          type: 'loading',
-                          content: '正在导出源代码...',
-                          duration: 0,
-                        })
+                  //       const messageKey = 'export-source-code'
+                  //       message.open({
+                  //         key: messageKey,
+                  //         type: 'loading',
+                  //         content: '正在导出源代码...',
+                  //         duration: 0,
+                  //       })
 
-                        try {
-                          for (let i = 0; i < files.length; i++) {
-                            const file = files[i]
-                            message.open({
-                              key: messageKey,
-                              type: 'loading',
-                              content: `正在导出源代码 (${i + 1}/${files.length})...`,
-                              duration: 0,
-                            })
-                            await writeFile(appDir, file.fileName, file.content)
-                          }
-                          message.open({
-                            key: messageKey,
-                            type: 'success',
-                            content: `源代码下载成功！共导出 ${files.length} 个文件`,
-                            duration: 2,
-                          })
-                        } catch (err) {
-                          message.open({
-                            key: messageKey,
-                            type: 'error',
-                            content: '源代码导出失败',
-                            duration: 2,
-                          })
-                          console.error(err)
-                        }
-                      }
-                    },
-                    {
-                      title: 'PRD',
-                      onClick: () => {
-                        const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
-                        if (!coms) {
-                          return message.warn('PRD文档不存在!')
-                        }
+                  //       try {
+                  //         for (let i = 0; i < files.length; i++) {
+                  //           const file = files[i]
+                  //           message.open({
+                  //             key: messageKey,
+                  //             type: 'loading',
+                  //             content: `正在导出源代码 (${i + 1}/${files.length})...`,
+                  //             duration: 0,
+                  //           })
+                  //           await writeFile(appDir, file.fileName, file.content)
+                  //         }
+                  //         message.open({
+                  //           key: messageKey,
+                  //           type: 'success',
+                  //           content: `源代码下载成功！共导出 ${files.length} 个文件`,
+                  //           duration: 2,
+                  //         })
+                  //       } catch (err) {
+                  //         message.open({
+                  //           key: messageKey,
+                  //           type: 'error',
+                  //           content: '源代码导出失败',
+                  //           duration: 2,
+                  //         })
+                  //         console.error(err)
+                  //       }
+                  //     }
+                  //   },
+                  //   {
+                  //     title: 'PRD',
+                  //     onClick: () => {
+                  //       const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
+                  //       if (!coms) {
+                  //         return message.warn('PRD文档不存在!')
+                  //       }
 
-                        const comId = Object.keys(coms)[0]
-                        if (!comId) {
-                          return message.warn('PRD文档不存在!')
-                        }
+                  //       const comId = Object.keys(coms)[0]
+                  //       if (!comId) {
+                  //         return message.warn('PRD文档不存在!')
+                  //       }
 
-                        const files = (window as any)._forApp_[comId].getFiles()
-                        const prdFile = files.find(item => item.fileName === 'requirement.md')
-                        if (!prdFile) {
-                          return message.warn('PRD文档不存在!')
-                        }
-                        const prdContent = prdFile.content
+                  //       const files = (window as any)._forApp_[comId].getFiles()
+                  //       const prdFile = files.find(item => item.fileName === 'requirement.md')
+                  //       if (!prdFile) {
+                  //         return message.warn('PRD文档不存在!')
+                  //       }
+                  //       const prdContent = prdFile.content
 
-                        // 从 front matter 中提取 title
-                        // 格式: ---\ntitle: xxx\ndesc: xxx\n---
+                  //       // 从 front matter 中提取 title
+                  //       // 格式: ---\ntitle: xxx\ndesc: xxx\n---
 
-                        const title = ctx.fileName?.replace(/\.[^.]+$/, '')
-                        const titleMatch = prdContent.match(/^---[\s\S]*?^title:\s*(.+?)$/m)
-                        const prdTitle = titleMatch ? titleMatch[1].trim() : title || 'PRD文档'
-                        // 下载为 Markdown 文件
-                        const blob = new Blob([prdContent], { type: 'text/markdown;charset=utf-8' })
-                        const url = URL.createObjectURL(blob)
-                        const anchor = document.createElement('a')
-                        anchor.href = url
-                        anchor.download = `${prdTitle}-PRD文档.md`
-                        anchor.click()
-                        URL.revokeObjectURL(url)
-                        message.success('PRD 文档下载成功')
-                      }
-                    },
-                  ]}
+                  //       const title = ctx.fileName?.replace(/\.[^.]+$/, '')
+                  //       const titleMatch = prdContent.match(/^---[\s\S]*?^title:\s*(.+?)$/m)
+                  //       const prdTitle = titleMatch ? titleMatch[1].trim() : title || 'PRD文档'
+                  //       // 下载为 Markdown 文件
+                  //       const blob = new Blob([prdContent], { type: 'text/markdown;charset=utf-8' })
+                  //       const url = URL.createObjectURL(blob)
+                  //       const anchor = document.createElement('a')
+                  //       anchor.href = url
+                  //       anchor.download = `${prdTitle}-PRD文档.md`
+                  //       anchor.click()
+                  //       URL.revokeObjectURL(url)
+                  //       message.success('PRD 文档下载成功')
+                  //     }
+                  //   },
+                  // ]}
                 />
               )
             }}

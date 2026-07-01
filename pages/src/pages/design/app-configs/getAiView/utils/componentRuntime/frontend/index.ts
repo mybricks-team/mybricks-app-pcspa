@@ -1,0 +1,19 @@
+export default {
+  entryFile: 'frontend/index.tsx',
+  type: 'frontend',
+  mode: 'gui_card',
+  getDependencies: () => {
+    return {
+       'antd': {
+        version: '5.21.4',
+        readme: '',
+        module: window['antd_5_21_4']
+      },
+      '@ant-design/icons': {
+        version: '4.7.0',
+        readme: '',
+        module: window['icons']
+      }
+    }
+  }
+}

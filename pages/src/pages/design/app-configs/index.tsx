@@ -51,7 +51,7 @@ import getAiView from "./getAiView";
 import AIPlugin from './getAiView/utils/get-ai-plugin'
 import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
 import cloudTpt from "./cloudTpt";
-import nocobaseConfigPlugin from "./nocobase";
+// import nocobaseConfigPlugin from "./nocobase";
 
 // const getComs = () => {
 //   const comDefs = {}
@@ -302,13 +302,16 @@ export default function appConfig(
     designerRef
   })
 
-  const nocobasePlugin = nocobaseConfigPlugin();
+  // const nocobasePlugin = nocobaseConfigPlugin();
 
   return {
     // debugger(json, opts) {
     //   return renderUI(json, opts)
     // },
     desnMode: 'vibeCoding',
+    vibeCoding: {
+      for: 'agent'
+    },
     shortcuts: {
       "ctrl+s": [save],
     },
@@ -420,7 +423,7 @@ export default function appConfig(
         },
         guidePrompt: ctx?.appConfig?.ai?.systemScenePrompt,
         key: ctx.fileId,
-        plugins: [nocobasePlugin.ai],
+        // plugins: [nocobasePlugin.ai],
         config: {
           enabledActionTags: ctx?.appConfig?.ai?.enabledActionTags
         }
@@ -503,7 +506,7 @@ export default function appConfig(
       // pluginToCode({
       //   type: "spa",
       // }),
-      nocobasePlugin,
+      // nocobasePlugin,
       // pluginDomain()
     ],
     // ...(ctx.hasMaterialApp
@@ -544,7 +547,7 @@ export default function appConfig(
           title: "PC-AI组件库",
           type: "com_lib",
           namespace: "mybricks.normal-pc-lite",
-          editJs: 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.69/edit.js',
+          editJs: 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.94/edit.13197e3ced63bafc.js'
         };
         const existing = baseComlibs.find(
           (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
