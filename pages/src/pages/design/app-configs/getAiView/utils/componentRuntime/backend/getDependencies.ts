@@ -1,7 +1,7 @@
 // const honoModule = require('hono')
 import { Hono } from 'hono'
 
-import { setHonoApp } from './requestProxy'
+import { honoApp } from './requestProxy'
 
 // pg browser-compat shim (PGlite-backed) — maintained in the pg plugin.
 import {
@@ -16,19 +16,6 @@ import dayjs from 'dayjs'
 //   honoModule.default?.Hono ??
 //   honoModule.default ??
 //   honoModule
-
-/**
- * 包装 Hono class：
- * 用户执行 new Hono() 时，自动把该实例注册到 requestProxy 的 axios adapter 里。
- * 后续 componentAxios 的所有请求都会直接走到这个 Hono 实例处理，无需真实网络。
- */
-const HandledHono = new Proxy(Hono, {
-  construct(Target: any, args: any[]) {
-    const instance = new Target(...args)
-    setHonoApp(instance)
-    return instance
-  },
-})
 
 type RuntimeLogger = Pick<Console, 'log' | 'error'>
 
@@ -46,7 +33,27 @@ const getDependencies = (props?: GetDependenciesProps) => {
     hono: {
       version: '4.12.21',
       readme: '',
-      module: { Hono: HandledHono },
+      dynamic: true,
+      module: (params) => {
+        const { id, logger } = params
+        if (!honoApp.app || !id.endsWith("/server/index.ts")) {
+          return { Hono }
+        }
+
+        const HandledHono = new Proxy(Hono, {
+          construct(Target: any, args: any[]) {
+            const instance = new Target(...args)
+            const prefix = `api/${id.replace('/server/index.ts', '').replace(/^\//, '')}`
+            honoApp.honos.set(prefix, instance)
+            honoApp.ready = false
+            honoApp.logger = logger
+            return instance
+          },
+        })
+        return {
+          Hono: HandledHono
+        }
+      },
     },
     ['mysql2/promise']: {
       version: '3.x (http-proxy-compat)',

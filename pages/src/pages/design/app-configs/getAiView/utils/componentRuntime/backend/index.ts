@@ -2,7 +2,7 @@ import getDependencies from './getDependencies'
 // import componentAxios from './requestProxy'
 
 export default {
-  entryFile: 'backend/index.ts',
+  pattern: /\/server\//,
   type: 'backend',
   getDependencies,
   // requestProxy: componentAxios,

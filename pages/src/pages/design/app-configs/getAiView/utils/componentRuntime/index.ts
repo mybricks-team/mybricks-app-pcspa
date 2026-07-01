@@ -3,6 +3,8 @@ import wrapper from './wrapper'
 import chat from './chat'
 import backend from './backend'
 import frontend from './frontend'
+import requestProxy, { honoApp } from './backend/requestProxy'
+import mybricksPrompt from './mybricksPrompt'
 
 export default {
   version: 1,
@@ -19,5 +21,14 @@ export default {
   modules: {
     backend,
     frontend
-  }
+  },
+  requestProxy,
+  onDebug(debug) {
+    if (debug) {
+      honoApp.init()
+    } else {
+      honoApp.clear()
+    }
+  },
+  mybricksPrompt,
 }

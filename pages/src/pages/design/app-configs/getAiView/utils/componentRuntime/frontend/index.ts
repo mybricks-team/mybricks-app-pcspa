@@ -1,7 +1,8 @@
 export default {
-  entryFile: 'frontend/index.tsx',
+  entryFile: 'index.tsx',
   type: 'frontend',
   mode: 'gui_card',
+  pattern: /^(?!.*\/server\/).+$/,
   getDependencies: () => {
     return {
        'antd': {

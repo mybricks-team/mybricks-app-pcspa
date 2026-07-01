@@ -25,17 +25,16 @@ const appPrompt = {
 卡片和工具是两类完全不同的前端产物，开发时须严格区分：
 
 **卡片（Card）** — 有界面的功能单元
-- 位于 \`frontend/skills/{skill名称}/cards/{功能名}/\` 目录，是有可视界面的 React 组件。
+- 位于 \`skills/{skill名称}/cards/{功能名}/\` 目录，是有可视界面的 React 组件。
 - 入口为 \`index.tsx\`（使用 \`comRef\` 定义），配置文件为 \`index.config.ts\`（使用 \`defineConfig\` 定义）。
 - 必须通过 \`useCardApis\` 向外暴露只读数据接口，供其他卡片或宿主调用。
 - 适用场景：需要向用户展示信息或提供交互操作时使用，例如数据列表、图表、表单、详情面板等一切需要渲染到页面上的功能单元。
 
 **工具（Tool）** — 无界面的函数能力
-- 位于 \`frontend/tools/{工具名}/\` 目录，是注册给 AI Agent 按需调用的 Function Calling 工具。
+- 位于 \`tools/{工具名}/\` 目录，是注册给 AI Agent 按需调用的 Function Calling 工具。
 - 入口为 \`index.ts\`（使用 \`defineTool\` 默认导出），无对应的 \`index.config.ts\`，不渲染任何 UI。
 - 必须定义 \`name\`、\`title\`、\`description\`、\`parameters\`、\`validate\` 和 \`execute\` 字段。
 - 适用场景：需要执行计算、查询、转换等纯逻辑操作时使用，例如单位换算、数据格式化、调用外部 API 获取信息等无需渲染界面的能力。
-
 
 ## 严格的交付边界规则：
 - 用户需求描述中出现「工具」「xxx工具」（如查询工具、转换工具、计算工具、时间工具等）时，识别为 Tool，只交付工具，禁止附带卡片。
@@ -46,51 +45,45 @@ const appPrompt = {
 - 在浅色和深色主题、不同字体、美学之间变化；
 注意：永远不要使用通用的AI生成美学、陈词滥调的配色方案（特别是白色背景上的紫色渐变）、可预测的布局，以及缺乏特征的千篇一律的设计。
 
-## 全栈应用开发
+## 服务开发
 当前项目支持使用 Hono 进行服务端开发。涉及数据库时，先通过工具确认数据库表结构，再在服务端代码中编写查询、写入和接口逻辑。`,
     architectureSection: `\`\`\`
-├─ frontend                             # 前端代码目录
-|  ├─ index.tsx                         # MyBricks 前端入口，有且仅有一个，必须写在 frontend/index.tsx
-|  ├─ index.module.less
-|  ├─ dataSource.ts                     # 前端数据源，项目唯一文件，必须，调用本项目服务端使用 /api/xxx 路径调用
-|  ├─ tools                             # 可选，Agent 工具目录，注册供 AI 按需调用的函数工具（Function Calling）
-|  |  ├─ {工具名}                        # 单个工具目录，以工具功能命名，snake_case 格式，例如 calculate_square、query_weather
-|  |  |  ├─ index.ts                    # 必选，工具定义入口，默认导出使用 defineTool 定义的工具创建函数
-|  ├─ skills                            # 可选，skill 目录，每个 skill 是一个独立文件夹
-|  |  ├─ {skill名称}                     # 单个 skill 目录，以 skill 功能命名，kebab-case 格式，例如 user-profile、order-list
-|  |  |  ├─ SKILL.md                    # 必选，skill 说明文件，描述该 skill 的功能、使用场景
-|  |  |  └─ cards                       # 必选，该 skill 下的卡片目录
-|  |  |  |  └─ components               # 前端可复用公共组件目录
-|  |  |  |  |  └── SharedComponent
-|  |  |  |  |  |  ├── index.tsx
-|  |  |  |  |  |  ├── index.module.less
-|  |  |  |  |  |  └── hooks
-|  |  |  |  |  |  |  └── useXxx.ts
-|  |  |  |  ├─ hooks                    # 可选，可复用的全局自定义 hooks 目录
+├─ skills                              # 可选，skills 目录，内部包含多个 skill
+|  ├─ {skill名称}                       # 单个 skill 目录，以 skill 功能命名，kebab-case 格式
+|  |  ├─ SKILL.md                      # 必选，skill 说明文件
+|  |  ├─ setup.ts                      # 可选，声明 \`mock\` 环境（设计态自动激活），必须和 \`dataSource.ts\` 配套使用
+|  |  ├─ dataSource.ts                 # 可选，定义数据源获取 API，所有正式数据（接口请求、静态数据）必须维护在该文件中，必须和 \`setup.ts\` 配套使用
+|  |  └─ cards                         # 可选，该 skill 下的卡片目录
+|  |  |  └─ components                 # 可选，卡片可复用的公共组件目录
+|  |  |  |  └── SharedComponent
+|  |  |  |  |  ├── index.tsx
+|  |  |  |  |  ├── index.module.less
+|  |  |  |  |  └── hooks
+|  |  |  |  |  |  └── useXxx.ts
+|  |  |  ├─ hooks                      # 可选，卡片可复用的自定义 hooks 目录
+|  |  |  |  ├── useXxx.ts
+|  |  |  |  └── useYyy.ts
+|  |  |  ├─ {功能名}                    # 具体的功能卡片目录，例如 UserProfile、OrderList
+|  |  |  |  ├─ index.config.ts         # 必选，卡片配置文件，描述卡片元信息；若卡片对外暴露 API，必须在此文件的 apis 字段声明
+|  |  |  |  ├─ index.tsx               # 必选，卡片组件入口，导出默认 React 组件
+|  |  |  |  ├─ index.module.less       # 可选，卡片样式文件，使用 CSS Modules
+|  |  |  |  ├─ {子组件名}.tsx           # 可选，当 index.tsx 中组件过多时，适当拆分为同级子组件文件
+|  |  |  |  ├─ {子组件名}.module.less   # 可选，子组件样式文件，使用 CSS Modules
+|  |  |  |  ├─ hooks                   # 可选，可复用的自定义 hooks 目录
 |  |  |  |  |  ├── useXxx.ts
-|  |  |  |  |  └── useYyy.ts
-|  |  |  |  ├─ {功能名}                  # 具体的功能卡片目录，例如 UserProfile、OrderList
-|  |  |  |  |  ├─ index.config.ts       # 必选，卡片配置文件，描述卡片元信息；若卡片对外暴露 API，必须在此文件的 apis 字段声明
-|  |  |  |  |  ├─ index.tsx             # 必选，卡片组件入口，导出默认 React 组件
-|  |  |  |  |  ├─ index.module.less     # 可选，卡片样式文件，使用 CSS Modules
-|  |  |  |  |  ├─ {子组件名}.tsx         # 可选，当 index.tsx 中组件过多时，适当拆分为同级子组件文件
-|  |  |  |  |  ├─ {子组件名}.module.less # 可选，子组件样式文件，使用 CSS Modules
-|  |  |  |  |  ├─ hooks                 # 可选，可复用的自定义 hooks 目录
-|  |  |  |  |  |  ├── useXxx.ts
-|  |  |  |  └─ ...                      # 其他功能卡片目录
-|  |  └─ ...                            # 其他 skill 目录
-├─ backend                              # 必选，服务端代码入口，自动渲染 MyBricks 前端项目
-|  ├─ index.ts                          # 必选，服务入口，在这里创建 Hono app
-|  ├─ db.ts                             # 可选，数据库连接文件，仅在需要数据库时创建
-|  ├─ middlewares                       # 可选，服务端中间件目录，仅在需要时创建
-|  ├─ routes                            # 可选，按业务域和路由拆分，一个文件一个业务路由，比如 /api/user 存放到 user.ts 中
-|  |  └── user.ts
+|  |  |  └─ ...                        # 其他功能卡片目录
+|  |  ├─ tools                         # 可选，skill 下内置的 Agent 工具目录，注册供 AI 按需调用的函数工具（Function Calling）
+|  |  |  ├─ {工具名}                    # 单个工具目录，以工具功能命名，snake_case 格式
+|  |  |  |  ├─ index.ts                # 必选，工具定义入口，默认导出使用 defineTool 定义的工具创建函数
+|  |  ├─ server                        # 可选，skill 下内置的服务目录，为当前 skill 提供接口
+|  |  |  ├─ index.ts                   # 必选，服务入口，在这里创建 Hono app
+├─ index.tsx                           # 必选，前端入口文件，固定编码占位，与 \`前端示例\` 中保持一致
 \`\`\``,
   },
   frontend: {
     metaSection: `---
-title: 前端工程
-description: 前端卡片、组件、样式、数据源、日志与设计态规范。
+title: Agent Skill & Tool 开发
+description: Agent Skill、Tool、前端卡片、组件、样式、数据源、日志、后端服务与设计态规范。
 permissions:
   - read
   - write
@@ -156,12 +149,12 @@ import { appRef } from 'mybricks'
  * summary: 入口文件
  * type: app
  */
-export default appRef(({ children }) => {
-  return children
+export default appRef(() => {
+  return
 })
 \`\`\`
 
-\`\`\`md frontend/skills/student-score-manage/SKILL.md
+\`\`\`md skills/student-score-manage/SKILL.md
 ---
 name: student-score-manage
 title: 学生成绩管理
@@ -180,13 +173,13 @@ description: 学生成绩管理功能域。当需要展示学生学籍信息、�
 3. 在页面中展示成绩汇总摘要（总分 / 平均分）时
 \`\`\`
 
-\`\`\`less frontend/skills/student-score-manage/cards/GradeCard/index.module.less
+\`\`\`less skills/student-score-manage/cards/GradeCard/index.module.less
 .gradeCard {
   width: 100%;
 }
 \`\`\`
 
-\`\`\`tsx frontend/skills/student-score-manage/cards/GradeCard/index.tsx
+\`\`\`tsx skills/student-score-manage/cards/GradeCard/index.tsx
 import { comRef, useCardApis } from 'mybricks'
 import { useState } from 'react'
 import styles from './index.module.less'
@@ -232,7 +225,7 @@ export default comRef(({ studentId, showAverage }) => {
 })
 \`\`\`
 
-\`\`\`ts frontend/skills/student-score-manage/cards/GradeCard/index.config.ts
+\`\`\`ts skills/student-score-manage/cards/GradeCard/index.config.ts
 import { defineConfig } from 'mybricks'
 
 export default defineConfig({
@@ -273,7 +266,76 @@ export default defineConfig({
 })
 \`\`\`
 
-\`\`\`ts frontend/tools/calculateSquare/index.ts
+\`\`\`ts skills/student-score-manage/dataSource.ts
+import { DataSource } from 'mybricks'
+
+interface GradeItem {
+  subject: string
+  score: number
+}
+
+interface StudentInfo {
+  name: string
+  className: string
+}
+
+interface StudentGradesResult {
+  studentInfo: StudentInfo
+  gradeList: GradeItem[]
+}
+
+class MyDatasource extends DataSource {
+  async fetchStudentGrades(studentId: string): Promise<StudentGradesResult> {
+    return this.axios.get('/student-grades', { params: { studentId } })
+  }
+}
+
+export default new MyDatasource()
+\`\`\`
+
+\`\`\`ts skills/student-score-manage/server/index.ts
+import { Hono } from 'hono'
+
+interface GradeItem {
+  subject: string
+  score: number
+}
+
+interface StudentInfo {
+  name: string
+  className: string
+}
+
+const server = new Hono()
+
+server.get('/student-grades', async (c) => {
+  const serverLogger = c.get('logger').child({ route: 'student-score-manage', action: 'student-grades' })
+  const studentId = c.req.query('studentId')
+
+  serverLogger.info({ studentId }, '查询学生成绩')
+
+  try {
+    if (!studentId) {
+      return c.json({ result: -1, error_msg: 'studentId 不能为空' }, 400)
+    }
+
+    const studentInfo: StudentInfo = { name: '张三', className: '三年一班' }
+    const gradeList: GradeItem[] = [
+      { subject: '语文', score: 90 },
+      { subject: '数学', score: 95 },
+    ]
+
+    return c.json({ result: 1, error_msg: 'success', data: { studentInfo, gradeList } })
+  } catch (error) {
+    serverLogger.error({ error }, '查询学生成绩失败')
+    return c.json({ result: -1, error_msg: '查询学生成绩失败' }, 500)
+  }
+})
+
+export default server
+\`\`\`
+
+\`\`\`ts tools/calculateSquare/index.ts
 import { defineTool } from 'mybricks'
 
 interface SquareParams {
@@ -409,7 +471,7 @@ export default defineTool(function () {
 </JSDoc 注释编写规范>
 
 <基于 tsx 的 JSDoc 注释示例>
-\`\`\`ts frontend/dataSource.ts
+\`\`\`ts skills/student-score-manage/dataSource.ts
 import { DataSource } from 'mybricks'
 
 interface GradeItem {
@@ -429,14 +491,14 @@ interface StudentGradesResult {
 
 class MyDatasource extends DataSource {
   async fetchStudentGrades(studentId: string): Promise<StudentGradesResult> {
-    return this.axios.get('/api/student-grades', { params: { studentId } })
+    return this.axios.get('/student-grades', { params: { studentId } })
   }
 }
 
 export default new MyDatasource()
 \`\`\`
 
-\`\`\`tsx frontend/index.tsx
+\`\`\`tsx index.tsx
 import { appRef } from 'mybricks'
 
 /**
@@ -446,15 +508,15 @@ import { appRef } from 'mybricks'
  * summary: 入口文件
  * type: app
  */
-export default appRef(({ children }) => {
-  return children
+export default appRef(() => {
+  return
 })
 \`\`\`
 
-\`\`\`tsx frontend/skills/student-score-manage/cards/GradeCard/index.tsx
+\`\`\`tsx skills/student-score-manage/cards/GradeCard/index.tsx
 import { comRef, useCardApis } from 'mybricks'
 import { useEffect, useState } from 'react'
-import dataSource from '../../../../dataSource'
+import dataSource from '../../dataSource'
 import styles from './index.module.less'
 
 interface GradeItem {
@@ -576,73 +638,22 @@ export default comRef(({ studentId, showAverage }) => {
 </基于 tsx 的 JSDoc 注释示例>`,
   },
   backend: {
-    codeRulesSection: `1. 后端接口路径统一挂在 \`api\` scope 下，例如 \`/api/todos\`、\`/api/users/:id\`。
+    codeRulesSection: `1. 后端接口使用合理、语义化的路径，如果是根路径，直接使用 “/” 即可。
 2. 路由处理函数中必须做好参数校验和异常捕获，避免未处理异常直接暴露给用户。
 3. 涉及数据库时，数据库表结构由工具调用进行准备；业务代码只负责查询和写入，不要在接口处理函数中执行建表逻辑。
-4. 路由拆分参考 Express Router 的思路：每个业务路由文件导出一个独立 router，入口文件只负责统一挂载，不要把所有接口都写进 \`backend/index.ts\`。
+4. 路由拆分参考 Express Router 的思路：每个业务路由文件导出一个独立 router，入口文件只负责统一挂载，不要把所有接口都写进 \`index.ts\`，合理拆分即可，不强制要求。
 
 ### 日志规范
-1. 必须包含服务启动日志，以及在有路由的情况下，需要统一的请求中间件；
-2. 必要时可以单独拆分一个logger文件；
+1. 请求参数、返回数据以及各种异常信息都必须打印对应的日志，方便排查问题
 
 ### 路由返回规范
 1. 服务端返回统一使用 JSON，成功返回 \`{ result: 1, error_msg: 'success', data }\`，失败返回 \`{ result: -1, error_msg: '失败原因' }\`，并设置合理 HTTP 状态码。
 
 ###
 `,
-    builtInCapabilitiesSection: `使用skill: common-service`,
+    // builtInCapabilitiesSection: `使用skill: common-service`,
     examplesSection: `1. 入口文件
-\`\`\`ts
-import { Hono } from "hono";
-import { logger } from "mybricks";
-import todoRoutes from "./routes/todo";
-
-const app = new Hono();
-const serverLogger = logger.child({ module: "backend" });
-
-const createRequestId = () => {
-  return \`\${Date.now().toString(36)}-\${Math.random().toString(36).slice(2, 8)}\`;
-};
-
-const requestHandle = async (c, next) => {
-  const requestId = c.req.header("x-request-id") ?? createRequestId();
-  const startedAt = Date.now();
-  const requestLogger = serverLogger.child({
-    requestId,
-    method: c.req.method,
-    path: c.req.path,
-  });
-
-  c.set("logger", requestLogger);
-  c.header("x-request-id", requestId);
-
-  try {
-    await next();
-  } catch (error) {
-    requestLogger.error({ error }, "服务端请求异常");
-
-    return c.json(
-      { result: -1, error_msg: "服务异常，请稍后重试" },
-      500,
-    );
-  } finally {
-    requestLogger.info({
-      status: c.res.status,
-      duration: Date.now() - startedAt,
-    }, "服务端请求完成");
-  }
-};
-
-app.use("*", requestHandle);
-app.route("/api/todos", todoRoutes);
-
-serverLogger.info("server start");
-
-export default app;
-\`\`\`
-
-2. 业务路由 todo.ts
-\`\`\`ts
+\`\`\`ts index.ts
 import { Hono } from "hono";
 
 interface Todo {
@@ -651,22 +662,25 @@ interface Todo {
   completed: boolean;
 }
 
-const todoRoutes = new Hono();
+const server = new Hono();
 
-todoRoutes.get("/", async (c) => {
-  const routeLogger = c.get("logger").child({ route: "todos", action: "list" });
+server.get("/", async (c) => {
+  const serverLogger = c.get("logger").child({ route: "todos", action: "list" });
 
   try {
     const items: Todo[] = [];
     return c.json({ result: 1, error_msg: "success", data: { items } });
   } catch (error) {
-    routeLogger.error({ error }, "查询任务列表失败");
+    serverLogger.error({ error }, "查询任务列表失败");
     return c.json({ result: -1, error_msg: "查询任务列表失败" }, 500);
   }
 });
 
-export default todoRoutes;
-\`\`\``,
+export default server;
+\`\`\`
+`,
+    honoUsageSection: `### Hono
+当前项目支持使用 Hono 进行服务端开发。入口文件创建并导出 Hono app`,
   },
 }
 
@@ -740,10 +754,11 @@ export function fullStackAppPromptBuilder(
             '## 环境变量',
             fullStackAppPromptSection.backend.environmentVariablesSection,
             '## 框架和数据库',
-            fullStackAppPromptSection.backend.honoUsageSection,
+            appPrompt.backend.honoUsageSection,
+            // fullStackAppPromptSection.backend.honoUsageSection,
             // fullStackAppPromptSection.backend.pgUsageSection,
-            '## 服务端内置能力',
-            fullStackAppPromptSection.backend.builtInCapabilitiesSection,
+            // '## 服务端内置能力',
+            // fullStackAppPromptSection.backend.builtInCapabilitiesSection,
             '## 服务端示例',
             appPrompt.backend.examplesSection,
           ]

@@ -1,15 +1,73 @@
 import type { AxiosRequestConfig, AxiosResponse } from 'axios'
 import axios from 'axios'
+import { Hono } from 'hono'
 
-type HonoApp = {
-  fetch: (request: Request) => Promise<Response>
+class HonoApp {
+  app: Hono = null
+
+  honos = new Map<string, Hono>()
+
+  ready: boolean = false
+
+  logger: any
+
+  init() {
+    this.app = new Hono()
+
+    if (!this.logger) {
+      return
+    }
+
+    const serverLogger = this.logger.child({ module: "server" });
+
+    const createRequestId = () => {
+      return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    };
+
+    const requestHandle = async (c, next) => {
+      const requestId = c.req.header("x-request-id") ?? createRequestId();
+      const startedAt = Date.now();
+      const requestLogger = serverLogger.child({
+        requestId,
+        method: c.req.method,
+        path: c.req.path,
+      });
+
+      c.set("logger", requestLogger);
+      c.header("x-request-id", requestId);
+
+      try {
+        await next();
+      } catch (error) {
+        requestLogger.error({ error }, "服务端请求异常");
+
+        return c.json(
+          { result: -1, error_msg: "服务异常，请稍后重试" },
+          500,
+        );
+      } finally {
+        requestLogger.info({
+          status: c.res.status,
+          duration: Date.now() - startedAt,
+        }, "服务端请求完成");
+      }
+    };
+    this.app.use("*", requestHandle);
+
+    Object.entries(Object.fromEntries(this.honos)).forEach(([id, hono]) => {
+      this.app.route(id, hono)
+    })
+  }
+
+  clear() {
+    this.app = null
+    this.honos = new Map()
+  }
 }
 
-let honoApp: HonoApp | null = null
+export const honoApp = new HonoApp()
 
-export function setHonoApp(app: HonoApp) {
-  honoApp = app
-}
+window._honoApp = honoApp
 
 type PlatformRequestContext = {
   userId?: string
@@ -40,7 +98,7 @@ async function httpRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
 }
 
 async function honoRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
-  if (!honoApp) {
+  if (!honoApp.app) {
     throw new Error(
       '[requestProxy] No Hono app registered. Make sure to create a Hono instance.',
     )
@@ -87,7 +145,16 @@ async function honoRequest(config: AxiosRequestConfig): Promise<AxiosResponse> {
     body: hasBody ? body : undefined,
   })
 
-  const response = await honoApp.fetch(request)
+  if (!honoApp.ready) {
+    honoApp.ready = true
+    honoApp.init()
+  }
+
+  console.log('[request]', request)
+
+  const response = await honoApp.app.fetch(request)
+
+  console.log('[response]', response)
 
   const responseText = await response.text()
   let responseData: unknown
