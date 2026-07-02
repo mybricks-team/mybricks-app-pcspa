@@ -65,11 +65,11 @@ const buildVibeAppEntry = ({ source, designerJSON }: VibeAppCodeMapOptions) => {
       return
     }
 
-    if (splitPath[0] === 'tools') {
-      const filename = splitPath[splitPath.length - 1]
-      if (filename === 'index.ts' && file.content.includes('defineTool')) {
-        toolsPath.push(file.path)
-      }
+    const isToolEntry = /^(skills\/[^/]+\/)?tools\/[^/]+\/index\.ts$/.test(
+      file.path,
+    )
+    if (isToolEntry && file.content.includes('defineTool')) {
+      toolsPath.push(file.path)
     }
   })
 

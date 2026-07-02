@@ -6,11 +6,6 @@ export default {
     return (
       <ChatPanel
         {...props}
-        user={{
-          name: '梁李昊',
-          avatar: 'https://f2.eckwai.com/kos/nlav12333/aicode/logo/newlogo.png',
-        }}
-        copilot={{ name: 'MyBricks', avatar: 'https://my.mybricks.world/image/icon.png' }}
       />
     )
   },
