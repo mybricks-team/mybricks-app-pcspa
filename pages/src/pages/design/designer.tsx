@@ -1010,16 +1010,6 @@ export default function MyDesigner({ appData: originAppData }) {
               newName = requirementFile.compiled.title
             }
 
-            if (!newName) {
-              try {
-                const entryFile = allFiles.find((f) => ['index.jsx', 'index.tsx'].includes(f.fileName))
-                if (entryFile?.jsDocMap) {
-                  const jsDoc = JSON.parse(decodeURIComponent(entryFile.jsDocMap))
-                  newName = jsDoc.default.title
-                }
-              } catch {}
-            }
-
             // 退而从 README.md 的 compiled.default.title 获取
             if (!newName) {
               const readmeFile = allFiles.find((f) => f.fileName === 'README.md')
