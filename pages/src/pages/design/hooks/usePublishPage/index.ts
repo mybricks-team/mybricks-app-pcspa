@@ -73,7 +73,7 @@ export function usePublishPage({
 
   const [publishLoading, setPublishLoading] = useState(false)
 
-  const handlePublish = useCallback(async ({ next }) => {
+  const handlePublish = useCallback(async ({ next, title: overrideTitle }: { next: (url: string) => void; title?: string }) => {
     setPublishLoading(true)
     try {
       let sourceList: Awaited<ReturnType<typeof getVibePublishSourceList>>
@@ -89,7 +89,7 @@ export function usePublishPage({
       }
 
       const source = sourceList[0]
-      const title = getTitle()
+      const title = overrideTitle || getTitle()
       const pageName = title || '未命名页面'
       const assetOwnerId = String(chatId)
       const finalTitle = pageName

@@ -70,8 +70,17 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
         color: 'white',
       }}
       loading={publishLoading}
-      onClick={() => {
+      onClick={async () => {
+        // 持久化标题到后端
+        if (title && title !== getTitle()) {
+          try {
+            await ctx.save({ name: title })
+          } catch (e) {
+            console.error('[PublishPageModal] 保存标题失败:', e)
+          }
+        }
         handlePublish({
+          title,
           next: (url) => {
             setPublishUrl(`${url}?env=mock`)
           }
