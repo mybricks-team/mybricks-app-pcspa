@@ -34,9 +34,9 @@ const getDependencies = (props?: GetDependenciesProps) => {
       version: '4.12.21',
       readme: '',
       dynamic: true,
-      module: (params) => {
+      module: (params: any) => {
         const { id, logger } = params
-        if (!honoApp.app || !id.endsWith("/server/index.ts")) {
+        if (!honoApp.app || !id.endsWith('/server/index.ts')) {
           return { Hono }
         }
 
@@ -51,7 +51,7 @@ const getDependencies = (props?: GetDependenciesProps) => {
           },
         })
         return {
-          Hono: HandledHono
+          Hono: HandledHono,
         }
       },
     },

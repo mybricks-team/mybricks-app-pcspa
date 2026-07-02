@@ -31,10 +31,11 @@ const appPrompt = {
 - 适用场景：需要向用户展示信息或提供交互操作时使用，例如数据列表、图表、表单、详情面板等一切需要渲染到页面上的功能单元。
 
 **工具（Tool）** — 无界面的函数能力
-- 位于 \`tools/{工具名}/\` 目录，是注册给 AI Agent 按需调用的 Function Calling 工具。
+- 位于 \`skills/{skill名称}/tools/{工具名}/\` 目录，是注册给 AI Agent 按需调用的 Function Calling 工具。
 - 入口为 \`index.ts\`（使用 \`defineTool\` 默认导出），无对应的 \`index.config.ts\`，不渲染任何 UI。
 - 必须定义 \`name\`、\`title\`、\`description\`、\`parameters\`、\`validate\` 和 \`execute\` 字段。
 - 适用场景：需要执行计算、查询、转换等纯逻辑操作时使用，例如单位换算、数据格式化、调用外部 API 获取信息等无需渲染界面的能力。
+- 当需要调服务端接口时，必须在 \`dataSource.ts\` 中通过 MyBricks DataSource 的 \`this.axios\` 调用 \`/xxx\`(使用合理、语义化的路径，如果是根路径，直接使用 “/” 即可) 请求。
 
 ## 严格的交付边界规则：
 - 用户需求描述中出现「工具」「xxx工具」（如查询工具、转换工具、计算工具、时间工具等）时，识别为 Tool，只交付工具，禁止附带卡片。
@@ -98,7 +99,7 @@ permissions:
 6. 所有来自三方库的组件和所有 html 元素都必须带有语义化明确且唯一的 \`className\`。
 7. 禁止出现直接引用标签的写法，例如 \`<Tags[XX] property={'aa'}/>\`；正确写法是先定义 \`const XX = Tags[XX]; <XX property={'aa'} />\`。
 8. 所有列表中的组件必须通过 \`key\` 属性做唯一标识，不要使用 index 作为 key。
-9. 前端调用本项目服务端接口时，统一在 \`dataSource.ts\` 中通过 MyBricks DataSource 的 \`this.axios\` 调用 \`/api/xxx\` 请求。
+9. 前端调用本项目服务端接口时，统一在 \`dataSource.ts\` 中通过 MyBricks DataSource 的 \`this.axios\` 调用 \`/xxx\`(使用合理、语义化的路径，如果是根路径，直接使用 “/” 即可) 请求。
 10. 卡片必须通过 \`useCardApis\`（从 \`mybricks\` 导入）暴露数据、状态的读取接口，供其他卡片或宿主调用，这是强制要求，不能省略。** 实现时必须同时满足两个条件：① 在 \`index.config.ts\` 的 \`apis\` 字段中声明所有 API 名称与描述；② 在 \`index.tsx\` 运行时通过 \`useCardApis\` 注册对应的实现函数，二者必须保持一致。API 仅用于对外提供只读信息（getter）：包括卡片当前展示的数据、加载状态、筛选条件、选中项等一切有意义的可读状态；禁止暴露任何会修改卡片内部状态的操作类方法。卡片内部状态只能由卡片自身管理，不允许通过 API 被外部写入或变更。
 
 ## LESS 文件编写规范
@@ -335,7 +336,7 @@ server.get('/student-grades', async (c) => {
 export default server
 \`\`\`
 
-\`\`\`ts tools/calculateSquare/index.ts
+\`\`\`ts skills/calculate/tools/square/index.ts
 import { defineTool } from 'mybricks'
 
 interface SquareParams {
