@@ -449,36 +449,60 @@ function buildCodeMap(
   const codeMap = source.files.reduce(
     (acc, file) => {
       acc[file.path] = file.content
-        .replace(`@mybricks/ai-render/testing`, `./mybricks-testing`)
-        .replace(`mybricks/testing`, `./mybricks-testing`)
-      if (file.path === 'index.jsx' || file.path === 'index.tsx') {
-        acc[file.path] = `
-        import {activate} from './mybricks-testing'
-        import { setAppContextDefaults } from '@mybricks/ai-render'
-
-        setAppContextDefaults({
-          _renderType: "application",
-          _router: "hash"
-        })
-
-        ${source.files.some(f => f.path === 'setup.ts' || f.path === 'setup.js') ? `import "./setup"` : ''}
-
-        // 初始化时读取 URL 参数
-        const __vibeDesignEnv = new URLSearchParams(window.location.search).get('env')
-        if (!__vibeDesignEnv || __vibeDesignEnv === 'mock') {
-          activate('mock')
-        }
-
-        ${acc[file.path]}
-        `
-      }
       return acc
     },
     {} as Record<string, string>,
   )
 
+  let importSetup = ''
+  let importMybricksTesting = ''
+
+  const toIdentifier = (path: string) => path.replace(/[^a-zA-Z0-9]/g, '_')
+
   codeMap['mybricks-testing.ts'] = mockMybricksTesting
   Object.assign(codeMap, vibeAppCodeMap({ source, designerJSON }))
+
+  Object.entries(codeMap).forEach(([path, content]) => {
+    if (path.endsWith('/setup.ts')) {
+      const testPath = path.split('/').slice(0, -1).concat('mybricks-testing.ts').join('/')
+      codeMap[path] = content.replace('mybricks/testing', './mybricks-testing')
+      codeMap[testPath] = `import { createEnvRunner } from '${path.split('/').reduce((pre, cur) => {
+          return pre + '../'
+      }, '')}mybricks-testing'
+
+      console.log('setup file loaded')
+
+      const _defaultRunner = createEnvRunner()
+      export const describe = _defaultRunner.describe
+      export const spyOn = _defaultRunner.spyOn
+      export const activate = _defaultRunner.activate
+      `
+
+      importSetup += `import './${path.replace(/^\//, '')}'\n`
+      const testName = toIdentifier(testPath)
+      importMybricksTesting += `import { activate as ${testName}activate } from './${testPath.replace(/^\//, '')}'\n
+      ${testName}activate('mock')
+      `
+    }
+  })
+
+  const buildPrelude = (): string => {
+    return `import { setAppContextDefaults } from '@mybricks/ai-render'
+setAppContextDefaults({
+  _renderType: 'application',
+  _router: 'hash',
+})`
+  }
+
+  codeMap['index.tsx'] = `
+  ${buildPrelude()}
+  ${importSetup}
+  ${importMybricksTesting}
+  ${codeMap['index.tsx']} 
+  `
+
+  console.log('[前端:codeMap]', codeMap)
+
   return codeMap
 }
 

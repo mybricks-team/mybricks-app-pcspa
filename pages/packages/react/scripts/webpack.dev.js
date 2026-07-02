@@ -39,7 +39,7 @@ module.exports = merge(common, {
           '/api/pcpage/vibepublish'
         ],
         // target: 'https://my.mybricks.world',
-        target: 'http://localhost:9002/mybricks-app-pcspa',
+        target: 'http://localhost:9002/mybricks-app-ai-agent',
         secure: false,
         changeOrigin: true,
       },
