@@ -70,6 +70,8 @@ class HonoApp {
 
 export const honoApp = new HonoApp()
 
+window._honoApp = honoApp
+
 type PlatformRequestContext = {
   userId?: string
 }

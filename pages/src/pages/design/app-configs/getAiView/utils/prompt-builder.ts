@@ -35,7 +35,7 @@ const appPrompt = {
 - 入口为 \`index.ts\`（使用 \`defineTool\` 默认导出），无对应的 \`index.config.ts\`，不渲染任何 UI。
 - 必须定义 \`name\`、\`title\`、\`description\`、\`parameters\`、\`validate\` 和 \`execute\` 字段。
 - 适用场景：需要执行计算、查询、转换等纯逻辑操作时使用，例如单位换算、数据格式化、调用外部 API 获取信息等无需渲染界面的能力。
-- 当需要调服务端接口时，必须在 \`dataSource.ts\` 中通过 MyBricks DataSource 的 \`this.axios\` 调用 \`/xxx\`(使用合理、语义化的路径，如果是根路径，直接使用 “/” 即可) 请求。
+- 当需要调服务端接口时，必须在 \`dataSource.ts\` 中通过 MyBricks DataSource 的 \`this.axios\` 调用 \`/xxx\`(使用合理、语义化的路径，如果是根路径，直接使用 "/" 即可) 请求。
 
 ## 严格的交付边界规则：
 - 用户需求描述中出现「工具」「xxx工具」（如查询工具、转换工具、计算工具、时间工具等）时，识别为 Tool，只交付工具，禁止附带卡片。
@@ -53,7 +53,7 @@ const appPrompt = {
 |  ├─ {skill名称}                       # 单个 skill 目录，以 skill 功能命名，kebab-case 格式
 |  |  ├─ SKILL.md                      # 必选，skill 说明文件
 |  |  ├─ setup.ts                      # 可选，声明 \`mock\` 环境（设计态自动激活），必须和 \`dataSource.ts\` 配套使用
-|  |  ├─ dataSource.ts                 # 可选，定义数据源获取 API，所有正式数据（接口请求、静态数据）必须维护在该文件中，必须和 \`setup.ts\` 配套使用
+|  |  ├─ dataSource.ts                 # 可选，与 SKILL.md 同级，定义数据源获取 API，所有正式数据（接口请求、静态数据）必须维护在该文件中，必须和 \`setup.ts\` 配套使用
 |  |  └─ cards                         # 可选，该 skill 下的卡片目录
 |  |  |  └─ components                 # 可选，卡片可复用的公共组件目录
 |  |  |  |  └── SharedComponent
