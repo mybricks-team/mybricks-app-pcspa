@@ -21,6 +21,12 @@
 
     :global {
 
+      .ant-btn {
+        border-radius: 6px;
+        font-size: 12px;
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12) !important;
+      }
+
       .ant-btn-primary,
       .ant-btn-primary:not([disabled]) {
         border-radius: 6px;
@@ -31,14 +37,14 @@
         text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12) !important;
       }
 
-      .ant-btn:hover,
-      .ant-btn:active {
+      .ant-btn:hover:not([disabled]),
+      .ant-btn:active:not([disabled]) {
         border-color: var(--mybricks-color-primary) !important;
       }
 
-      .ant-btn-primary[disabled],
-      .ant-btn-primary[disabled]:hover,
-      .ant-btn-primary[disabled]:active {
+      .ant-btn[disabled],
+      .ant-btn[disabled]:hover,
+      .ant-btn[disabled]:active {
         opacity: 0.6;
       }
 
@@ -117,8 +123,8 @@
         font-weight: 500;
       }
 
-      .ant-btn:hover,
-      .ant-btn:active {
+      .ant-btn:hover:not([disabled]),
+      .ant-btn:active:not([disabled]) {
         color: var(--mybricks-color-primary);
       }
 

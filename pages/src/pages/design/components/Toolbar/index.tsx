@@ -109,7 +109,6 @@ const ToolBar = forwardRef<TitlebarRef, ToolbarProps>((props, ref) =>{
               </Button>
             </Badge>
             <Button
-              type='primary'
               disabled={!canSave}
               onClick={onPublish}
             >
