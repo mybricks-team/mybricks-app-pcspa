@@ -59,8 +59,8 @@ module.exports = merge(common, {
       {
         context: ['/'],
         // target: 'https://test.mybricks.world/',
-        // target: 'http://dev.manateeai.com/',
-        target: 'https://my.mybricks.world',
+        target: 'http://dev.manateeai.com/',
+        // target: 'https://my.mybricks.world',
         // target: 'http://localhost:3100',
         secure: false,
         changeOrigin: true,
@@ -79,6 +79,7 @@ module.exports = merge(common, {
     new HtmlWebpackPlugin({
       filename: 'index.html',
       chunks: ['index'],
+
       templateContent: ({ htmlWebpackPlugin }) => {
         let content = fs.readFileSync(
           path.resolve(__dirname, '../templates/index.html'),
