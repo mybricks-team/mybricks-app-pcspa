@@ -1,4 +1,5 @@
 import AIPlugin, { IDBHistory } from '@mybricks/plugin-ai'
+import skills from './skills'
 
 const COMLIB_NAMESPACE_LITE = 'mybricks.normal-pc-lite'
 const COMLIB_NAMESPACE_AI = 'mybricks.ai-comlib-pc'
@@ -20,6 +21,7 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
   config,
   key,
   plugins,
+  skills
   // componentRuntime: {
   //   chat: {
   //     agent: {
