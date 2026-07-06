@@ -1,5 +1,5 @@
 import AIPlugin, { fullStackAppPromptSection } from '@mybricks/plugin-ai'
-import { fullStackAppPromptBuilder } from './prompt-builder'
+import { fullStackAppPromptBuilder } from './promptBuilder'
 
 const COMLIB_NAMESPACE_LITE = 'mybricks.normal-pc-lite'
 const COMLIB_NAMESPACE_AI = 'mybricks.ai-comlib-pc'

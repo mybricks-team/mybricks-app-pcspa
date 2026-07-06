@@ -18,6 +18,8 @@
 comRef(baseComponent: FunctionComponent<Props>): FunctionComponent<Props>
 ```
 
+IMPORTANT：comRef 包裹的组件与就是一个 React 组件，是可复用的。
+
 ### 浮层类组件声明
 浮层类组件（弹窗、抽屉等）必须通过 popupRef 包裹实现，popupRef是MyBricks提供的高阶函数，用于创建一个浮层类组件。
 
