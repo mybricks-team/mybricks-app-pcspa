@@ -11,7 +11,12 @@ export default {
   mybricksPrompt,
   getDependencies: () => {
     return {
-       'antd': {
+      'dayjs': {
+        version: '1.11.13',
+        readme: '',
+        module: window['dayjs']
+      },
+      'antd': {
         version: '5.21.4',
         readme: '',
         module: window['antd_5_21_4']
