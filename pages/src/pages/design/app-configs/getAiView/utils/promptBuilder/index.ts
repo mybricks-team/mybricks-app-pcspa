@@ -1,10 +1,7 @@
-import type * as PluginAITypes from '@mybricks/plugin-ai'
 import type { PluginAIPreset } from '@mybricks/plugin-ai'
-import root from './root'
 import frontend from './frontend'
 
 const appPrompt = {
-  root,
   frontend,
   backend: {
     codeRulesSection: `1. 后端接口使用合理、语义化的路径，如果是根路径，直接使用 “/” 即可。
