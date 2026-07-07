@@ -1,5 +1,3 @@
-# 前端规范
-
 ## TSX 文件编写规范
 1. 必须使用 TypeScript，所有组件 props、state、函数参数和返回值都需要有明确的类型定义。
 2. 组件状态和业务逻辑封装在组件内部，使用 useState、useReducer 等 React hooks 管理状态。
