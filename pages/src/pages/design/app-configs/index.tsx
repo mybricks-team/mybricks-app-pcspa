@@ -534,36 +534,39 @@ export default function appConfig(
     //   //   return lib
     //   // })
     // }),
-    comLibAdder: appData.comLibAdder(ctx),
+    // comLibAdder: appData.comLibAdder(ctx),
     // comLibLoader: appData.comLibLoader({
     //   comlibs: ctx.comlibs
     // }),
-    comLibLoader: appData.comLibLoader({
-      comlibs: (() => {
-        const baseComlibs = ctx.comlibs.filter(
-          (lib) => lib.namespace !== "mybricks.ai-comlib-pc"
-        );
-        const pcAiComlib = {
-          title: "PC-AI组件库",
-          type: "com_lib",
-          namespace: "mybricks.normal-pc-lite",
-          editJs: 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.97/edit.b952133c3494c75b.js'
-          // editJs: 'public/comlibs/0702/edit.js'
-          // editJs: 'http://localhost:20000/comlib.js'
-        };
-        const existing = baseComlibs.find(
-          (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
-        );
-        if (existing) {
-          return baseComlibs.map((lib) =>
-            lib.namespace === pcAiComlib.namespace && lib.editJs
-              ? { ...lib, editJs: pcAiComlib.editJs }
-              : lib
-          );
-        }
-        return baseComlibs.concat(pcAiComlib);
-      })(),
-    }),
+    // comLibLoader: appData.comLibLoader({
+    //   comlibs: (() => {
+    //     const baseComlibs = ctx.comlibs.filter(
+    //       (lib) => lib.namespace !== "mybricks.ai-comlib-pc"
+    //     );
+    //     const pcAiComlib = {
+    //       title: "PC-AI组件库",
+    //       type: "com_lib",
+    //       namespace: "mybricks.normal-pc-lite",
+    //       editJs: 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.97/edit.b952133c3494c75b.js'
+    //       // editJs: 'public/comlibs/0702/edit.js'
+    //       // editJs: 'http://localhost:20000/comlib.js'
+    //     };
+    //     const existing = baseComlibs.find(
+    //       (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
+    //     );
+    //     if (existing) {
+    //       return baseComlibs.map((lib) =>
+    //         lib.namespace === pcAiComlib.namespace && lib.editJs
+    //           ? { ...lib, editJs: pcAiComlib.editJs }
+    //           : lib
+    //       );
+    //     }
+    //     return baseComlibs.concat(pcAiComlib);
+    //   })(),
+    // }),
+    comLibLoader() {
+      return ['https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.0.97/edit.b952133c3494c75b.js']
+    },
     pageContentLoader() {
       //加载页面内容
       return new Promise(async (resolve, reject) => {
@@ -927,7 +930,17 @@ export default function appConfig(
     },
     geoView: {
       scenes: {
-        adder,
+        adder: [
+          {
+            type: 'normal',
+            title: 'AI页面',
+            template: {
+              namespace: 'mybricks.basic-comlib.ai-mix',
+              deletable: false,
+              asRoot: true,
+            },
+          }
+        ],
       },
       ...(!!ctx.hasAIComlib ? {
         nav: {

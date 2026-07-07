@@ -343,8 +343,10 @@ export default function MyDesigner({ appData: originAppData }) {
 
   useLayoutEffect(() => {
     appData.getInitComLibs({
-      localComlibs: APP_TYPE === "react" ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : [],
-      currentComlibs: appData.fileContent?.content?.comlibs,
+      localComlibs: [],
+      currentComlibs: []
+      // localComlibs: APP_TYPE === "react" ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : [],
+      // currentComlibs: appData.fileContent?.content?.comlibs,
     }).then(({ comlibs, latestComlibs }) => {
       const newComlibs = ctx.debug
         ? replaceComlib(comlibs, comlibDebugUtils.get())
