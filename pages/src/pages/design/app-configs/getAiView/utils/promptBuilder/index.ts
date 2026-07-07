@@ -57,7 +57,6 @@ export function fullStackAppPromptBuilder(
   agentAppPromptSection: any,
 ): PluginAIPreset {
   return {
-    disallowedDebugEnvs: ['mock'], // 调试态禁止mock环境
     promptSections: {
       agent: agentAppPromptSection.agent,
       developeGuide: agentAppPromptSection.developeGuide,
