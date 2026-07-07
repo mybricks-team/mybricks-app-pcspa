@@ -13,181 +13,146 @@ export default appRef(() => {
 })
 ```
 
-```md skills/student-score-manage/SKILL.md
+```md skills/score-summary/SKILL.md
 ---
-name: student-score-manage
-title: 学生成绩管理
-description: 学生成绩管理功能域。当需要展示学生学籍信息、历次考试各科成绩，或在页面中呈现成绩汇总摘要（总分 / 平均分）时使用。
+name: score-summary
+title: 成绩摘要
+description: 成绩摘要卡片。当需要在页面中展示某个学生的总分、平均分、最高分、最低分等聚合信息时使用。
 ---
 
-# student-score-manage
+# score-summary
 
 ## 功能说明
-提供学生基本信息查看与各科目成绩统计展示能力，支持按 studentId 动态加载数据。
+提供一个成绩摘要卡片，用于展示某个学生已计算好的成绩统计结果。卡片只负责呈现摘要信息，并通过只读 API 向 Agent 暴露当前摘要状态。
 
 ## 何时使用
 当用户需要：
-1. 展示某位学生的学籍信息（姓名、班级）时
-2. 呈现历次考试各科目成绩列表时
-3. 在页面中展示成绩汇总摘要（总分 / 平均分）时
+1. 展示某个学生的成绩汇总概览时
+2. 在页面中呈现总分、平均分、最高分、最低分等统计指标时
+3. 让 Agent 读取当前卡片展示的成绩摘要信息时
 ```
 
-```less skills/student-score-manage/cards/GradeCard/index.module.less
-.gradeCard {
+```less skills/score-summary/cards/ScoreSummaryCard/index.module.less
+.scoreSummaryCard {
   width: 100%;
 }
 ```
 
-```tsx skills/student-score-manage/cards/GradeCard/index.tsx
+```tsx skills/score-summary/cards/ScoreSummaryCard/index.tsx
 import { comRef, useCardApis } from 'mybricks'
-import { useState } from 'react'
 import styles from './index.module.less'
 
-interface GradeItem {
-  subject: string
-  score: number
-}
-
-interface StudentInfo {
-  name: string
-  className: string
+interface ScoreSummary {
+  totalScore: number
+  averageScore: number
+  highestScore: number
+  lowestScore: number
 }
 
 /**
  * @mybricks
- * name: GradeCard
- * title: 学生成绩查看卡片
- * summary: 卡片主体，展示学生基本信息、各科目成绩列表与总分/平均分统计，支持刷新加载。
+ * name: ScoreSummaryCard
+ * title: 成绩摘要卡片
+ * summary: 展示成绩统计摘要，包含总分、平均分、最高分、最低分等信息。
  * type: com
  */
-export default comRef(({ studentId, showAverage }) => {
-  const [studentInfo, setStudentInfo] = useState<StudentInfo | null>(null)
-  const [gradeList, setGradeList] = useState<GradeItem[]>([])
-  const [loaded, setLoaded] = useState(false)
-
-  const total = gradeList.reduce((sum, item) => sum + item.score, 0)
-  const average = gradeList.length > 0 ? (total / gradeList.length).toFixed(1) : null
+export default comRef(({ studentId, title }) => {
+  const summary: ScoreSummary | null = null
 
   useCardApis({
-    /** 获取当前展示的学生基本信息，数据未加载完成时返回 null */
-    getStudentInfo: () => (loaded ? studentInfo : null),
-    /** 获取学生各科目成绩列表，数据未加载完成时返回空数组 */
-    getGradeList: () => (loaded ? gradeList : []),
-    /** 获取成绩统计摘要，包含总分和平均分，数据未加载完成时返回 null */
-    getSummary: () =>
-      loaded && studentInfo
-        ? `${studentInfo.name}：总分 ${total} 分，平均分 ${average} 分`
-        : null,
+    /** 获取当前展示的成绩摘要数据，数据未加载时返回 null */
+    getScoreSummary: () => summary,
   })
 
-  return <div className={styles.gradeCard}>学生成绩卡片</div>
+  return <div className={styles.scoreSummaryCard}>成绩摘要卡片</div>
 })
 ```
 
-```ts skills/student-score-manage/cards/GradeCard/index.config.ts
+```ts skills/score-summary/cards/ScoreSummaryCard/index.config.ts
 import { defineConfig } from 'mybricks'
 
 export default defineConfig({
-  name: 'student-grade-card',
-  title: '学生成绩查看卡片',
-  description: '展示学生基本信息、各科目成绩列表与总分/平均分统计，支持刷新加载。',
+  name: 'score-summary-card',
+  title: '成绩摘要卡片',
+  description: '展示成绩统计摘要，包含总分、平均分、最高分、最低分等信息。',
   props: {
     type: 'object',
     properties: {
       studentId: {
         type: 'string',
         title: '学生 ID',
-        description: '需要展示成绩的学生唯一标识',
+        description: '需要展示成绩摘要的学生唯一标识',
       },
-      showAverage: {
-        type: 'boolean',
-        title: '显示平均分',
-        description: '是否在成绩列表底部展示平均分统计行',
-        default: true,
+      title: {
+        type: 'string',
+        title: '卡片标题',
+        description: '成绩摘要卡片顶部展示的标题',
+        default: '成绩摘要',
       },
     },
     required: ['studentId'],
   },
   apis: [
     {
-      name: 'getStudentInfo',
-      description: '获取当前展示的学生基本信息，包括姓名、班级等，数据未加载完成时返回 null',
-    },
-    {
-      name: 'getGradeList',
-      description: '获取学生各科目成绩列表，数据未加载完成时返回空数组',
-    },
-    {
-      name: 'getSummary',
-      description: '获取成绩统计摘要，包含总分和平均分，数据未加载完成时返回 null',
+      name: 'getScoreSummary',
+      description: '获取当前展示的成绩摘要数据，包括总分、平均分、最高分、最低分等，数据未加载时返回 null',
     },
   ],
 })
 ```
 
-```ts skills/student-score-manage/dataSource.ts
+```ts skills/score-summary/dataSource.ts
 import { DataSource } from 'mybricks'
 
-interface GradeItem {
-  subject: string
-  score: number
+interface ScoreSummaryParams {
+  studentId: string
 }
 
-interface StudentInfo {
-  name: string
-  className: string
-}
-
-interface StudentGradesResult {
-  studentInfo: StudentInfo
-  gradeList: GradeItem[]
+interface ScoreSummaryResult {
+  totalScore: number
+  averageScore: number
+  highestScore: number
+  lowestScore: number
 }
 
 class MyDatasource extends DataSource {
-  async fetchStudentGrades(studentId: string): Promise<StudentGradesResult> {
-    return this.axios.get('/student-grades', { params: { studentId } })
+  async fetchScoreSummary(params: ScoreSummaryParams): Promise<ScoreSummaryResult> {
+    return this.axios.get('/score-summary', { params })
   }
 }
 
 export default new MyDatasource()
 ```
 
-```ts skills/student-score-manage/server/index.ts
+```ts skills/score-summary/server/index.ts
 import { Hono } from 'hono'
-
-interface GradeItem {
-  subject: string
-  score: number
-}
-
-interface StudentInfo {
-  name: string
-  className: string
-}
 
 const server = new Hono()
 
-server.get('/student-grades', async (c) => {
-  const serverLogger = c.get('logger').child({ route: 'student-score-manage', action: 'student-grades' })
+server.get('/score-summary', async (c) => {
+  const serverLogger = c.get('logger').child({ route: 'score-summary', action: 'fetch-score-summary' })
   const studentId = c.req.query('studentId')
 
-  serverLogger.info({ studentId }, '查询学生成绩')
+  serverLogger.info({ studentId }, '查询成绩摘要')
 
   try {
     if (!studentId) {
       return c.json({ result: -1, error_msg: 'studentId 不能为空' }, 400)
     }
 
-    const studentInfo: StudentInfo = { name: '张三', className: '三年一班' }
-    const gradeList: GradeItem[] = [
-      { subject: '语文', score: 90 },
-      { subject: '数学', score: 95 },
-    ]
-
-    return c.json({ result: 1, error_msg: 'success', data: { studentInfo, gradeList } })
+    return c.json({
+      result: 1,
+      error_msg: 'success',
+      data: {
+        totalScore: 520,
+        averageScore: 86.7,
+        highestScore: 98,
+        lowestScore: 76,
+      },
+    })
   } catch (error) {
-    serverLogger.error({ error }, '查询学生成绩失败')
-    return c.json({ result: -1, error_msg: '查询学生成绩失败' }, 500)
+    serverLogger.error({ error }, '查询成绩摘要失败')
+    return c.json({ result: -1, error_msg: '查询成绩摘要失败' }, 500)
   }
 })
 

@@ -3,8 +3,6 @@ import type { PluginAIPreset } from '@mybricks/plugin-ai'
 import root from './root'
 import frontend from './frontend'
 
-type FullStackAppPromptSection = typeof PluginAITypes.fullStackAppPromptSection
-
 const appPrompt = {
   root,
   frontend,
@@ -56,15 +54,15 @@ export default server;
 }
 
 export function fullStackAppPromptBuilder(
-  fullStackAppPromptSection: FullStackAppPromptSection,
+  agentAppPromptSection: any,
 ): PluginAIPreset {
   return {
     disallowedDebugEnvs: ['mock'], // 调试态禁止mock环境
     promptSections: {
-      agent: fullStackAppPromptSection.agent,
-      developeGuide: fullStackAppPromptSection.developeGuide,
-      designGuide: fullStackAppPromptSection.designGuide,
-      documentGuide: fullStackAppPromptSection.documentGuide,
+      agent: agentAppPromptSection.agent,
+      developeGuide: agentAppPromptSection.developeGuide,
+      designGuide: agentAppPromptSection.designGuide,
+      documentGuide: agentAppPromptSection.documentGuide,
     } satisfies any,
     virtualFiles: async (context: any) => {
       const libraryDocsSection = await context.getEffectiveLibrariesSection()
@@ -73,13 +71,11 @@ export function fullStackAppPromptBuilder(
         {
           path: '.agent/agent.md',
           content: [
-            fullStackAppPromptSection.root.metaSection,
+            agentAppPromptSection.root.metaSection,
             '## 开发宪章',
-            // fullStackAppPromptSection.root.guideSection,
-            appPrompt.root.guideSection,
+            agentAppPromptSection.root.guideSection,
             '## 工程架构',
-            // fullStackAppPromptSection.root.architectureSection,
-            appPrompt.root.architectureSection,
+            agentAppPromptSection.root.architectureSection,
             '## 可用的三方库',
             libraryDocsSection,
           ]
@@ -96,12 +92,12 @@ export function fullStackAppPromptBuilder(
             '# 前端规范',
             // fullStackAppPromptSection.frontend.guideSection,
             appPrompt.frontend.guideSection,
-            '## 设计规范加载',
-            '当任务涉及卡片初始化、卡片搭建、卡片生成、改稿或样式调整时，先加载 design-spec skill 并读取相关规则文件，再进入具体代码开发。',
+            // '## 设计规范加载',
+            // '当任务涉及卡片初始化、卡片搭建、卡片生成、改稿或样式调整时，先加载 design-spec skill 并读取相关规则文件，再进入具体代码开发。',
             '## 资源使用规范',
-            fullStackAppPromptSection.frontend.assetsUsageSection,
+            agentAppPromptSection.frontend.assetsUsageSection,
             '## 环境变量',
-            fullStackAppPromptSection.frontend.environmentVariablesSection,
+            agentAppPromptSection.frontend.environmentVariablesSection,
             '## JsDoc声明规范',
             // fullStackAppPromptSection.frontend.jsDocUsageSection,
             appPrompt.frontend.jsDocUsageSection,
@@ -117,13 +113,13 @@ export function fullStackAppPromptBuilder(
         {
           path: 'backend/.agent/agent.md',
           content: [
-            fullStackAppPromptSection.backend.metaSection,
+            agentAppPromptSection.backend.metaSection,
             '# 服务端规范',
-            fullStackAppPromptSection.backend.guideSection,
+            agentAppPromptSection.backend.guideSection,
             '## 代码规范',
             appPrompt.backend.codeRulesSection,
             '## 环境变量',
-            fullStackAppPromptSection.backend.environmentVariablesSection,
+            agentAppPromptSection.backend.environmentVariablesSection,
             '## 框架和数据库',
             appPrompt.backend.honoUsageSection,
             // fullStackAppPromptSection.backend.honoUsageSection,
