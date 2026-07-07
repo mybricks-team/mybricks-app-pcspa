@@ -1,4 +1,4 @@
-import AIPlugin, { fullStackAppPromptSection } from '@mybricks/plugin-ai'
+import AIPlugin, { agentAppPromptSection } from '@mybricks/plugin-ai'
 import { fullStackAppPromptBuilder } from './promptBuilder'
 
 const COMLIB_NAMESPACE_LITE = 'mybricks.normal-pc-lite'
@@ -25,7 +25,7 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
   plugins,
   componentRuntime,
   // promptSections,
-  ...fullStackAppPromptBuilder(fullStackAppPromptSection),
+  ...fullStackAppPromptBuilder(agentAppPromptSection),
   // llm: {
   //   providers: [{
   //     providerId: 'kimi',
