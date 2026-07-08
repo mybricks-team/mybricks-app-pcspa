@@ -1088,6 +1088,23 @@ export default function MyDesigner({ appData: originAppData }) {
   usePageStayTime({ operable, appData: ctx, currentRef: designerRef })
 
   const TrueDesigner = useMemo(() => {
+
+    window._mybricks_export_ui_ = () => {
+      const json = getDumpJson()
+      const content = JSON.stringify(json, null, 2)
+      const baseName = ctx.fileName ? ctx.fileName.replace(/\.[^.]+$/, '') : 'export'
+      const fileName = `${baseName}.ui`
+      const blob = new Blob([content], { type: 'application/json' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    }
+
     return (
       SPADesigner &&
       remotePlugins &&

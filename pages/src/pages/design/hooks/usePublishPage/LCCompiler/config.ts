@@ -11,7 +11,7 @@ export const defaultExternal = {
   'antd': 'antd',
   'dayjs': 'dayjs',
   '@ant-design/icons': 'icons',
-  'echarts-for-react': 'echarts',
+  'echarts-for-react': 'EChartsForReact',
   'react/jsx-runtime': 'react_jsx_runtime',
 }
 
