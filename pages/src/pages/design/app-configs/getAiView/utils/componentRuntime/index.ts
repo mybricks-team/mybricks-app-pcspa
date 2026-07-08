@@ -11,7 +11,6 @@ export default {
   workspace,
   wrapper,
   chat,
-  disallowedDebugEnvs: ['mock'],
   eslint: {
     rules: {
       'requirement-check': 'off',

@@ -13,7 +13,6 @@ function getGenerationStrategy(): 'ai' | 'atomic' {
   return hasLite && hasAi ? 'ai' : 'atomic'
 }
 import componentRuntime from './componentRuntime'
-// import promptSections from './promptSections'
 
 export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config, plugins = [] }: any) => AIPlugin({
   // requestAsStream,
@@ -24,7 +23,6 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
   key,
   plugins,
   componentRuntime,
-  // promptSections,
   ...fullStackAppPromptBuilder(agentAppPromptSection),
   // llm: {
   //   providers: [{

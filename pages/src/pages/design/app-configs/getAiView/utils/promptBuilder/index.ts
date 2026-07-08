@@ -1,10 +1,7 @@
-import type * as PluginAITypes from '@mybricks/plugin-ai'
 import type { PluginAIPreset } from '@mybricks/plugin-ai'
-import root from './root'
 import frontend from './frontend'
 
 const appPrompt = {
-  root,
   frontend,
   backend: {
     codeRulesSection: `1. 后端接口使用合理、语义化的路径，如果是根路径，直接使用 “/” 即可。
@@ -57,7 +54,6 @@ export function fullStackAppPromptBuilder(
   agentAppPromptSection: any,
 ): PluginAIPreset {
   return {
-    disallowedDebugEnvs: ['mock'], // 调试态禁止mock环境
     promptSections: {
       agent: agentAppPromptSection.agent,
       developeGuide: agentAppPromptSection.developeGuide,
