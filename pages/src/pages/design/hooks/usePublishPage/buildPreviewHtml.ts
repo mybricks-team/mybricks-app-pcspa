@@ -379,6 +379,7 @@ export const loadBizCenterAssets = async (
         'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/ant-design-icons/6.0.2/index.umd.min.js',
         'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/antd/5.21.4/antd-with-locales.min.js',
         'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/echarts/5.6.0/echarts.min.js',
+        'https://p4-ec.eckwai.com/kos/nlav12333/aicode/static/umd/echarts-for-react.min.js'
       ],
       styles: [
         'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/antd/5.21.4/reset.min.css'
