@@ -223,7 +223,7 @@ export async function publishPush(
       await API.File.publish({
         userId,
         fileId: mainFileId,
-        extName: "pc-page",
+        extName: "ai-agent",
         commitInfo,
         content: JSON.stringify({ ...publishMaterialInfo, json }),
         type: envType,
@@ -233,7 +233,7 @@ export async function publishPush(
     const result = await API.File.publish({
       userId,
       fileId,
-      extName: "pc-page",
+      extName: "ai-agent",
       commitInfo,
       content: JSON.stringify({ ...publishMaterialInfo, json }),
       type: envType,

@@ -483,17 +483,22 @@ export default class PcPageController {
       url = `${baseUrl}${htmlToOSS.url}`
     } else {
       const groupId = await getGroupId(fileId);
-      const result = await this.service.vibepublish({
-        userId,
-        fileId,
-        html,
-        baseUrl,
-        groupId: String(groupId),
-        customApiUrl,
-      });
-      url = result.uploadUrl || ''
+      let result
+      try {
+        
+          result = await this.service.vibepublish({
+          userId,
+          fileId,
+          html,
+          baseUrl,
+          groupId: String(groupId),
+          customApiUrl,
+        });
+      }catch (e) {
+        console.log('=====vibepublish-error', e)
+      }
+      url = result?.uploadUrl || ''
     }
-
     if (!url) {
       throw new Error('vibepublish 上传结果未包含有效 url');
     }
@@ -503,7 +508,7 @@ export default class PcPageController {
       await API.File.publish({
         userId,
         fileId,
-        extName: 'pc-page',
+        extName: 'ai-agent',
         content: url
       })
 

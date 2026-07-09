@@ -10,7 +10,7 @@ import { getNextVersion } from '../tools/analysis';
 const FormData = require('form-data');
 const archiver = require('archiver');
 
-export const VIBE_ENV_TYPE = 'pc-vibe'
+export const VIBE_ENV_TYPE = 'ai-agent'
 
 export interface VibePublishParams {
   userId: string;
@@ -153,6 +153,14 @@ function localizeHtmlAssets(html: string, baseUrl?: string) {
   });
 
   // CSS url(...) references in inline styles and style blocks
+  // 先把 <script> 内容用占位符替换，避免 JS 代码里的 .url(...) 被误匹配
+  const scriptPlaceholders: string[] = [];
+  html = html.replace(/<script[\s\S]*?<\/script>/gi, (match) => {
+    const placeholder = `<!--__SCRIPT_PLACEHOLDER_${scriptPlaceholders.length}__-->`;
+    scriptPlaceholders.push(match);
+    return placeholder;
+  });
+
   html = html.replace(/url\(\s*(["']?)([^\)"']+)\1\s*\)/gi, (_match, quote, rawUrl) => {
     const absUrl = resolveUrl(rawUrl, baseUrl);
     if (!absUrl || !isHttpUrl(absUrl)) {
@@ -160,6 +168,11 @@ function localizeHtmlAssets(html: string, baseUrl?: string) {
     }
     const localPath = ensureResourceMapping(absUrl, mapping);
     return `url(${quote}${localPath}${quote})`;
+  });
+
+  // 恢复 <script> 内容
+  html = html.replace(/<!--__SCRIPT_PLACEHOLDER_(\d+)__-->/g, (_match, index) => {
+    return scriptPlaceholders[parseInt(index, 10)] || _match;
   });
 
   return { html, resourceUrls: Array.from(mapping.keys()), mapping };
