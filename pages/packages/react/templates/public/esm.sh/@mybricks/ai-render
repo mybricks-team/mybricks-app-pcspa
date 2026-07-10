@@ -1,4 +1,4 @@
 /* esm.sh - @mybricks/ai-render@0.0.14 */
-import "/axios@>=1.0.0?target=es2022";
-import "/react-router-dom@>=6.0.0?external=react,react-dom&target=es2022";
+import "/axios?target=es2022";
+import "/react-router-dom?external=react,react-dom&target=es2022";
 export * from "/@mybricks/ai-render@0.0.14/X-ZXJlYWN0LHJlYWN0LWRvbSxyZWFjdC1kb20vY2xpZW50/es2022/ai-render.bundle.mjs";
