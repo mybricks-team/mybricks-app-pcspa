@@ -1,0 +1,20 @@
+/* esm.sh - axios@1.18.1 */
+import "/axios@1.18.1/es2022/lib/adapters/xhr.mjs";
+import "/axios@1.18.1/es2022/lib/cancel/CanceledError.mjs";
+import "/axios@1.18.1/es2022/lib/core/AxiosError.mjs";
+import "/axios@1.18.1/es2022/lib/core/AxiosHeaders.mjs";
+import "/axios@1.18.1/es2022/lib/core/mergeConfig.mjs";
+import "/axios@1.18.1/es2022/lib/defaults/transitional.mjs";
+import "/axios@1.18.1/es2022/lib/helpers/bind.mjs";
+import "/axios@1.18.1/es2022/lib/helpers/null.mjs";
+import "/axios@1.18.1/es2022/lib/helpers/progressEventReducer.mjs";
+import "/axios@1.18.1/es2022/lib/helpers/resolveConfig.mjs";
+import "/axios@1.18.1/es2022/lib/helpers/sanitizeHeaderValue.mjs";
+import "/axios@1.18.1/es2022/lib/helpers/toFormData.mjs";
+import "/axios@1.18.1/es2022/lib/platform/index.mjs";
+import "/axios@1.18.1/es2022/unsafe/core/buildFullPath.mjs";
+import "/axios@1.18.1/es2022/unsafe/core/settle.mjs";
+import "/axios@1.18.1/es2022/unsafe/helpers/buildURL.mjs";
+import "/axios@1.18.1/es2022/unsafe/utils.mjs";
+export * from "/axios@1.18.1/es2022/axios.mjs";
+export { default } from "/axios@1.18.1/es2022/axios.mjs";

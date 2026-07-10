@@ -1,0 +1,3 @@
+/* esm.sh - axios@1.18.1/unsafe/core/buildFullPath */
+import i from"../../lib/core/AxiosError.mjs";import c from"../helpers/isAbsoluteURL.mjs";import s from"../helpers/combineURLs.mjs";var a=/^https?:(?!\/\/)/i,f=/[\t\n\r]/g;function p(t){let o=0;for(;o<t.length&&t.charCodeAt(o)<=32;)o++;return t.slice(o)}function m(t){return p(t).replace(f,"")}function n(t,o){if(typeof t=="string"&&a.test(m(t)))throw new i('Invalid URL: missing "//" after protocol',i.ERR_INVALID_URL,o)}function h(t,o,l,r){n(o,r);let e=!c(o);return t&&(e||l===!1)?(n(t,r),s(t,o)):o}export{h as default};
+//# sourceMappingURL=buildFullPath.mjs.map

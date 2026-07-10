@@ -1,0 +1,3 @@
+/* esm.sh - antd@6.5.0/es/locale/zh_CN */
+export * from "/antd@6.5.0/X-ZXJlYWN0LHJlYWN0LWRvbSxyZWFjdC1kb20vY2xpZW50/es2022/es/locale/zh_CN.bundle.mjs";
+export { default } from "/antd@6.5.0/X-ZXJlYWN0LHJlYWN0LWRvbSxyZWFjdC1kb20vY2xpZW50/es2022/es/locale/zh_CN.bundle.mjs";

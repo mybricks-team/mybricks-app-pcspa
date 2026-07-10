@@ -14,7 +14,8 @@ import {
   wrapComponentCode,
 } from './utils'
 
-const esmCDN = `https://esm.sh`
+// const esmCDN = `https://esm.sh`
+const esmCDN = `./public/esm.sh`
 
 // 解析相对路径为绝对路径
 function resolvePath(basePath: string, relativePath: string): string {
@@ -101,7 +102,7 @@ export const createLoaderPlugin = (options: {
 
     async load(id: string) {
       log('load', id)
-      if (id.startsWith('http')) {
+      if (id.startsWith('http') || id.startsWith(esmCDN)) {
         const code = await compilerFetchText(id)
         if (!id.startsWith(esmCDN) && cachedModuleMap.has(id)) {
           return createModuleWrapper(code, cachedModuleMap.get(id) || '')
@@ -217,9 +218,22 @@ function resolveModule(
     // importer 是 esm.sh 上的模块
     if (id.startsWith('./') || id.startsWith('../') || id.startsWith('/')) {
       // 相对路径：解析为 esm.sh URL
-      const baseUrl = new URL(importer)
-      const resolvedUrl = new URL(id, baseUrl)
-      return resolvedUrl.href
+      if (esmCDN.startsWith('http')) {
+        // 远程 CDN：使用 URL API 解析
+        const baseUrl = new URL(importer)
+        const resolvedUrl = new URL(id, baseUrl)
+        return resolvedUrl.href
+      } else {
+        if (id.startsWith('/')) {
+          // 绝对路径（/xxx）：相对于 esmCDN 根，去掉 query string
+          const pathWithoutQuery = id.split('?')[0]
+          return `${esmCDN}${pathWithoutQuery}`
+        } else {
+          // 相对路径（./、../）：基于 importer 目录解析，去掉 query string 后解析
+          const importerPath = importer.split('?')[0]
+          return resolvePath(importerPath, id)
+        }
+      }
     } else if (!id.startsWith('/')) {
       // 裸模块导入：转换为 esm.sh URL
       return `${esmCDN}/${id}`
