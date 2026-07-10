@@ -56,6 +56,7 @@ import { useBranch } from './hooks/useBranch'
 import { DesignerTitleBar, DesignerToolBar } from '@mybricks/sdk-for-app/ui'
 import { usePublishPage } from './hooks/usePublishPage'
 import PublishPageModal from './components/PublishPageModal'
+import { preloadDependencies } from './app-configs/getAiView/utils/manifest'
 
 const msgSaveKey = 'save'
 
@@ -150,6 +151,13 @@ export default function MyDesigner({ appData: originAppData }) {
     }
     return config || {}
   }, [appData.config[APP_NAME]?.config])
+
+  useEffect(() => {
+    setDependenciesSuccess(false)
+    preloadDependencies(appConfig?.ai?.dependencies || []).then(() => {
+      setDependenciesSuccess(true)
+    })
+  }, [appConfig?.ai?.dependencies?.schemaVersion])
 
   const { plugins = [] } = appConfig
   const uploadService = appConfig?.uploadServer?.uploadService || ''
@@ -329,7 +337,7 @@ export default function MyDesigner({ appData: originAppData }) {
   const [isDebugMode, setIsDebugMode] = useState(false)
   const operationList = useRef<any[]>([])
   const fileDBRef = useRef(null)
-
+  const [dependenciesSuccess, setDependenciesSuccess] = useState(false)
   const beforeUnloadRef = useRef(false)
 
   const designer = useMemo(() => {
@@ -1109,6 +1117,7 @@ export default function MyDesigner({ appData: originAppData }) {
       SPADesigner &&
       remotePlugins &&
       builtPlugins &&
+      dependenciesSuccess &&
       window?.mybricks?.createObservable && (
         <>
           <SPADesigner
@@ -1387,7 +1396,7 @@ export default function MyDesigner({ appData: originAppData }) {
         </>
       )
     )
-  }, [SPADesigner, remotePlugins, builtPlugins, window?.mybricks?.createObservable])
+  }, [SPADesigner, remotePlugins, builtPlugins, window?.mybricks?.createObservable, dependenciesSuccess])
 
 
   useEffect(() => {

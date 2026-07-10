@@ -53,6 +53,7 @@ import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
 import cloudTpt from "./cloudTpt";
 // import nocobaseConfigPlugin from "./nocobase";
 import manateeConfigPlugin  from './manateeai'
+import { getDependenciesCSS } from './getAiView/utils/manifest'
 
 // const getComs = () => {
 //   const comDefs = {}
@@ -425,7 +426,8 @@ export default function appConfig(
         plugins: [manateeaiPlugin.ai],
         config: {
           enabledActionTags: ctx?.appConfig?.ai?.enabledActionTags
-        }
+        },
+        manifest: ctx?.appConfig?.ai
       }),
       // ...remotePlugins,
       // themePlugin.use({ sdk: appData }),
@@ -943,6 +945,7 @@ export default function appConfig(
       } : {}),
       theme: {
         css: [
+          ...getDependenciesCSS(ctx?.appConfig?.ai?.dependencies),
           // 去除默认的样式文件
           // "public/antd/antd@4.21.6.variable.min.css",
           ///...(!isReact ? ['./public/elementUI/element@2.15.14.css'] : []),

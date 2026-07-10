@@ -1,5 +1,6 @@
 import AIPlugin, { IDBHistory } from '@mybricks/plugin-ai'
 import skills from './skills'
+import { getDependenciesConfig } from './manifest'
 
 const COMLIB_NAMESPACE_LITE = 'mybricks.normal-pc-lite'
 const COMLIB_NAMESPACE_AI = 'mybricks.ai-comlib-pc'
@@ -13,73 +14,86 @@ function getGenerationStrategy(): 'ai' | 'atomic' {
   return hasLite && hasAi ? 'ai' : 'atomic'
 }
 
-export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config, plugins = [] }: any) => AIPlugin({
-  // requestAsStream,
-  user,
-  isMutiCanvas: false,
-  deviceType: 'desktop',
-  config,
-  key,
-  plugins,
-  skills,
-  componentRuntime: {
-    workspace: {
-      coder: {
-        loaderConfig: {
-          paths: {
-            vs: './public/monaco-editor/0.45.0/min/vs'
-          }
-        },
-        eslint: {
-          src: './public/eslint/8.15.0/eslint.js',
-          config: {
-            env: {
-              browser: true,
-              es6: true,
-            },
-            parserOptions: {
-              ecmaVersion: 2018,
-              sourceType: "module",
-            },
+export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config, plugins = [], manifest }: any) => {
+  const designRules = manifest?.rules?.designRules
+  const codeRules = manifest?.rules?.codeRules
+  return AIPlugin({
+    // requestAsStream,
+    user,
+    isMutiCanvas: false,
+    deviceType: 'desktop',
+    config,
+    key,
+    plugins,
+    skills: [...skills, ...(manifest?.skills || [])],
+    componentRuntime: {
+      workspace: {
+        coder: {
+          loaderConfig: {
+            paths: {
+              vs: './public/monaco-editor/0.45.0/min/vs'
+            }
           },
+          eslint: {
+            src: './public/eslint/8.15.0/eslint.js',
+            config: {
+              env: {
+                browser: true,
+                es6: true,
+              },
+              parserOptions: {
+                ecmaVersion: 2018,
+                sourceType: "module",
+              },
+            },
+          }
         }
-      }
+      },
+      getDependencies: getDependenciesConfig(manifest?.dependencies)
+    },
+    promptSections: {
+      designGuide: designRules ? {
+        firstOfAll: designRules
+      } : undefined,
+      developeGuide: codeRules ? {
+        firstOfAll: codeRules
+      } : undefined,
     }
-  }
-  // componentRuntime: {
-  //   chat: {
-  //     agent: {
-  //       key: "simple-chat",
-  //       request: requestAsStreamInfra,
-  //       history: new IDBHistory({
-  //         dbName: "@plugin-ai/simple-chat",
-  //       }),
-  //       system: "你是一个闲聊助手",
-  //     },
-  //     panel: {
-  //       user: {
-  //         name: 'user',
-  //         avatar: 'https://my.mybricks.world/default_avatar.png',
-  //       },
-  //       header: false,
-  //       copilot: { name: 'MyBricks', avatar: 'https://my.mybricks.world/image/icon.png' }
-  //     }
-  //   }
-  // }
-  // onRequest: (params) => {
-  //   return createRequestAsStream({ useInfra: false })?.(params)
-  // },
-  // llm: {
-  //   providers: [{
-  //     providerId: 'kimi',
-  //     format: 'openai',
-  //     baseUrl: 'https://api.moonshot.cn/v1/chat/completions',
-  //     apiKey: '',
-  //     models: [{
-  //       id: 'kimi-k2.6',
-  //       name: 'kimi-k2.6'
-  //     }]
-  //   }]
-  // },
-  // ...commonCodePreset
-})
+    // componentRuntime: {
+    //   chat: {
+    //     agent: {
+    //       key: "simple-chat",
+    //       request: requestAsStreamInfra,
+    //       history: new IDBHistory({
+    //         dbName: "@plugin-ai/simple-chat",
+    //       }),
+    //       system: "你是一个闲聊助手",
+    //     },
+    //     panel: {
+    //       user: {
+    //         name: 'user',
+    //         avatar: 'https://my.mybricks.world/default_avatar.png',
+    //       },
+    //       header: false,
+    //       copilot: { name: 'MyBricks', avatar: 'https://my.mybricks.world/image/icon.png' }
+    //     }
+    //   }
+    // }
+    // onRequest: (params) => {
+    //   return createRequestAsStream({ useInfra: false })?.(params)
+    // },
+    // llm: {
+    //   providers: [{
+    //     providerId: 'kimi',
+    //     format: 'openai',
+    //     baseUrl: 'https://api.moonshot.cn/v1/chat/completions',
+    //     apiKey: '',
+    //     models: [{
+    //       id: 'kimi-k2.6',
+    //       name: 'kimi-k2.6'
+    //     }]
+    //   }]
+    // },
+    // ...commonCodePreset
+  })
+}
