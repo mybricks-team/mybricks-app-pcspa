@@ -1,0 +1,3 @@
+/* esm.sh - axios@1.18.1/lib/helpers/sanitizeHeaderValue */
+import i from"../../unsafe/utils.mjs";function c(e){let t=0,n=e.length;for(;t<n;){let r=e.charCodeAt(t);if(r!==9&&r!==32)break;t+=1}for(;n>t;){let r=e.charCodeAt(n-1);if(r!==9&&r!==32)break;n-=1}return t===0&&n===e.length?e:e.slice(t,n)}var u=new RegExp("[\\u0000-\\u0008\\u000a-\\u001f\\u007f]+","g"),a=new RegExp("[^\\u0009\\u0020-\\u007e\\u0080-\\u00ff]+","g");function o(e,t){return i.isArray(e)?e.map(n=>o(n,t)):c(String(e).replace(t,""))}var l=e=>o(e,u),f=e=>o(e,a);function s(e){let t=Object.create(null);return i.forEach(e.toJSON(),(n,r)=>{t[r]=f(n)}),t}export{f as sanitizeByteStringHeaderValue,l as sanitizeHeaderValue,s as toByteStringHeaderObject};
+//# sourceMappingURL=sanitizeHeaderValue.mjs.map

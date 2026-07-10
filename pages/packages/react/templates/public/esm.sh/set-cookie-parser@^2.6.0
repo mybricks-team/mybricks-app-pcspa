@@ -1,0 +1,3 @@
+/* esm.sh - set-cookie-parser@2.7.2 */
+export * from "/set-cookie-parser@2.7.2/es2022/set-cookie-parser.mjs";
+export { default } from "/set-cookie-parser@2.7.2/es2022/set-cookie-parser.mjs";

@@ -1,0 +1,3 @@
+/* esm.sh - axios@1.18.1/unsafe/helpers/buildURL */
+import o from"../utils.mjs";import f from"../../lib/helpers/AxiosURLSearchParams.mjs";function d(e){return encodeURIComponent(e).replace(/%3A/gi,":").replace(/%24/g,"$").replace(/%2C/gi,",").replace(/%20/g,"+")}function g(e,i,c){if(!i)return e;e=e||"";let n=o.isFunction(c)?{serialize:c}:c,a=o.getSafeProp(n,"encode")||d,r=o.getSafeProp(n,"serialize"),t;if(r?t=r(i,n):t=o.isURLSearchParams(i)?i.toString():new f(i,n).toString(a),t){let s=e.indexOf("#");s!==-1&&(e=e.slice(0,s)),e+=(e.indexOf("?")===-1?"?":"&")+t}return e}export{g as default,d as encode};
+//# sourceMappingURL=buildURL.mjs.map

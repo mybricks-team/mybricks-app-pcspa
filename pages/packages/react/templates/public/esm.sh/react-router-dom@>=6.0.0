@@ -1,0 +1,4 @@
+/* esm.sh - react-router-dom@7.18.1 */
+import "/react-router@7.18.1/X-ZXJlYWN0LHJlYWN0LWRvbQ/es2022/dom.mjs";
+import "/react-router@7.18.1/X-ZXJlYWN0LHJlYWN0LWRvbQ/es2022/react-router.mjs";
+export * from "/react-router-dom@7.18.1/X-ZXJlYWN0LHJlYWN0LWRvbQ/es2022/react-router-dom.mjs";
