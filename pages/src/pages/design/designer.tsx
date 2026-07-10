@@ -32,6 +32,7 @@ import { GET_DEFAULT_PAGE_HEADER, USE_CUSTOM_HOST } from './constants'
 import { getInitComLibs } from '../../utils/getComlibs'
 import { proxLocalStorage, proxSessionStorage } from '@/utils/debugMockUtils'
 import download from '@/utils/download'
+import JSZip from 'jszip'
 import {
   getMybricksStudioDB,
   initialSaveFileContent,
@@ -1272,42 +1273,24 @@ export default function MyDesigner({ appData: originAppData }) {
                           return message.warn('源代码为空，暂无可下载的内容!')
                         }
 
-                        let rootDir: FileSystemDirectoryHandle
-                        try {
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          rootDir = await (window as any).showDirectoryPicker({
-                            mode: 'readwrite',
-                          })
-                        } catch {
-                          // 用户取消选择，静默退出
-                          return
-                        }
-
-                        // 5. 在选择的目录下创建 App 文件夹
-                        const projectName = 'App'
-                        const appDir = await rootDir.getDirectoryHandle(projectName, {
-                          create: true,
-                        })
-
                         const messageKey = 'export-source-code'
-                        message.open({
-                          key: messageKey,
-                          type: 'loading',
-                          content: '正在导出源代码...',
-                          duration: 0,
-                        })
 
                         try {
+                          const zip = new JSZip()
+
                           for (let i = 0; i < files.length; i++) {
                             const file = files[i]
-                            message.open({
-                              key: messageKey,
-                              type: 'loading',
-                              content: `正在导出源代码 (${i + 1}/${files.length})...`,
-                              duration: 0,
-                            })
-                            await writeFile(appDir, file.fileName, file.content)
+                            zip.file(file.fileName, file.content)
                           }
+
+                          const blob = await zip.generateAsync({ type: 'blob' })
+                          const url = URL.createObjectURL(blob)
+                          const anchor = document.createElement('a')
+                          anchor.href = url
+                          anchor.download = 'sourceCode.zip'
+                          anchor.click()
+                          URL.revokeObjectURL(url)
+
                           message.open({
                             key: messageKey,
                             type: 'success',
