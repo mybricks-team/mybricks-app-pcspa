@@ -40,6 +40,9 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
               sourceType: "module",
             },
           },
+        },
+        jsxHighlight: {
+          customTypescriptUrl: `${location.origin}/public/typescript/4.6.4/typescript.min.js`
         }
       }
     }
