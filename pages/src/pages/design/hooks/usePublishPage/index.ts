@@ -98,6 +98,7 @@ export function usePublishPage({
         assetOwnerId,
         vbDesignContext,
         enableVibeProxy: false,
+        userId: ctx.user?.id,
       })
 
       const publishRes = await axios.post('/api/pcpage/vibepublish', {

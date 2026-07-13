@@ -337,6 +337,7 @@ type BizCenterContext = {
       configUrl?: string
     }
   }
+  prefixUrl: string
 }
 
 type AvailableLibrary = {
@@ -372,17 +373,25 @@ export const loadBizCenterAssets = async (
 
   if (!resourceUrl) {
     // [TODO] 写死，后续支持配置
+    const { prefixUrl } = vbDesignContext
     return {
       scripts: [
-        'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/dayjs/1.11.13/dayjs.min.js',
-        'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/dayjs/1.11.13/locale/zh-cn.min.js',
-        'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/ant-design-icons/6.0.2/index.umd.min.js',
-        'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/antd/5.21.4/antd-with-locales.min.js',
-        'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/echarts/5.6.0/echarts.min.js',
-        'https://p4-ec.eckwai.com/kos/nlav12333/aicode/static/umd/echarts-for-react.min.js'
+        `${prefixUrl}/dayjs/1.11.13/dayjs.min.js`,
+        `${prefixUrl}/dayjs/1.11.13/locale/zh-cn.min.js`,
+        `${prefixUrl}/ant-design-icons/6.0.2/index.umd.min.js`,
+        `${prefixUrl}/antd/5.21.4/antd-with-locales.min.js`,
+        `${prefixUrl}/echarts/5.6.0/echarts.min.js`,
+        `${prefixUrl}/echarts/5.6.0/echarts-for-react.min.js`,
+        // 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/dayjs/1.11.13/dayjs.min.js',
+        // 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/dayjs/1.11.13/locale/zh-cn.min.js',
+        // 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/ant-design-icons/6.0.2/index.umd.min.js',
+        // 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/antd/5.21.4/antd-with-locales.min.js',
+        // 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/echarts/5.6.0/echarts.min.js',
+        // 'https://p4-ec.eckwai.com/kos/nlav12333/aicode/static/umd/echarts-for-react.min.js'
       ],
       styles: [
-        'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/antd/5.21.4/reset.min.css'
+        `${prefixUrl}/antd/5.21.4/reset.min.css`
+        // 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/antd/5.21.4/reset.min.css'
       ],
       external: {},
     }
@@ -494,12 +503,15 @@ export const buildVibePreviewHtml = async ({
     },
   )
 
-  const bundleJsUrl: any = await API.Upload.toOss({
+  const { url: bundleJsUrl }: any = await API.Upload.staticServer({
     content: bundleCode,
     folderPath: `/vibe/pc/${chatId}`,
     fileName: `index.${dayjs().format('YYYY-MM-DD-HH-mm-ss')}.js`,
     noHash: true
   });
+
+  console.log('[dynamicAssets]', dynamicAssets)
+  console.log('[bundleJsUrl]', bundleJsUrl)
 
   const headStyles = dynamicAssets.styles
     .map(url => `<link rel="stylesheet" href="${url}" />`)
