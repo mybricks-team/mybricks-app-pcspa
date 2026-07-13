@@ -12,7 +12,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { usePublishPage } from '../../hooks/usePublishPage'
 import style from './index.less'
 import axios from 'axios'
-import { copyText } from '@/utils'
 
 interface PublishPageModalProps {
   visible: boolean
@@ -38,12 +37,11 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
       setTitle(getTitle())
       if (!publishUrl) {
         axios.get(
-          `/api/pcpage/getVibePublishUrl/${fileId}`
+          `/paas/api/workspace/publish/versions?fileId=${fileId}&pageSize=${1}&pageIndex=${1}`
         ).then((res) => {
-          console.log(res)
-          const data = res.data.data;
-          if (data && data.url) {
-            setPublishUrl(`${data.url}?env=mock`)
+          const list = res.data.data;
+          if (list.length) {
+            setPublishUrl(`${location.origin}/mfs/vibe/pc/publish/${fileId}/index.html?env=mock`)
           }
         }).catch((e) => {
           console.error(e)
@@ -74,7 +72,7 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
       onClick={() => {
         handlePublish({
           next: (url) => {
-            setPublishUrl(`${url}?env=mock`)
+            setPublishUrl(`${location.origin}${url}?env=mock`)
           }
         })
       }}
@@ -88,7 +86,7 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
 
   const onCopy = async (url: string) => {
     if (!url) return
-    copyText(url)
+    await navigator.clipboard.writeText(url)
     message.success('链接已复制到剪贴板')
   }
 

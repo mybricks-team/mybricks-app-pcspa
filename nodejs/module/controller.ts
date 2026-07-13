@@ -16,7 +16,7 @@ import Decorator from "@mybricks/sdk-for-app/decorator";
 import * as fs from "fs";
 import * as path from "path";
 import { getAppTypeFromTemplate } from "./tools/common";
-import { getAppAllConfig, getAppConfig, getCustomPublishApi, getGroupId } from "./tools/get-app-config";
+import { getAppAllConfig, getAppConfig, getGroupId } from "./tools/get-app-config";
 // import { generateToReactCode } from "@mybricks/to-code-react";
 
 import { Response } from "express";
@@ -24,7 +24,6 @@ import * as os from "os";
 import * as mkdirp from "mkdirp";
 import { rimrafSync } from "./tools";
 import API from '@mybricks/sdk-for-app/api'
-import { VIBE_ENV_TYPE } from "./service/vibePublish";
 
 const archiver = require("archiver");
 
@@ -461,102 +460,70 @@ export default class PcPageController {
     @Body('html') html: any,
     @Req() req: any
   ) {
-    Logger.info(`0:[vibepublish] ${userId} - ${fileId}`);
+    Logger.info(`0:[vibepublish] ${userId} - ${fileId}`)
 
-    const referer = req.headers.referer || req.headers.referrer;
-    const baseUrl = referer || req.headers.origin;
-    const customApiUrl = await getCustomPublishApi()
-    let uploadUrl = '';
-    if (!customApiUrl) {
-      const folderPath = `/vibe/pc/publish/${fileId}`
+    // const htmlToOSS: any = await API.Upload.toOss({
+    //   content: html,
+    //   folderPath: `/vibe/pc/publish/${fileId}`,
+    //   fileName: `helloworld.html`,
+    //   noHash: true
+    // });
 
-      await Promise.all([
-        '/dayjs/1.11.13/dayjs.min.js',
-        '/dayjs/1.11.13/locale/zh-cn.min.js',
-        '/ant-design-icons/6.0.2/index.umd.min.js',
-        '/antd/5.21.4/antd-with-locales.min.js',
-        '/antd/5.21.4/reset.min.css',
-        '/echarts/5.6.0/echarts.min.js',
-        '/echarts/5.6.0/echarts-for-react.min.js'
-      ].map(async (script) => {
-        const fileName = script.split('/').slice(-1)[0]
-        const content = fs.readFileSync(path.resolve(__dirname, `../../assets/public/publish${script}`),"utf8")
-        const res = await API.Upload.staticServer({
-          content,
-          folderPath: `${folderPath}${script.split('/').slice(0, -1).join('/')}`,
-          fileName,
-          noHash: true
-        });
-      }))
+    const folderPath = `/vibe/pc/publish/${fileId}`
 
-      const htmlToOSS: any = await API.Upload.staticServer({
-        content: html,
-        folderPath,
-        fileName: 'index.html',
+    await Promise.all([
+      '/react/18.2.0/react.production.min.js',
+      '/react-dom/18.2.0/react-dom.production.min.js',
+      '/dayjs/1.11.13/dayjs.min.js',
+      '/dayjs/1.11.13/locale/zh-cn.min.js',
+      '/ant-design-icons/6.0.2/index.umd.min.js',
+      '/antd/5.21.4/antd-with-locales.min.js',
+      '/antd/5.21.4/reset.min.css',
+      '/echarts/5.6.0/echarts.min.js',
+      '/echarts/5.6.0/echarts-for-react.min.js'
+    ].map(async (script) => {
+      const fileName = script.split('/').slice(-1)[0]
+      const content = fs.readFileSync(path.resolve(__dirname, `../../assets/public/publish${script}`),"utf8")
+      const res = await API.Upload.staticServer({
+        content,
+        folderPath: `${folderPath}${script.split('/').slice(0, -1).join('/')}`,
+        fileName,
         noHash: true
-      });
+      })
+    }))
 
-      Logger.info(`1:[vibepublish] 上传html:${htmlToOSS.url}`)
+    const htmlToOSS: any = await API.Upload.staticServer({
+      content: html,
+      folderPath,
+      fileName: 'index.html',
+      noHash: true
+    });
 
-      uploadUrl = `${baseUrl}${htmlToOSS.url}`
-    } else {
-      const groupId = await getGroupId(fileId);
-      const result = await this.service.vibepublish({
-        userId,
-        fileId,
-        html,
-        baseUrl,
-        groupId: String(groupId),
-        customApiUrl,
-      });
-      uploadUrl = result.uploadUrl || '';
-    }
+    Logger.info(`1:[vibepublish] 上传html:${htmlToOSS.url}`)
 
-    if (!uploadUrl) {
-      throw new Error('vibepublish 上传结果未包含有效 url');
-    }
+    const url = htmlToOSS.url
 
     try {
       // @ts-ignore
       await API.File.publish({
         userId,
         fileId,
-        extName: VIBE_ENV_TYPE,
-        content: uploadUrl,
-      });
+        extName: 'pc-page',
+        content: url
+      })
 
-      Logger.info(`2:[vibepublish] 调用API.File.publish成功`);
+      Logger.info(`2:[vibepublish] 调用API.File.publish成功`)
     } catch (e) {
-      Logger.info(`3-[vibepublish] 调用API.File.publish失败: ${e?.message || e}`);
+      Logger.info(`3-[vibepublish] 调用API.File.publish失败: ${e?.message || e}`)
     }
 
     return {
       code: 1,
       data: {
-        url: uploadUrl,
+        url
       },
-      message: null,
-    };
-  }
-
-  @Get('/getVibePublishUrl/:fileId')
-  async getVibePublishUrl(
-    @Param('fileId') fileId: number,
-    @Req() req: any
-  ) {
-    const pubInfo = await API.File.getLatestPub({
-      fileId,
-    });
-
-    const latestPub = pubInfo?.[0];
-
-    return {
-      code: 1,
-      data: {
-        url: latestPub?.content || '',
-      },
-      message: null,
-    };
+      message: null
+    }
   }
 }
 

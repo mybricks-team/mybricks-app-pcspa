@@ -1,6 +1,6 @@
 import { message } from 'antd'
 import { useCallback, useState } from 'react'
-import { buildVibePreviewHtml } from './buildPreviewHtml'
+import { buildVibePreviewHtml, buildVibePreviewZip } from './buildPreviewHtml'
 import {
   getVibePublishSourceList,
 } from './getPublishSource'
@@ -42,26 +42,24 @@ export function usePublishPage({
       const assetOwnerId = String(chatId)
       const finalTitle = pageName
 
-      const htmlContent = await buildVibePreviewHtml({
+      const zipBlob = await buildVibePreviewZip({
         title: finalTitle,
         source,
         chatId,
         assetOwnerId,
         vbDesignContext,
-        enableVibeProxy: false,
       })
 
-      // 下载为 HTML 文件
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' })
-      const url = URL.createObjectURL(blob)
+      // 下载为 ZIP 文件（包含 index.html + 所有本地资源）
+      const url = URL.createObjectURL(zipBlob)
       const anchor = document.createElement('a')
       anchor.href = url
-      anchor.download = `${chatId}-${title}-${finalTitle}.html`
+      anchor.download = `${chatId}-${finalTitle}.zip`
       anchor.click()
       URL.revokeObjectURL(url)
-      message.success('HTML 文件下载成功')
+      message.success('ZIP 文件下载成功')
     } catch (error) {
-      console.error('[usePublishPage] download html error:', error)
+      console.error('[usePublishPage] download zip error:', error)
       message.error('下载失败，请重试')
     } finally {
       setDownloadHtmlLoading(false)
