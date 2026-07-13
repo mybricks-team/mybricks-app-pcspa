@@ -58,6 +58,7 @@ import { DesignerTitleBar, DesignerToolBar } from '@mybricks/sdk-for-app/ui'
 import { usePublishPage } from './hooks/usePublishPage'
 import PublishPageModal from './components/PublishPageModal'
 import { preloadDependencies } from './app-configs/getAiView/utils/manifest'
+import { useAiSourceCodeExport } from './hooks/useCodeExport';
 
 const msgSaveKey = 'save'
 
@@ -1096,6 +1097,11 @@ export default function MyDesigner({ appData: originAppData }) {
   // 上报页面的开发数据
   usePageStayTime({ operable, appData: ctx, currentRef: designerRef })
 
+  const { handleExport } = useAiSourceCodeExport({
+    getExportToJSON: () => designerRef.current?.toJSON?.(),
+    folderName: "app",
+  });
+
   const TrueDesigner = useMemo(() => {
 
     window._mybricks_export_ui_ = () => {
@@ -1265,57 +1271,7 @@ export default function MyDesigner({ appData: originAppData }) {
                     },
                     {
                       title: '源代码',
-                      onClick: async () => {
-                        const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
-                        if (!coms) {
-                          return message.warn('源代码为空，暂无可下载的内容!')
-                        }
-
-                        const comId = Object.keys(coms)[0]
-                        if (!comId) {
-                          return message.warn('源代码为空，暂无可下载的内容!')
-                        }
-
-                        const files = (window as any)._forApp_[comId].getFiles()
-
-                        if (!files.length) {
-                          return message.warn('源代码为空，暂无可下载的内容!')
-                        }
-
-                        const messageKey = 'export-source-code'
-
-                        try {
-                          const zip = new JSZip()
-
-                          for (let i = 0; i < files.length; i++) {
-                            const file = files[i]
-                            zip.file(file.fileName, file.content)
-                          }
-
-                          const blob = await zip.generateAsync({ type: 'blob' })
-                          const url = URL.createObjectURL(blob)
-                          const anchor = document.createElement('a')
-                          anchor.href = url
-                          anchor.download = 'sourceCode.zip'
-                          anchor.click()
-                          URL.revokeObjectURL(url)
-
-                          message.open({
-                            key: messageKey,
-                            type: 'success',
-                            content: `源代码下载成功！共导出 ${files.length} 个文件`,
-                            duration: 2,
-                          })
-                        } catch (err) {
-                          message.open({
-                            key: messageKey,
-                            type: 'error',
-                            content: '源代码导出失败',
-                            duration: 2,
-                          })
-                          console.error(err)
-                        }
-                      }
+                      onClick: handleExport
                     },
                     {
                       title: 'PRD',
