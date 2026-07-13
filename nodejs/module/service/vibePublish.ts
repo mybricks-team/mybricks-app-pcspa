@@ -62,6 +62,23 @@ function isHttpUrl(url: string): boolean {
   return /^https?:\/\//i.test(url);
 }
 
+function isEsmShUrl(url: string): boolean {
+  return /esm\.sh/i.test(url);
+}
+
+function rewriteEsmShUrl(url: string, baseUrl: string): string {
+  try {
+    const parsed = new URL(url);
+    // 将 esm.sh 的路径转换为代理路径
+    // 例如: https://esm.sh/react@18.0.0 -> {baseUrl}/mybricks-app-pcspa-vibe/api/pcpage/esm-proxy/react@18.0.0
+    const path = parsed.pathname + parsed.search;
+    return `${baseUrl}/mybricks-app-pcspa-vibe/api/pcpage/esm-proxy${path}`;
+  } catch (e) {
+    Logger.warn(`[vibepublish] 无法重写 esm.sh URL: ${url}`);
+    return url;
+  }
+}
+
 function getLocalAssetPath(assetUrl: string): string {
   const parsed = new URL(assetUrl);
   const segments = parsed.pathname.split('/').filter(Boolean);
@@ -136,6 +153,12 @@ function localizeHtmlAssets(html: string, baseUrl?: string) {
         return fullMatch;
       }
 
+      // 如果是 esm.sh 的 URL，重写为代理路径
+      if (isEsmShUrl(absUrl)) {
+        const proxyUrl = rewriteEsmShUrl(absUrl, baseUrl || '');
+        return fullMatch.replace(url, proxyUrl);
+      }
+
       const localPath = ensureResourceMapping(absUrl, mapping);
       return fullMatch.replace(url, localPath);
     });
@@ -158,6 +181,13 @@ function localizeHtmlAssets(html: string, baseUrl?: string) {
     if (!absUrl || !isHttpUrl(absUrl)) {
       return _match;
     }
+
+    // 如果是 esm.sh 的 URL，重写为代理路径
+    if (isEsmShUrl(absUrl)) {
+      const proxyUrl = rewriteEsmShUrl(absUrl, baseUrl || '');
+      return `url(${quote}${proxyUrl}${quote})`;
+    }
+
     const localPath = ensureResourceMapping(absUrl, mapping);
     return `url(${quote}${localPath}${quote})`;
   });

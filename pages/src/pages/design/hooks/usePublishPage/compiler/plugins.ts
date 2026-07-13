@@ -15,7 +15,7 @@ import {
 } from './utils'
 
 // const esmCDN = `https://esm.sh`
-const esmCDN = `./public/esm.sh`
+const esmCDN = `/mybricks-app-pcspa-vibe/api/pcpage/esm-proxy`
 
 // 解析相对路径为绝对路径
 function resolvePath(basePath: string, relativePath: string): string {

@@ -25,6 +25,7 @@ import * as mkdirp from "mkdirp";
 import { rimrafSync } from "./tools";
 import API from '@mybricks/sdk-for-app/api'
 import { VIBE_ENV_TYPE } from "./service/vibePublish";
+import { proxyEsmRequest } from "./service/esmProxy";
 
 const archiver = require("archiver");
 
@@ -536,6 +537,43 @@ export default class PcPageController {
       },
       message: null,
     };
+  }
+
+  @Get('/esm-proxy/*')
+  async esmProxy(
+    @Req() req: any,
+    @Res() res: Response
+  ) {
+    try {
+      console.log(`[esm-proxy] 请求路径: ${req.url}`);
+      // 从 req.url 中提取 /esm-proxy/ 后面的完整路径（含 query string）
+      const marker = '/esm-proxy/';
+      const idx = req.url.indexOf(marker);
+      const esmPath = idx >= 0 ? req.url.slice(idx + marker.length) : '';
+
+      if (!esmPath) {
+        return res.status(400).json({
+          code: -1,
+          message: 'ESM 路径不能为空',
+        });
+      }
+
+      Logger.info(`[esm-proxy] 请求路径: ${esmPath}`);
+
+      const { data, contentType, statusCode } = await proxyEsmRequest(esmPath);
+
+      res.status(statusCode);
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.send(data);
+    } catch (error: any) {
+      Logger.error('[esm-proxy] 代理请求失败:', error);
+      res.status(500).json({
+        code: -1,
+        message: error?.message || 'ESM 代理请求失败',
+      });
+    }
   }
 }
 

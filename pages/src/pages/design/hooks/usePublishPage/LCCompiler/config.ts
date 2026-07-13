@@ -42,6 +42,6 @@ export const getExternalInfo = target => {
 export const moduleMatcher: Array<ModuleMatcher> = [
   {
     matcher: item => item.replace(/\?.*$/, '').endsWith('jsx-runtime'),
-    resolve: () => 'https://esm.sh/react@18.0.0/jsx-runtime',
+    resolve: () => '/mybricks-app-pcspa-vibe/api/pcpage/esm-proxy/react@18.0.0/jsx-runtime',
   },
 ]
