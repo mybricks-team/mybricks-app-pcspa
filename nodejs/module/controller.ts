@@ -472,6 +472,8 @@ export default class PcPageController {
     const folderPath = `/vibe/pc/publish/${fileId}`
 
     await Promise.all([
+      '/react/18.2.0/react.production.min.js',
+      '/react-dom/18.2.0/react-dom.production.min.js',
       '/dayjs/1.11.13/dayjs.min.js',
       '/dayjs/1.11.13/locale/zh-cn.min.js',
       '/ant-design-icons/6.0.2/index.umd.min.js',

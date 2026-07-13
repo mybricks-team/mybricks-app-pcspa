@@ -1,6 +1,7 @@
 // import { uploadAssets } from '@/utils/shareUtils'
 import { LCCompiler } from './LCCompiler'
 import dayjs from 'dayjs'
+import JSZip from 'jszip'
 import type {
   VibePublishSourceItem,
   VibePublishThemeVar,
@@ -18,6 +19,55 @@ const uploadAssets = () => {
 const PRE_SCRIPTS = [
   `https://f2.eckwai.com/kos/nlav12333/web-assets/lib/react/18.2.0/react.production.min.js`,
   `https://f2.eckwai.com/kos/nlav12333/web-assets/lib/react-dom/18.2.0/react-dom.production.min.js`,
+]
+
+/**
+ * 下载 zip 包时使用的本地资源映射表
+ * key: 在 zip 包内的相对路径（相对于 index.html）
+ * value: 可被 fetch 下载的绝对 URL（当前服务的 /public/publish/... 静态路径）
+ */
+const ZIP_LOCAL_ASSETS: Array<{ zipPath: string; fetchUrl: string }> = [
+  // React 18
+  {
+    zipPath: 'assets/react.production.min.js',
+    fetchUrl: '/public/react@18.0.0.production.min.js',
+  },
+  {
+    zipPath: 'assets/react-dom.production.min.js',
+    fetchUrl: '/public/react-dom@18.0.0.production.min.js',
+  },
+  // dayjs
+  {
+    zipPath: 'assets/dayjs/1.11.13/dayjs.min.js',
+    fetchUrl: '/public/publish/dayjs/1.11.13/dayjs.min.js',
+  },
+  {
+    zipPath: 'assets/dayjs/1.11.13/locale/zh-cn.min.js',
+    fetchUrl: '/public/publish/dayjs/1.11.13/locale/zh-cn.min.js',
+  },
+  // ant-design-icons
+  {
+    zipPath: 'assets/ant-design-icons/6.0.2/index.umd.min.js',
+    fetchUrl: '/public/publish/ant-design-icons/6.0.2/index.umd.min.js',
+  },
+  // antd
+  {
+    zipPath: 'assets/antd/5.21.4/antd-with-locales.min.js',
+    fetchUrl: '/public/publish/antd/5.21.4/antd-with-locales.min.js',
+  },
+  {
+    zipPath: 'assets/antd/5.21.4/reset.min.css',
+    fetchUrl: '/public/publish/antd/5.21.4/reset.min.css',
+  },
+  // echarts
+  {
+    zipPath: 'assets/echarts/5.6.0/echarts.min.js',
+    fetchUrl: '/public/publish/echarts/5.6.0/echarts.min.js',
+  },
+  {
+    zipPath: 'assets/echarts/5.6.0/echarts-for-react.min.js',
+    fetchUrl: '/public/publish/echarts/5.6.0/echarts-for-react.min.js',
+  },
 ]
 
 /**
@@ -376,6 +426,8 @@ export const loadBizCenterAssets = async (
     const { prefixUrl } = vbDesignContext
     return {
       scripts: [
+        `${prefixUrl}/react/18.2.0/react.production.min.js`,
+        `${prefixUrl}/react-dom/18.2.0/react-dom.production.min.js`,
         `${prefixUrl}/dayjs/1.11.13/dayjs.min.js`,
         `${prefixUrl}/dayjs/1.11.13/locale/zh-cn.min.js`,
         `${prefixUrl}/ant-design-icons/6.0.2/index.umd.min.js`,
@@ -522,7 +574,7 @@ export const buildVibePreviewHtml = async ({
   //   ? `<style id="vibe-design-theme-vars">\n${themeStyleText}\n</style>`
   //   : ''
 
-  const headScripts = [...PRE_SCRIPTS, ...dynamicAssets.scripts]
+  const headScripts = [...dynamicAssets.scripts]
     .map(url => `<script src="${url}"></script>`)
     .join('\n')
 
@@ -564,4 +616,99 @@ export const buildThemeStyleText = (
     .map(item => `  ${item.propertyName}: ${item.value};`)
     .join('\n')
   return `:root {\n${cssText}\n}`
+}
+
+/**
+ * 构建离线 zip 包：index.html 中所有资源引用本地相对路径，
+ * 同时把对应静态文件写入 zip 的 assets/ 目录。
+ */
+export const buildVibePreviewZip = async ({
+  title,
+  source,
+  chatId,
+  assetOwnerId,
+  vbDesignContext,
+}: {
+  title: string
+  source: VibePublishSourceItem
+  chatId: number | string
+  assetOwnerId: string
+  vbDesignContext?: BizCenterContext
+}): Promise<Blob> => {
+  const codeMap = buildCodeMap(source)
+  const compiler = new LCCompiler()
+
+  const bundleCode = await compiler.generateBundle(
+    codeMap,
+    { name: source.name || 'component', props: {} },
+    {
+      extraExternal: {
+        react: 'React',
+        'react-dom': 'ReactDOM',
+        dayjs: 'dayjs',
+        antd: 'antd',
+        '@ant-design/icons': 'icons',
+        echarts: 'echarts',
+        'echarts-for-react': 'ReactECharts',
+      },
+    },
+  )
+
+  // 构建 index.html —— 所有资源引用本地相对路径
+  const localStyles = [`<link rel="stylesheet" href="assets/antd/5.21.4/reset.min.css" />`]
+    .join('\n')
+
+  const localScripts = [
+    `<script src="assets/react.production.min.js"></script>`,
+    `<script src="assets/react-dom.production.min.js"></script>`,
+    `<script src="assets/dayjs/1.11.13/dayjs.min.js"></script>`,
+    `<script src="assets/dayjs/1.11.13/locale/zh-cn.min.js"></script>`,
+    `<script src="assets/ant-design-icons/6.0.2/index.umd.min.js"></script>`,
+    `<script src="assets/antd/5.21.4/antd-with-locales.min.js"></script>`,
+    `<script src="assets/echarts/5.6.0/echarts.min.js"></script>`,
+    `<script src="assets/echarts/5.6.0/echarts-for-react.min.js"></script>`,
+  ].join('\n')
+
+  const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${title}</title>
+  ${localStyles}
+  ${localScripts}
+  <script>
+  window.react_jsx_runtime = {
+    Fragment: window.React.Fragment,
+    jsx: window.React.createElement,
+    jsxs: window.React.createElement,
+    jsxDEV: window.React.createElement,
+  };
+</script>
+</head>
+<body>
+  <div id="root" class="aicode-preview-container"></div>
+  <script defer src="assets/index.js"></script>
+</body>
+</html>`
+
+  // 打包 zip
+  const zip = new JSZip()
+  zip.file('index.html', htmlContent)
+  zip.file('assets/index.js', bundleCode)
+
+  // 并行下载所有本地资源并写入 zip
+  await Promise.all(
+    ZIP_LOCAL_ASSETS.map(async ({ zipPath, fetchUrl }) => {
+      const resp = await fetch(fetchUrl)
+      if (!resp.ok) {
+        console.warn(`[buildVibePreviewZip] failed to fetch asset: ${fetchUrl} (${resp.status})`)
+        return
+      }
+      const buffer = await resp.arrayBuffer()
+      zip.file(zipPath, buffer)
+    }),
+  )
+
+  return zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } })
 }

@@ -41,7 +41,7 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
         ).then((res) => {
           const list = res.data.data;
           if (list.length) {
-            setPublishUrl(`https://my.mybricks.world/mfs/vibe/pc/publish/${fileId}/index.html?env=mock`)
+            setPublishUrl(`${location.origin}/mfs/vibe/pc/publish/${fileId}/index.html?env=mock`)
           }
         }).catch((e) => {
           console.error(e)
@@ -72,7 +72,7 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
       onClick={() => {
         handlePublish({
           next: (url) => {
-            setPublishUrl(`${url}?env=mock`)
+            setPublishUrl(`${location.origin}${url}?env=mock`)
           }
         })
       }}
