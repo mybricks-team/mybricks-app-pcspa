@@ -503,9 +503,9 @@ export const buildVibePreviewHtml = async ({
     },
   )
 
-  const { url: bundleJsUrl }: any = await API.Upload.staticServer({
+  const bundleJsUrl: any = await API.Upload.staticServer({
     content: bundleCode,
-    folderPath: `/vibe/pc/${chatId}`,
+    folderPath: `/vibe/pc/publish/${chatId}`,
     fileName: `index.${dayjs().format('YYYY-MM-DD-HH-mm-ss')}.js`,
     noHash: true
   });

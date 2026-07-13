@@ -476,14 +476,15 @@ export default class PcPageController {
       '/dayjs/1.11.13/locale/zh-cn.min.js',
       '/ant-design-icons/6.0.2/index.umd.min.js',
       '/antd/5.21.4/antd-with-locales.min.js',
+      '/antd/5.21.4/reset.min.css',
       '/echarts/5.6.0/echarts.min.js',
       '/echarts/5.6.0/echarts-for-react.min.js'
     ].map(async (script) => {
       const fileName = script.split('/').slice(-1)[0]
       const content = fs.readFileSync(path.resolve(__dirname, `../../assets/public/publish${script}`),"utf8")
-      await API.Upload.staticServer({
+      const res = await API.Upload.staticServer({
         content,
-        folderPath,
+        folderPath: `${folderPath}${script.split('/').slice(0, -1).join('/')}`,
         fileName,
         noHash: true
       })

@@ -54,7 +54,7 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
 
   const { handlePublish, publishLoading } = usePublishPage({
     vbDesignContext: {
-      prefixUrl: `/mfs/vibe/pc/${fileId}`
+      prefixUrl: `/mfs/vibe/pc/publish/${fileId}`
     },
     chatId: fileId,
     getTitle,
