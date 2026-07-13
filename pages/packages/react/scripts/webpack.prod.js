@@ -37,10 +37,9 @@ module.exports = (env) => merge(common, (function () {
       new webpack.DefinePlugin({
         APP_ENV: JSON.stringify('production')
       }),
-      ...generateAssetMapPlugin({
+      new HtmlWebpackPlugin({
         filename: 'index.html',
         chunks: ['index'],
-        assetsMap: [],
         templateContent: () => {
           return fs.readFileSync(path.resolve(__dirname, '../templates/index.html'), 'utf-8')
               .replace('<!-- _APP_CONFIG_ -->', `<script>const _APP_CONFIG_ = {namespace: '${appInfo.name}'}</script>`);
