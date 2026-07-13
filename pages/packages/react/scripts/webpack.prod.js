@@ -6,14 +6,12 @@ const webpack = require('webpack')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const Plugins = require('@mybricks/sdk-for-app/plugin');
 const WebpackBar = require('webpackbar')
 const HtmlWebpackInlineSourcePlugin = require('@effortlessmotion/html-webpack-inline-source-plugin')
 const pkg = require(path.join(__dirname, '../../../../package.json'))
 
 const appInfo = pkg.appConfig.react
 
-const { generateAssetMapPlugin } = Plugins.default;
 module.exports = (env) => merge(common, (function () {
   const isOffline = env && env.app?.type === 'offline';
   return {
@@ -37,7 +35,7 @@ module.exports = (env) => merge(common, (function () {
       new webpack.DefinePlugin({
         APP_ENV: JSON.stringify('production')
       }),
-      ...generateAssetMapPlugin({
+      new HtmlWebpackPlugin({
         filename: 'index.html',
         chunks: ['index'],
         assetsMap: [],
@@ -46,7 +44,7 @@ module.exports = (env) => merge(common, (function () {
               .replace('<!-- _APP_CONFIG_ -->', `<script>const _APP_CONFIG_ = {namespace: '${appInfo.name}'}</script>`);
         }
       }),
-      ...generateAssetMapPlugin({
+      new HtmlWebpackPlugin({
         filename: 'preview.html',
         chunks: ['preview'],
         template: path.resolve(__dirname, '../templates/preview.html'),
