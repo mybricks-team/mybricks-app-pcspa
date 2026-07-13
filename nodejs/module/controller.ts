@@ -469,16 +469,36 @@ export default class PcPageController {
     //   noHash: true
     // });
 
+    const folderPath = `/vibe/pc/publish/${fileId}`
+
+    await Promise.all([
+      '/dayjs/1.11.13/dayjs.min.js',
+      '/dayjs/1.11.13/locale/zh-cn.min.js',
+      '/ant-design-icons/6.0.2/index.umd.min.js',
+      '/antd/5.21.4/antd-with-locales.min.js',
+      '/echarts/5.6.0/echarts.min.js',
+      '/echarts/5.6.0/echarts-for-react.min.js'
+    ].map(async (script) => {
+      const fileName = script.split('/').slice(-1)[0]
+      const content = fs.readFileSync(path.resolve(__dirname, `../../assets/public/publish${script}`),"utf8")
+      await API.Upload.staticServer({
+        content,
+        folderPath,
+        fileName,
+        noHash: true
+      })
+    }))
+
     const htmlToOSS: any = await API.Upload.staticServer({
       content: html,
-      folderPath: `/vibe/pc/publish/${fileId}`,
+      folderPath,
       fileName: 'index.html',
       noHash: true
     });
 
     Logger.info(`1:[vibepublish] 上传html:${htmlToOSS.url}`)
 
-    const url = `https://my.mybricks.world${htmlToOSS.url}`
+    const url = htmlToOSS.url
 
     try {
       // @ts-ignore
