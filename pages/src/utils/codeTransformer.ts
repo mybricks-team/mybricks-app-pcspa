@@ -2,6 +2,7 @@ import * as parser from '@babel/parser';
 import traverse from '@babel/traverse';
 import generate from '@babel/generator';
 import * as t from '@babel/types';
+import type { AIConfigManifestDependency } from '@/types/aiConfigManifest'
 
 export interface CodeFile {
   path: string;
@@ -17,7 +18,7 @@ export class CodeTransformer {
   /**
    * 入口：接收文件列表，逐个转换后返回。
    */
-  transformFiles(files: CodeFile[]): CodeFile[] {
+  transformFiles(files: CodeFile[], dependencies: AIConfigManifestDependency[]): CodeFile[] {
     return files.map((file) => this.transformSingleFile(file));
   }
 
