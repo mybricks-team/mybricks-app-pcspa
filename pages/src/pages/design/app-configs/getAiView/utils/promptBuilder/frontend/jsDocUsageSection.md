@@ -65,7 +65,8 @@
               type: 关系类型（page，popup），打开弹窗使用popup，跳转页面使用page
     3. 【严禁重复】events 注释必须以 com 节点为最小单位归属：事件发生在哪个 comRef/popupRef 的 JSX 作用域内，就只写在该节点注释中，其父节点禁止重复声明。
     4. 无交互事件直接省略 events 字段，禁止出现空对象，不写即代表无事件
-    5. 【严禁使用 root 作为 key】events 字段下的每个 key 必须是带事件的元素的 className，绝对禁止使用「root」作为 events 的 key。events 只描述具体元素或组件的 onXXX 实现，不存在「整个根节点」的事件。如果某元素没有 className，必须先在代码中补上 className，再以该 className 作为 key。
+    5. 当事件逻辑由 React hooks（如 useEffect）发起、不属于任何具体交互元素时，使用「root」作为标识；root 下可以有多个事件，每个事件对应一段独立的 hooks 逻辑；事件名根据该 hook 的实际触发时机和用途语义化命名（如 onLoad 表示仅挂载时执行一次、onLoadGrades 表示加载成绩等），禁止所有 hook 逻辑都归到同一个 onLoad 下。
+    6. 除上述「root」场景外，events 字段下的每个 key 必须是带事件的元素的 className，如果某元素没有 className，必须先在代码中补上 className，再以该 className 作为 key。
   关于 Mermaid 语法流程图需关注以下规则和要求：
   - 流程图方向统一用 LR（从左到右），节点文本全部用双引号包裹；
   - 条件判断节点用 {} 包裹，分支标注用 |标注内容| 写在箭头上；
@@ -174,6 +175,10 @@ interface StudentInfo {
  *     errorMsg:
  *       desc: 展示成绩加载失败时的错误提示
  * events:
+ *   root:
+ *     onLoadGrades:
+ *       title: 加载成绩
+ *       mermaid: 'flowchart LR; A["设置loading状态"] --> B["清空错误提示"] --> C["请求学生成绩接口"] --> D{"请求是否成功"}; D -->|成功| E["更新学生信息"] --> F["更新成绩列表"] --> G["取消loading状态"]; D -->|失败| H["展示错误提示"] --> G'
  *   refreshBtn:
  *     onClick:
  *       title: 刷新成绩

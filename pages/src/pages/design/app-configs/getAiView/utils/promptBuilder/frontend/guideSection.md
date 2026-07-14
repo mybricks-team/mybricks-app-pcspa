@@ -52,7 +52,8 @@
 入口文件为 index.tsx ，使用 comRef 定义并默认导出。
 配置文件为 index.config.ts，使用 defineConfig 定义。
 IMPORTANT：必须通过 useCardApis 对外提供只读 API 接口，由 Agent 调用以获取卡片内部状态、数据信息，这是强制要求，不能省略。实现时必须同时满足两个条件，① 在 index.config.ts 的 apis 字段中声明所有 API 名称与描述，② 在 index.tsx 运行时通过 useCardApis 注册对应的实现函数，二者必须保持一致。API 仅用于对外提供只读信息（getter），包括卡片当前展示的数据、加载状态、筛选条件、选中项等一切有意义的可读状态，禁止暴露任何会修改卡片内部状态的操作类方法。卡片内部状态只能由卡片自身管理，不允许通过 API 被外部写入或变更。
-IMPORTANT：卡片可以被其他卡片引用，实现能力复用，尤其当用户提出“点击xxx，展示xx卡片”、“点击xxx打开xxx”等类似卡片跳转、切换的需求时。
+IMPORTANT：卡片可以被其他卡片引用，实现能力复用，尤其当用户提出"点击xxx，展示xx卡片"、"点击xxx打开xxx"等类似卡片跳转、切换的需求时。需要复用时，应尽量将可共用的 UI 部分抽离并封装到 skills/{skill名称}/cards/components 目录（卡片可复用的公共组件目录，按需创建）中，再由多个卡片统一引用，避免重复实现相同 UI 逻辑。
+IMPORTANT：当卡片需要主动与 Agent 交互时，使用 useCardAction hook。调用 `const dispatch = useCardAction()` 后，通过 `dispatch(action)` 触发以下交互行为：① `{ type: 'sendUserMessage', text: string }` —— 直接以用户身份向 Agent 发送消息（text），无需用户手动确认，适用于卡片内点击某个选项后自动触发下一轮对话。
 
 ### 样式规范
 卡片会被 Agent 工具驱动，通过聊天界面与用户进行互动。
