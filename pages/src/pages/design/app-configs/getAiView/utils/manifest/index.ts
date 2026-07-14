@@ -1,5 +1,5 @@
 import { loadUMDS } from './loadScript';
-import type { AIConfigManifestDependency } from './types';
+import type { AIConfigManifestDependency } from '@/types/aiConfigManifest';
 
 export const DEPENDENCIES_MAP_KEY = '__componentRuntimeDependencies__'
 
