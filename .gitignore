@@ -48,3 +48,5 @@ assets
 // 发布模版
 nodejs/module/template
 nodejs/module/public
+
+/pages/src/pages/design/hooks/useCodeExport/exportTemplate.json
