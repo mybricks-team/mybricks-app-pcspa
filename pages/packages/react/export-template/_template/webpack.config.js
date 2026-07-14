@@ -1,6 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import HtmlWebpackTagsPlugin from "html-webpack-tags-plugin";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,8 +20,16 @@ export default {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
+        test: /\.(ts|tsx)$/,
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              // 只做语法转换，不做类型校验，终端永不报错
+              transpileOnly: true
+            },
+          },
+        ],
         exclude: /node_modules/,
       },
       {
@@ -72,6 +81,16 @@ export default {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, 'public/index.html'),
     }),
+    new HtmlWebpackTagsPlugin({
+      scripts: [
+        "https://unpkg.com/react@18.0.0/umd/react.production.min.js",
+        "https://unpkg.com/react-dom@18.0.0/umd/react-dom.production.min.js",
+        "https://unpkg.com/dayjs@1.11.19/dayjs.min.js",
+      ],
+      css: [],
+      append: false, 
+      usePublicPath: false
+    }),
   ],
   devServer: {
     port: 3000,
@@ -80,4 +99,8 @@ export default {
     open: false,
   },
   devtool: 'source-map',
+  externals: {
+    "react": "React",
+    "react-dom": "ReactDOM",
+  }
 };

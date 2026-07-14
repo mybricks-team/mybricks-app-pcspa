@@ -57,7 +57,7 @@ import { useBranch } from './hooks/useBranch'
 import { DesignerTitleBar, DesignerToolBar } from '@mybricks/sdk-for-app/ui'
 import { usePublishPage } from './hooks/usePublishPage'
 import PublishPageModal from './components/PublishPageModal'
-import { preloadDependencies } from './app-configs/getAiView/utils/manifest'
+import { preloadDependencies, getAllDependencies } from './app-configs/getAiView/utils/manifest'
 import { useAiSourceCodeExport, useAiPrdExport } from './hooks/useCodeExport';
 
 const msgSaveKey = 'save'
@@ -1100,7 +1100,7 @@ export default function MyDesigner({ appData: originAppData }) {
   const { handleExport } = useAiSourceCodeExport({
     getExportToJSON: () => designerRef.current?.toJSON?.(),
     folderName: "app",
-    dependencies: appConfig?.ai?.dependencies || [],
+    dependencies: getAllDependencies(appConfig?.ai?.dependencies),
   });
   const { handleExportPrd } = useAiPrdExport({
     getExportToJSON: () => designerRef.current?.toJSON?.(),

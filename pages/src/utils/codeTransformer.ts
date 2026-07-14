@@ -19,7 +19,15 @@ export class CodeTransformer {
    * 入口：接收文件列表，逐个转换后返回。
    */
   transformFiles(files: CodeFile[], dependencies: AIConfigManifestDependency[]): CodeFile[] {
-    return files.map((file) => this.transformSingleFile(file));
+    return files.map((file) => {
+      if (file.path === 'webpack.config.js') {
+        return this.injectWebpackDependencies(file, dependencies)
+      }
+      if (file.path === 'src/global.d.ts') {
+        return this.injectGlobalDTS(file, dependencies)
+      }
+      return this.transformSingleFile(file)
+    });
   }
 
   /**
@@ -285,6 +293,171 @@ export class CodeTransformer {
         }
       },
     });
+  }
+
+  /**
+   * 向 webpack.config.js 中注入依赖项。
+   */
+  private injectWebpackDependencies(file: CodeFile, dependencies: AIConfigManifestDependency[]) {
+    try {
+      const ast = this.parseCode(file.content);
+      const scripts = dependencies.flatMap((dependency) => dependency.umd ?? []);
+      const css = dependencies.flatMap((dependency) => dependency.css ?? []);
+      const externals = dependencies.map((dependency) => ({
+        name: dependency.name,
+        libraryName: dependency.libraryName,
+      }));
+
+      const isPropertyMatch = (property: t.ObjectProperty | t.ObjectMethod | t.SpreadElement, name: string) => {
+        if (!t.isObjectProperty(property)) return false;
+        if (t.isIdentifier(property.key)) return property.key.name === name;
+        return t.isStringLiteral(property.key) && property.key.value === name;
+      };
+
+      const upsertObjectProperty = (objectExpression: t.ObjectExpression, name: string, value: t.Expression) => {
+        const property = objectExpression.properties.find((item) => isPropertyMatch(item, name));
+        if (property && t.isObjectProperty(property)) {
+          property.value = value;
+          return;
+        }
+        objectExpression.properties.push(
+          t.objectProperty(t.identifier(name), value),
+        );
+      };
+
+      const mergeArrayProperty = (objectExpression: t.ObjectExpression, name: string, values: string[]) => {
+        const property = objectExpression.properties.find((item) => isPropertyMatch(item, name));
+        const mergedValues = new Set<string>();
+
+        if (property && t.isObjectProperty(property) && t.isArrayExpression(property.value)) {
+          property.value.elements.forEach((element) => {
+            if (t.isStringLiteral(element)) {
+              mergedValues.add(element.value);
+            }
+          });
+        }
+
+        values.forEach((value) => mergedValues.add(value));
+
+        upsertObjectProperty(
+          objectExpression,
+          name,
+          t.arrayExpression(Array.from(mergedValues).map((item) => t.stringLiteral(item))),
+        );
+      };
+
+      const mergeObjectProperty = (
+        objectExpression: t.ObjectExpression,
+        name: string,
+        values: Array<{ key: string; value: string }>,
+      ) => {
+        const property = objectExpression.properties.find((item) => isPropertyMatch(item, name));
+        const mergedProperties: t.ObjectProperty[] = [];
+        const existingKeys = new Set<string>();
+
+        if (property && t.isObjectProperty(property) && t.isObjectExpression(property.value)) {
+          property.value.properties.forEach((item) => {
+            if (!t.isObjectProperty(item)) return;
+            if (t.isIdentifier(item.key)) {
+              existingKeys.add(item.key.name);
+              mergedProperties.push(item);
+              return;
+            }
+            if (t.isStringLiteral(item.key)) {
+              existingKeys.add(item.key.value);
+              mergedProperties.push(item);
+            }
+          });
+        }
+
+        values.forEach(({ key, value }) => {
+          if (existingKeys.has(key)) return;
+          existingKeys.add(key);
+          mergedProperties.push(
+            t.objectProperty(
+              t.stringLiteral(key),
+              t.stringLiteral(value),
+            ),
+          );
+        });
+
+        upsertObjectProperty(
+          objectExpression,
+          name,
+          t.objectExpression(mergedProperties),
+        );
+      };
+
+      traverse(ast, {
+        NewExpression(path) {
+          if (!t.isIdentifier(path.node.callee, { name: 'HtmlWebpackTagsPlugin' })) return;
+          const [firstArg] = path.node.arguments;
+          if (!firstArg || !t.isObjectExpression(firstArg)) return;
+
+          mergeArrayProperty(firstArg, 'scripts', scripts);
+          mergeArrayProperty(firstArg, 'css', css);
+        },
+        ExportDefaultDeclaration(path) {
+          if (!t.isObjectExpression(path.node.declaration)) return;
+          mergeObjectProperty(
+            path.node.declaration,
+            'externals',
+            externals.map((item) => ({
+              key: item.name,
+              value: item.libraryName,
+            })),
+          );
+        },
+      });
+
+      const output = generate(
+        ast,
+        { retainLines: false, jsescOption: { minimal: true } },
+        file.content,
+      );
+
+      return {
+        ...file,
+        content: output.code,
+      };
+    } catch {
+      return file;
+    }
+  }
+
+  /**
+   * 注入全局类型定义。
+   */
+  private injectGlobalDTS(file: CodeFile, dependencies: AIConfigManifestDependency[]) {
+    try {
+      const declarations = dependencies.flatMap((dependency) => {
+        const result: string[] = [];
+
+        if (!file.content.includes(`declare module '${dependency.name}'`)) {
+          result.push(`declare module '${dependency.name}';`);
+        }
+
+        if (
+          dependency.libraryName &&
+          !file.content.includes(`declare const ${dependency.libraryName}: any;`)
+        ) {
+          result.push(`declare const ${dependency.libraryName}: any;`);
+        }
+
+        return result;
+      });
+
+      if (declarations.length === 0) {
+        return file;
+      }
+
+      return {
+        ...file,
+        content: `${file.content.trimEnd()}\n\n${declarations.join('\n')}\n`,
+      };
+    } catch {
+      return file;
+    }
   }
 
   /**

@@ -3,6 +3,35 @@ import type { AIConfigManifestDependency } from '@/types/aiConfigManifest';
 
 export const DEPENDENCIES_MAP_KEY = '__componentRuntimeDependencies__'
 
+// 当没有注入依赖时，使用的默认附加库。
+const PRESET_ADDON_LIBS = [
+  {
+    name: 'antd',
+    version: '5.21.4',
+    libraryName: 'antd',
+    umd: ['https://unpkg.com/antd@5.21.4/dist/antd.min.js'],
+    css: ['https://unpkg.com/antd@5.21.4/dist/reset.css']
+  },
+  {
+    name: '@ant-design/icons',
+    version: '5.5.0',
+    libraryName: 'icons',
+    umd: ['https://unpkg.com/@ant-design/icons@5.5.0/dist/index.umd.js'],
+  },
+  // {
+  //   name: 'echarts',
+  //   version: '5.6.0',
+  //   libraryName: 'echarts',
+  //   umd: ['https://unpkg.com/echarts@5.6.0/dist/echarts.min.js']
+  // },
+  // {
+  //   name: 'echarts-for-react',
+  //   version: '5.6.0',
+  //   libraryName: 'EChartsForReact',
+  //   umd: ['http://localhost:9001/public/publish/echarts/5.6.0/echarts-for-react.min.js']
+  // }
+]
+
 export async function preloadDependencies (dependencies: AIConfigManifestDependency[]) {
   const arr = dependencies.reduce((acc, dep) => {
     acc = acc.concat(dep.umd)
@@ -39,4 +68,10 @@ export function getDependenciesCSS (dependencies: AIConfigManifestDependency[]) 
     return acc
   }, [])
   return css || []
+}
+
+// 获取所有依赖库，包括基础库和预设库/注入的依赖库
+export function getAllDependencies (dependencies: AIConfigManifestDependency[]) {
+  const libs =  dependencies?.length ? dependencies : PRESET_ADDON_LIBS
+  return libs
 }
