@@ -975,6 +975,81 @@ export default function MyDesigner({ appData: originAppData }) {
     }
   }, [onEdit])
 
+  /** 开发模式：在 window 上挂载清空画布、导出ui文件、导入ui文件三个方法 */
+  useEffect(() => {
+    if (APP_ENV === 'production') return
+
+    /** 清空画布 */
+    ;(window as any).__clearCanvas__ = async () => {
+      setSaveLoading(true)
+      try {
+        await ctx.save({ content: '{}' }, { saveType: 'import' })
+      } finally {
+        setSaveLoading(false)
+      }
+    }
+
+    /** 导出ui文件 */
+    ;(window as any).__exportUI__ = () => {
+      const json = getDumpJson()
+      const content = JSON.stringify(json, null, 2)
+      const baseName = ctx.fileName ? ctx.fileName.replace(/\.[^.]+$/, '') : 'export'
+      const fileName = `${baseName}.ui`
+      const blob = new Blob([content], { type: 'application/json' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    }
+
+    /** 导入ui文件 */
+    ;(window as any).__importUI__ = () => {
+      if (!ctx.operable || isDebugMode) {
+        message.warn(!ctx.operable ? '请先点击右上角个人头像上锁获取页面编辑权限' : '请退出调试模式，再进行导入')
+        return
+      }
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = '.ui'
+      input.onchange = async (e: any) => {
+        const file = e.target.files[0]
+        if (!file) return
+        const reader = new FileReader()
+        reader.onload = async (ev) => {
+          try {
+            const text = ev.target.result as string
+            const json = JSON.parse(text)
+            const { content, pageConfig } = json
+            const contentStr = JSON.stringify({ content, ...pageConfig })
+            setSaveLoading(true)
+            try {
+              await ctx.save({ content: contentStr }, { saveType: 'import' })
+            } finally {
+              setSaveLoading(false)
+            }
+          } catch (err) {
+            message.error('导入失败：文件格式不正确')
+            console.error(err)
+          }
+        }
+        reader.readAsText(file)
+      }
+      document.body.appendChild(input)
+      input.click()
+      document.body.removeChild(input)
+    }
+
+    return () => {
+      delete (window as any).__clearCanvas__
+      delete (window as any).__exportUI__
+      delete (window as any).__importUI__
+    }
+  }, [ctx.operable, isDebugMode, setSaveLoading, ctx.fileName])
+
   useEffect(() => {
     ;(window as any).__vibeCodingCallbacks__ = {
       onStart() {
@@ -1196,14 +1271,14 @@ export default function MyDesigner({ appData: originAppData }) {
                   //       if (!coms) {
                   //         return message.warn('源代码为空，暂无可发布的内容!')
                   //       }
-
+                  //
                   //       const comId = Object.keys(coms)[0]
                   //       if (!comId) {
                   //         return message.warn('源代码为空，暂无可发布的内容!')
                   //       }
-
+                  //
                   //       const files = (window as any)._forApp_[comId].getFiles()
-
+                  //
                   //       if (!files.length) {
                   //         return message.warn('源代码为空，暂无可发布的内容!')
                   //       }

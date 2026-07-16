@@ -48,6 +48,39 @@ export default function get({ctx, envList}) {
       )
       return
     },
+
+    // items({}, cate0, cate1, cate2) {
+    //   cate0.title = ''
+    //   cate0.items = [
+    //     {
+    //       items: [
+    //         // {
+    //         //   title: '知识源',
+    //         //   type: 'text',
+    //         //   value: {
+    //         //     get(context) {},
+    //         //     set(context, v: string) {},
+    //         //   },
+    //         // },
+    //       ],
+    //     },
+    //   ];
+    //   cate1.title = 'UI';
+    //   cate1.items = [
+    //      {
+    //       items: [
+    //         {
+    //           title: '知识源',
+    //           type: 'text',
+    //           value: {
+    //             get(context) {},
+    //             set(context, v: string) {},
+    //           },
+    //         },
+    //       ],
+    //     },
+    //   ];
+    // },
     // items({}, cate0, cate1, cate2) {
     //   cate0.title = `页面`
     //   cate0.items = [
