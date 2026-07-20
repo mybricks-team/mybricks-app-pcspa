@@ -83,22 +83,16 @@ export function fullStackAppPromptBuilder(
         {
           path: 'frontend/.agent/agent.md',
           content: [
-            // fullStackAppPromptSection.frontend.metaSection,
-            appPrompt.frontend.metaSection,
+            agentAppPromptSection.frontend.metaSection,
             '# 前端规范',
-            // fullStackAppPromptSection.frontend.guideSection,
-            appPrompt.frontend.guideSection,
-            // '## 设计规范加载',
-            // '当任务涉及卡片初始化、卡片搭建、卡片生成、改稿或样式调整时，先加载 design-spec skill 并读取相关规则文件，再进入具体代码开发。',
+            agentAppPromptSection.frontend.guideSection,
             '## 资源使用规范',
             agentAppPromptSection.frontend.assetsUsageSection,
             '## 环境变量',
             agentAppPromptSection.frontend.environmentVariablesSection,
             '## JsDoc声明规范',
-            // fullStackAppPromptSection.frontend.jsDocUsageSection,
             appPrompt.frontend.jsDocUsageSection,
             '## 前端示例',
-            // fullStackAppPromptSection.frontend.examplesSection,
             appPrompt.frontend.examplesSection,
           ]
             .filter(Boolean)
