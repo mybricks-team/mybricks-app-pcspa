@@ -169,7 +169,7 @@ ${toolsPath
 ].filter(Boolean)`
 
   return `import VibeAppContainer from 'mybricks/vibe-app-container'
-import { CardContext } from '@mybricks/ai-render'
+import { CanvasContext, ComponentContext } from '@mybricks/ai-render'
 ${importCards}${importTools}
 const cardsGroups = ${cardsGroups}
 
@@ -183,7 +183,8 @@ export default function App() {
       cardsGroups={cardsGroups}
       customTools={customTools}
       emptyGuideConfig={emptyGuideConfig}
-      CardContext={CardContext}
+      CanvasContext={CanvasContext}
+      ComponentContext={ComponentContext}
     />
   )
 }
