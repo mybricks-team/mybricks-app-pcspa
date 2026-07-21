@@ -11,6 +11,7 @@ import { fAxios } from '../../services/http'
 import moment from 'moment'
 import { message, Modal, Tooltip } from 'antd'
 import API from '@mybricks/sdk-for-app/api'
+import { parsePage } from '@mybricks/file-parser'
 import config from './app-configs/index'
 import { fetchPlugins, removeBadChar } from '../../utils'
 import {
@@ -53,12 +54,14 @@ import { code as code_icon } from './icon/code'
 import classNames from 'classnames'
 import { sendPageDeps } from './utils/sendPageDeps'
 import { BranchMergeModal } from './components/branch-merge-modal'
+import { CodeMergeModal } from './components/code-merge-modal'
 import { useBranch } from './hooks/useBranch'
 import { DesignerTitleBar, DesignerToolBar } from '@mybricks/sdk-for-app/ui'
 import { usePublishPage } from './hooks/usePublishPage'
 import PublishPageModal from './components/PublishPageModal'
 import { preloadDependencies } from './app-configs/getAiView/utils/manifest'
 import { useAiSourceCodeExport } from './hooks/useCodeExport';
+import { safeDecodeURIComponent } from './utils'
 
 const msgSaveKey = 'save'
 
@@ -107,9 +110,15 @@ export default function MyDesigner({ appData: originAppData }) {
   window.fileId = originAppData.fileId
   window._disableSmartLayout = originAppData?.config?.['mybricks-app-pcspa']?.config?.feature?.disableSmartLayout; // 是否禁用智能布局
 
-  const { branchInfo, branchName, mainFileId, getBranchInfoByMainFileId, getMainFileId } = useBranch()
+  const { branchInfo, branchName, mainFileId, getBranchInfoByMainFileId, getMainFileId, getFileContent } = useBranch()
 
   const [publishPageModalVisible, setPublishPageModalVisible] = useState(false)
+  const [codeMergeModalVisible, setCodeMergeModalVisible] = useState(false)
+  const [mergeBranchId, setMergeBranchId] = useState<number | null>(null)
+  const [currentFiles, setCurrentFiles] = useState<{ fileName: string; source: string }[]>([])
+  const [branchFiles, setBranchFiles] = useState<{ fileName: string; source: string }[]>([])
+  const [baseFiles, setBaseFiles] = useState<{ fileName: string; source: string }[]>([])
+
 
   const appData = useMemo(() => {
     let data = { ...originAppData }
@@ -1244,6 +1253,34 @@ export default function MyDesigner({ appData: originAppData }) {
                         }
                         setPublishPageModalVisible(true)
                       }
+                    },
+                    {
+                      icon: branch_icon,
+                      title: '代码合并',
+                      onClick: async () => {
+                        // 获取当前文件中的源码
+                        const dumpJSON = designerRef.current?.dump()
+                        const normalizeFile = (f: any) => ({
+                          fileName: f.fileName,
+                          source: safeDecodeURIComponent(f.source ?? f.content)
+                        })
+                        const currentParsed = parsePage(dumpJSON.content['xg.desn.stageview'])
+                        const currentFilesData = currentParsed.mainModule.slot.slots[0].comAry[0].runtime.model.data.files.map(normalizeFile)
+                        if (!currentFilesData?.length) {
+                          return message.warn('当前页面源代码为空!')
+                        }
+
+                        // 获取分支列表
+                        await getBranchInfoByMainFileId(ctx.fileId)
+                        if (!branchInfo || branchInfo.length === 0) {
+                          return message.warn('暂无可合并的分支!')
+                        }
+
+                        // 分支文件由弹窗内的分支选择器负责加载
+                        setCurrentFiles(currentFilesData)
+                        setBaseFiles(currentFilesData) // 暂时使用当前文件作为 base
+                        setCodeMergeModalVisible(true)
+                      }
                     }
                   ]}
                   exportActions={[
@@ -1363,6 +1400,61 @@ export default function MyDesigner({ appData: originAppData }) {
         }}
         ctx={ctx}
         fileId={ctx.fileId}
+      />
+      <CodeMergeModal
+        open={codeMergeModalVisible}
+        onCancel={() => setCodeMergeModalVisible(false)}
+        branches={branchInfo || []}
+        onBranchChange={async (branchId) => {
+          const normalizeFile = (f: any) => ({
+            fileName: f.fileName,
+            source: safeDecodeURIComponent(f.source ?? f.content)
+          })
+
+          const branchRes = await axios.get('/paas/api/workspace/getFullFile?fileId=' + branchId)
+          const branchContentStr = branchRes.data?.data?.content
+          if (!branchContentStr) {
+            throw new Error('获取分支内容失败')
+          }
+
+          const branchContentJSON = JSON.parse(branchContentStr)
+          const branchParsed = parsePage(branchContentJSON.content['xg.desn.stageview'])
+          const branchFilesData = branchParsed.mainModule.slot.slots[0].comAry[0].runtime.model.data.files.map(normalizeFile)
+
+          return branchFilesData
+        }}
+        onConfirm={async (mergedFiles, branchId) => {
+          try {
+            setMergeBranchId(branchId)
+            // 获取当前 dump
+            const json = designerRef.current?.dump()
+            if (!json) {
+              throw new Error('无法获取当前设计器状态')
+            }
+
+            // 更新源码文件
+            const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
+            const comId = Object.keys(coms)[0]
+            if (comId && (window as any)._forApp_[comId]) {
+              // 通过 _forApp_ 更新文件
+              mergedFiles.forEach(file => {
+                (window as any)._forApp_[comId].updateFile(file.fileName, file.source)
+              })
+            }
+
+            // 保存
+            setSaveLoading(true)
+            await save()
+            message.success('代码合并并保存成功!')
+            setCodeMergeModalVisible(false)
+          } catch (e) {
+            message.error('合并保存失败: ' + (e as Error).message)
+          } finally {
+            setSaveLoading(false)
+          }
+        }}
+        currentFiles={currentFiles}
+        baseFiles={baseFiles}
       />
     </div>
   )

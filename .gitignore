@@ -48,3 +48,4 @@ assets
 // 发布模版
 nodejs/module/template
 nodejs/module/public
+dist/

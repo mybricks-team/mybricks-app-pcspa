@@ -65,6 +65,7 @@
   },
   "dependencies": {
     "@babel/standalone": "^7.29.4",
+    "@monaco-editor/react": "^4.7.0",
     "@mybricks/file-parser": "^1.1.1",
     "@mybricks/plugin-connector-domain": "0.0.52",
     "@mybricks/plugin-connector-http": "^1.2.33",
@@ -83,6 +84,7 @@
     "classnames": "^2.3.1",
     "compare-versions": "^6.0.0",
     "dayjs": "^1.11.3",
+    "diff": "^9.0.0",
     "escodegen": "^2.1.0",
     "html-to-image": "^1.10.8",
     "jszip": "^3.10.1",

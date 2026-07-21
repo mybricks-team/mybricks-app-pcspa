@@ -23,3 +23,11 @@ export function isValidPascalCase(name: string) {
   var pattern = /^[A-Z][a-zA-Z0-9]*$/;
   return pattern.test(name);
 }
+
+export const safeDecodeURIComponent = (str: string) => {
+  try {
+    return decodeURIComponent(str)
+  } catch (e) {
+    return str
+  }
+}
