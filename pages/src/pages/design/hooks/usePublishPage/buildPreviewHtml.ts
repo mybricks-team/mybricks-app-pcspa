@@ -20,10 +20,10 @@ const PRE_SCRIPTS = [
 ]
 
 const VIBE_APP_CONTAINER_UMD =
-  'https://p4-ec.eckwai.com/kos/nlav12333/aicode/assets/vibe-app-container/index.umd.0.0.1.min.0b2f461b8b8c405f.js'
+  'https://f2.eckwai.com/kos/nlav12333/aicode/assets/vibe-app-container/index.umd.0.0.1.min.cd991c504584edde.js'
 
 const VIBE_APP_SCRIPTS = [
-  'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/plugin-ai/2.2.24/index.umd.js',
+  'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/plugin-ai/2.2.25/index.umd.js',
   VIBE_APP_CONTAINER_UMD,
 ]
 
