@@ -6,6 +6,7 @@ import {
   type ComponentData,
   type FileItem,
 } from './structureGenerator'
+import type { AIConfigManifestDependency } from '@/types/aiConfigManifest'
 
 // 这里只保留导出核心能力，供不同 UI 入口复用。
 export type ExportJSON = any
@@ -25,6 +26,7 @@ export type ExportAiSourceCodeParams = {
   exportJSON: ExportJSON
   folderName?: string
   onProgress?: (progress: ExportProgress) => void
+  dependencies?: AIConfigManifestDependency[]
 }
 
 export type ExportAiPrdParams = {
@@ -110,11 +112,11 @@ function mergeTransformedCodeFiles(
 /**
  * 对结构化后的代码文件统一补做 Babel 转换。
  */
-export function transformGeneratedCodeFiles(files: FileItem[]): FileItem[] {
+export function transformGeneratedCodeFiles(files: FileItem[], dependencies: AIConfigManifestDependency[]): FileItem[] {
   // 结构生成之后统一补一层 Babel 转换，避免入口各自处理。
   const transformer = new CodeTransformer()
   const codeFiles = getTransformableCodeFiles(files)
-  const transformedFiles = transformer.transformFiles(codeFiles)
+  const transformedFiles = transformer.transformFiles(codeFiles, dependencies)
 
   return mergeTransformedCodeFiles(files, transformedFiles)
 }
@@ -122,9 +124,9 @@ export function transformGeneratedCodeFiles(files: FileItem[]): FileItem[] {
 /**
  * 生成最终可导出的文件列表。
  */
-export async function generateAiExportFiles(data: ComponentData): Promise<FileItem[]> {
+export async function generateAiExportFiles(data: ComponentData, dependencies: AIConfigManifestDependency[]): Promise<FileItem[]> {
   const files = generateCodeStructure(data)
-  const transformedFiles = transformGeneratedCodeFiles(files)
+  const transformedFiles = transformGeneratedCodeFiles(files, dependencies)
   return transformedFiles
 }
 
@@ -134,6 +136,7 @@ export async function generateAiExportFiles(data: ComponentData): Promise<FileIt
 export async function exportAiSourceCode({
   exportJSON,
   folderName = 'app',
+  dependencies = [],
   onProgress,
 }: ExportAiSourceCodeParams) {
   const context = getAiExportContext(exportJSON)
@@ -142,7 +145,7 @@ export async function exportAiSourceCode({
     throw new Error('源代码为空，暂无可下载的内容!')
   }
 
-  const files = await generateAiExportFiles(context.data)
+  const files = await generateAiExportFiles(context.data, dependencies)
   await exportCode(files, {
     folderName,
     onProgress,
@@ -155,6 +158,7 @@ export async function exportAiSourceCode({
 export async function runAiSourceCodeExport({
   exportJSON,
   folderName = 'app',
+  dependencies = [],
 }: Omit<ExportAiSourceCodeParams, 'onProgress'>) {
   // 统一处理源码导出的提示文案与进度反馈。
   const messageKey = 'export-source-code'
@@ -170,6 +174,7 @@ export async function runAiSourceCodeExport({
     await exportAiSourceCode({
       exportJSON,
       folderName,
+      dependencies,
       onProgress: (progress) => {
         message.open({
           key: messageKey,

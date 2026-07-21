@@ -57,8 +57,8 @@ import { useBranch } from './hooks/useBranch'
 import { DesignerTitleBar, DesignerToolBar } from '@mybricks/sdk-for-app/ui'
 import { usePublishPage } from './hooks/usePublishPage'
 import PublishPageModal from './components/PublishPageModal'
-import { preloadDependencies } from './app-configs/getAiView/utils/manifest'
-import { useAiSourceCodeExport } from './hooks/useCodeExport';
+import { preloadDependencies, getAllDependencies } from './app-configs/getAiView/utils/manifest'
+import { useAiSourceCodeExport, useAiPrdExport } from './hooks/useCodeExport';
 
 const msgSaveKey = 'save'
 
@@ -1100,6 +1100,11 @@ export default function MyDesigner({ appData: originAppData }) {
   const { handleExport } = useAiSourceCodeExport({
     getExportToJSON: () => designerRef.current?.toJSON?.(),
     folderName: "app",
+    dependencies: getAllDependencies(appConfig?.ai?.dependencies),
+  });
+  const { handleExportPrd } = useAiPrdExport({
+    getExportToJSON: () => designerRef.current?.toJSON?.(),
+    getRuntimeFiles: (comId) => (window as any)._forApp_[comId].getFiles(),
   });
 
   const TrueDesigner = useMemo(() => {
@@ -1275,40 +1280,7 @@ export default function MyDesigner({ appData: originAppData }) {
                     },
                     {
                       title: 'PRD',
-                      onClick: () => {
-                        const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
-                        if (!coms) {
-                          return message.warn('PRD文档不存在!')
-                        }
-
-                        const comId = Object.keys(coms)[0]
-                        if (!comId) {
-                          return message.warn('PRD文档不存在!')
-                        }
-
-                        const files = (window as any)._forApp_[comId].getFiles()
-                        const prdFile = files.find(item => item.fileName === 'requirement.md')
-                        if (!prdFile) {
-                          return message.warn('PRD文档不存在!')
-                        }
-                        const prdContent = prdFile.content
-
-                        // 从 front matter 中提取 title
-                        // 格式: ---\ntitle: xxx\ndesc: xxx\n---
-
-                        const title = ctx.fileName?.replace(/\.[^.]+$/, '')
-                        const titleMatch = prdContent.match(/^---[\s\S]*?^title:\s*(.+?)$/m)
-                        const prdTitle = titleMatch ? titleMatch[1].trim() : title || 'PRD文档'
-                        // 下载为 Markdown 文件
-                        const blob = new Blob([prdContent], { type: 'text/markdown;charset=utf-8' })
-                        const url = URL.createObjectURL(blob)
-                        const anchor = document.createElement('a')
-                        anchor.href = url
-                        anchor.download = `${prdTitle}-PRD文档.md`
-                        anchor.click()
-                        URL.revokeObjectURL(url)
-                        message.success('PRD 文档下载成功')
-                      }
+                      onClick: handleExportPrd
                     },
                   ]}
                 />

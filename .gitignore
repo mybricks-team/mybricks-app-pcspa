@@ -49,4 +49,6 @@ assets
 nodejs/module/template
 nodejs/module/public
 
+/pages/src/pages/design/hooks/useCodeExport/exportTemplate.json
+
 dist/

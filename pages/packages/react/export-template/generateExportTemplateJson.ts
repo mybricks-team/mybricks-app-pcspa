@@ -8,7 +8,7 @@ interface TemplateFile {
 
 
 const TEMPLATE_PATH = path.join(__dirname, './_template');
-const JSON_FILE_PATH = path.join(__dirname, '../../../src/components/designerToolBar/components/codeExport/exportTemplate.json');
+const JSON_FILE_PATH = path.join(__dirname, '../../../src/pages/design/hooks/useCodeExport/exportTemplate.json');
 
 /**
  * 递归遍历目录并生成文件树结构

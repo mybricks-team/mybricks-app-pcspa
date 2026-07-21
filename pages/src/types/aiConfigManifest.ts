@@ -17,7 +17,6 @@ export interface AIConfigManifestDependency {
   name: string;
   version: string;
   libraryName: string;
-  globalVar?: string;
   umd: string[];
   css?: string[];
   readme?: string;
