@@ -19,12 +19,27 @@ const getGuiCard = (designerJSON?: any) => {
 
 const buildVibeAppEntry = ({ source, designerJSON }: VibeAppCodeMapOptions) => {
   const { files } = source
+  const guiCard = getGuiCard(designerJSON)
+  const rawHomePins: Array<{ name: string; props: string; enabled: boolean }> =
+    guiCard?.homePins ?? []
+  const processedHomePins = rawHomePins
+    .filter(pin => pin.enabled !== false)
+    .reduce<Array<{ name: string; props: unknown }>>((acc, pin) => {
+      try {
+        const parsedProps = JSON.parse(decodeURIComponent(pin.props))
+        acc.push({ ...pin, props: parsedProps })
+      } catch {
+        // skip items that fail to parse
+      }
+      return acc
+    }, [])
   const emptyGuide = {
     title: '开始对话',
     subtitle: '你可以向我提问，或从下方场景快速开始',
     assistantTitle: '智能助手',
-    ...getGuiCard(designerJSON),
+    ...guiCard,
   }
+  emptyGuide.homePins = processedHomePins
   const filesMap = files.reduce<
     Record<string, VibePublishSourceItem['files'][0]>
   >((acc, file) => {
