@@ -47,7 +47,6 @@ import { compareVersionLatest } from "../utils/saveContent";
 
 const { confirm } = Modal;
 import editViewConfig from "./editView";
-import getAiView from "./getAiView";
 import AIPlugin from './getAiView/utils/get-ai-plugin'
 import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
 import cloudTpt from "./cloudTpt";
@@ -296,12 +295,6 @@ export default function appConfig(
   //   )
   // }
 
-  const aiViewConfig = getAiView(true, {
-    model: ctx?.appConfig?.publishLocalizeConfig?.selectAIModel,
-    scenePrompt: ctx?.appConfig?.ai?.systemScenePrompt,
-    designerRef
-  })
-
   const nocobasePlugin = nocobaseConfigPlugin();
 
   return {
@@ -415,15 +408,8 @@ export default function appConfig(
           name: appData.user.name || appData.user.email || "user",
           avatar: appData.user.avatar
         },
-        requestAsStream: ({ messages, emits, aiRole }) => {
-          return aiViewConfig.requestAsStream(messages, undefined, emits, { aiRole });
-        },
-        guidePrompt: ctx?.appConfig?.ai?.systemScenePrompt,
         key: ctx.fileId,
         plugins: [nocobasePlugin.ai],
-        config: {
-          enabledActionTags: ctx?.appConfig?.ai?.enabledActionTags
-        }
       }),
       // ...remotePlugins,
       // themePlugin.use({ sdk: appData }),
@@ -544,7 +530,8 @@ export default function appConfig(
           title: "PC-AI组件库",
           type: "com_lib",
           namespace: "mybricks.normal-pc-lite",
-          editJs: './public/comlibs/0714/edit.js',
+          // editJs: './public/comlibs/0714/edit.js',
+          editJs: 'http://localhost:20000/comlib.js'
         };
         const existing = baseComlibs.find(
           (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
@@ -639,7 +626,6 @@ export default function appConfig(
       useStrict: false,
       useExtendedInput: true, // 开启场景卡片的扩展输入
     },
-    aiView: aiViewConfig,
     editView: editViewConfig({ ctx, envList }),
     com: {
       env: {
