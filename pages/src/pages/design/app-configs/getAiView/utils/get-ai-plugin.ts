@@ -1,6 +1,7 @@
 import AIPlugin, { IDBHistory } from '@mybricks/plugin-ai'
 import skills from './skills'
 import { getDependenciesConfig } from './manifest'
+import { onRequest } from '@/utils/aiRequest'
 
 const COMLIB_NAMESPACE_LITE = 'mybricks.normal-pc-lite'
 const COMLIB_NAMESPACE_AI = 'mybricks.ai-comlib-pc'
@@ -24,6 +25,40 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
     deviceType: 'desktop',
     config,
     key,
+    llm:{
+      providers: [
+        {
+          providerId: "auto",
+          models: [
+            {
+              id: "kimi-k2.7-code-highspeed",
+              name: "kimi-k2.7-code-highspeed"
+            },
+            {
+              id: "glm-5.2",
+              name: "glm-5.2",
+            },
+            {
+              id: "kimi-k2.6",
+              name: "kimi-k2.6"
+            },
+            {
+              id: "kimi-k2.7-code",
+              name: "kimi-k2.7-code",
+            },
+            {
+              id: "deepseek-v4-pro",
+              name: "deepseek-v4-pro",
+            },
+            {
+              id: "deepseek-v4-flash",
+              name: "deepseek-v4-flash"
+            }, 
+          ],
+          request: onRequest,
+        },
+      ],
+    },
     plugins,
     skills: [...skills, ...(manifest?.skills || [])],
     componentRuntime: {
