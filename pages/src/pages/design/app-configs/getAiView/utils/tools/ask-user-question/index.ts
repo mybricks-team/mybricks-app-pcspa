@@ -166,7 +166,7 @@ export function createAskUserQuestionTool({
 
       return {
         title: '向用户提问',
-        output: `已向用户提出 ${questions.length} 个问题，等待用户在界面上作答。用户提交作答后会以新消息发送回答内容，收到后请据此继续处理，不要重复提问。`,
+        output: `已向用户提出 ${questions.length} 个问题，等待用户在界面上作答。请立即结束当前轮回复并暂停任务流程；在用户提交答案形成新的用户消息之前，不要继续执行、不要调用其他工具、不要基于假设推进任务，也不要重复提问。收到用户提交的回答后，再根据回答内容继续处理。`,
         metadata: { questions },
       }
     },
