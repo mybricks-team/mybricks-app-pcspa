@@ -649,7 +649,7 @@ export const buildVibePreviewZip = async ({
         antd: 'antd',
         '@ant-design/icons': 'icons',
         echarts: 'echarts',
-        'echarts-for-react': 'ReactECharts',
+        'echarts-for-react': 'EChartsForReact',
       },
     },
   )

@@ -410,6 +410,7 @@ export default function appConfig(
         },
         key: ctx.fileId,
         plugins: [nocobasePlugin.ai],
+        designerRef
       }),
       // ...remotePlugins,
       // themePlugin.use({ sdk: appData }),
@@ -530,8 +531,9 @@ export default function appConfig(
           title: "PC-AI组件库",
           type: "com_lib",
           namespace: "mybricks.normal-pc-lite",
+          // editJs: 'http://localhost:20000/comlib.js'
           // editJs: './public/comlibs/0714/edit.js',
-          editJs: 'http://localhost:20000/comlib.js'
+          editJs: 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.1.13/edit.9d4334fc8c2f665a.js'
         };
         const existing = baseComlibs.find(
           (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs

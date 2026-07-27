@@ -344,6 +344,15 @@ export default function MyDesigner({ appData: originAppData }) {
     appData.getInitComLibs({
       localComlibs: APP_TYPE === "react" ? [PC_NORMAL_COM_LIB, CHARS_COM_LIB, BASIC_COM_LIB] : [],
       currentComlibs: appData.fileContent?.content?.comlibs,
+      defaultExternals: [
+        {
+          "name": "echarts-for-react",
+          "library": "EChartsForReact",
+          "urls": [
+            "/public/publish/echarts/5.6.0/echarts-for-react.min.js",
+          ]
+        },
+      ]
     }).then(({ comlibs, latestComlibs }) => {
       const newComlibs = ctx.debug
         ? replaceComlib(comlibs, comlibDebugUtils.get())
