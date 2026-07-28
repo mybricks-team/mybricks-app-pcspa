@@ -148,6 +148,14 @@ export default function MyDesigner({ appData: originAppData }) {
         typeof originConfig === 'string'
           ? JSON.parse(originConfig)
           : originConfig
+      if (config?.ai) {
+        try {
+          config.ai = JSON.parse(decodeURIComponent(typeof config.ai === 'string' ? config.ai : JSON.stringify(config.ai)))
+        } catch (error) {
+          config.ai = {}
+          console.error('parse ai config error', error)
+        }
+      }
     } catch (error) {
       console.error('get appConfig error', error)
     }
