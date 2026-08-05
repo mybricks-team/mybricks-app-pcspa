@@ -9,6 +9,86 @@ import type {
 import { mockMybricksTesting } from './mockMybricksTesting'
 import API from '@mybricks/sdk-for-app/api'
 
+const createPreviewEnvReplacementPlugin = (babel: any) => {
+  const t = babel.types
+
+  return {
+    visitor: {
+      MemberExpression(path: any) {
+        if (path.matchesPattern('process.env.POPUP_VISIBLE')) {
+          path.replaceWith(t.booleanLiteral(false))
+        } else if (path.matchesPattern('process.env.POPUP_NODE')) {
+          path.replaceWith(
+            t.memberExpression(t.identifier('document'), t.identifier('body')),
+          )
+        } else {
+          return
+        }
+
+        const parentPath = path.parentPath
+        if (parentPath?.isBinaryExpression()) {
+          const result = parentPath.evaluate()
+          if (result.confident) {
+            parentPath.replaceWith(t.valueToNode(result.value))
+          }
+        }
+
+        if (parentPath?.isLogicalExpression()) {
+          const leftPath = parentPath.get('left')
+          if (leftPath.isBooleanLiteral()) {
+            const { operator, left, right } = parentPath.node
+            if (operator === '||') {
+              parentPath.replaceWith(left.value ? left : right)
+            } else if (operator === '&&') {
+              parentPath.replaceWith(left.value ? right : left)
+            }
+          }
+        }
+      },
+      IfStatement: {
+        exit(path: any) {
+          const testPath = path.get('test')
+          if (!testPath.isBooleanLiteral()) {
+            return
+          }
+
+          if (testPath.node.value) {
+            path.replaceWith(path.node.consequent)
+          } else if (path.node.alternate) {
+            path.replaceWith(path.node.alternate)
+          } else {
+            path.remove()
+          }
+        },
+      },
+    },
+  }
+}
+
+/**
+ * Preview code runs outside the editor popup runtime. Replace its injected
+ * environment values before compiling so generated code can run standalone.
+ */
+export const replacePreviewEnvVarsInCode = (code: string): string => {
+  const babel = typeof window === 'undefined' ? undefined : (window as any).Babel
+  if (!babel?.transform) {
+    return code
+  }
+
+  try {
+    const result = babel.transform(code, {
+      sourceType: 'module',
+      parserOpts: {
+        plugins: ['jsx', 'typescript'],
+      },
+      plugins: [createPreviewEnvReplacementPlugin],
+    })
+    return result.code || code
+  } catch {
+    return code
+  }
+}
+
 const uploadAssets = () => {
   // 上传cdn
   // content: string,
@@ -494,9 +574,11 @@ export const loadBizCenterAssets = async (
 function buildCodeMap(source: VibePublishSourceItem): Record<string, string> {
   const codeMap = source.files.reduce(
     (acc, file) => {
-      acc[file.path] = file.content
-        .replace(`@mybricks/ai-render/testing`, `./mybricks-testing`)
-        .replace(`mybricks/testing`, `./mybricks-testing`)
+      acc[file.path] = replacePreviewEnvVarsInCode(
+        file.content
+          .replace(`@mybricks/ai-render/testing`, `./mybricks-testing`)
+          .replace(`mybricks/testing`, `./mybricks-testing`),
+      )
       if (file.path === 'index.jsx' || file.path === 'index.tsx') {
         acc[file.path] = `
         import {activate} from './mybricks-testing'
