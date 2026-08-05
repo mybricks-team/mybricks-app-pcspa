@@ -2,6 +2,7 @@ import AIPlugin, { IDBHistory } from '@mybricks/plugin-ai'
 import skills from './skills'
 import { getDependenciesConfig } from './manifest'
 import { onRequest } from '@/utils/aiRequest'
+import { getAISetting } from "../../../hooks/useSetting/storage";
 
 const COMLIB_NAMESPACE_LITE = 'mybricks.normal-pc-lite'
 const COMLIB_NAMESPACE_AI = 'mybricks.ai-comlib-pc'
@@ -18,6 +19,27 @@ function getGenerationStrategy(): 'ai' | 'atomic' {
 export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config, plugins = [], manifest }: any) => {
   const designRules = manifest?.rules?.designRules
   const codeRules = manifest?.rules?.codeRules
+
+  // 从 localStorage 读取用户保存的 LLM 配置
+  const savedSettings = getAISetting();
+  // 平台默认
+  const defaultProvider = {
+    providerId: "auto",
+    models: [
+      { id: "kimi-k2.7-code-highspeed", name: "kimi-k2.7-code-highspeed" },
+      { id: "kimi-k2.6", name: "kimi-k2.6" },
+      { id: "kimi-k2.7-code", name: "kimi-k2.7-code" },
+      { id: "deepseek-v4-pro", name: "deepseek-v4-pro" },
+      { id: "deepseek-v4-flash", name: "deepseek-v4-flash" },
+      { id: "glm-5.2", name: "glm-5.2" },
+    ],
+    request: onRequest,
+  };
+  // 用户配置的 providers
+  const userProviders = savedSettings.providers || [];
+  // 按渠道决定 providers：custom 走用户自定义，其余走平台兜底
+  const effectiveProviders = savedSettings.channel === "custom" ? userProviders : [defaultProvider];
+
   return AIPlugin({
     // requestAsStream,
     user,
@@ -26,38 +48,7 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
     config,
     key,
     llm:{
-      providers: [
-        {
-          providerId: "auto",
-          models: [
-            {
-              id: "kimi-k2.7-code-highspeed",
-              name: "kimi-k2.7-code-highspeed"
-            },
-            {
-              id: "glm-5.2",
-              name: "glm-5.2",
-            },
-            {
-              id: "kimi-k2.6",
-              name: "kimi-k2.6"
-            },
-            {
-              id: "kimi-k2.7-code",
-              name: "kimi-k2.7-code",
-            },
-            {
-              id: "deepseek-v4-pro",
-              name: "deepseek-v4-pro",
-            },
-            {
-              id: "deepseek-v4-flash",
-              name: "deepseek-v4-flash"
-            }, 
-          ],
-          request: onRequest,
-        },
-      ],
+      providers: effectiveProviders,
     },
     plugins,
     skills: [...skills, ...(manifest?.skills || [])],

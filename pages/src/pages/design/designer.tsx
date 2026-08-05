@@ -23,7 +23,7 @@ import {
 import { PreviewStorage } from './../../utils/previewStorage'
 import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
-import { createFromIconfontCN, InfoCircleTwoTone, DownloadOutlined, UploadOutlined, CloudUploadOutlined, DeleteOutlined } from '@ant-design/icons'
+import { createFromIconfontCN, InfoCircleTwoTone, DownloadOutlined, UploadOutlined, CloudUploadOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
 import { usePageStayTime } from './utils/sendPageTimer'
 
@@ -59,6 +59,7 @@ import { usePublishPage } from './hooks/usePublishPage'
 import PublishPageModal from './components/PublishPageModal'
 import { preloadDependencies, getAllDependencies } from './app-configs/getAiView/utils/manifest'
 import { useAiSourceCodeExport, useAiPrdExport } from './hooks/useCodeExport';
+import useAISetting from './hooks/useAISetting';
 
 const msgSaveKey = 'save'
 
@@ -1114,6 +1115,7 @@ export default function MyDesigner({ appData: originAppData }) {
     getExportToJSON: () => designerRef.current?.toJSON?.(),
     getRuntimeFiles: (comId) => (window as any)._forApp_[comId].getFiles(),
   });
+  const { openSetting } = useAISetting()
 
   const TrueDesigner = useMemo(() => {
 
@@ -1256,7 +1258,12 @@ export default function MyDesigner({ appData: originAppData }) {
                           return message.warn('源代码为空，暂无可发布的内容!')
                         }
                         setPublishPageModalVisible(true)
-                      }
+                      },
+                    },
+                    {
+                      icon: <SettingOutlined />,
+                      title: '设置',
+                      onClick: openSetting,
                     }
                   ]}
                   exportActions={[
