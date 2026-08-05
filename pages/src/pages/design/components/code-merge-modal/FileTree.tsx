@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Tree } from 'antd'
 import type { TreeProps, DataNode } from 'antd/es/tree'
 import { FileMergeState } from './types'
@@ -21,12 +21,15 @@ interface FileTreeProps {
   mergedFiles: Map<string, string>
   selectedFileName: string | null
   onSelect: (fileName: string) => void
+  expandedKeys?: string[]
+  onExpandedKeysChange?: (keys: string[]) => void
 }
 
 interface TreeNode extends DataNode {
   isLeaf?: boolean
   fileName?: string
   status?: FileStatus
+  statusChar?: string
 }
 
 export function FileTree({
@@ -35,9 +38,13 @@ export function FileTree({
   branchFiles,
   mergedFiles,
   selectedFileName,
-  onSelect
+  onSelect,
+  expandedKeys: controlledExpandedKeys,
+  onExpandedKeysChange
 }: FileTreeProps) {
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([])
+  const [localExpandedKeys, setLocalExpandedKeys] = useState<string[]>([])
+  const expandedKeys = controlledExpandedKeys ?? localExpandedKeys
+  const setExpandedKeys = onExpandedKeysChange ?? setLocalExpandedKeys
 
   // 计算文件状态
   const getFileStatus = (file: FileMergeState): FileStatus => {
@@ -50,6 +57,42 @@ export function FileTree({
     if (inCurrent && !inBranch) return 'deleted'
     if (inCurrent && inBranch && currentSource !== branchSource) return 'modified'
     return 'unchanged'
+  }
+
+  // 获取文件在最终合并后的源码，用于判断用户是否已处理过该文件
+  const getFileMergedSource = (fileName: string): string | undefined => {
+    return mergedFiles.get(fileName)
+  }
+
+  // 收集所有需要展开的目录key（包含变化的文件的目录）
+  const getDefaultExpandedKeys = (nodes: TreeNode[]): string[] => {
+    const keys: string[] = []
+    const collect = (nodes: TreeNode[], parentKey?: string) => {
+      for (const node of nodes) {
+        if (node.isLeaf) {
+          if (node.status && node.status !== 'unchanged' && parentKey) {
+            keys.push(parentKey)
+          }
+        } else if (node.children) {
+          const hasModified = node.children.some(child =>
+            (child.isLeaf && child.status && child.status !== 'unchanged') ||
+            (child.children && hasModifiedDescendant(child.children))
+          )
+          if (hasModified) {
+            keys.push(node.key as string)
+            collect(node.children, node.key as string)
+          }
+        }
+      }
+    }
+    const hasModifiedDescendant = (nodes: TreeNode[]): boolean => {
+      return nodes.some(node =>
+        (node.isLeaf && node.status && node.status !== 'unchanged') ||
+        (!node.isLeaf && node.children && hasModifiedDescendant(node.children))
+      )
+    }
+    collect(nodes)
+    return keys
   }
 
   // 构建树形结构
@@ -81,15 +124,17 @@ export function FileTree({
           // 叶子节点（文件）
           const file = files.find(f => f.fileName === fullPath)!
           const status = getFileStatus(file)
-          const statusChar = STATUS_CHAR[status]
+          const isResolved = getFileMergedSource(fullPath) !== undefined
+          const statusChar = isResolved ? '' : STATUS_CHAR[status]
+          const displayStatus = isResolved ? 'unchanged' : status
 
           return {
             key: fullPath,
             title: (
               <span className={styles.fileNode}>
-                <span className={`${styles.fileName} ${styles[`status-${status}`]}`}>{key}</span>
+                <span className={`${styles.fileName} ${styles[`status-${displayStatus}`]}`}>{key}</span>
                 {statusChar && (
-                  <span className={`${styles.statusChar} ${styles[`status-${status}`]}`}>
+                  <span className={`${styles.statusChar} ${styles[`status-${displayStatus}`]}`}>
                     {statusChar}
                   </span>
                 )}
@@ -97,7 +142,7 @@ export function FileTree({
             ),
             isLeaf: true,
             fileName: fullPath,
-            status
+            status: displayStatus
           }
         } else {
           // 目录节点
@@ -120,6 +165,12 @@ export function FileTree({
 
     return buildTree(root)
   }, [files, currentFiles, branchFiles, mergedFiles])
+
+  // 当treeData变化且没有用户手动展开时，自动展开有变化的目录
+  useEffect(() => {
+    const defaultExpanded = getDefaultExpandedKeys(treeData)
+    setExpandedKeys(defaultExpanded)
+  }, [treeData])
 
   const handleSelect: TreeProps['onSelect'] = (selectedKeys, info) => {
     const node = info.node as TreeNode

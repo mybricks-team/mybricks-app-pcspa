@@ -135,6 +135,19 @@ export function CodeMergeModal({
     return states
   }, [currentFiles, branchFiles, baseFiles])
 
+  // 统计各类文件数量
+  const stats = useMemo(() => {
+    const total = fileMergeStates.length
+    const added = fileMergeStates.filter(f => !currentFiles.some(c => c.fileName === f.fileName) && branchFiles.some(b => b.fileName === f.fileName)).length
+    const deleted = fileMergeStates.filter(f => currentFiles.some(c => c.fileName === f.fileName) && !branchFiles.some(b => b.fileName === f.fileName)).length
+    const modified = fileMergeStates.filter(f => {
+      const current = currentFiles.find(c => c.fileName === f.fileName)?.source
+      const branch = branchFiles.find(b => b.fileName === f.fileName)?.source
+      return current !== undefined && branch !== undefined && current !== branch
+    }).length
+    return { total, added, deleted, modified }
+  }, [fileMergeStates, currentFiles, branchFiles])
+
   // 默认选中第一个文件（优先选中有冲突的）
   useEffect(() => {
     if (!selectedFileName && fileMergeStates.length > 0) {
@@ -143,10 +156,17 @@ export function CodeMergeModal({
     }
   }, [fileMergeStates, selectedFileName])
 
+  // 当前选中的文件
   const currentFile = useMemo(
     () => fileMergeStates.find(f => f.fileName === selectedFileName) || null,
     [fileMergeStates, selectedFileName]
   )
+
+  // 用 ref 追踪当前选中的文件名，避免 onMount 闭包持有旧值
+  const currentFileNameRef = useRef(selectedFileName)
+  useEffect(() => {
+    currentFileNameRef.current = selectedFileName
+  }, [selectedFileName])
 
   const handleAcceptCurrent = () => {
     if (!currentFile) return
@@ -181,6 +201,7 @@ export function CodeMergeModal({
         fileName: state.fileName,
         source: encodeURIComponent(mergedFiles.get(state.fileName) || state.mergedSource)
       }))
+      console.log(result)
       await onConfirm(result, selectedBranchId)
       message.success('合并成功')
     } catch (e) {
@@ -297,6 +318,12 @@ export function CodeMergeModal({
                 onSelect={setSelectedFileName}
               />
             </div>
+            <div className={styles.fileStats}>
+              <span className={styles.statItem}>待处理：{stats.modified}</span>
+              <span className={styles.statItem}>新增：{stats.added}</span>
+              <span className={styles.statItem}>删除：{stats.deleted}</span>
+              <span className={styles.statItem}>共：{stats.total}</span>
+            </div>
             {currentFile && currentFile.hasConflict && (
               <div className={styles.actions}>
                 <Button size="small" onClick={handleAcceptCurrent} block>
@@ -347,7 +374,9 @@ export function CodeMergeModal({
         <div className={styles.editor}>
           {currentFile ? (
             <DiffEditor
+              key={currentFile.fileName}
               height="100%"
+              theme='light'
               language={getLanguage(currentFile.fileName)}
               original={originalValue}
               modified={modifiedValue}
@@ -356,6 +385,22 @@ export function CodeMergeModal({
                 renderSideBySide: true,
                 originalEditable: false,
                 automaticLayout: true
+              }}
+              onMount={(editor) => {
+                const modifiedEditor = editor.getModifiedEditor()
+                const disposable = modifiedEditor.onDidChangeModelContent(() => {
+                  const fileName = currentFileNameRef.current
+                  if (!fileName) return
+                  const value = modifiedEditor.getValue()
+                  setMergedFiles(prev => {
+                    if (prev.get(fileName) === value) return prev
+                    const newMap = new Map(prev)
+                    newMap.set(fileName, value)
+                    return newMap
+                  })
+                })
+                // 组件卸载或重渲染时清理旧监听
+                return () => disposable.dispose()
               }}
               beforeMount={(monaco) => {
                 // ✅ 1. 正确开启 TSX
