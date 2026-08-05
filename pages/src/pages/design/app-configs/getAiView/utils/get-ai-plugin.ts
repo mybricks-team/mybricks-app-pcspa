@@ -2,7 +2,7 @@ import AIPlugin, { IDBHistory } from '@mybricks/plugin-ai'
 import skills from './skills'
 import { getDependenciesConfig } from './manifest'
 import { onRequest } from '@/utils/aiRequest'
-import { getAISetting } from "../../../hooks/useSetting/storage";
+import { getAISetting } from "../../../hooks/useAISetting/storage";
 
 const COMLIB_NAMESPACE_LITE = 'mybricks.normal-pc-lite'
 const COMLIB_NAMESPACE_AI = 'mybricks.ai-comlib-pc'
