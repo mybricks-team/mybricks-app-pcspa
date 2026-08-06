@@ -23,15 +23,27 @@ async function loadUMD(params: LoadUMDParams) {
     const _sandbox = sandbox || {};
 
     // 2. 代理：读可穿透到真实 window，写只留在沙箱
+    // 缓存已绑定的函数，避免每次属性访问都创建新的 bind 包装
+    const boundFnCache = new WeakMap<Function, Function>();
+
     const proxyGlobal = new Proxy(_sandbox, {
       get(target, prop) {
         if (prop in target) {
           return target[prop];
         }
         // 模拟真实 window 上的属性（如 document、setTimeout）
-        const value = window[prop];
-        // 若是函数，直接返回，不做特殊绑定（绝大多数情况不影响）
-        return value;
+        const rawValue = (window as any)[prop];
+        if (typeof rawValue === 'function') {
+          // 原生函数必须绑定 window，否则以 proxyGlobal 作为 this 调用时会报
+          // "TypeError: Illegal invocation"（如 antd 内部对 setTimeout、addEventListener 等的调用）
+          let bound = boundFnCache.get(rawValue);
+          if (!bound) {
+            bound = rawValue.bind(window);
+            boundFnCache.set(rawValue, bound);
+          }
+          return bound;
+        }
+        return rawValue;
       },
       set(target, prop, value) {
         target[prop] = value;
