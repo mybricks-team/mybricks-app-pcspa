@@ -39,6 +39,8 @@ module.exports = {
     alias: {
       '@': path.resolve(__dirname, '../../../src'),
       '@mybricks/plugin-ai': path.resolve(__dirname, '../../../../../plugin-ai/packages/plugin/src/index'),
+      "@mybricks/agent": path.resolve(__dirname, '../../../../../plugin-ai/packages/agent/src/index.ts'),
+      "@mybricks/request": path.resolve(__dirname, '../../../../../plugin-ai/packages/request/src/index.ts'),
       '@mybricks/sdk-for-app': path.resolve(__dirname, '../../../../../sdk-for-app/src')
     },
   },
