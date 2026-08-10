@@ -71,6 +71,8 @@ function getDesignerParams(args, { defaultModel }) {
 const getAiView = (enableAI, option) => {
   const { model: defaultModel, designerRef } = option ?? {};
 
+  console.log('enableAI', enableAI)
+
   if (enableAI) {
     return {
       ...aiViewConfig,

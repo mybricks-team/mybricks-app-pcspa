@@ -38,6 +38,7 @@ module.exports = {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
       '@': path.resolve(__dirname, '../../../src'),
+      '@mybricks/plugin-ai': path.resolve(__dirname, '../../../../../plugin-ai/packages/plugin/src/index'),
     },
   },
   externals: [

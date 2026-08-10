@@ -42,6 +42,7 @@ import { blobToBase64 } from "@/utils/blobToBase64";
 // import { render as renderUI } from '@mybricks/render-web'
 
 import { EnumLocale, getLocaleLang } from "../../setting/App/I18nConfig/utils";
+import AIPlugin from './getAiView/utils/get-ai-plugin'
 
 import { compareVersionLatest } from "../utils/saveContent";
 
@@ -341,6 +342,13 @@ export default function appConfig(
           ctx.i18nUsedIdList = ids;
         },
       }),
+      AIPlugin({
+        user: {
+          name: appData.user.name || appData.user.email || "user",
+          avatar: appData.user.avatar
+        },
+        key: ctx.fileId,
+      }),
       ...remotePlugins,
       themePlugin.use({ sdk: appData }),
       ...(ctx.isPreview
@@ -439,9 +447,15 @@ export default function appConfig(
     //   })
     // }),
     comLibAdder: appData.comLibAdder(ctx),
+    // comLibLoader: appData.comLibLoader({
+    //   comlibs: ctx.comlibs
+    // }),
     comLibLoader: appData.comLibLoader({
-      comlibs: ctx.comlibs
+      comlibs: ['http://localhost:20000/comlib.js']
     }),
+    // comlibLoader: async () => {
+    //   return Promise.resolve(['http://localhost:20000/comlib.js'])
+    // },
     pageContentLoader() {
       //加载页面内容
       return new Promise(async (resolve, reject) => {

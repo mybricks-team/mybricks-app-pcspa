@@ -933,7 +933,7 @@ export default function MyDesigner({ appData: originAppData }) {
   /** 监听 auto-publish 事件 */
   useEffect(() => {
     const handler = async (event: MessageEvent) => {
-      console.log('designer receive message', event.data)
+      // console.log('designer receive message', event.data)
       if (event.data?.action === 'auto-publish') {
         try {
           const res = await publish(event.data.data)
