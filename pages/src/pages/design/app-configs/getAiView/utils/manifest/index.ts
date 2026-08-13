@@ -4,6 +4,7 @@ import type { AIConfigManifestDependency } from '@/types/aiConfigManifest';
 export const DEPENDENCIES_MAP_KEY = '__componentRuntimeDependencies__'
 
 // 当没有注入依赖时，使用的默认附加库。
+// 导出源代码时用，同步ai插件里的默认附加库
 const PRESET_ADDON_LIBS = [
   {
     name: 'antd',
@@ -34,9 +35,9 @@ const PRESET_ADDON_LIBS = [
 
 export async function preloadDependencies (dependencies: AIConfigManifestDependency[]) {
   const arr = dependencies.reduce((acc, dep) => {
-    acc = acc.concat(dep.umd)
+    acc = acc.concat(dep.umd.map((url) => ({ url, libraryName: dep.libraryName })))
     return acc
-  }, [])
+  }, [] as Array<{ url: string; libraryName: string }>)
   const res = await loadUMDS(arr)
   window[DEPENDENCIES_MAP_KEY] = res
   return res
@@ -46,13 +47,25 @@ export function getDependenciesConfig (dependencies: AIConfigManifestDependency[
   const dependenciesMap = window[DEPENDENCIES_MAP_KEY]
   const result = {}
   dependencies?.forEach((dep) => {
-    const module = dependenciesMap[dep.libraryName]
-    if (module) {
+    const dependencie = dependenciesMap[dep.libraryName]
+    if (dependencie) {
       result[dep.name] = {
         version: dep.version,
         readme: dep.readme,
-        module,
+        module: dependencie,
       }
+
+      if (dep.modules) {
+        dep.modules.forEach((module) => {
+          try {
+            result[module.modulePath] = dependencie[module.umdPath]
+          } catch (error) {
+            console.error('[依赖模块获取失败]', error)
+          }
+        })
+      }
+    } else {
+      console.error('[依赖获取失败]', dep.libraryName)
     }
   })
 

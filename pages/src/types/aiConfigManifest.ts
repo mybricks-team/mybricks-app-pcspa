@@ -20,6 +20,13 @@ export interface AIConfigManifestDependency {
   umd: string[];
   css?: string[];
   readme?: string;
+  modules?: AIConfigManifestModule[];
+}
+
+export interface AIConfigManifestModule {
+  modulePath: string;
+  umdPath: string;
+  readme?: string;
 }
 
 export interface AIConfigManifestRules {

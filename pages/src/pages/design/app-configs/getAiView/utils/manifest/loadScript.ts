@@ -8,7 +8,7 @@ interface LoadUMDParams {
 
 interface LoadUMDOptions {
   // 库名
-  name: string;
+  name?: string;
   // UMD 库的全局变量名
   libraryName?: string;
 }
@@ -55,7 +55,14 @@ async function loadUMD(params: LoadUMDParams) {
     const response = await fetch(url);
     const scriptText = await response.text();
 
-    const wrappedCode = `var define = undefined;\n${scriptText}`;
+    // 部分库（如 Rollup 打包的 supabase）以 `var <libraryName> = (function(){...})()` 形式发布，
+    // 执行后结果只停留在函数体局部变量，不会挂到 window/this 沙箱上，导致后续依赖注入失败。
+    // 这里在脚本末尾追加一段，把同名的局部变量补挂到沙箱全局对象上。
+    const exposeCode = libraryName
+      ? `;(function(){ var __umdExposeValue__; try { __umdExposeValue__ = typeof ${libraryName} !== 'undefined' ? ${libraryName} : undefined; } catch (e) {} if (typeof globalThis[${JSON.stringify(libraryName)}] === 'undefined' && __umdExposeValue__ !== undefined) { globalThis[${JSON.stringify(libraryName)}] = __umdExposeValue__; } })();`
+      : '';
+
+    const wrappedCode = `var define = undefined;\n${scriptText}\n${exposeCode}`;
     const fn = new Function('window', 'self', 'globalThis', wrappedCode);
 
     // 执行时将 this 也指向 proxyGlobal，确保 UMD 里 this 即沙箱
@@ -76,12 +83,17 @@ async function loadUMD(params: LoadUMDParams) {
 }
 
 // 批量加载
-async function loadUMDS(urls: string[]) {
+async function loadUMDS(urls: Array<{ url: string; libraryName?: string }>) {
   const sandbox = {};
 
   const loadNext = async (index: number): Promise<void> => {
     if (index >= urls.length) return;
-    await loadUMD({ url: urls[index], sandbox });
+    const item = urls[index];
+    await loadUMD({
+      url: item.url,
+      sandbox,
+      options: { name: item.libraryName, libraryName: item.libraryName },
+    });
     await loadNext(index + 1);
   };
 
