@@ -43,6 +43,22 @@ export async function preloadDependencies (dependencies: AIConfigManifestDepende
   return res
 }
 
+/**
+ * 从依赖模块对象中按 umdPath 取值。
+ * umdPath 形如 'antd.locales.zh_CN'，也可能以 'window.' 开头（需要去掉）；
+ */
+function getModuleValueByPath (module: any, umdPath: string) {
+  if (!umdPath) return module
+
+  // 去掉 window.
+  const path = umdPath.replace(/^window\./i, '')
+  if (!path) return window
+
+  const keys = path.split('.').filter(Boolean)
+
+  return keys.reduce((acc, key) => (acc == null ? undefined : acc[key]), module)
+}
+
 export function getDependenciesConfig (dependencies: AIConfigManifestDependency[]) {
   const dependenciesMap = window[DEPENDENCIES_MAP_KEY]
   const result = {}
@@ -55,21 +71,26 @@ export function getDependenciesConfig (dependencies: AIConfigManifestDependency[
         module: dependencie,
       }
 
-      // if (dep.modules) {
-      //   dep.modules.forEach((module) => {
-      //     try {
-      //       result[module.modulePath] = dependencie[module.umdPath]
-      //     } catch (error) {
-      //       console.error('[依赖模块获取失败]', error)
-      //     }
-      //   })
-      // }
+      if (dep.modules) {
+        dep.modules.forEach((module) => {
+          try {
+            result[module.modulePath] = {
+              version: dep.version,
+              readme: module.readme,
+              module: getModuleValueByPath(dependenciesMap, module.umdPath),
+            }
+          } catch (error) {
+            console.error('[依赖模块获取失败]', error)
+          }
+        })
+      }
     } else {
       console.error('[依赖获取失败]', dep.libraryName)
     }
   })
 
   if (Object.keys(result).length) {
+    console.log('[依赖模块获取成功]', result)
     return () => result
   }
   return undefined
