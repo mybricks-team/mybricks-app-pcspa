@@ -55,15 +55,15 @@ export function getDependenciesConfig (dependencies: AIConfigManifestDependency[
         module: dependencie,
       }
 
-      if (dep.modules) {
-        dep.modules.forEach((module) => {
-          try {
-            result[module.modulePath] = dependencie[module.umdPath]
-          } catch (error) {
-            console.error('[依赖模块获取失败]', error)
-          }
-        })
-      }
+      // if (dep.modules) {
+      //   dep.modules.forEach((module) => {
+      //     try {
+      //       result[module.modulePath] = dependencie[module.umdPath]
+      //     } catch (error) {
+      //       console.error('[依赖模块获取失败]', error)
+      //     }
+      //   })
+      // }
     } else {
       console.error('[依赖获取失败]', dep.libraryName)
     }
