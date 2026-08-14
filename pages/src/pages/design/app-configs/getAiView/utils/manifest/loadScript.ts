@@ -13,6 +13,10 @@ interface LoadUMDOptions {
   libraryName?: string;
 }
 
+const DEFAULT_SANDBOX = {
+  dayjs: (window as any).dayjs,
+}
+
 // 单个加载
 async function loadUMD(params: LoadUMDParams) {
   const { url, options, sandbox } = params;
@@ -20,7 +24,7 @@ async function loadUMD(params: LoadUMDParams) {
 
   try {
     // 1. 沙箱全局对象
-    const _sandbox = sandbox || {};
+    const _sandbox = sandbox || DEFAULT_SANDBOX;
 
     // 2. 代理：读可穿透到真实 window，写只留在沙箱
     // 缓存已绑定的函数，避免每次属性访问都创建新的 bind 包装
@@ -84,7 +88,7 @@ async function loadUMD(params: LoadUMDParams) {
 
 // 批量加载
 async function loadUMDS(urls: Array<{ url: string; libraryName?: string }>) {
-  const sandbox = {};
+  const sandbox = DEFAULT_SANDBOX;
 
   const loadNext = async (index: number): Promise<void> => {
     if (index >= urls.length) return;

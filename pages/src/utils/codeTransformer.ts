@@ -295,6 +295,20 @@ export class CodeTransformer {
     });
   }
 
+  private genExternals(dependencies: AIConfigManifestDependency[]) {
+    return dependencies.reduce((acc, dependency) => {
+      acc.push({
+        name: dependency.name, libraryName: dependency.libraryName,
+      });
+      if (dependency.modules) {
+        acc.push(...dependency.modules.map((module) => ({
+          name: module.modulePath, libraryName: module.umdPath,
+        })));
+      }
+      return acc;
+    }, []);
+  }
+
   /**
    * 向 webpack.config.js 中注入依赖项。
    */
@@ -303,10 +317,7 @@ export class CodeTransformer {
       const ast = this.parseCode(file.content);
       const scripts = dependencies.flatMap((dependency) => dependency.umd ?? []);
       const css = dependencies.flatMap((dependency) => dependency.css ?? []);
-      const externals = dependencies.map((dependency) => ({
-        name: dependency.name,
-        libraryName: dependency.libraryName,
-      }));
+      const externals = this.genExternals(dependencies);
 
       const isPropertyMatch = (property: t.ObjectProperty | t.ObjectMethod | t.SpreadElement, name: string) => {
         if (!t.isObjectProperty(property)) return false;
@@ -395,7 +406,7 @@ export class CodeTransformer {
           if (!firstArg || !t.isObjectExpression(firstArg)) return;
 
           mergeArrayProperty(firstArg, 'scripts', scripts);
-          mergeArrayProperty(firstArg, 'css', css);
+          mergeArrayProperty(firstArg, 'links', css);
         },
         ExportDefaultDeclaration(path) {
           if (!t.isObjectExpression(path.node.declaration)) return;
@@ -430,18 +441,12 @@ export class CodeTransformer {
    */
   private injectGlobalDTS(file: CodeFile, dependencies: AIConfigManifestDependency[]) {
     try {
-      const declarations = dependencies.flatMap((dependency) => {
+      const externals = this.genExternals(dependencies);
+      const declarations = externals.flatMap((dependency) => {
         const result: string[] = [];
 
         if (!file.content.includes(`declare module '${dependency.name}'`)) {
           result.push(`declare module '${dependency.name}';`);
-        }
-
-        if (
-          dependency.libraryName &&
-          !file.content.includes(`declare const ${dependency.libraryName}: any;`)
-        ) {
-          result.push(`declare const ${dependency.libraryName}: any;`);
         }
 
         return result;

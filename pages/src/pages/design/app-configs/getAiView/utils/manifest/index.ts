@@ -3,8 +3,9 @@ import type { AIConfigManifestDependency } from '@/types/aiConfigManifest';
 
 export const DEPENDENCIES_MAP_KEY = '__componentRuntimeDependencies__'
 
-// 当没有注入依赖时，使用的默认附加库。
-// 导出源代码时用，同步ai插件里的默认附加库
+// 默认附加库
+// - 运行时不需要注入，mybricks默认有
+// - 导出源代码时，壳工程需要注入
 const PRESET_ADDON_LIBS = [
   {
     name: 'antd',
@@ -33,6 +34,7 @@ const PRESET_ADDON_LIBS = [
   // }
 ]
 
+// 预加载所有依赖库
 export async function preloadDependencies (dependencies: AIConfigManifestDependency[]) {
   const arr = dependencies.reduce((acc, dep) => {
     acc = acc.concat(dep.umd.map((url) => ({ url, libraryName: dep.libraryName })))
@@ -59,6 +61,7 @@ function getModuleValueByPath (module: any, umdPath: string) {
   return keys.reduce((acc, key) => (acc == null ? undefined : acc[key]), module)
 }
 
+// 生成AI插件依赖库配置
 export function getDependenciesConfig (dependencies: AIConfigManifestDependency[]) {
   const dependenciesMap = window[DEPENDENCIES_MAP_KEY]
   const result = {}
@@ -88,14 +91,15 @@ export function getDependenciesConfig (dependencies: AIConfigManifestDependency[
       console.error('[依赖获取失败]', dep.libraryName)
     }
   })
+  console.log('[注入依赖]', result)
 
   if (Object.keys(result).length) {
-    console.log('[依赖模块获取成功]', result)
     return () => result
   }
   return undefined
 }
 
+// 获取所有依赖库的css文件
 export function getDependenciesCSS (dependencies: AIConfigManifestDependency[]) {
   const css =  dependencies?.reduce((acc, dep) => {
     acc = acc.concat(dep.css)
@@ -104,7 +108,7 @@ export function getDependenciesCSS (dependencies: AIConfigManifestDependency[]) 
   return css || []
 }
 
-// 获取所有依赖库，包括基础库和预设库/注入的依赖库
+// 获取所有依赖库
 export function getAllDependencies (dependencies: AIConfigManifestDependency[]) {
   const libs =  dependencies?.length ? dependencies : PRESET_ADDON_LIBS
   return libs

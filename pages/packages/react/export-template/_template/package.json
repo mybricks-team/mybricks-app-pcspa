@@ -15,8 +15,7 @@
   "dependencies": {
     "@mybricks/ai-render": "^0.0.12",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "dayjs": "^1.11.19"
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

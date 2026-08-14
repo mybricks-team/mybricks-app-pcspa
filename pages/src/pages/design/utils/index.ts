@@ -5,21 +5,31 @@ export function isValidPascalCase(name: string) {
   return pattern.test(name);
 }
 
-function isEmptyObj (obj: any) {
+function isEmptyObj(obj: any) {
   if (!obj) return true
   if (typeof obj === 'object' && Object.keys(obj).length === 0) return true
   return false
 }
 
-function parseObject (str: string | object | undefined) {
+function parseObject(str: string | object | undefined) {
   if (!str) return null
   const result = typeof str === 'string' ? JSON.parse(str) : str
   return result || null
 }
 
-export function getAppAiConfig (allConfig: any) {
+export function getAppAiConfig(allConfig: any) {
   const appConfig = parseObject(allConfig[APP_NAME]?.config)
   const groupConfig = parseObject(Object.values<any>(allConfig).find(i => i?.appNamespace?.startsWith(`${APP_NAME}@group`))?.config)
   const aiConfig = isEmptyObj(groupConfig?.ai) ? appConfig?.ai : groupConfig?.ai
-  return JSON.parse(decodeURIComponent(typeof aiConfig === 'string' ? aiConfig : JSON.stringify(aiConfig)))
+  let aiConfigStr = typeof aiConfig === 'string' ? aiConfig : JSON.stringify(aiConfig)
+  try {
+    aiConfigStr = decodeURIComponent(aiConfigStr)
+  } catch (error) {
+  }
+  try {
+    const config = JSON.parse(aiConfigStr)
+    return config || {}
+  } catch (error) {
+    return {}
+  }
 }

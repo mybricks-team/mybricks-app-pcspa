@@ -59,6 +59,7 @@ module.exports = {
         root: 'ReactDOM',
       },
       moment: 'moment',
+      dayjs: 'dayjs',
       antd: 'antd',
       '@ant-design/icons': 'icons',
       "@babel/standalone": "Babel",
