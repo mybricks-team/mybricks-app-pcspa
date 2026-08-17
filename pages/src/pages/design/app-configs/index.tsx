@@ -53,7 +53,7 @@ import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
 import cloudTpt from "./cloudTpt";
 // import nocobaseConfigPlugin from "./nocobase";
 import manateeConfigPlugin  from './manateeai'
-import { getDependenciesCSS } from './getAiView/utils/manifest'
+import { getDependenciesCSS } from '@/pages/design/utils/aiConfigManifest'
 
 // const getComs = () => {
 //   const comDefs = {}

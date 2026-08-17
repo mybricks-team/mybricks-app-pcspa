@@ -1,6 +1,6 @@
 import AIPlugin, { IDBHistory } from '@mybricks/plugin-ai'
 import skills from './skills'
-import { getDependenciesConfig } from './manifest'
+import { getDependenciesConfig } from '@/pages/design/utils/aiConfigManifest'
 import { onRequest } from '@/utils/aiRequest'
 import { getAISetting } from "../../../hooks/useAISetting/storage";
 

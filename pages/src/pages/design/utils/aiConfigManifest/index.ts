@@ -11,7 +11,7 @@ const PRESET_ADDON_LIBS = [
     name: 'antd',
     version: '5.21.4',
     libraryName: 'antd',
-    umd: ['https://unpkg.com/antd@5.21.4/dist/antd.min.js'],
+    umd: ['https://unpkg.com/antd@5.21.4/dist/antd-with-locales.min.js'],
     css: ['https://unpkg.com/antd@5.21.4/dist/reset.css']
   },
   {
@@ -20,18 +20,19 @@ const PRESET_ADDON_LIBS = [
     libraryName: 'icons',
     umd: ['https://unpkg.com/@ant-design/icons@5.5.0/dist/index.umd.js'],
   },
-  // {
-  //   name: 'echarts',
-  //   version: '5.6.0',
-  //   libraryName: 'echarts',
-  //   umd: ['https://unpkg.com/echarts@5.6.0/dist/echarts.min.js']
-  // },
-  // {
-  //   name: 'echarts-for-react',
-  //   version: '5.6.0',
-  //   libraryName: 'EChartsForReact',
-  //   umd: ['http://localhost:9001/public/publish/echarts/5.6.0/echarts-for-react.min.js']
-  // }
+  {
+    name: 'echarts',
+    version: '5.6.0',
+    libraryName: 'echarts',
+    umd: ['https://unpkg.com/echarts@5.6.0/dist/echarts.min.js']
+  },
+  {
+    name: 'echarts-for-react',
+    version: '5.6.0',
+    libraryName: 'EChartsForReact',
+    // 官方没有提供umd，暂时用work的吧
+    umd: ['http://work.manateeai.com/mybricks-app-pcspa-vibe/public/publish/echarts/5.6.0/echarts-for-react.min.js']
+  }
 ]
 
 // 预加载所有依赖库
@@ -61,7 +62,7 @@ function getModuleValueByPath (module: any, umdPath: string) {
   return keys.reduce((acc, key) => (acc == null ? undefined : acc[key]), module)
 }
 
-// 生成AI插件依赖库配置
+// 生成依赖库配置（AI插件）
 export function getDependenciesConfig (dependencies: AIConfigManifestDependency[]) {
   const dependenciesMap = window[DEPENDENCIES_MAP_KEY]
   const result = {}
@@ -99,7 +100,7 @@ export function getDependenciesConfig (dependencies: AIConfigManifestDependency[
   return undefined
 }
 
-// 获取所有依赖库的css文件
+// 获取所有依赖库的css文件（appConfig）
 export function getDependenciesCSS (dependencies: AIConfigManifestDependency[]) {
   const css =  dependencies?.reduce((acc, dep) => {
     acc = acc.concat(dep.css)
@@ -108,8 +109,46 @@ export function getDependenciesCSS (dependencies: AIConfigManifestDependency[]) 
   return css || []
 }
 
-// 获取所有依赖库
+// 获取所有依赖库（导出源代码）
 export function getAllDependencies (dependencies: AIConfigManifestDependency[]) {
   const libs =  dependencies?.length ? dependencies : PRESET_ADDON_LIBS
   return libs
+}
+
+// 从 AI 配置依赖中提取 scripts / styles / external / zipAssets（发布）
+export function buildAssetsFromDependencies(
+  deps: AIConfigManifestDependency[],
+): {
+  external: Record<string, string>
+  scripts: string[]
+  styles: string[]
+  zipAssets: Array<{ zipPath: string; fetchUrl: string }>
+} {
+  const external: Record<string, string> = {}
+  const scripts: string[] = []
+  const styles: string[] = []
+  const zipAssets: Array<{ zipPath: string; fetchUrl: string }> = []
+
+  for (const dep of deps) {
+    if (dep.name && dep.libraryName) {
+      external[dep.name] = dep.libraryName
+      if (dep.modules?.length) {
+        for (const module of dep.modules) {
+          external[module.modulePath] = module.umdPath
+        }
+      }
+    }
+    for (const url of dep.umd || []) {
+      scripts.push(url)
+      const fileName = url.split('/').pop()
+      zipAssets.push({ zipPath: `assets/${fileName}`, fetchUrl: url })
+    }
+    for (const url of dep.css || []) {
+      styles.push(url)
+      const fileName = url.split('/').pop()
+      zipAssets.push({ zipPath: `assets/${fileName}`, fetchUrl: url })
+    }
+  }
+
+  return { external, scripts, styles, zipAssets }
 }
