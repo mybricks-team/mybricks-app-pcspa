@@ -427,6 +427,7 @@ export default function appConfig(
         config: {
           enabledActionTags: ctx?.appConfig?.ai?.enabledActionTags
         },
+        fileId: ctx.fileId,
         manifest: ctx?.appConfig?.ai
       }),
       // ...remotePlugins,

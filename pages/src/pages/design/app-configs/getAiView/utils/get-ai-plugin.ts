@@ -16,7 +16,7 @@ function getGenerationStrategy(): 'ai' | 'atomic' {
   return hasLite && hasAi ? 'ai' : 'atomic'
 }
 
-export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config, plugins = [], manifest }: any) => {
+export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config, plugins = [], manifest, fileId }: any) => {
   const designRules = manifest?.rules?.designRules
   const codeRules = manifest?.rules?.codeRules
 
@@ -47,7 +47,7 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
     deviceType: 'desktop',
     config,
     key,
-    llm:{
+    llm: {
       providers: effectiveProviders,
     },
     plugins,
@@ -87,7 +87,16 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
       developeGuide: codeRules ? {
         firstOfAll: codeRules
       } : undefined,
-    }
+    },
+    remoteAgent: {
+      type: 'websocket',
+      baseUrl: 'http://112.17.139.222:8106', // 可省略，默认此地址
+      apiKey: 'ak_6rfy7Drr7TNoBT8xzO_fWbTIs8OrVPrrQ2hCGrCRu_g',                       // 必填：智能体平台 Bearer token
+      workspaceId: 'conversation-id',
+      agentCode: 'frontend_code_assistant',           // 可选；留空走默认智能体
+      clientType: 'mybricks-designer',        // 可选
+      meta: { fileId },            // 可选：写入会话 meta 供审计
+    },
     // componentRuntime: {
     //   chat: {
     //     agent: {

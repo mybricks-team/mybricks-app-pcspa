@@ -150,7 +150,7 @@ export default function MyDesigner({ appData: originAppData }) {
         typeof originConfig === 'string'
           ? JSON.parse(originConfig)
           : originConfig
-      
+
       try {
         config.ai = getAppAiConfig(appData.config)
       } catch (error) {
@@ -980,7 +980,7 @@ export default function MyDesigner({ appData: originAppData }) {
 
   useEffect(() => {
     /** 供外部调用，模拟一次编辑以触发保存按钮的未保存状态（* 号） */
-    ;(window as any)._mybricksOnEdit_ = (info?: { title?: string; [key: string]: any }) => {
+    ; (window as any)._mybricksOnEdit_ = (info?: { title?: string;[key: string]: any }) => {
       onEdit({ title: '手动触发编辑', ...info })
     }
     return () => {
@@ -989,7 +989,7 @@ export default function MyDesigner({ appData: originAppData }) {
   }, [onEdit])
 
   useEffect(() => {
-    ;(window as any).__vibeCodingCallbacks__ = {
+    ; (window as any).__vibeCodingCallbacks__ = {
       onStart() {
         // vibe coding 开始
       },
@@ -1032,7 +1032,7 @@ export default function MyDesigner({ appData: originAppData }) {
                   const jsDoc = JSON.parse(decodeURIComponent(entryFile.jsDocMap))
                   newName = jsDoc.default.title
                 }
-              } catch {}
+              } catch { }
             }
 
             // 退而从 README.md 的 compiled.default.title 获取
@@ -1086,9 +1086,9 @@ export default function MyDesigner({ appData: originAppData }) {
           const res = await publish(event.data.data)
           console.log('自动发布结果', res)
           const data = {
-                fileId: ctx.fileId,
-                ...(res || {})
-              }
+            fileId: ctx.fileId,
+            ...(res || {})
+          }
           if (res && res.code === 1) {
             window.parent.postMessage({ action: 'publish-success', data }, '*')
           } else {
