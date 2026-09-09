@@ -68,6 +68,32 @@ import { getAppAiConfig } from './utils/index'
 const msgSaveKey = 'save'
 
 /**
+ * @description 将 designer.getCode() 的返回值归一化为 {fileName, source} 数组
+ * 兼容 [{path, content}]、[{fileName, source}]、{path: content} 三种形态
+ */
+const normalizeCodeFiles = (code: any): Array<{ fileName: string, source: string }> => {
+  if (!code) return []
+
+  if (Array.isArray(code)) {
+    return code
+      .map((f: any) => ({
+        fileName: f?.path ?? f?.fileName,
+        source: safeDecodeURIComponent(f?.content ?? f?.source ?? '')
+      }))
+      .filter((f) => !!f.fileName)
+  }
+
+  if (typeof code === 'object') {
+    return Object.entries(code).map(([path, content]) => ({
+      fileName: path,
+      source: safeDecodeURIComponent((content as any) ?? '')
+    }))
+  }
+
+  return []
+}
+
+/**
  * @description 获取当前应用setting
  * @returns object
  */
@@ -341,6 +367,8 @@ export default function MyDesigner({ appData: originAppData }) {
     switchActivity
     getPluginData
     loadContent
+    getCode: () => any
+    setCode: (params: { path: string, content: string }) => void
     toplView: { focusCom: (comId: string) => void }
   }>()
 
@@ -364,7 +392,7 @@ export default function MyDesigner({ appData: originAppData }) {
     if (ctx.debug && localStorage.getItem('__DEBUG_DESIGNER__')) {
       return localStorage.getItem('__DEBUG_DESIGNER__')
     }
-    // return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.943.t5/index.min.js'
+    // return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.976.t7/index.min.js'
     return appConfig.designer?.url || DESIGNER_STATIC_PATH
   }, [appConfig])
 
@@ -1278,6 +1306,26 @@ export default function MyDesigner({ appData: originAppData }) {
                       icon: branch_icon,
                       title: '代码合并',
                       onClick: async () => {
+                        // 获取当前文件中的源码（通过 designer 的 getCode）
+                        console.log('designerRef.current?.getCode()', designerRef.current?.getCode())
+                        const currentFilesData = normalizeCodeFiles(designerRef.current?.getCode())
+                        if (!currentFilesData?.length) {
+                          return message.warn('当前页面源代码为空!')
+                        }
+
+                        // 获取分支列表
+                        await getBranchInfoByMainFileId(ctx.fileId)
+                        if (!branchInfo || branchInfo.length === 0) {
+                          return message.warn('暂无可合并的分支!')
+                        }
+
+                        // 分支文件由弹窗内的分支选择器负责加载
+                        setCurrentFiles(currentFilesData)
+                        setBaseFiles(currentFilesData) // 暂时使用当前文件作为 base
+                        setCodeMergeModalVisible(true)
+                      }
+                      /* 旧实现：手动解析 dump JSON，getCode 不可用时放开注释即可回退
+                      onClick: async () => {
                         // 获取当前文件中的源码
                         const dumpJSON = designerRef.current?.dump()
                         const normalizeFile = (f: any) => ({
@@ -1301,6 +1349,7 @@ export default function MyDesigner({ appData: originAppData }) {
                         setBaseFiles(currentFilesData) // 暂时使用当前文件作为 base
                         setCodeMergeModalVisible(true)
                       }
+                      */
                     }
                   ]}
                   exportActions={[
@@ -1413,31 +1462,22 @@ export default function MyDesigner({ appData: originAppData }) {
         onConfirm={async (mergedFiles, branchId) => {
           try {
             setMergeBranchId(branchId)
-            // 获取当前 dump
-            const json = designerRef.current?.dump()
-            if (!json) {
-              throw new Error('无法获取当前设计器状态')
-            }
 
-            // 更新源码文件
-            const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
-            const comId = Object.keys(coms)[0]
-            if (comId && (window as any)._forApp_[comId]) {
-              // 通过 _forApp_ 更新文件
-              mergedFiles.forEach(file => {
-                (window as any)._forApp_[comId].updateFile(file.fileName, file.source)
-              })
-            }
+            // 通过 designer 的 setCode 更新源码文件
+            mergedFiles.forEach(file => {
+              console.log(file)
+              designerRef.current?.setCode({ path: file.fileName, content: decodeURIComponent(file.source) })
+            })
 
             // 保存
-            setSaveLoading(true)
-            await save()
-            message.success('代码合并并保存成功!')
+            // setSaveLoading(true)
+            // await save()
+            message.success('代码已合并，请检查并保存')
             setCodeMergeModalVisible(false)
           } catch (e) {
             message.error('合并保存失败: ' + (e as Error).message)
           } finally {
-            setSaveLoading(false)
+            // setSaveLoading(false)
           }
         }}
         currentFiles={currentFiles}

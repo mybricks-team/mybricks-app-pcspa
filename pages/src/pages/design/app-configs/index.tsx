@@ -548,7 +548,7 @@ export default function appConfig(
           title: "PC-AI组件库",
           type: "com_lib",
           namespace: "mybricks.normal-pc-lite",
-          editJs: './public/comlibs/0714/edit.js',
+          editJs: './public/comlibs/vibe-coding/2.1.25/edit.js',
         };
         const existing = baseComlibs.find(
           (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
@@ -560,7 +560,7 @@ export default function appConfig(
               : lib
           );
         }
-        return baseComlibs.concat(pcAiComlib);
+        return baseComlibs.concat(pcAiComlib, 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/comlib/2.1.25/edit.8c602ef7083ddda5.js');
       })(),
     }),
     pageContentLoader() {
