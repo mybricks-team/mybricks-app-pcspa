@@ -7,7 +7,8 @@ const formatConfig = (data: any) => {
     if (!data) {
       return undefined;
     }
-    return JSON.stringify(data);
+    const strData = typeof data === 'string' ? data : JSON.stringify(data);
+    return decodeURIComponent(strData);
   } catch (error) {
     return undefined;
   }
@@ -34,7 +35,7 @@ export default (props: TConfigProps) => {
       }
     }
     
-    await mergeUpdateConfig({ ai: parsedConfig || {} });
+    await mergeUpdateConfig({ ai: parsedConfig ? encodeURIComponent(JSON.stringify(parsedConfig)) : undefined });
     message.success('保存成功');
   };
 

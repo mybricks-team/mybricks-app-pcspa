@@ -8,6 +8,88 @@ import type {
 } from './getPublishSource'
 import { mockMybricksTesting } from './mockMybricksTesting'
 import API from '@mybricks/sdk-for-app/api'
+import type { AIConfigManifestDependency } from '@/types/aiConfigManifest'
+import { buildAssetsFromDependencies } from '@/pages/design/utils/aiConfigManifest'
+
+const createPreviewEnvReplacementPlugin = (babel: any) => {
+  const t = babel.types
+
+  return {
+    visitor: {
+      MemberExpression(path: any) {
+        if (path.matchesPattern('process.env.POPUP_VISIBLE')) {
+          path.replaceWith(t.booleanLiteral(false))
+        } else if (path.matchesPattern('process.env.POPUP_NODE')) {
+          path.replaceWith(
+            t.memberExpression(t.identifier('document'), t.identifier('body')),
+          )
+        } else {
+          return
+        }
+
+        const parentPath = path.parentPath
+        if (parentPath?.isBinaryExpression()) {
+          const result = parentPath.evaluate()
+          if (result.confident) {
+            parentPath.replaceWith(t.valueToNode(result.value))
+          }
+        }
+
+        if (parentPath?.isLogicalExpression()) {
+          const leftPath = parentPath.get('left')
+          if (leftPath.isBooleanLiteral()) {
+            const { operator, left, right } = parentPath.node
+            if (operator === '||') {
+              parentPath.replaceWith(left.value ? left : right)
+            } else if (operator === '&&') {
+              parentPath.replaceWith(left.value ? right : left)
+            }
+          }
+        }
+      },
+      IfStatement: {
+        exit(path: any) {
+          const testPath = path.get('test')
+          if (!testPath.isBooleanLiteral()) {
+            return
+          }
+
+          if (testPath.node.value) {
+            path.replaceWith(path.node.consequent)
+          } else if (path.node.alternate) {
+            path.replaceWith(path.node.alternate)
+          } else {
+            path.remove()
+          }
+        },
+      },
+    },
+  }
+}
+
+/**
+ * Preview code runs outside the editor popup runtime. Replace its injected
+ * environment values before compiling so generated code can run standalone.
+ */
+export const replacePreviewEnvVarsInCode = (code: string): string => {
+  const babel = typeof window === 'undefined' ? undefined : (window as any).Babel
+  if (!babel?.transform) {
+    return code
+  }
+
+  try {
+    const result = babel.transform(code, {
+      sourceType: 'module',
+      parserOpts: {
+        plugins: ['jsx', 'typescript'],
+      },
+      plugins: [createPreviewEnvReplacementPlugin],
+    })
+    return result.code || code
+  } catch {
+    return code
+  }
+}
 
 const uploadAssets = () => {
   // 上传cdn
@@ -16,18 +98,23 @@ const uploadAssets = () => {
   // shareId: string,
 }
 
-const PRE_SCRIPTS = [
-  `https://f2.eckwai.com/kos/nlav12333/web-assets/lib/react/18.2.0/react.production.min.js`,
-  `https://f2.eckwai.com/kos/nlav12333/web-assets/lib/react-dom/18.2.0/react-dom.production.min.js`,
+// 基础库（永远需要），与配置依赖无关
+const BASE_EXTERNAL = {
+  react: 'React',
+  'react-dom': 'ReactDOM',
+  dayjs: 'dayjs',
+  'react/jsx-runtime': 'react_jsx_runtime',
+}
+
+const BASE_SCRIPTS = (prefixUrl: string) => [
+  `${prefixUrl}/react/18.2.0/react.production.min.js`,
+  `${prefixUrl}/react-dom/18.2.0/react-dom.production.min.js`,
+  `${prefixUrl}/dayjs/1.11.13/dayjs.min.js`,
+  `${prefixUrl}/dayjs/1.11.13/locale/zh-cn.min.js`,
 ]
 
-/**
- * 下载 zip 包时使用的本地资源映射表
- * key: 在 zip 包内的相对路径（相对于 index.html）
- * value: 可被 fetch 下载的绝对 URL（当前服务的 /public/publish/... 静态路径）
- */
-const ZIP_LOCAL_ASSETS: Array<{ zipPath: string; fetchUrl: string }> = [
-  // React 18
+// ZIP 包中永远需要的基础资源（从本地静态文件 fetch）
+const BASE_ZIP_ASSETS: Array<{ zipPath: string; fetchUrl: string }> = [
   {
     zipPath: 'assets/react.production.min.js',
     fetchUrl: '/public/react@18.0.0.production.min.js',
@@ -36,7 +123,6 @@ const ZIP_LOCAL_ASSETS: Array<{ zipPath: string; fetchUrl: string }> = [
     zipPath: 'assets/react-dom.production.min.js',
     fetchUrl: '/public/react-dom@18.0.0.production.min.js',
   },
-  // dayjs
   {
     zipPath: 'assets/dayjs/1.11.13/dayjs.min.js',
     fetchUrl: '/public/publish/dayjs/1.11.13/dayjs.min.js',
@@ -45,6 +131,23 @@ const ZIP_LOCAL_ASSETS: Array<{ zipPath: string; fetchUrl: string }> = [
     zipPath: 'assets/dayjs/1.11.13/locale/zh-cn.min.js',
     fetchUrl: '/public/publish/dayjs/1.11.13/locale/zh-cn.min.js',
   },
+]
+
+const DEFAULT_SCRIPTS = (prefixUrl: string) => [
+  `${prefixUrl}/ant-design-icons/6.0.2/index.umd.min.js`,
+  `${prefixUrl}/antd/5.21.4/antd-with-locales.min.js`,
+  `${prefixUrl}/echarts/5.6.0/echarts.min.js`,
+  `${prefixUrl}/echarts/5.6.0/echarts-for-react.min.js`,
+]
+
+/**
+ * 下载 zip 包时使用的本地资源映射表 （无配置依赖时）
+ * key: 在 zip 包内的相对路径（相对于 index.html）
+ * value: 可被 fetch 下载的绝对 URL（当前服务的 /public/publish/... 静态路径）
+ * 无配置依赖时 ZIP 包的兜底资源（仅含基础库之外的部分）。
+ * 基础库资源见 BASE_ZIP_ASSETS，最终列表由 [...BASE_ZIP_ASSETS, ...DEFAULT_ZIP_ASSETS] 拼出。
+ */
+const DEFAULT_ZIP_ASSETS: Array<{ zipPath: string; fetchUrl: string }> = [
   // ant-design-icons
   {
     zipPath: 'assets/ant-design-icons/6.0.2/index.umd.min.js',
@@ -412,6 +515,7 @@ interface BuildVibePreviewHtmlParams {
   assetOwnerId: string
   vbDesignContext?: BizCenterContext
   enableVibeProxy?: boolean
+  dependencies?: AIConfigManifestDependency[]
 }
 
 export const loadBizCenterAssets = async (
@@ -426,14 +530,8 @@ export const loadBizCenterAssets = async (
     const { prefixUrl } = vbDesignContext
     return {
       scripts: [
-        `${prefixUrl}/react/18.2.0/react.production.min.js`,
-        `${prefixUrl}/react-dom/18.2.0/react-dom.production.min.js`,
-        `${prefixUrl}/dayjs/1.11.13/dayjs.min.js`,
-        `${prefixUrl}/dayjs/1.11.13/locale/zh-cn.min.js`,
-        `${prefixUrl}/ant-design-icons/6.0.2/index.umd.min.js`,
-        `${prefixUrl}/antd/5.21.4/antd-with-locales.min.js`,
-        `${prefixUrl}/echarts/5.6.0/echarts.min.js`,
-        `${prefixUrl}/echarts/5.6.0/echarts-for-react.min.js`,
+        ...BASE_SCRIPTS(prefixUrl),
+        ...DEFAULT_SCRIPTS(prefixUrl),
         // 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/dayjs/1.11.13/dayjs.min.js',
         // 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/dayjs/1.11.13/locale/zh-cn.min.js',
         // 'https://p4-ec.ecukwai.com/kos/nlav11092/vibe-coding/assets/ant-design-icons/6.0.2/index.umd.min.js',
@@ -494,9 +592,11 @@ export const loadBizCenterAssets = async (
 function buildCodeMap(source: VibePublishSourceItem): Record<string, string> {
   const codeMap = source.files.reduce(
     (acc, file) => {
-      acc[file.path] = file.content
-        .replace(`@mybricks/ai-render/testing`, `./mybricks-testing`)
-        .replace(`mybricks/testing`, `./mybricks-testing`)
+      acc[file.path] = replacePreviewEnvVarsInCode(
+        file.content
+          .replace(`@mybricks/ai-render/testing`, `./mybricks-testing`)
+          .replace(`mybricks/testing`, `./mybricks-testing`),
+      )
       if (file.path === 'index.jsx' || file.path === 'index.tsx') {
         acc[file.path] = `
         import {activate} from './mybricks-testing'
@@ -536,22 +636,39 @@ export const buildVibePreviewHtml = async ({
   assetOwnerId,
   vbDesignContext,
   enableVibeProxy = true,
+  dependencies = [],
 }: BuildVibePreviewHtmlParams): Promise<string> => {
   const codeMap = buildCodeMap(source)
   const compiler = new LCCompiler()
   const ctx = vbDesignContext
-  const dynamicAssets = await loadBizCenterAssets(ctx).catch(() => ({
-    scripts: [],
-    styles: [],
-    external: {},
-  }))
+  const hasCustomDeps = dependencies?.length > 0
+
+  // 从配置依赖中提取 assets
+  const { external: depExternal, scripts: depScripts, styles: depStyles } =
+    hasCustomDeps
+      ? buildAssetsFromDependencies(dependencies)
+      : { external: {}, scripts: [], styles: [] }
+
+  // 没传配置依赖时走原来的 biz center 兜底
+  const bizAssets = !hasCustomDeps
+    ? await loadBizCenterAssets(ctx).catch(() => ({
+        scripts: [],
+        styles: [],
+        external: {},
+      }))
+    : { scripts: [], styles: [], external: {} }
+
+  const extraExternal = {
+    ...BASE_EXTERNAL,
+    ...(hasCustomDeps ? depExternal : bizAssets.external),
+  }
 
   const bundleCode = await compiler.generateBundle(
     codeMap,
     { name: source.name || 'component', props: {} },
     {
       target,
-      extraExternal: dynamicAssets.external,
+      extraExternal,
     },
   )
 
@@ -562,10 +679,15 @@ export const buildVibePreviewHtml = async ({
     noHash: true
   });
 
-  console.log('[dynamicAssets]', dynamicAssets)
   console.log('[bundleJsUrl]', bundleJsUrl)
 
-  const headStyles = dynamicAssets.styles
+  const mergedStyles = hasCustomDeps ? depStyles : bizAssets.styles
+  const mergedScripts = [
+    ...BASE_SCRIPTS(ctx?.prefixUrl || ''),
+    ...(hasCustomDeps ? depScripts : bizAssets.scripts),
+  ]
+
+  const headStyles = mergedStyles
     .map(url => `<link rel="stylesheet" href="${url}" />`)
     .join('\n')
 
@@ -574,7 +696,7 @@ export const buildVibePreviewHtml = async ({
   //   ? `<style id="vibe-design-theme-vars">\n${themeStyleText}\n</style>`
   //   : ''
 
-  const headScripts = [...dynamicAssets.scripts]
+  const headScripts = mergedScripts
     .map(url => `<script src="${url}"></script>`)
     .join('\n')
 
@@ -628,45 +750,66 @@ export const buildVibePreviewZip = async ({
   chatId,
   assetOwnerId,
   vbDesignContext,
+  dependencies = [],
 }: {
   title: string
   source: VibePublishSourceItem
   chatId: number | string
   assetOwnerId: string
   vbDesignContext?: BizCenterContext
+  dependencies?: AIConfigManifestDependency[]
 }): Promise<Blob> => {
   const codeMap = buildCodeMap(source)
   const compiler = new LCCompiler()
+  const hasCustomDeps = dependencies?.length > 0
+
+  const { external: depExternal, zipAssets: depZipAssets } = hasCustomDeps
+    ? buildAssetsFromDependencies(dependencies)
+    : { external: {} as Record<string, string>, zipAssets: [] as Array<{ zipPath: string; fetchUrl: string }> }
+
+  // external: 基础 + 配置（或硬编码兜底）
+  const zipExternal = {
+    ...BASE_EXTERNAL,
+    ...(hasCustomDeps
+      ? depExternal
+      : {
+          antd: 'antd',
+          '@ant-design/icons': 'icons',
+          echarts: 'echarts',
+          'echarts-for-react': 'EChartsForReact',
+        }),
+  }
 
   const bundleCode = await compiler.generateBundle(
     codeMap,
     { name: source.name || 'component', props: {} },
-    {
-      extraExternal: {
-        react: 'React',
-        'react-dom': 'ReactDOM',
-        dayjs: 'dayjs',
-        antd: 'antd',
-        '@ant-design/icons': 'icons',
-        echarts: 'echarts',
-        'echarts-for-react': 'ReactECharts',
-      },
-    },
+    { extraExternal: zipExternal },
   )
 
-  // 构建 index.html —— 所有资源引用本地相对路径
-  const localStyles = [`<link rel="stylesheet" href="assets/antd/5.21.4/reset.min.css" />`]
-    .join('\n')
+  // 依赖的 js 和 css 文件（不含基础库）
+  const depJsFiles = depZipAssets.filter(
+    a => !a.fetchUrl.endsWith('.css'),
+  )
+  const depCssFiles = depZipAssets.filter(a =>
+    a.fetchUrl.endsWith('.css'),
+  )
+
+  // 构建 index.html —— 基础库 + 配置依赖（或兜底）
+  const localStyles = [
+    ...(hasCustomDeps
+      ? depCssFiles.map(
+          a => `<link rel="stylesheet" href="${a.zipPath}" />`,
+        )
+      : [`<link rel="stylesheet" href="assets/antd/5.21.4/reset.min.css" />`]),
+  ].join('\n')
 
   const localScripts = [
-    `<script src="assets/react.production.min.js"></script>`,
-    `<script src="assets/react-dom.production.min.js"></script>`,
-    `<script src="assets/dayjs/1.11.13/dayjs.min.js"></script>`,
-    `<script src="assets/dayjs/1.11.13/locale/zh-cn.min.js"></script>`,
-    `<script src="assets/ant-design-icons/6.0.2/index.umd.min.js"></script>`,
-    `<script src="assets/antd/5.21.4/antd-with-locales.min.js"></script>`,
-    `<script src="assets/echarts/5.6.0/echarts.min.js"></script>`,
-    `<script src="assets/echarts/5.6.0/echarts-for-react.min.js"></script>`,
+    // 基础库（永远需要）
+    ...BASE_ZIP_ASSETS.map(a => `<script src="${a.zipPath}"></script>`),
+    // 配置依赖（或兜底）
+    ...(hasCustomDeps
+      ? depJsFiles.map(a => `<script src="${a.zipPath}"></script>`)
+      : DEFAULT_ZIP_ASSETS.map(a => `<script src="${a.zipPath}"></script>`)),
   ].join('\n')
 
   const htmlContent = `<!DOCTYPE html>
@@ -697,12 +840,19 @@ export const buildVibePreviewZip = async ({
   zip.file('index.html', htmlContent)
   zip.file('assets/index.js', bundleCode)
 
-  // 并行下载所有本地资源并写入 zip
+  // 基础库资源 + 配置依赖（或兜底）
+  const allZipAssets = [
+    ...BASE_ZIP_ASSETS,
+    ...(hasCustomDeps ? depZipAssets : DEFAULT_ZIP_ASSETS),
+  ]
+
   await Promise.all(
-    ZIP_LOCAL_ASSETS.map(async ({ zipPath, fetchUrl }) => {
+    allZipAssets.map(async ({ zipPath, fetchUrl }) => {
       const resp = await fetch(fetchUrl)
       if (!resp.ok) {
-        console.warn(`[buildVibePreviewZip] failed to fetch asset: ${fetchUrl} (${resp.status})`)
+        console.warn(
+          `[buildVibePreviewZip] failed to fetch asset: ${fetchUrl} (${resp.status})`,
+        )
         return
       }
       const buffer = await resp.arrayBuffer()

@@ -37,6 +37,7 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
+      "less":"less",
       '@': path.resolve(__dirname, '../../../src'),
       '@mybricks/plugin-ai': path.resolve(__dirname, '../../../../../plugin-ai/packages/plugin/src/index'),
       '@mybricks/sdk-for-app': path.resolve(__dirname, '../../../../../sdk-for-app/src')
@@ -58,6 +59,7 @@ module.exports = {
         root: 'ReactDOM',
       },
       moment: 'moment',
+      dayjs: 'dayjs',
       antd: 'antd',
       '@ant-design/icons': 'icons',
       "@babel/standalone": "Babel",
@@ -87,6 +89,7 @@ module.exports = {
       },
       '@mybricks/sdk-for-ai': 'mybricks_sdk_for_ai',
       '@mybricks/ai-utils': 'mybricks_ai_utils',
+      "less":"less"
     },
   ],
   module: {

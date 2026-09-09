@@ -2,6 +2,12 @@
 // index.less - 海牛连接器样式（复用原有设计，增加 warning 状态）
 // ============================================================
 
+ :global {
+    [class^="pluginBg-"] {
+      z-index: 10 !important;
+    }
+  }
+
 .container {
   width: 320px;
   height: 100%;
@@ -40,7 +46,7 @@
   top: 3px;
   left: 0;
   height: 12px;
-  border-left: 3px solid #fa6400;
+  border-left: 3px solid var(--mybricks-color-primary);
   content: "";
 }
 
@@ -65,12 +71,12 @@
 .link {
   display: inline-block;
   margin-left: 4px;
-  color: #fa6400;
+  color: var(--mybricks-color-primary);
   text-decoration: none;
 }
 
 .link:hover {
-  color: #ff7a1a;
+  color: var(--mybricks-color-primary);
   text-decoration: underline;
 }
 
@@ -89,7 +95,6 @@
 .inputWrap {
   display: flex;
   align-items: center;
-  height: 28px;
   border: 1px solid #d9dce3;
   border-radius: 4px;
   background: #fff;
@@ -97,7 +102,7 @@
 }
 
 .inputWrap:focus-within {
-  border-color: #fa6400;
+  border-color: var(--mybricks-color-primary);
   box-shadow: 0 0 0 2px rgba(250, 100, 0, 0.12);
 }
 
@@ -128,28 +133,25 @@
 .selectWrap {
   display: flex;
   align-items: center;
-  height: 28px;
   border: 1px solid #d9dce3;
-  border-radius: 4px;
   background: #fff;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .selectWrap:focus-within {
-  border-color: #fa6400;
+  border-color: var(--mybricks-color-primary);
   box-shadow: 0 0 0 2px rgba(250, 100, 0, 0.12);
 }
 
 .select {
   flex: 1;
   min-width: 0;
-  height: 26px;
-  padding: 0 8px;
   border: none;
   outline: none;
   background: transparent;
   color: #1f2329;
   font-size: 12px;
+  border: 1px solid var(--mybricks-color-primary);
 }
 
 .error {
@@ -171,9 +173,9 @@
 .button {
   width: 100%;
   height: 28px;
-  border: 1px solid #fa6400;
+  border: 1px solid var(--mybricks-color-primary);
   border-radius: 4px;
-  background: #fa6400;
+  background: var(--mybricks-color-primary);
   color: #fff !important;
   cursor: pointer;
   font-size: 12px;
@@ -182,14 +184,14 @@
 }
 
 .button:hover {
-  border-color: #ff7a1a;
-  background: #ff7a1a;
+  border-color: var(--mybricks-color-primary);
+  background: var(--mybricks-color-primary);
   color: #fff !important;
 }
 
 .button:active {
-  border-color: #db5600;
-  background: #db5600;
+  border-color: var(--mybricks-color-primary);
+  background: var(--mybricks-color-primary);
   color: #fff !important;
 }
 
@@ -198,8 +200,8 @@
 }
 
 .button:disabled {
-  border-color: #ffb27a;
-  background: #ffb27a;
+  border-color: color-mix(in srgb, var(--mybricks-color-primary) 50%, #fff);
+  background: color-mix(in srgb, var(--mybricks-color-primary) 50%, #fff);
   color: #fff !important;
   cursor: not-allowed;
 }
@@ -268,11 +270,11 @@
 }
 
 .suffixIcon:hover {
-  color: #fa6400;
+  color: var(--mybricks-color-primary);
 }
 
 .suffixIcon:active {
-  color: #db5600;
+  color: var(--mybricks-color-primary);
 }
 
 .subTitle{
@@ -304,6 +306,5 @@
 }
 
 .multiSelect{
-  min-height: 40px !important;
   height: auto !important;  
 }

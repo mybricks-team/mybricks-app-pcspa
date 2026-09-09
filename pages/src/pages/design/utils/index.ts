@@ -1,22 +1,3 @@
-import API from "@mybricks/sdk-for-app/api";
-
-interface IAppSetting {
-  baseConfig?: {
-    isEncode?: string;
-  };
-}
-
-const APP_NAME = "mybricks-app-pc-cdm";
-
-/**
- * @description 获取当前应用setting
- * @returns object
- */
-export const getAppSetting = async () => {
-  const settings = await API.Setting.getSetting([APP_NAME]);
-  return settings[APP_NAME]?.config as IAppSetting;
-};
-
 /** 检查是否符合大驼峰命名规范 */
 export function isValidPascalCase(name: string) {
   // 大驼峰命名规范：每个单词的首字母大写，无空格或特殊字符
@@ -29,5 +10,34 @@ export const safeDecodeURIComponent = (str: string) => {
     return decodeURIComponent(str)
   } catch (e) {
     return str
+  }
+}
+
+function isEmptyObj(obj: any) {
+  if (!obj) return true
+  if (typeof obj === 'object' && Object.keys(obj).length === 0) return true
+  return false
+}
+
+function parseObject(str: string | object | undefined) {
+  if (!str) return null
+  const result = typeof str === 'string' ? JSON.parse(str) : str
+  return result || null
+}
+
+export function getAppAiConfig(allConfig: any) {
+  const appConfig = parseObject(allConfig[APP_NAME]?.config)
+  const groupConfig = parseObject(Object.values<any>(allConfig).find(i => i?.appNamespace?.startsWith(`${APP_NAME}@group`))?.config)
+  const aiConfig = isEmptyObj(groupConfig?.ai) ? appConfig?.ai : groupConfig?.ai
+  let aiConfigStr = typeof aiConfig === 'string' ? aiConfig : JSON.stringify(aiConfig)
+  try {
+    aiConfigStr = decodeURIComponent(aiConfigStr)
+  } catch (error) {
+  }
+  try {
+    const config = JSON.parse(aiConfigStr)
+    return config || {}
+  } catch (error) {
+    return {}
   }
 }

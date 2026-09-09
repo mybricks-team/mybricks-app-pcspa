@@ -24,7 +24,7 @@ import {
 import { PreviewStorage } from './../../utils/previewStorage'
 import unionBy from 'lodash/unionBy'
 import PublishModal, { EnumMode } from './components/PublishModal'
-import { createFromIconfontCN, InfoCircleTwoTone, DownloadOutlined, UploadOutlined, CloudUploadOutlined, DeleteOutlined } from '@ant-design/icons'
+import { createFromIconfontCN, InfoCircleTwoTone, DownloadOutlined, UploadOutlined, CloudUploadOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons'
 import { i18nLangContentFilter } from '../../utils/index'
 import { usePageStayTime } from './utils/sendPageTimer'
 
@@ -59,9 +59,11 @@ import { useBranch } from './hooks/useBranch'
 import { DesignerTitleBar, DesignerToolBar } from '@mybricks/sdk-for-app/ui'
 import { usePublishPage } from './hooks/usePublishPage'
 import PublishPageModal from './components/PublishPageModal'
-import { preloadDependencies } from './app-configs/getAiView/utils/manifest'
-import { useAiSourceCodeExport } from './hooks/useCodeExport';
+import { preloadDependencies, getAllDependencies } from './utils/aiConfigManifest'
+import { useAiSourceCodeExport, useAiPrdExport } from './hooks/useCodeExport';
 import { safeDecodeURIComponent } from './utils'
+import useAISetting from './hooks/useAISetting';
+import { getAppAiConfig } from './utils/index'
 
 const msgSaveKey = 'save'
 
@@ -157,6 +159,13 @@ export default function MyDesigner({ appData: originAppData }) {
         typeof originConfig === 'string'
           ? JSON.parse(originConfig)
           : originConfig
+      
+      try {
+        config.ai = getAppAiConfig(appData.config)
+      } catch (error) {
+        config.ai = {}
+        console.error('parse ai config error', error)
+      }
     } catch (error) {
       console.error('get appConfig error', error)
     }
@@ -495,7 +504,7 @@ export default function MyDesigner({ appData: originAppData }) {
     getTitle() {
       return ctx.fileName
     },
-    ctx
+    ctx,
   })
 
   const getToJSON = () => {
@@ -1109,7 +1118,13 @@ export default function MyDesigner({ appData: originAppData }) {
   const { handleExport } = useAiSourceCodeExport({
     getExportToJSON: () => designerRef.current?.toJSON?.(),
     folderName: "app",
+    dependencies: getAllDependencies(appConfig?.ai?.dependencies),
   });
+  const { handleExportPrd } = useAiPrdExport({
+    getExportToJSON: () => designerRef.current?.toJSON?.(),
+    getRuntimeFiles: (comId) => (window as any)._forApp_[comId].getFiles(),
+  });
+  const { openSetting } = useAISetting()
 
   const TrueDesigner = useMemo(() => {
 
@@ -1252,7 +1267,12 @@ export default function MyDesigner({ appData: originAppData }) {
                           return message.warn('源代码为空，暂无可发布的内容!')
                         }
                         setPublishPageModalVisible(true)
-                      }
+                      },
+                    },
+                    {
+                      icon: <SettingOutlined />,
+                      title: '设置',
+                      onClick: openSetting,
                     },
                     {
                       icon: branch_icon,
@@ -1312,40 +1332,7 @@ export default function MyDesigner({ appData: originAppData }) {
                     },
                     {
                       title: 'PRD',
-                      onClick: () => {
-                        const coms = designerRef.current?.toJSON()?.scenes?.[0]?.coms
-                        if (!coms) {
-                          return message.warn('PRD文档不存在!')
-                        }
-
-                        const comId = Object.keys(coms)[0]
-                        if (!comId) {
-                          return message.warn('PRD文档不存在!')
-                        }
-
-                        const files = (window as any)._forApp_[comId].getFiles()
-                        const prdFile = files.find(item => item.fileName === 'requirement.md')
-                        if (!prdFile) {
-                          return message.warn('PRD文档不存在!')
-                        }
-                        const prdContent = prdFile.content
-
-                        // 从 front matter 中提取 title
-                        // 格式: ---\ntitle: xxx\ndesc: xxx\n---
-
-                        const title = ctx.fileName?.replace(/\.[^.]+$/, '')
-                        const titleMatch = prdContent.match(/^---[\s\S]*?^title:\s*(.+?)$/m)
-                        const prdTitle = titleMatch ? titleMatch[1].trim() : title || 'PRD文档'
-                        // 下载为 Markdown 文件
-                        const blob = new Blob([prdContent], { type: 'text/markdown;charset=utf-8' })
-                        const url = URL.createObjectURL(blob)
-                        const anchor = document.createElement('a')
-                        anchor.href = url
-                        anchor.download = `${prdTitle}-PRD文档.md`
-                        anchor.click()
-                        URL.revokeObjectURL(url)
-                        message.success('PRD 文档下载成功')
-                      }
+                      onClick: handleExportPrd
                     },
                   ]}
                 />

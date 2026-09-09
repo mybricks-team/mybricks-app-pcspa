@@ -17,9 +17,10 @@ export function usePublishPage({
   chatId,
   vbDesignContext,
   getTitle,
-  ctx
+  ctx,
 }: UsePublishPageOptions) {
   const [downloadHtmlLoading, setDownloadHtmlLoading] = useState(false)
+  const dependencies = ctx?.appConfig?.ai?.dependencies || []
 
   const handleDownloadHtml = useCallback(async () => {
     setDownloadHtmlLoading(true)
@@ -48,6 +49,7 @@ export function usePublishPage({
         chatId,
         assetOwnerId,
         vbDesignContext,
+        dependencies,
       })
 
       // 下载为 ZIP 文件（包含 index.html + 所有本地资源）
@@ -64,7 +66,7 @@ export function usePublishPage({
     } finally {
       setDownloadHtmlLoading(false)
     }
-  }, [chatId, vbDesignContext])
+  }, [chatId, vbDesignContext, dependencies])
 
   const [publishLoading, setPublishLoading] = useState(false)
 
@@ -97,6 +99,7 @@ export function usePublishPage({
         vbDesignContext,
         enableVibeProxy: false,
         userId: ctx.user?.id,
+        dependencies,
       })
 
       const publishRes = await axios.post('/api/pcpage/vibepublish', {
@@ -112,7 +115,7 @@ export function usePublishPage({
     } finally {
       setPublishLoading(false)
     }
-  }, [chatId, vbDesignContext])
+  }, [chatId, vbDesignContext, dependencies])
 
   return {
     handleDownloadHtml,

@@ -5,6 +5,7 @@ import {
   runAiSourceCodeExport,
   type ExportJSON,
 } from './exportHelper'
+import type { AIConfigManifestDependency } from '@/types/aiConfigManifest'
 
 /**
  * AI 源码导出 hook 入参。
@@ -12,6 +13,7 @@ import {
 type UseAiSourceCodeExportParams = {
   getExportToJSON: () => ExportJSON
   folderName?: string
+  dependencies?: AIConfigManifestDependency[]
 }
 
 /**
@@ -29,6 +31,7 @@ type UseAiPrdExportParams = {
 export function useAiSourceCodeExport({
   getExportToJSON,
   folderName = 'app',
+  dependencies = [],
 }: UseAiSourceCodeExportParams) {
   const [loading, setLoading] = useState(false)
 
@@ -41,6 +44,7 @@ export function useAiSourceCodeExport({
       await runAiSourceCodeExport({
         exportJSON: getExportToJSON(),
         folderName,
+        dependencies
       })
     } catch (error) {
       console.error('[导出为代码] 导出失败', error)

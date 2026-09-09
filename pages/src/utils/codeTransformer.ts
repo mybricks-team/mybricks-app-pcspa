@@ -2,6 +2,7 @@ import * as parser from '@babel/parser';
 import traverse from '@babel/traverse';
 import generate from '@babel/generator';
 import * as t from '@babel/types';
+import type { AIConfigManifestDependency } from '@/types/aiConfigManifest'
 
 export interface CodeFile {
   path: string;
@@ -17,8 +18,16 @@ export class CodeTransformer {
   /**
    * 入口：接收文件列表，逐个转换后返回。
    */
-  transformFiles(files: CodeFile[]): CodeFile[] {
-    return files.map((file) => this.transformSingleFile(file));
+  transformFiles(files: CodeFile[], dependencies: AIConfigManifestDependency[]): CodeFile[] {
+    return files.map((file) => {
+      if (file.path === 'webpack.config.js') {
+        return this.injectWebpackDependencies(file, dependencies)
+      }
+      if (file.path === 'src/global.d.ts') {
+        return this.injectGlobalDTS(file, dependencies)
+      }
+      return this.transformSingleFile(file)
+    });
   }
 
   /**
@@ -265,14 +274,52 @@ export class CodeTransformer {
   
   private replaceMyBricks(ast: t.File) {
     traverse(ast, {
-      // 1) import { xxx } from 'mybricks'  →  import { xxx } from '@mybricks/ai-render'
       ImportDeclaration(path) {
-        if (path.node.source.value === 'mybricks') {
-          path.node.source = t.stringLiteral('@mybricks/ai-render');
+        if (path.node.source.value !== 'mybricks') return;
+
+        const axiosSpecifiers: t.ImportDeclaration['specifiers'] = [];
+        const routerSpecifiers: t.ImportDeclaration['specifiers'] = [];
+        const otherSpecifiers: t.ImportDeclaration['specifiers'] = [];
+
+        path.node.specifiers.forEach((specifier) => {
+          if (!t.isImportSpecifier(specifier)) {
+            // 保留 default 和 namespace 导入
+            otherSpecifiers.push(specifier);
+            return;
+          }
+
+          const imported = t.isIdentifier(specifier.imported)
+            ? specifier.imported.name
+            : specifier.imported.value;
+
+          // DataSource 来自本地 dataSource.ts
+          if (imported === 'DataSource') {
+            axiosSpecifiers.push(specifier);
+          }
+          // 路由相关来自 react-router-dom
+          else if (['Routes', 'Route', 'useLocation', 'useNavigate', 'useParams'].includes(imported)) {
+            routerSpecifiers.push(specifier);
+          }
+          // 其他具名导入都丢弃（logger 等已在其他转换中处理）
+        });
+
+        const declarations: t.ImportDeclaration[] = [];
+
+        if (axiosSpecifiers.length) {
+          declarations.push(t.importDeclaration(axiosSpecifiers, t.stringLiteral('./dataSource')));
         }
+        if (routerSpecifiers.length) {
+          declarations.push(t.importDeclaration(routerSpecifiers, t.stringLiteral('react-router-dom')));
+        }
+        if (otherSpecifiers.length) {
+          // 保留其他导入但改向 @mybricks/ai-render（如果有需要）
+          declarations.push(t.importDeclaration(otherSpecifiers, t.stringLiteral('@mybricks/ai-render')));
+        }
+
+        declarations.length ? path.replaceWithMultiple(declarations) : path.remove();
       },
 
-      // 2) require('mybricks')  →  require('@mybricks/ai-render')
+      // 处理 require('mybricks') 的情况
       CallExpression(path) {
         const callee = path.node.callee;
         if (
@@ -280,10 +327,181 @@ export class CodeTransformer {
           path.node.arguments.length === 1 &&
           t.isStringLiteral(path.node.arguments[0], { value: 'mybricks' })
         ) {
+          // 改为 @mybricks/ai-render，与导入保持一致
           path.node.arguments[0] = t.stringLiteral('@mybricks/ai-render');
         }
       },
     });
+  }
+
+  private genExternals(dependencies: AIConfigManifestDependency[]) {
+    return dependencies.reduce((acc, dependency) => {
+      acc.push({
+        name: dependency.name, libraryName: dependency.libraryName,
+      });
+      if (dependency.modules) {
+        acc.push(...dependency.modules.map((module) => ({
+          name: module.modulePath, libraryName: module.umdPath,
+        })));
+      }
+      return acc;
+    }, []);
+  }
+
+  /**
+   * 向 webpack.config.js 中注入依赖项。
+   */
+  private injectWebpackDependencies(file: CodeFile, dependencies: AIConfigManifestDependency[]) {
+    try {
+      const ast = this.parseCode(file.content);
+      const scripts = dependencies.flatMap((dependency) => dependency.umd ?? []);
+      const css = dependencies.flatMap((dependency) => dependency.css ?? []);
+      const externals = this.genExternals(dependencies);
+
+      const isPropertyMatch = (property: t.ObjectProperty | t.ObjectMethod | t.SpreadElement, name: string) => {
+        if (!t.isObjectProperty(property)) return false;
+        if (t.isIdentifier(property.key)) return property.key.name === name;
+        return t.isStringLiteral(property.key) && property.key.value === name;
+      };
+
+      const upsertObjectProperty = (objectExpression: t.ObjectExpression, name: string, value: t.Expression) => {
+        const property = objectExpression.properties.find((item) => isPropertyMatch(item, name));
+        if (property && t.isObjectProperty(property)) {
+          property.value = value;
+          return;
+        }
+        objectExpression.properties.push(
+          t.objectProperty(t.identifier(name), value),
+        );
+      };
+
+      const mergeArrayProperty = (objectExpression: t.ObjectExpression, name: string, values: string[]) => {
+        const property = objectExpression.properties.find((item) => isPropertyMatch(item, name));
+        const mergedValues = new Set<string>();
+
+        if (property && t.isObjectProperty(property) && t.isArrayExpression(property.value)) {
+          property.value.elements.forEach((element) => {
+            if (t.isStringLiteral(element)) {
+              mergedValues.add(element.value);
+            }
+          });
+        }
+
+        values.forEach((value) => mergedValues.add(value));
+
+        upsertObjectProperty(
+          objectExpression,
+          name,
+          t.arrayExpression(Array.from(mergedValues).map((item) => t.stringLiteral(item))),
+        );
+      };
+
+      const mergeObjectProperty = (
+        objectExpression: t.ObjectExpression,
+        name: string,
+        values: Array<{ key: string; value: string }>,
+      ) => {
+        const property = objectExpression.properties.find((item) => isPropertyMatch(item, name));
+        const mergedProperties: t.ObjectProperty[] = [];
+        const existingKeys = new Set<string>();
+
+        if (property && t.isObjectProperty(property) && t.isObjectExpression(property.value)) {
+          property.value.properties.forEach((item) => {
+            if (!t.isObjectProperty(item)) return;
+            if (t.isIdentifier(item.key)) {
+              existingKeys.add(item.key.name);
+              mergedProperties.push(item);
+              return;
+            }
+            if (t.isStringLiteral(item.key)) {
+              existingKeys.add(item.key.value);
+              mergedProperties.push(item);
+            }
+          });
+        }
+
+        values.forEach(({ key, value }) => {
+          if (existingKeys.has(key)) return;
+          existingKeys.add(key);
+          mergedProperties.push(
+            t.objectProperty(
+              t.stringLiteral(key),
+              t.stringLiteral(value),
+            ),
+          );
+        });
+
+        upsertObjectProperty(
+          objectExpression,
+          name,
+          t.objectExpression(mergedProperties),
+        );
+      };
+
+      traverse(ast, {
+        NewExpression(path) {
+          if (!t.isIdentifier(path.node.callee, { name: 'HtmlWebpackTagsPlugin' })) return;
+          const [firstArg] = path.node.arguments;
+          if (!firstArg || !t.isObjectExpression(firstArg)) return;
+
+          mergeArrayProperty(firstArg, 'scripts', scripts);
+          mergeArrayProperty(firstArg, 'links', css);
+        },
+        ExportDefaultDeclaration(path) {
+          if (!t.isObjectExpression(path.node.declaration)) return;
+          mergeObjectProperty(
+            path.node.declaration,
+            'externals',
+            externals.map((item) => ({
+              key: item.name,
+              value: item.libraryName,
+            })),
+          );
+        },
+      });
+
+      const output = generate(
+        ast,
+        { retainLines: false, jsescOption: { minimal: true } },
+        file.content,
+      );
+
+      return {
+        ...file,
+        content: output.code,
+      };
+    } catch {
+      return file;
+    }
+  }
+
+  /**
+   * 注入全局类型定义。
+   */
+  private injectGlobalDTS(file: CodeFile, dependencies: AIConfigManifestDependency[]) {
+    try {
+      const externals = this.genExternals(dependencies);
+      const declarations = externals.flatMap((dependency) => {
+        const result: string[] = [];
+
+        if (!file.content.includes(`declare module '${dependency.name}'`)) {
+          result.push(`declare module '${dependency.name}';`);
+        }
+
+        return result;
+      });
+
+      if (declarations.length === 0) {
+        return file;
+      }
+
+      return {
+        ...file,
+        content: `${file.content.trimEnd()}\n\n${declarations.join('\n')}\n`,
+      };
+    } catch {
+      return file;
+    }
   }
 
   /**

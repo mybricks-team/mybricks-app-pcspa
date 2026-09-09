@@ -15,3 +15,5 @@ declare module '@mybricks/ai-render' {
   export const useNavigate: any
   export const useParams: any
 }
+
+declare module 'dayjs'
