@@ -392,8 +392,8 @@ export default function MyDesigner({ appData: originAppData }) {
     if (ctx.debug && localStorage.getItem('__DEBUG_DESIGNER__')) {
       return localStorage.getItem('__DEBUG_DESIGNER__')
     }
-    // return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.976.t7/index.min.js'
-    return appConfig.designer?.url || DESIGNER_STATIC_PATH
+    return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.976.t7/index.min.js'
+    // return appConfig.designer?.url || DESIGNER_STATIC_PATH
   }, [appConfig])
 
   useLayoutEffect(() => {
@@ -1307,7 +1307,7 @@ export default function MyDesigner({ appData: originAppData }) {
                       title: '代码合并',
                       onClick: async () => {
                         // 获取当前文件中的源码（通过 designer 的 getCode）
-                        console.log('designerRef.current?.getCode()', designerRef.current?.getCode())
+                        console.log('designerRef.current?.getCode()', designerRef.current)
                         const currentFilesData = normalizeCodeFiles(designerRef.current?.getCode())
                         if (!currentFilesData?.length) {
                           return message.warn('当前页面源代码为空!')
@@ -1465,7 +1465,6 @@ export default function MyDesigner({ appData: originAppData }) {
 
             // 通过 designer 的 setCode 更新源码文件
             mergedFiles.forEach(file => {
-              console.log(file)
               designerRef.current?.setCode({ path: file.fileName, content: decodeURIComponent(file.source) })
             })
 

@@ -108,11 +108,12 @@ export function CodeMergeModal({
           conflicts: []
         })
       } else if (current && !branch) {
-        // 删除文件（保留当前）
+        // 分支删除了该文件：默认应用删除，内容置空
+        // （暂时以空内容表示删除，后续接入真正的删除 API 后再替换）
         states.push({
           fileName,
           hasConflict: false,
-          mergedSource: current.source,
+          mergedSource: '',
           conflicts: []
         })
       } else if (current && branch) {
@@ -162,6 +163,11 @@ export function CodeMergeModal({
     [fileMergeStates, selectedFileName]
   )
 
+  // 当前选中的文件是否为「分支删除」的文件（当前有、分支没有）
+  const isDeletedInBranch = !!currentFile
+    && currentFiles.some(c => c.fileName === currentFile.fileName)
+    && !branchFiles.some(b => b.fileName === currentFile.fileName)
+
   // 用 ref 追踪当前选中的文件名，避免 onMount 闭包持有旧值
   const currentFileNameRef = useRef(selectedFileName)
   useEffect(() => {
@@ -197,13 +203,18 @@ export function CodeMergeModal({
     }
     setLoading(true)
     try {
-      const result = fileMergeStates.map(state => ({
-        fileName: state.fileName,
-        source: encodeURIComponent(mergedFiles.get(state.fileName) || state.mergedSource)
-      }))
-      console.log(result)
+      const result = fileMergeStates
+        .map(state => {
+          // 用户在编辑器中改过（包括删空）则用改后的值，否则用自动合并结果
+          const source = mergedFiles.has(state.fileName)
+            ? mergedFiles.get(state.fileName)!
+            : state.mergedSource
+          return { fileName: state.fileName, source }
+        })
+        // 新增文件被清空内容时，视为放弃该文件，不参与合并
+        .filter(f => !(f.source === '' && !currentFiles.some(c => c.fileName === f.fileName)))
+        .map(f => ({ fileName: f.fileName, source: encodeURIComponent(f.source) }))
       await onConfirm(result, selectedBranchId)
-      message.success('合并成功')
     } catch (e) {
       message.error('合并失败: ' + (e as Error).message)
     } finally {
@@ -337,6 +348,14 @@ export function CodeMergeModal({
                 >
                   采用分支版本
                 </Button>
+              </div>
+            )}
+            {currentFile && isDeletedInBranch && (
+              <div className={styles.actions}>
+                <Button size="small" onClick={handleAcceptCurrent} block>
+                  保留当前文件（取消删除）
+                </Button>
+                <div className={styles.actionTip}>该文件在分支中已删除，默认内容置空；点击上方按钮可保留当前内容</div>
               </div>
             )}
             {currentFile && currentFile.conflicts.length > 0 && (
