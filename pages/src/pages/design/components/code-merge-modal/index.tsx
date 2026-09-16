@@ -14,7 +14,7 @@ interface BranchInfo {
 interface CodeMergeModalProps {
   open: boolean
   onCancel: () => void
-  onConfirm: (mergedFiles: { fileName: string; source: string }[], branchId: number) => Promise<void>
+  onConfirm: (mergedFiles: { fileName: string; source: string; deleted?: boolean }[], branchId: number) => Promise<void>
   // 当前版本文件列表
   currentFiles: { fileName: string; source: string }[]
   // 分支列表
@@ -109,7 +109,7 @@ export function CodeMergeModal({
         })
       } else if (current && !branch) {
         // 分支删除了该文件：默认应用删除，内容置空
-        // （暂时以空内容表示删除，后续接入真正的删除 API 后再替换）
+        // （确认时通过 deleted 标记显式声明删除，designer 侧调 setCode({ path, type: 'delete' })）
         states.push({
           fileName,
           hasConflict: false,
@@ -209,11 +209,20 @@ export function CodeMergeModal({
           const source = mergedFiles.has(state.fileName)
             ? mergedFiles.get(state.fileName)!
             : state.mergedSource
-          return { fileName: state.fileName, source }
+          // 仅「分支删除且用户未点保留（最终内容为空）」的文件标记为删除文件；
+          // 手动删空内容不算删除文件，正常以空内容写回
+          const isDeletedInBranch =
+            currentFiles.some(c => c.fileName === state.fileName) &&
+            !branchFiles.some(b => b.fileName === state.fileName)
+          return {
+            fileName: state.fileName,
+            source,
+            deleted: isDeletedInBranch && source === ''
+          }
         })
         // 新增文件被清空内容时，视为放弃该文件，不参与合并
         .filter(f => !(f.source === '' && !currentFiles.some(c => c.fileName === f.fileName)))
-        .map(f => ({ fileName: f.fileName, source: encodeURIComponent(f.source) }))
+        .map(f => ({ fileName: f.fileName, source: encodeURIComponent(f.source), deleted: f.deleted }))
       await onConfirm(result, selectedBranchId)
     } catch (e) {
       message.error('合并失败: ' + (e as Error).message)
@@ -355,7 +364,7 @@ export function CodeMergeModal({
                 <Button size="small" onClick={handleAcceptCurrent} block>
                   保留当前文件（取消删除）
                 </Button>
-                <div className={styles.actionTip}>该文件在分支中已删除，默认内容置空；点击上方按钮可保留当前内容</div>
+                <div className={styles.actionTip}>该文件在分支中已删除，默认会删除该文件；点击上方按钮可保留当前内容</div>
               </div>
             )}
             {currentFile && currentFile.conflicts.length > 0 && (

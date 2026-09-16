@@ -368,7 +368,7 @@ export default function MyDesigner({ appData: originAppData }) {
     getPluginData
     loadContent
     getCode: () => any
-    setCode: (params: { path: string, content: string }) => void
+    setCode: (params: { path: string, content?: string, type?: string }) => void
     toplView: { focusCom: (comId: string) => void }
   }>()
 
@@ -1463,9 +1463,13 @@ export default function MyDesigner({ appData: originAppData }) {
           try {
             setMergeBranchId(branchId)
 
-            // 通过 designer 的 setCode 更新源码文件
+            // 通过 designer 的 setCode 更新源码文件；deleted 标记的文件走删除
             mergedFiles.forEach(file => {
-              designerRef.current?.setCode({ path: file.fileName, content: decodeURIComponent(file.source) })
+              if (file.deleted) {
+                designerRef.current?.setCode({ path: file.fileName, type: 'delete' })
+              } else {
+                designerRef.current?.setCode({ path: file.fileName, content: decodeURIComponent(file.source) })
+              }
             })
 
             // 保存
