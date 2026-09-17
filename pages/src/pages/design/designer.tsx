@@ -392,8 +392,8 @@ export default function MyDesigner({ appData: originAppData }) {
     if (ctx.debug && localStorage.getItem('__DEBUG_DESIGNER__')) {
       return localStorage.getItem('__DEBUG_DESIGNER__')
     }
-    return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.976.t7/index.min.js'
-    // return appConfig.designer?.url || DESIGNER_STATIC_PATH
+    // return 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.976.t7/index.min.js'
+    return appConfig.designer?.url || DESIGNER_STATIC_PATH
   }, [appConfig])
 
   useLayoutEffect(() => {
