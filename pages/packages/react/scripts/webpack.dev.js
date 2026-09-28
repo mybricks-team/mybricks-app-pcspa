@@ -19,7 +19,7 @@ module.exports = merge(common, {
     static: {
       directory: path.join(__dirname, '../templates'),
     },
-    port: 9001,
+    port: 8001,
     host: 'localhost',
     hot: true,
     client: {
