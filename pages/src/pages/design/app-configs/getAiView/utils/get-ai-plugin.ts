@@ -93,7 +93,7 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
       baseUrl: 'http://112.17.139.222:8106', // 可省略，默认此地址
       apiKey: 'ak_6rfy7Drr7TNoBT8xzO_fWbTIs8OrVPrrQ2hCGrCRu_g',                       // 必填：智能体平台 Bearer token
       workspaceId: 'conversation-id',
-      projectId: 1785123369499394,
+      projectId: 1778582161969970,
       userId: 75,
       agentCode: 'wangfa_mybricks_team',           // 可选；留空走默认智能体
       clientType: 'mybricks-designer',        // 可选
