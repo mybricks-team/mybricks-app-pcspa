@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { usePublishPage } from '../../hooks/usePublishPage'
 import style from './index.less'
 import axios from 'axios'
+import { copyText } from '@/utils'
 
 interface PublishPageModalProps {
   visible: boolean
@@ -41,7 +42,7 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
         ).then((res) => {
           const list = res.data.data;
           if (list.length) {
-            setPublishUrl(`${location.origin}/mfs/vibe/pc/publish/${fileId}/index.html?env=mock`)
+            setPublishUrl(`${location.origin}/mfs/vibe/pc/publish/${fileId}/index.html?env=prod`)
           }
         }).catch((e) => {
           console.error(e)
@@ -86,7 +87,7 @@ const PublishPageModal: React.FC<PublishPageModalProps> = ({
 
   const onCopy = async (url: string) => {
     if (!url) return
-    await navigator.clipboard.writeText(url)
+    copyText(url)
     message.success('链接已复制到剪贴板')
   }
 

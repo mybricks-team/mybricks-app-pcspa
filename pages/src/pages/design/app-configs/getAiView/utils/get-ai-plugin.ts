@@ -16,9 +16,11 @@ function getGenerationStrategy(): 'ai' | 'atomic' {
   return hasLite && hasAi ? 'ai' : 'atomic'
 }
 
-export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config, plugins = [], manifest, fileId }: any) => {
+export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlow, config, plugins = [], manifest, fileId, aiProjectId }: any) => {
   const designRules = manifest?.rules?.designRules
   const codeRules = manifest?.rules?.codeRules
+
+  const userId = window.localStorage.getItem('userId')
 
   // 从 localStorage 读取用户保存的 LLM 配置
   const savedSettings = getAISetting();
@@ -92,9 +94,9 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
       type: 'websocket',
       baseUrl: 'http://112.17.139.222:8106', // 可省略，默认此地址
       apiKey: 'ak_6rfy7Drr7TNoBT8xzO_fWbTIs8OrVPrrQ2hCGrCRu_g',                       // 必填：智能体平台 Bearer token
-      workspaceId: 'conversation-id',
-      projectId: 1778582161969970,
-      userId: 75,
+      workspaceId: fileId,
+      projectId: aiProjectId,
+      userId: userId,
       agentCode: 'wangfa_mybricks_team',           // 可选；留空走默认智能体
       clientType: 'mybricks-designer',        // 可选
       meta: { fileId },            // 可选：写入会话 meta 供审计

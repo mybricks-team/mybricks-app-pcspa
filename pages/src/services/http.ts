@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const fAxios = axios.create({ withCredentials: true });
+export const fAxios = axios.create({ withCredentials: false });
 
 fAxios.interceptors.response.use(
   (response) => {

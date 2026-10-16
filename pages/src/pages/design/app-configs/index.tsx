@@ -428,7 +428,8 @@ export default function appConfig(
           enabledActionTags: ctx?.appConfig?.ai?.enabledActionTags
         },
         fileId: ctx.fileId,
-        manifest: ctx?.appConfig?.ai
+        manifest: ctx?.appConfig?.ai,
+        aiProjectId: ctx?.appConfig?.aiProjectId
       }),
       // ...remotePlugins,
       // themePlugin.use({ sdk: appData }),
