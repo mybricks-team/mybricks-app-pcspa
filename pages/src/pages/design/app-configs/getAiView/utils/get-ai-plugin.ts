@@ -29,12 +29,12 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
   const defaultProvider = {
     providerId: "auto",
     models: [
-      { id: "kimi-k2.7-code-highspeed", name: "kimi-k2.7-code-highspeed" },
-      { id: "kimi-k2.6", name: "kimi-k2.6" },
+      { id: "kimi-k3", name: "kimi-k3" },
       { id: "kimi-k2.7-code", name: "kimi-k2.7-code" },
       { id: "deepseek-v4-pro", name: "deepseek-v4-pro" },
       { id: "deepseek-v4-flash", name: "deepseek-v4-flash" },
-      { id: "glm-5.2", name: "glm-5.2" },
+      { id: "glm-5.3", name: "glm-5.3" },
+      { id: "glm-5.3-flash", name: "glm-5.3-flash" },
     ],
     request: onRequest,
   };
