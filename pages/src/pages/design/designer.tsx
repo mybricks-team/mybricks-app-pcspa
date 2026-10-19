@@ -57,7 +57,7 @@ import { useBranch } from './hooks/useBranch'
 import { DesignerTitleBar, DesignerToolBar } from '@mybricks/sdk-for-app/ui'
 import { usePublishPage } from './hooks/usePublishPage'
 import PublishPageModal from './components/PublishPageModal'
-import { preloadDependencies, getAllDependencies } from './app-configs/getAiView/utils/manifest'
+import { preloadDependencies, getAllDependencies } from './utils/aiConfigManifest'
 import { useAiSourceCodeExport, useAiPrdExport } from './hooks/useCodeExport';
 import useAISetting from './hooks/useAISetting';
 import { getAppAiConfig } from './utils/index'
@@ -495,7 +495,7 @@ export default function MyDesigner({ appData: originAppData }) {
     getTitle() {
       return ctx.fileName
     },
-    ctx
+    ctx,
   })
 
   const getToJSON = () => {

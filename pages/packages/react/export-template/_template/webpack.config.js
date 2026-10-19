@@ -87,7 +87,7 @@ export default {
         "https://unpkg.com/react-dom@18.0.0/umd/react-dom.production.min.js",
         "https://unpkg.com/dayjs@1.11.19/dayjs.min.js",
       ],
-      css: [],
+      links: [],
       append: false, 
       usePublicPath: false
     }),
@@ -102,5 +102,6 @@ export default {
   externals: {
     "react": "React",
     "react-dom": "ReactDOM",
+    "dayjs": "dayjs",
   }
 };

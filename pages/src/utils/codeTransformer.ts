@@ -274,14 +274,52 @@ export class CodeTransformer {
   
   private replaceMyBricks(ast: t.File) {
     traverse(ast, {
-      // 1) import { xxx } from 'mybricks'  →  import { xxx } from '@mybricks/ai-render'
       ImportDeclaration(path) {
-        if (path.node.source.value === 'mybricks') {
-          path.node.source = t.stringLiteral('@mybricks/ai-render');
+        if (path.node.source.value !== 'mybricks') return;
+
+        const axiosSpecifiers: t.ImportDeclaration['specifiers'] = [];
+        const routerSpecifiers: t.ImportDeclaration['specifiers'] = [];
+        const otherSpecifiers: t.ImportDeclaration['specifiers'] = [];
+
+        path.node.specifiers.forEach((specifier) => {
+          if (!t.isImportSpecifier(specifier)) {
+            // 保留 default 和 namespace 导入
+            otherSpecifiers.push(specifier);
+            return;
+          }
+
+          const imported = t.isIdentifier(specifier.imported)
+            ? specifier.imported.name
+            : specifier.imported.value;
+
+          // DataSource 来自本地 dataSource.ts
+          if (imported === 'DataSource') {
+            axiosSpecifiers.push(specifier);
+          }
+          // 路由相关来自 react-router-dom
+          else if (['Routes', 'Route', 'useLocation', 'useNavigate', 'useParams'].includes(imported)) {
+            routerSpecifiers.push(specifier);
+          }
+          // 其他具名导入都丢弃（logger 等已在其他转换中处理）
+        });
+
+        const declarations: t.ImportDeclaration[] = [];
+
+        if (axiosSpecifiers.length) {
+          declarations.push(t.importDeclaration(axiosSpecifiers, t.stringLiteral('./dataSource')));
         }
+        if (routerSpecifiers.length) {
+          declarations.push(t.importDeclaration(routerSpecifiers, t.stringLiteral('react-router-dom')));
+        }
+        if (otherSpecifiers.length) {
+          // 保留其他导入但改向 @mybricks/ai-render（如果有需要）
+          declarations.push(t.importDeclaration(otherSpecifiers, t.stringLiteral('@mybricks/ai-render')));
+        }
+
+        declarations.length ? path.replaceWithMultiple(declarations) : path.remove();
       },
 
-      // 2) require('mybricks')  →  require('@mybricks/ai-render')
+      // 处理 require('mybricks') 的情况
       CallExpression(path) {
         const callee = path.node.callee;
         if (
@@ -289,10 +327,25 @@ export class CodeTransformer {
           path.node.arguments.length === 1 &&
           t.isStringLiteral(path.node.arguments[0], { value: 'mybricks' })
         ) {
+          // 改为 @mybricks/ai-render，与导入保持一致
           path.node.arguments[0] = t.stringLiteral('@mybricks/ai-render');
         }
       },
     });
+  }
+
+  private genExternals(dependencies: AIConfigManifestDependency[]) {
+    return dependencies.reduce((acc, dependency) => {
+      acc.push({
+        name: dependency.name, libraryName: dependency.libraryName,
+      });
+      if (dependency.modules) {
+        acc.push(...dependency.modules.map((module) => ({
+          name: module.modulePath, libraryName: module.umdPath,
+        })));
+      }
+      return acc;
+    }, []);
   }
 
   /**
@@ -303,10 +356,7 @@ export class CodeTransformer {
       const ast = this.parseCode(file.content);
       const scripts = dependencies.flatMap((dependency) => dependency.umd ?? []);
       const css = dependencies.flatMap((dependency) => dependency.css ?? []);
-      const externals = dependencies.map((dependency) => ({
-        name: dependency.name,
-        libraryName: dependency.libraryName,
-      }));
+      const externals = this.genExternals(dependencies);
 
       const isPropertyMatch = (property: t.ObjectProperty | t.ObjectMethod | t.SpreadElement, name: string) => {
         if (!t.isObjectProperty(property)) return false;
@@ -395,7 +445,7 @@ export class CodeTransformer {
           if (!firstArg || !t.isObjectExpression(firstArg)) return;
 
           mergeArrayProperty(firstArg, 'scripts', scripts);
-          mergeArrayProperty(firstArg, 'css', css);
+          mergeArrayProperty(firstArg, 'links', css);
         },
         ExportDefaultDeclaration(path) {
           if (!t.isObjectExpression(path.node.declaration)) return;
@@ -430,18 +480,12 @@ export class CodeTransformer {
    */
   private injectGlobalDTS(file: CodeFile, dependencies: AIConfigManifestDependency[]) {
     try {
-      const declarations = dependencies.flatMap((dependency) => {
+      const externals = this.genExternals(dependencies);
+      const declarations = externals.flatMap((dependency) => {
         const result: string[] = [];
 
         if (!file.content.includes(`declare module '${dependency.name}'`)) {
           result.push(`declare module '${dependency.name}';`);
-        }
-
-        if (
-          dependency.libraryName &&
-          !file.content.includes(`declare const ${dependency.libraryName}: any;`)
-        ) {
-          result.push(`declare const ${dependency.libraryName}: any;`);
         }
 
         return result;

@@ -114,11 +114,7 @@ export default {
     let entryCode = `
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-
 import Component from './index';
-import zhCN from 'antd/es/locale/zh_CN';
-import { ConfigProvider } from 'antd';
-
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -161,9 +157,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
       <RenderTracker>
-        <ConfigProvider locale={zhCN}>
-          <Component {...${this.getComponentPropsString(componentInfo)}} />
-        </ConfigProvider>
+        <Component {...${this.getComponentPropsString(componentInfo)}} />
       </RenderTracker>
     </ErrorBoundary>
   </React.StrictMode>

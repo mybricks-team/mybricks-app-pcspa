@@ -1,8 +1,9 @@
 import AIPlugin, { IDBHistory } from '@mybricks/plugin-ai'
 import skills from './skills'
-import { getDependenciesConfig } from './manifest'
+import { getDependenciesConfig } from '@/pages/design/utils/aiConfigManifest'
 import { onRequest } from '@/utils/aiRequest'
 import { getAISetting } from "../../../hooks/useAISetting/storage";
+import developeGuide from "./prompt/developeGuide";
 
 const COMLIB_NAMESPACE_LITE = 'mybricks.normal-pc-lite'
 const COMLIB_NAMESPACE_AI = 'mybricks.ai-comlib-pc'
@@ -88,7 +89,7 @@ export default ({ requestAsStream, user, key, guidePrompt, enableDefaultEventFlo
       } : undefined,
       developeGuide: codeRules ? {
         firstOfAll: codeRules
-      } : undefined,
+      } : developeGuide,
     },
     remoteAgent: {
       type: 'websocket',

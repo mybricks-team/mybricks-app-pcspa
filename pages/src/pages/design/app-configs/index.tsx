@@ -53,7 +53,7 @@ import { getExecuteEnvByMode } from "@/pages/design/app-configs/utils";
 import cloudTpt from "./cloudTpt";
 // import nocobaseConfigPlugin from "./nocobase";
 import manateeConfigPlugin  from './manateeai'
-import { getDependenciesCSS } from './getAiView/utils/manifest'
+import { getDependenciesCSS } from '@/pages/design/utils/aiConfigManifest'
 
 // const getComs = () => {
 //   const comDefs = {}
@@ -550,7 +550,7 @@ export default function appConfig(
           title: "PC-AI组件库",
           type: "com_lib",
           namespace: "mybricks.normal-pc-lite",
-          editJs: './public/comlibs/0714/edit.js',
+          editJs: './public/comlibs/2.1.36/edit.js',
         };
         const existing = baseComlibs.find(
           (lib) => lib.namespace === pcAiComlib.namespace && lib.editJs
